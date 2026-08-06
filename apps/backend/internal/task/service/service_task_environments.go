@@ -405,6 +405,14 @@ func (s *Service) ResetTaskEnvironment(ctx context.Context, taskID string, opts 
 			return fmt.Errorf("push branch before reset: %w", err)
 		}
 	}
+	if s.taskLSP != nil {
+		if err := s.taskLSP.CleanupTask(ctx, taskID, "task_environment_reset"); err != nil {
+			releaseReset(models.TaskResourceCleanupStateFailed, err)
+			return fmt.Errorf("stop task language servers before environment reset: %w", err)
+		}
+	}
+
+
 	cleanupCtx := ctx
 	if resetJobID != "" {
 		cleanupCtx = recoveryclaim.WithTaskCleanupJob(cleanupCtx, recoveryclaim.TaskCleanupJob{ID: resetJobID, TaskID: taskID})

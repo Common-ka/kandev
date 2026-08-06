@@ -132,6 +132,12 @@ vi.mock("@/components/task/branch-path-popover", () => ({
   BranchPathPopover: () => null,
 }));
 
+vi.mock("@/components/lsp/task-lsp-topbar-control", () => ({
+  TaskLspTopbarControl: ({ taskId }: { taskId: string | null }) => (
+    <button data-testid="task-lsp-control">{taskId}</button>
+  ),
+}));
+
 describe("TaskTopBar executor environment controls", () => {
   const executorSettingsButtonTestId = "executor-settings-button";
 

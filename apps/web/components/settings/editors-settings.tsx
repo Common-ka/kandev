@@ -11,7 +11,6 @@ import { SettingsGroup } from "@/components/settings/settings-group";
 import { GENERAL_SETTINGS_TARGETS } from "@/lib/settings-discovery/catalog/preferences";
 import { Combobox, type ComboboxOption } from "@/components/combobox";
 import { EditableCard } from "@/components/settings/editable-card";
-import { LspStatusLocationSetting } from "@/components/settings/lsp-status-location-setting";
 import {
   EditorForm,
   type EditorFormState,
@@ -480,11 +479,6 @@ export function EditorsSettings({ embedded = false }: { embedded?: boolean }) {
             baselineLspAutoInstall={state.baselineLspAutoInstall}
             toggleAutoStart={toggleAutoStart}
             toggleAutoInstall={toggleAutoInstall}
-          />
-          <LspStatusLocationSetting
-            value={state.lspStatusLocation}
-            baseline={state.baselineLspStatusLocation}
-            onChange={state.setLspStatusLocation}
           />
           <LspServerConfigSection
             lspConfigStrings={state.lspConfigStrings}

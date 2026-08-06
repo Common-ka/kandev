@@ -2236,6 +2236,9 @@ func (e *Executor) finalizeLaunch(ctx context.Context, task *v1.Task, session *m
 				zap.Error(err))
 		}
 	}
+	if e.onTaskEnvironmentReady != nil {
+		e.onTaskEnvironmentReady(context.WithoutCancel(ctx), task.ID)
+	}
 
 	e.logger.Info("agent launched for prepared session",
 		zap.String("task_id", task.ID),
@@ -3038,6 +3041,7 @@ func (e *Executor) persistTaskEnvironment(
 	}
 
 	workspacePath := computeWorkspacePath(req, resp)
+	resolvedExecutorType, resolvedExecutorID := taskEnvironmentExecutorIdentity(req, execCfg)
 
 	if existingEnv != nil {
 		materializationSessionID := existingEnv.MaterializationSessionID
@@ -3088,6 +3092,9 @@ func (e *Executor) persistTaskEnvironment(
 		// onto an environment whose canonical inventory turned out empty for a
 		// repo-backed task — that permanently bricks reuse (see
 		// validateReuseEnvironmentInventory).
+		existingEnv.ExecutorType = resolvedExecutorType
+		existingEnv.ExecutorID = resolvedExecutorID
+		existingEnv.ExecutorProfileID = session.ExecutorProfileID
 		// Refresh workspace + container/sandbox fields. The original update
 		// branch only touched AgentExecutionID/Status, so envs created with
 		// empty paths (e.g. before the worktree resolved) stayed permanently
@@ -3210,8 +3217,8 @@ func (e *Executor) persistTaskEnvironment(
 	env := &models.TaskEnvironment{
 		ID:                session.TaskEnvironmentID,
 		TaskID:            taskID,
-		ExecutorType:      req.ExecutorType,
-		ExecutorID:        execCfg.ExecutorID,
+		ExecutorType:      resolvedExecutorType,
+		ExecutorID:        resolvedExecutorID,
 		ExecutorProfileID: session.ExecutorProfileID,
 		// AgentExecutionID is intentionally not set here — see executors_running
 		// for the active execution per session.
@@ -3286,6 +3293,21 @@ func (e *Executor) persistRecoveredBaseBranch(
 			zap.String("base_branch", resolvedBranch),
 			zap.Error(err))
 	}
+}
+
+func taskEnvironmentExecutorIdentity(req *LaunchAgentRequest, execCfg executorConfig) (string, string) {
+	executorType := req.ExecutorType
+	if executorType == "" {
+		executorType = execCfg.ExecutorType
+	}
+	executorID := execCfg.ExecutorID
+	if executorType == "" {
+		executorType = string(models.ExecutorTypeLocal)
+		if executorID == "" {
+			executorID = models.ExecutorIDLocal
+		}
+	}
+	return executorType, executorID
 }
 
 // environmentReposForLaunch returns the environment-repository rows for a

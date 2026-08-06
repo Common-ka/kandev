@@ -32,6 +32,7 @@ import {
   RemoteRepositoryProviderIcon,
   useRemoteRepositoryProviderLabel,
 } from "@/components/task-create-dialog-remote-repo-provider-tabs";
+import { TaskLspTopbarControl } from "@/components/lsp/task-lsp-topbar-control";
 import { isDebugUI } from "@/lib/config";
 import { useTranslation } from "react-i18next";
 import type { TaskActionsMenuBoardRow } from "@/hooks/use-task-actions-menu";
@@ -443,6 +444,7 @@ function TopBarRight({
   const { t } = useTranslation();
   return (
     <div className="flex items-center justify-self-end gap-2 [&_button]:whitespace-nowrap">
+      <TaskLspTopbarControl taskId={taskId ?? null} />
       <TopbarMetrics activeSessionId={activeSessionId} size="sm" />
       {!isArchived && (
         <TopbarCluster

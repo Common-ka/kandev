@@ -1334,20 +1334,25 @@ func (m *Manager) StopAgentWithReason(ctx context.Context, executionID string, r
 		}
 	}
 	// End session trace span
-	execution.EndSessionSpan()
+	if !execution.IsTaskHost {
+		execution.EndSessionSpan()
+	}
 
 	m.RemoveExecution(executionID)
-	if execution.Owner.Kind != ExecutionOwnerRun && !preservePassthroughConversation {
+	if !execution.IsTaskHost && execution.Owner.Kind != ExecutionOwnerRun && !preservePassthroughConversation {
 		m.deleteExecutorRunning(ctx, executionInventorySessionID(execution), execution.ID)
 	}
-	m.clearRemoteStatus(execution.SessionID)
+	if !execution.IsTaskHost {
+		m.clearRemoteStatus(execution.SessionID)
+	}
 
 	m.logger.Info("agent stopped and removed from tracking",
 		zap.String("execution_id", executionID),
 		zap.String("task_id", execution.TaskID))
 
-	// Publish stopped event
-	m.eventPublisher.PublishAgentEvent(ctx, events.AgentStopped, execution)
+	if !execution.IsTaskHost {
+		m.eventPublisher.PublishAgentEvent(ctx, events.AgentStopped, execution)
+	}
 
 	return nil
 }
@@ -2755,6 +2760,7 @@ func (m *Manager) stopAgentViaBackend(ctx context.Context, executionID string, e
 		TaskID:               execution.TaskID,
 		SessionID:            executionInventorySessionID(execution),
 		ContainerID:          execution.ContainerID,
+		ContainerIP:          execution.ContainerIP,
 		StandaloneInstanceID: execution.standaloneInstanceID,
 		StandalonePort:       execution.standalonePort,
 		Metadata:             execution.MetadataSnapshot(),
@@ -2768,6 +2774,9 @@ func (m *Manager) stopAgentViaBackend(ctx context.Context, executionID string, e
 		}
 		runtimeInstance.Metadata = metadata
 	}
+	if execution.agentctl != nil {
+		runtimeInstance.AuthToken = execution.agentctl.AuthToken()
+	}
 	if err := rt.StopInstance(ctx, runtimeInstance, force); err != nil {
 		// During shutdown the runtime instance may already be stopping or
 		// absent. Only surface this at WARN outside shutdown.
@@ -2780,7 +2789,7 @@ func (m *Manager) stopAgentViaBackend(ctx context.Context, executionID string, e
 				zap.String("execution_id", executionID),
 				zap.Error(err))
 		}
-		return err
+		return fmt.Errorf("stop runtime instance: %w", err)
 	}
 	return nil
 }

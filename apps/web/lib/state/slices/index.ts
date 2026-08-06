@@ -29,6 +29,7 @@ export {
   createInboxHistorySlice,
   defaultInboxHistoryState,
 } from "./inbox-history/inbox-history-slice";
+export { createLspSlice, defaultLspState } from "./lsp/lsp-slice";
 
 // Export types
 export type { KanbanSlice, KanbanSliceState, KanbanSliceActions } from "./kanban/types";
@@ -129,6 +130,7 @@ export type {
   InboxHistoryWorkspaceState,
   InboxHistoryReadStatus,
 } from "./inbox-history/types";
+export type { LspSlice, LspSliceActions, LspSliceState, TaskLspTaskState } from "./lsp/types";
 
 // Re-export commonly used types from each domain
 export type {

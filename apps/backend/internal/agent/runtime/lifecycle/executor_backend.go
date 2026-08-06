@@ -625,6 +625,7 @@ type ExecutorCreateRequest struct {
 	TaskTitle         string
 	SessionID         string
 	TaskEnvironmentID string // Env this execution belongs to (shared across sessions in same task)
+	IsTaskHost        bool   // Internal task-environment service host; never session-owned
 	// WorkspaceReuseRequired means this runtime must attach to the supplied
 	// environment handle and must never fall back to provisioning a replacement.
 	WorkspaceReuseRequired bool
@@ -809,6 +810,7 @@ func (ri *ExecutorInstance) ToAgentExecution(req *ExecutorCreateRequest) *AgentE
 		TaskID:               req.TaskID,
 		SessionID:            req.SessionID,
 		TaskEnvironmentID:    req.TaskEnvironmentID,
+		IsTaskHost:           req.IsTaskHost,
 		AgentProfileID:       req.AgentProfileID,
 		OfficeAgentProfileID: req.OfficeAgentProfileID,
 		promptTurnID:         req.PromptTurnID,

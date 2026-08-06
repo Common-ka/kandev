@@ -2502,6 +2502,12 @@ func (s *Service) ArchiveTask(ctx context.Context, id string) error {
 	if err != nil {
 		return err
 	}
+	if s.taskLSP != nil {
+		if err := s.taskLSP.CleanupTask(ctx, id, "task_archived"); err != nil {
+			s.resolveTaskResourceCleanupAfterMutationError(ctx, cleanupJob)
+			return fmt.Errorf("stop task language servers before archive: %w", err)
+		}
+	}
 
 	// 3. Set archived_at in DB
 	var archiveErr error
@@ -3185,6 +3191,12 @@ func (s *Service) deleteTaskWithReasonAndDBDelete(
 	if err != nil {
 		return false, err
 	}
+	if s.taskLSP != nil {
+		if err := s.taskLSP.CleanupTask(ctx, id, "task_deleted"); err != nil {
+			s.resolveTaskResourceCleanupAfterMutationError(ctx, cleanupJob)
+			return false, fmt.Errorf("stop task language servers before delete: %w", err)
+		}
+	}
 
 	// 4. Delete from DB (sync, fast)
 	deleted, err := deleteFromDB(operationCtx, id)
@@ -3282,6 +3294,18 @@ func (s *Service) CleanupTaskResources(ctx context.Context, taskID string, delet
 	// change whether the environment row itself is deleted.
 	preserveBranches := !deleteEnvRow
 	taskDeleted := deleteEnvRow
+	if s.taskLSP != nil {
+		reason := "task_archived"
+		if deleteEnvRow {
+			reason = "task_deleted"
+		}
+		if err := s.taskLSP.CleanupTask(ctx, taskID, reason); err != nil {
+			// Environment teardown below is the process-tree backstop; continue
+			// even when the graceful task-host stop path is unavailable.
+			s.logger.Warn("failed to stop task language servers before cascade cleanup",
+				zap.String("task_id", taskID), zap.Error(err))
+		}
+	}
 	if deleteEnvRow && s.attachmentSvc != nil {
 		if err := s.attachmentSvc.DeleteByTask(context.WithoutCancel(ctx), taskID); err != nil {
 			s.logger.Warn("failed to remove task attachment bytes during resource cleanup",

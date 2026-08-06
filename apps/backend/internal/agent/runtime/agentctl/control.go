@@ -21,6 +21,10 @@ import (
 	"go.uber.org/zap"
 )
 
+// ErrInstanceNotFound identifies an already-removed agentctl instance. Runtime
+// teardown treats this as an idempotent success after a lost response or retry.
+var ErrInstanceNotFound = errors.New("agentctl instance not found")
+
 // ControlClient is a client for the agentctl control server API.
 // It manages creation and deletion of agent instances.
 // Used by both Docker and standalone runtimes.

@@ -1054,6 +1054,16 @@ func startGatewayAndServe(
 	databaseQuiesce func() error,
 	sshReachabilityPoller *reachabilitypkg.Poller,
 ) bool {
+	services.TaskLSP = newTaskLSPController(
+		services.Task,
+		repos.Task,
+		services.User,
+		newTaskLSPTaskHostAdapter(lifecycleMgr),
+		eventBus,
+	)
+	if services.TaskLSP != nil {
+		configureTaskLSP(ctx, services, orchestratorSvc, eventBus, log, addCleanup)
+	}
 	// ============================================
 	// WEBSOCKET GATEWAY
 	// ============================================
@@ -1071,10 +1081,7 @@ func startGatewayAndServe(
 		// be resolved while authentication is enforced.
 		services.Auth,
 		cfg.ResolvedHomeDir(),
-		func(fn func() error) { addCleanup(fn) },
-		cfg.Features.LSPBrowserContinuity,
-		orchestratorSvc.AcquireSessionLifecycleFence,
-		cfg.Limits.LSPMaxConnections,
+
 	)
 	if terminalSvc != nil {
 		services.Terminal = terminalSvc
@@ -1082,6 +1089,9 @@ func startGatewayAndServe(
 	if err != nil {
 		log.Error("Failed to initialize WebSocket gateway", zap.Error(err))
 		return false
+	}
+	if services.TaskLSP != nil {
+		gateway.SetLSPHandler(services.TaskLSP)
 	}
 
 	gateways.RegisterSessionStreamNotifications(ctx, eventBus, gateway.Hub, log)

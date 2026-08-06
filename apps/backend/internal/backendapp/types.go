@@ -21,6 +21,7 @@ import (
 	"github.com/kandev/kandev/internal/gitlab"
 	"github.com/kandev/kandev/internal/jira"
 	"github.com/kandev/kandev/internal/linear"
+	tasklsp "github.com/kandev/kandev/internal/lsp"
 	notificationservice "github.com/kandev/kandev/internal/notifications/service"
 	notificationstore "github.com/kandev/kandev/internal/notifications/store"
 	office "github.com/kandev/kandev/internal/office"
@@ -153,6 +154,9 @@ type Services struct {
 	// Mode() == ModeDisabled and the middleware injects the synthetic identity.
 	Auth                    *authservice.Service
 	SessionHostnameResolver *hostnames.Resolver
+	// TaskLSP is the single task/language lifecycle controller shared by
+	// browser HTTP controls, WebSocket attachments, and lifecycle cleanup.
+	TaskLSP *tasklsp.Controller
 }
 
 type schedulerStopper interface {

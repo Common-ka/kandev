@@ -52,6 +52,10 @@ type AgentExecution struct {
 	// ExecutorType preserves launch locality for features that must only access
 	// the backend user's host filesystem. Empty means locality is unknown.
 	ExecutorType string
+	// IsTaskHost marks an internal, task-environment-owned agentctl execution.
+	// Task hosts provide long-lived task services such as LSP and deliberately
+	// never participate in session lookup or session lifecycle events.
+	IsTaskHost bool
 	// AgentProfileID is the concrete profile used by the running CLI. The
 	// historical name is retained inside lifecycle because profile resolution,
 	// MCP, env, and command construction all consume this value.
