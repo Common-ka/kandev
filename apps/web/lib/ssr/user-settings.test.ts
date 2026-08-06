@@ -3,6 +3,7 @@
 import { describe, it, expect } from "vitest";
 import {
   buildCoreFields,
+  buildLspFields,
   createDefaultUserSettings,
   mapUserSettingsData,
   mapUserSettingsResponse,
@@ -170,6 +171,16 @@ describe("LSP status location hydration", () => {
     });
 
     expect(result.lspStatusLocation).toBe("status_bar");
+  });
+});
+
+describe("LSP task status visibility hydration", () => {
+  it("defaults to showing every language and preserves hidden language IDs", () => {
+    expect(buildLspFields(undefined).lspStatusHiddenLanguages).toEqual([]);
+    expect(
+      buildLspFields({ lsp_status_hidden_languages: ["go", "kotlin"] } as never)
+        .lspStatusHiddenLanguages,
+    ).toEqual(["go", "kotlin"]);
   });
 });
 
