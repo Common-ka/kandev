@@ -4704,6 +4704,12 @@ func (s *Service) StopTask(ctx context.Context, taskID string, reason string, fo
 			zap.String("task_id", taskID),
 			zap.Error(err))
 	}
+	if s.taskStopCleanup != nil {
+		if err := s.taskStopCleanup(ctx, taskID, reason); err != nil {
+			return fmt.Errorf("clean up task-owned runtimes: %w", err)
+		}
+	}
+
 	// Move task to REVIEW state for user review
 	if err := s.taskRepo.UpdateTaskState(ctx, taskID, v1.TaskStateReview); err != nil {
 		s.logger.Error("failed to update task state to REVIEW after stop",
