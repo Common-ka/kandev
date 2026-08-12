@@ -78,7 +78,7 @@ func provideWorktreeManager(dbPool *db.Pool, cfg *config.Config, log *logger.Log
 	}
 	taskSvc.SetWorktreeCleanup(manager)
 	if lifecycleMgr != nil {
-		taskSvc.SetEnvironmentDestroyer(&environmentDestroyerAdapter{
+		destroyer := &environmentDestroyerAdapter{
 			lifecycle: lifecycleMgr,
 			worktrees: manager,
 			containers: &containerOpsDispatch{
@@ -86,7 +86,9 @@ func provideWorktreeManager(dbPool *db.Pool, cfg *config.Config, log *logger.Log
 				remote:    runtime.NewRemoteDockerContainers(log),
 				executors: taskSvc,
 			},
-		})
+		}
+		taskSvc.SetEnvironmentDestroyer(destroyer)
+		taskSvc.SetTaskEnvironmentRuntimeSecretDeleter(destroyer)
 	}
 	taskSvc.SetSSHTaskDirReclaimer(newSSHTaskDirReclaimerAdapter(log))
 
@@ -145,6 +147,13 @@ func (a *environmentDestroyerAdapter) DestroyWorktree(ctx context.Context, workt
 		return fmt.Errorf("worktree %s is still referenced by another task", worktreeID)
 	}
 	return nil
+}
+
+func (a *environmentDestroyerAdapter) DeleteTaskEnvironmentRuntimeSecrets(
+	ctx context.Context,
+	taskEnvironmentID, authSecretID, bootstrapSecretID string,
+) error {
+	return a.lifecycle.DeleteTaskEnvironmentRuntimeSecrets(ctx, taskEnvironmentID, authSecretID, bootstrapSecretID)
 }
 
 func (a *environmentDestroyerAdapter) GetContainerLiveStatus(

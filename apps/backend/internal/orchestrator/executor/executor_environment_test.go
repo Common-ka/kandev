@@ -1050,9 +1050,11 @@ func TestPersistTaskEnvironment_RepairsResolvedExecutorIdentity(t *testing.T) {
 		ExecutorType: string(models.ExecutorTypeLocal),
 	}
 
-	exec.persistTaskEnvironment(
+	if err := exec.persistTaskEnvironment(
 		context.Background(), "task-1", session, environment, req, response, config,
-	)
+	); err != nil {
+		t.Fatalf("persistTaskEnvironment: %v", err)
+	}
 
 	stored := repo.taskEnvironments[environment.ID]
 	if stored.ExecutorType != string(models.ExecutorTypeLocal) {
@@ -1092,10 +1094,12 @@ func TestTaskEnvironmentReadyCallbackRunsAfterSessionLinkPersistence(t *testing.
 		ExecutorType: string(models.ExecutorTypeLocal),
 	}
 	response := &LaunchAgentResponse{AgentExecutionID: "execution-ready", WorkspacePath: "/workspace/task-ready"}
-	exec.persistTaskEnvironment(
+	if err := exec.persistTaskEnvironment(
 		context.Background(), "task-ready", session, nil, request, response,
 		executorConfig{ExecutorID: models.ExecutorIDLocal, ExecutorType: string(models.ExecutorTypeLocal)},
-	)
+	); err != nil {
+		t.Fatalf("persistTaskEnvironment: %v", err)
+	}
 	if _, err := exec.finalizeLaunch(
 		context.Background(), &v1.Task{ID: "task-ready"}, session, "profile-ready", session.ID,
 		&repoInfo{RepositoryID: "repo-ready"}, response, false, executorConfig{},

@@ -2487,7 +2487,7 @@ func TestLaunch_PersistsDockerRuntimeSecrets(t *testing.T) {
 		&MockCredentialsManager{}, &MockProfileResolver{}, nil,
 		ExecutorFallbackWarn, "", log,
 	)
-	mgr.SetSecretStore(store)
+	mgr.SetRuntimeSecretStore(store)
 	mgr.dataDir = t.TempDir()
 	cleanupManagerStopCh(t, mgr)
 

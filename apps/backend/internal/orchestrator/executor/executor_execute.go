@@ -24,6 +24,7 @@ import (
 	"github.com/kandev/kandev/internal/repoclone"
 	"github.com/kandev/kandev/internal/sysprompt"
 	"github.com/kandev/kandev/internal/task/models"
+	taskrepo "github.com/kandev/kandev/internal/task/repository"
 	"github.com/kandev/kandev/internal/worktree"
 	v1 "github.com/kandev/kandev/pkg/api/v1"
 	"go.uber.org/zap"
@@ -1751,6 +1752,19 @@ func (e *Executor) LaunchPreparedSession(ctx context.Context, task *v1.Task, ses
 		primaryRepo = &repoInfo{}
 	}
 
+	// Environment creation and its first runtime launch are one task-scoped
+	// critical section. A second session that passed the earlier fast path waits
+	// here, then observes and reuses the first session's durable environment.
+	taskEnvironmentLock := e.taskEnvLock(task.ID)
+	taskEnvironmentLock.Lock()
+	defer taskEnvironmentLock.Unlock()
+
+	// Resolve and owner-validate the canonical environment before launch so the
+	// in-memory execution is environment-scoped from its first runtime request.
+	existingEnv, err := e.resolveLaunchTaskEnvironment(ctx, task, session)
+	if err != nil {
+		return nil, err
+	}
 	assignLaunchTaskEnvironmentID(session, existingEnv)
 
 	// A sibling can be prepared while the elected materializer is still
@@ -1892,6 +1906,15 @@ func (e *Executor) LaunchPreparedSession(ctx context.Context, task *v1.Task, ses
 	if err := e.resolveLaunchEnvironment(launchCtx, req, execCfg.ProfileEnvVars, allRepos); err != nil {
 		return nil, err
 	}
+	reservedEnvironment := false
+	resolvedExecutorType, _ := taskEnvironmentExecutorIdentity(req, execCfg)
+	if existingEnv == nil && resolvedExecutorType == string(models.ExecutorTypeLocalDocker) {
+		existingEnv, err = e.createTaskEnvironmentReservation(ctx, task.ID, session, req, execCfg)
+		if err != nil {
+			return nil, e.handleLaunchFailure(ctx, task.ID, sessionID, "", "", err)
+		}
+		reservedEnvironment = true
+	}
 
 	// Fast path: workspace already launched (executors_running row exists).
 	// The selected-environment recovery gate above must run first, including
@@ -1923,7 +1946,9 @@ func (e *Executor) LaunchPreparedSession(ctx context.Context, task *v1.Task, ses
 		if err == nil {
 			err = errors.New("agent launch returned no response")
 		}
-		if existingEnv != nil && existingEnv.Status == models.TaskEnvironmentStatusCreating && existingEnv.MaterializationSessionID == session.ID {
+		if reservedEnvironment {
+			err = errors.Join(err, e.rollbackTaskEnvironmentReservation(context.WithoutCancel(ctx), existingEnv, ""))
+		} else if existingEnv != nil && existingEnv.Status == models.TaskEnvironmentStatusCreating && existingEnv.MaterializationSessionID == session.ID {
 			existingEnv.Status = models.TaskEnvironmentStatusFailed
 			existingEnv.MaterializationSessionID = ""
 			if updateErr := e.repo.UpdateTaskEnvironment(launchCtx, existingEnv); updateErr != nil {
@@ -1936,9 +1961,13 @@ func (e *Executor) LaunchPreparedSession(ctx context.Context, task *v1.Task, ses
 	}
 
 	// Create or update the task environment with launch results
-	if err := e.persistTaskEnvironment(launchCtx, task.ID, session, existingEnv, req, resp, execCfg); err != nil {
-		e.cleanupUnstartedExecutionAfterPersistError(launchCtx, sessionID, resp.AgentExecutionID, err)
-		e.markTaskEnvironmentMaterializationFailed(launchCtx, existingEnv, session.ID)
+	if err := e.persistTaskEnvironmentLocked(launchCtx, task.ID, session, existingEnv, req, resp, execCfg); err != nil {
+		if reservedEnvironment {
+			err = errors.Join(err, e.rollbackTaskEnvironmentReservation(context.WithoutCancel(launchCtx), existingEnv, resp.AgentExecutionID))
+		} else {
+			e.cleanupUnstartedExecutionAfterPersistError(launchCtx, sessionID, resp.AgentExecutionID, err)
+			e.markTaskEnvironmentMaterializationFailed(launchCtx, existingEnv, session.ID)
+		}
 		repositoryID, taskRepositoryID := failingLaunchRepositoryIdentity(req, err)
 		return nil, e.handleLaunchFailure(launchCtx, task.ID, sessionID, repositoryID, taskRepositoryID, err)
 	}
@@ -2997,6 +3026,65 @@ func computeWorkspacePath(req *LaunchAgentRequest, resp *LaunchAgentResponse) st
 	return req.RepositoryPath
 }
 
+func (e *Executor) createTaskEnvironmentReservation(
+	ctx context.Context,
+	taskID string,
+	session *models.TaskSession,
+	req *LaunchAgentRequest,
+	execCfg executorConfig,
+) (*models.TaskEnvironment, error) {
+	executorType, executorID := taskEnvironmentExecutorIdentity(req, execCfg)
+	environment := &models.TaskEnvironment{
+		ID:                       session.TaskEnvironmentID,
+		TaskID:                   taskID,
+		ExecutorType:             executorType,
+		ExecutorID:               executorID,
+		ExecutorProfileID:        session.ExecutorProfileID,
+		Status:                   models.TaskEnvironmentStatusCreating,
+		MaterializationSessionID: session.ID,
+		WorkspacePath:            req.WorkspacePath,
+		TaskDirName:              req.TaskDirName,
+	}
+	if err := e.repo.CreateTaskEnvironment(ctx, environment); err != nil {
+		return nil, fmt.Errorf("reserve task environment before runtime launch: %w", err)
+	}
+	session.TaskEnvironmentID = environment.ID
+	req.TaskEnvironmentID = environment.ID
+	return environment, nil
+}
+
+type taskEnvironmentRuntimeSecretDeleter interface {
+	DeleteTaskEnvironmentRuntimeSecrets(context.Context, string, string, string) error
+}
+
+func (e *Executor) rollbackTaskEnvironmentReservation(
+	ctx context.Context,
+	environment *models.TaskEnvironment,
+	executionID string,
+) error {
+	if environment == nil || environment.ID == "" {
+		return nil
+	}
+	if executionID != "" {
+		if err := e.agentManager.StopAgentWithReason(ctx, executionID, "task environment finalization failed", true); err != nil &&
+			!errors.Is(err, lifecycle.ErrExecutionNotFound) {
+			return fmt.Errorf("stop runtime after environment finalization failure: %w", err)
+		}
+	}
+	deleter, ok := e.agentManager.(taskEnvironmentRuntimeSecretDeleter)
+	if !ok {
+		return fmt.Errorf("runtime secret cleanup is not configured")
+	}
+	if err := deleter.DeleteTaskEnvironmentRuntimeSecrets(ctx, environment.ID, "", ""); err != nil {
+		return fmt.Errorf("delete reserved environment runtime secrets: %w", err)
+	}
+	if err := e.repo.DeleteTaskEnvironment(ctx, environment.ID); err != nil &&
+		!errors.Is(err, taskrepo.ErrTaskEnvironmentNotFound) {
+		return fmt.Errorf("delete reserved task environment: %w", err)
+	}
+	return nil
+}
+
 // persistTaskEnvironment creates or updates the task environment record after a successful launch.
 // It also links the session to the environment via TaskEnvironmentID. For
 // multi-repo launches it additionally writes one TaskEnvironmentRepo row per repo.
@@ -3018,6 +3106,18 @@ func (e *Executor) persistTaskEnvironment(
 	mu := e.taskEnvLock(taskID)
 	mu.Lock()
 	defer mu.Unlock()
+	return e.persistTaskEnvironmentLocked(ctx, taskID, session, existingEnv, req, resp, execCfg)
+}
+
+func (e *Executor) persistTaskEnvironmentLocked(
+	ctx context.Context,
+	taskID string,
+	session *models.TaskSession,
+	existingEnv *models.TaskEnvironment,
+	req *LaunchAgentRequest,
+	resp *LaunchAgentResponse,
+	execCfg executorConfig,
+) error {
 
 	// Re-fetch under the lock — a sibling launch for the same task may have
 	// just created or rebound the env and released the lock. The launch-local

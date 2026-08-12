@@ -607,7 +607,7 @@ func startAgentInfrastructure(
 		restoreCleanups = append(restoreCleanups, stop)
 		return stop
 	}
-	userSecretStore := secrets.NewUserVisibleStore(repos.Secrets)
+	agentSecrets := newAgentSecretStores(repos.Secrets)
 	mcpScopeResolver := mcpscope.NewResolver(
 		repos.Task,
 		services.Auth,
@@ -672,11 +672,13 @@ func startAgentInfrastructure(
 	})
 
 	// Session/environment-scoped HTTP surfaces (shell, files, ports, vscode,
-	// LSP, terminals) enforce per-user workspace scoping (opt-in auth). The
+	// terminals) enforce per-user workspace scoping (opt-in auth). Their
 	// GetOrEnsure* execution paths run these checks internally; the vscode and
 	// port reverse proxies (bare lookup + cache) call CheckSessionAccess at
 	// the handler, and the SSR terminal-list routes call CheckTaskAccess /
 	// CheckEnvironmentAccess / CheckTaskEnvironmentAccess in a route guard.
+	// Task-scoped LSP authorizes the task before resolving its canonical task
+	// environment through the same access-checker family.
 	wireLifecycleAccessCheckers(lifecycleMgr, services.Task)
 
 	// TODO(task-model-unification Phase 2, ADR 0004): wire agentruntime.New(lifecycleMgr)

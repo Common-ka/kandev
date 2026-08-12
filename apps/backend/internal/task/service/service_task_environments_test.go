@@ -157,6 +157,19 @@ func TestCleanupTaskEnvironmentSkipsStaleOwnershipGeneration(t *testing.T) {
 	}
 }
 
+type stubRuntimeSecretDeleter struct {
+	calls []string
+	err   error
+}
+
+func (s *stubRuntimeSecretDeleter) DeleteTaskEnvironmentRuntimeSecrets(
+	_ context.Context,
+	environmentID, _, _ string,
+) error {
+	s.calls = append(s.calls, environmentID)
+	return s.err
+}
+
 func (s *stubRunningChecker) IsAnySessionRunningForTask(context.Context, string) (bool, error) {
 	return s.running, s.err
 }
@@ -267,6 +280,44 @@ func TestResetTaskEnvironmentDestroysPluginExecutorUnderResetClaim(t *testing.T)
 	}
 	if !repo.deleted || repo.resetReleased != models.TaskResourceCleanupStateSucceeded {
 		t.Fatalf("reset completion deleted=%v state=%q", repo.deleted, repo.resetReleased)
+	}
+}
+
+func TestResetTaskEnvironmentDeletesRuntimeSecretsBeforeEnvironmentRow(t *testing.T) {
+	repo := &stubEnvRepo{env: &models.TaskEnvironment{
+		ID: "env-1", TaskID: "task-1", AgentctlAuthSecretID: "runtime-auth",
+		AgentctlBootstrapSecretID: "runtime-bootstrap",
+	}}
+	deleter := &stubRuntimeSecretDeleter{}
+	svc := newResetTestService(t, repo)
+	svc.SetSessionRunningChecker(&stubRunningChecker{})
+	svc.SetTaskEnvironmentRuntimeSecretDeleter(deleter)
+
+	if err := svc.ResetTaskEnvironment(context.Background(), "task-1", ResetOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	if len(deleter.calls) != 1 || deleter.calls[0] != "env-1" {
+		t.Fatalf("runtime secret cleanup calls = %v, want env-1", deleter.calls)
+	}
+	if !repo.deleted {
+		t.Fatal("environment row was not deleted after runtime secrets")
+	}
+}
+
+func TestResetTaskEnvironmentRuntimeSecretFailurePreservesEnvironmentRow(t *testing.T) {
+	repo := &stubEnvRepo{env: &models.TaskEnvironment{
+		ID: "env-1", TaskID: "task-1", AgentctlAuthSecretID: "runtime-auth",
+	}}
+	deleter := &stubRuntimeSecretDeleter{err: errors.New("secret store unavailable")}
+	svc := newResetTestService(t, repo)
+	svc.SetSessionRunningChecker(&stubRunningChecker{})
+	svc.SetTaskEnvironmentRuntimeSecretDeleter(deleter)
+
+	if err := svc.ResetTaskEnvironment(context.Background(), "task-1", ResetOptions{}); err == nil {
+		t.Fatal("ResetTaskEnvironment unexpectedly succeeded")
+	}
+	if repo.deleted {
+		t.Fatal("environment row deleted after runtime secret cleanup failure")
 	}
 }
 
@@ -596,14 +647,15 @@ func TestResetTaskEnvironment_PushBranchFailureAbortsResetBeforeTeardown(t *test
 
 func TestPerformTaskCleanup_TearsDownTaskEnvironmentAndDeletesRow(t *testing.T) {
 	env := &models.TaskEnvironment{
-		ID:          "env-1",
-		TaskID:      "task-1",
-		ContainerID: "container-abc",
+		ID: "env-1", TaskID: "task-1", ContainerID: "container-abc",
+		AgentctlAuthSecretID: "runtime-auth",
 	}
 	repo := &stubEnvRepo{env: env}
 	destroyer := &stubDestroyer{}
+	secretDeleter := &stubRuntimeSecretDeleter{}
 	svc := newResetTestService(t, repo)
 	svc.SetEnvironmentDestroyer(destroyer)
+	svc.SetTaskEnvironmentRuntimeSecretDeleter(secretDeleter)
 
 	errs := svc.performTaskCleanup(context.Background(), "task-1", nil, nil, nil, taskEnvironmentCleanup{
 		env:       env,
@@ -618,6 +670,9 @@ func TestPerformTaskCleanup_TearsDownTaskEnvironmentAndDeletesRow(t *testing.T) 
 	}
 	if !repo.deleted {
 		t.Fatal("expected task environment row to be deleted")
+	}
+	if len(secretDeleter.calls) != 1 || secretDeleter.calls[0] != "env-1" {
+		t.Fatalf("runtime secret cleanup calls = %v, want env-1", secretDeleter.calls)
 	}
 }
 
