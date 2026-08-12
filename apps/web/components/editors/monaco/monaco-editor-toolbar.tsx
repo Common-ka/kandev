@@ -304,6 +304,7 @@ interface MonacoEditorToolbarProps {
   lspStatus: LspStatus;
   lspProgress: LspProgressSnapshot;
   lspLanguage: string | null;
+  lspTaskId: string | null;
   showLspStatus?: boolean;
   onToggleLsp: () => void;
   onToggleWrap: () => void;
@@ -362,6 +363,7 @@ function MonacoToolbarActions({
   lspStatus,
   lspProgress,
   lspLanguage,
+  lspTaskId,
   showLspStatus = true,
   onToggleLsp,
   onToggleWrap,
@@ -507,6 +509,7 @@ export function MonacoEditorToolbar(props: MonacoEditorToolbarProps) {
         <MonacoToolbarOverflowPrimaryActions
           showLspStatus={props.showLspStatus}
           lspStatus={props.lspStatus}
+          lspTaskId={props.lspTaskId}
           lspProgress={props.lspProgress}
           lspLanguage={props.lspLanguage}
           onToggleLsp={props.onToggleLsp}

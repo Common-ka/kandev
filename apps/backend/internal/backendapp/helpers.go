@@ -814,6 +814,7 @@ func registerRoutes(p routeParams) {
 	p.taskSvc.SetWorkspacePolicyAttacher(handoffSvc)
 	p.taskSvc.SetWorkspaceGroupMembershipReader(p.officeRepo)
 	handoffSvc.SetCommentReader(&officeCommentReaderAdapter{reader: p.officeRepo})
+	p.taskSvc.SetTaskEnvironmentResetGuard(handoffSvc)
 	// Phase 6 wirings — materializer hook + disk cleaner. The
 	// SessionWorktreeReader and WorkspaceCleaner interfaces are both
 	// satisfied by adapters that delegate to existing services.

@@ -118,6 +118,9 @@ type taskResourceCleanupSnapshot struct {
 	WorkspaceID            string                                     `json:"workspace_id,omitempty"`
 	DeleteEnvironmentRow   bool                                       `json:"delete_environment_row,omitempty"`
 	LegacyWorktreeCleanup  bool                                       `json:"legacy_worktree_cleanup,omitempty"`
+	TaskEnvironmentAuthSecretID      string                    `json:"task_environment_auth_secret_id,omitempty"`
+	TaskEnvironmentBootstrapSecretID string                    `json:"task_environment_bootstrap_secret_id,omitempty"`
+	DeleteEnvironmentSecrets         bool                      `json:"delete_environment_secrets,omitempty"`
 	// SSHTaskDirs records the remote task directories this task launched into.
 	// Additive and absent-tolerant: a job row written by an older backend
 	// decodes with an empty list and reclaims nothing.
@@ -209,7 +212,12 @@ func (s *Service) persistTaskResourceCleanup(
 		WorkspaceID:            workspaceID,
 		TaskEnvironment:        envCleanup.env,
 		DeleteEnvironmentRow:   envCleanup.deleteRow,
+		DeleteEnvironmentSecrets: envCleanup.deleteSecrets,
 		LegacyWorktreeCleanup:  s.hasLegacyWorktreeCleanup(),
+	}
+	if envCleanup.env != nil {
+		snapshot.TaskEnvironmentAuthSecretID = envCleanup.env.AgentctlAuthSecretID
+		snapshot.TaskEnvironmentBootstrapSecretID = envCleanup.env.AgentctlBootstrapSecretID
 	}
 	if collectSSH {
 		sshTaskDirs, err := s.gatherSSHReclaimTargets(ctx, taskID)
@@ -1218,12 +1226,11 @@ func (s *Service) executeTaskResourceCleanupJob(
 	reapRootCandidates := s.gatherOrphanReapRootCandidates(
 		snapshot, cleanupSessionIDs(snapshot.Sessions, targets),
 	)
+	environmentCleanup := restoreTaskEnvironmentCleanup(*snapshot)
+	environmentCleanup.preserveBranches = job.IsArchive()
+	environmentCleanup.discardWorktreeChanges = snapshot.DiscardWorktreeChanges
 	errs = append(errs, s.performTaskCleanup(ctx, job.TaskID, snapshot.Sessions, snapshot.Worktrees, targets,
-		taskEnvironmentCleanup{
-			env: snapshot.TaskEnvironment, deleteRow: snapshot.DeleteEnvironmentRow,
-			preserveBranches:       job.IsArchive(),
-			discardWorktreeChanges: snapshot.DiscardWorktreeChanges,
-		},
+		environmentCleanup,
 		taskCleanupPreserveRows(stopOutcome))...)
 	// Record every path this attempt actually removed and confirmed absent
 	// as a reap root, before any early return below can skip it. This
@@ -1302,6 +1309,24 @@ func (s *Service) captureAndPersistTaskSourceManifest(
 		return fmt.Errorf("persist archive source manifest before cleanup: cleanup claim changed")
 	}
 	return nil
+}
+
+func restoreTaskEnvironmentCleanup(snapshot taskResourceCleanupSnapshot) taskEnvironmentCleanup {
+	environment := snapshot.TaskEnvironment
+	if environment != nil {
+		copy := *environment
+		copy.AgentctlAuthSecretID = snapshot.TaskEnvironmentAuthSecretID
+		copy.AgentctlBootstrapSecretID = snapshot.TaskEnvironmentBootstrapSecretID
+		environment = &copy
+	}
+	return taskEnvironmentCleanup{
+		env:       environment,
+		deleteRow: snapshot.DeleteEnvironmentRow,
+		// Older durable snapshots only recorded row deletion. Preserve their
+		// cleanup semantics while letting task/workspace delete jobs remove
+		// credentials after the task FK already removed the environment row.
+		deleteSecrets: snapshot.DeleteEnvironmentSecrets || snapshot.DeleteEnvironmentRow,
+	}
 }
 
 func (s *Service) hasLegacyWorktreeCleanup() bool {

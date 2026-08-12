@@ -1206,6 +1206,10 @@ type WorkspaceRepositorySpec struct {
 	BranchSlug              string
 	BranchIdentitySlug      string
 	Position int
+	// TaskHostPosition is the repository's persisted physical order inside an
+	// already-materialized task host. Nil means the host has not yet been
+	// materialized and launch ordering may establish the mapping.
+	TaskHostPosition *int
 }
 
 // RouteOverride carries a fully resolved provider profile for one

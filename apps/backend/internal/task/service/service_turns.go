@@ -1131,6 +1131,10 @@ func (s *Service) populateWorkspaceRepositorySpecs(ctx context.Context, taskID s
 				spec.CloneRelocation.RecordedSourcePath = worktree.WorktreeSourceClonePath
 				spec.CloneRelocation.RecordedSourceCommonDir = worktree.WorktreeSourceCommonDir
 			}
+			if info.ExecutorType == string(models.ExecutorTypeLocalDocker) {
+				physicalPosition := worktree.Position
+				spec.TaskHostPosition = &physicalPosition
+			}
 		}
 		info.WorkspaceRepositories = append(info.WorkspaceRepositories, spec)
 	}
@@ -1274,6 +1278,9 @@ func applyTaskEnvironmentToWorkspaceInfo(info *lifecycle.WorkspaceInfo, env *mod
 	info.TaskEnvironmentID = env.ID
 	info.EnvironmentOwnerTaskID = env.TaskID
 	info.OwnershipGeneration = env.OwnershipGeneration
+	if info.ExecutorType == "" {
+		info.ExecutorType = env.ExecutorType
+	}
 	if info.ExecutorProfileID == "" {
 		info.ExecutorProfileID = env.ExecutorProfileID
 	}
@@ -1453,7 +1460,34 @@ func (s *Service) GetWorkspaceInfoForTaskLSP(
 		}
 		return matching[i].ID > matching[j].ID
 	})
-	return s.GetWorkspaceInfoForSession(ctx, taskID, matching[0].ID)
+	info, err := s.GetWorkspaceInfoForSession(ctx, taskID, matching[0].ID)
+	if err != nil {
+		return nil, err
+	}
+	if err := validateBorrowedTaskHostRepositoryMapping(taskID, environment, info); err != nil {
+		return nil, err
+	}
+	return info, nil
+}
+
+func validateBorrowedTaskHostRepositoryMapping(
+	taskID string,
+	environment *models.TaskEnvironment,
+	info *lifecycle.WorkspaceInfo,
+) error {
+	if environment == nil || environment.TaskID == taskID ||
+		environment.ExecutorType != string(models.ExecutorTypeLocalDocker) || info == nil {
+		return nil
+	}
+	for _, repository := range info.WorkspaceRepositories {
+		if repository.TaskHostPosition == nil {
+			return fmt.Errorf(
+				"task %s has no physical repository mapping for %s in task environment %s",
+				taskID, repository.RepositoryID, environment.ID,
+			)
+		}
+	}
+	return nil
 }
 
 func (s *Service) getTaskOwnedWorkspaceInfo(
@@ -1479,7 +1513,7 @@ func (s *Service) getTaskOwnedWorkspaceInfo(
 			}
 		}
 	}
-	if err := s.populateWorkspaceRepositorySpecs(ctx, env.TaskID, nil, info); err != nil {
+	if err := s.populateWorkspaceRepositorySpecs(ctx, env.TaskID, env.Repos, info); err != nil {
 		return nil, err
 	}
 	return info, nil

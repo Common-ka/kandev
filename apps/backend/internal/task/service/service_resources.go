@@ -558,7 +558,7 @@ func (s *Service) prepareWorkspaceDeleteTaskCleanup(ctx context.Context, task *m
 		ctx, task.ID, models.TaskResourceCleanupTriggerWorkspaceDelete,
 		newTaskResourceCleanupOperationID(models.TaskResourceCleanupTriggerWorkspaceDelete, task.ID),
 		cleanup.sessions, cleanup.worktrees, cleanup.stopTargets, cleanup.attachments,
-		taskEnvironmentCleanup{env: cleanup.taskEnv, deleteRow: false}, true, true, task.WorkspaceID,
+		taskEnvironmentCleanup{env: cleanup.taskEnv, deleteRow: false, deleteSecrets: true}, true, true, task.WorkspaceID,
 	)
 	return cleanup, err
 }
@@ -690,7 +690,7 @@ func (s *Service) runWorkspaceDeleteTaskCleanup(cleanup workspaceDeleteTaskClean
 		}
 		return
 	}
-	envCleanup := taskEnvironmentCleanup{env: cleanup.taskEnv, deleteRow: false}
+	envCleanup := taskEnvironmentCleanup{env: cleanup.taskEnv, deleteRow: false, deleteSecrets: true}
 	s.runTaskCleanup(cleanup.task.ID, cleanup.sessions, cleanup.worktrees, cleanup.stopTargets, envCleanup, true,
 		"task deleted", "failed to stop session on task delete", "task cleanup completed")
 }

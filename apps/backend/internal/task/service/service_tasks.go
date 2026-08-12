@@ -125,10 +125,15 @@ type taskEnvironmentCleanup struct {
 	deleteRow              bool
 	preserveBranches       bool
 	discardWorktreeChanges bool
+	deleteSecrets bool
 }
 
 type taskEnvironmentSessionUsageChecker interface {
 	HasActiveTaskSessionsByTaskEnvironmentExcludingTask(ctx context.Context, taskEnvironmentID, taskID string) (bool, error)
+}
+
+type taskEnvironmentLiveTaskUsageChecker interface {
+	HasLiveTaskSessionsByTaskEnvironmentExcludingTask(ctx context.Context, taskEnvironmentID, taskID string) (bool, error)
 }
 
 type taskEnvironmentSessionBorrowerFinder interface {
@@ -2496,7 +2501,9 @@ func (s *Service) ArchiveTask(ctx context.Context, id string) error {
 	if err != nil {
 		return fmt.Errorf("lookup task environment for archive: %w", err)
 	}
-	envCleanup := taskEnvironmentCleanup{env: taskEnv, deleteRow: false, preserveBranches: true}
+	envCleanup := taskEnvironmentCleanup{
+		env: taskEnv, deleteRow: false, deleteSecrets: true, preserveBranches: true,
+	}
 	cleanupJob, err := s.persistTaskResourceCleanup(
 		archiveCtx, id, models.TaskResourceCleanupTriggerArchive, "",
 		sessions, worktrees, stopTargets, nil, envCleanup, true, true, task.WorkspaceID,
@@ -3187,7 +3194,7 @@ func (s *Service) deleteTaskWithReasonAndDBDelete(
 	}
 
 	envCleanup := taskEnvironmentCleanup{
-		env: taskEnv, deleteRow: false, discardWorktreeChanges: options.DiscardWorktreeChanges,
+		env: taskEnv, deleteRow: false, deleteSecrets: true, discardWorktreeChanges: options.DiscardWorktreeChanges,
 	}
 	cleanupJob, err := s.persistTaskResourceCleanup(
 		operationCtx, id, trigger, "", sessions, worktrees, stopTargets, attachments, envCleanup, true, true, task.WorkspaceID,
@@ -3362,7 +3369,7 @@ func (s *Service) CleanupTaskResources(ctx context.Context, taskID string, delet
 		}
 	}
 	envCleanup := taskEnvironmentCleanup{
-		env: taskEnv, deleteRow: deleteEnvRow, preserveBranches: preserveBranches,
+		env: taskEnv, deleteRow: deleteEnvRow, deleteSecrets: deleteEnvRow, preserveBranches: preserveBranches,
 	}
 	if len(sessions) == 0 && len(worktrees) == 0 && len(stopTargets) == 0 && taskEnv == nil {
 		return
@@ -4339,6 +4346,16 @@ func (s *Service) hasActiveOtherTaskSessionsForEnvironment(ctx context.Context, 
 	return checker.HasActiveTaskSessionsByTaskEnvironmentExcludingTask(ctx, env.ID, taskID)
 }
 
+func (s *Service) hasOtherLiveTasksForEnvironment(ctx context.Context, taskID string, env *models.TaskEnvironment) (bool, error) {
+	if env == nil || env.ID == "" || s.sessions == nil {
+		return false, nil
+	}
+	if checker, ok := s.sessions.(taskEnvironmentLiveTaskUsageChecker); ok {
+		return checker.HasLiveTaskSessionsByTaskEnvironmentExcludingTask(ctx, env.ID, taskID)
+	}
+	return s.hasActiveOtherTaskSessionsForEnvironment(ctx, taskID, env)
+}
+
 func (s *Service) preserveTaskEnvironmentForActiveBorrower(ctx context.Context, taskID string, env *models.TaskEnvironment) (bool, error) {
 	if env == nil || env.ID == "" || s.sessions == nil {
 		return false, nil
@@ -4518,13 +4535,15 @@ func (s *Service) cleanupTaskEnvironment(
 			zap.Error(teardownErr))
 		return []error{fmt.Errorf("teardown task environment %s: %w", cleanup.env.ID, teardownErr)}
 	}
-	if cleanup.deleteRow {
+	if cleanup.deleteSecrets || cleanup.deleteRow {
 		if cause := context.Cause(ctx); cause != nil {
 			return []error{cause}
 		}
 		if err := s.deleteTaskEnvironmentRuntimeSecrets(ctx, cleanup.env); err != nil {
 			return []error{err}
 		}
+	}
+	if cleanup.deleteRow {
 		if err := s.taskEnvironments.DeleteTaskEnvironment(ctx, cleanup.env.ID); err != nil &&
 			!errors.Is(err, taskrepo.ErrTaskEnvironmentNotFound) {
 			s.logger.Warn("failed to delete task environment row during task cleanup",
