@@ -1632,7 +1632,43 @@ func (m *Manager) persistRuntimeSecrets(
 			)
 		}
 	}
+	m.propagateDockerTaskEnvironmentAuthToken(ctx, execution, instance.AuthToken)
 	return nil
+}
+
+// propagateDockerTaskEnvironmentAuthToken adopts a rotated Docker control
+// credential across every live client for the task environment. The token is
+// transport state shared by the container's agentctl server, not session-owned
+// lifecycle state. Session executor rows remain the existing durable encrypted
+// mirror so recovery can reconnect before the task host exists.
+func (m *Manager) propagateDockerTaskEnvironmentAuthToken(
+	ctx context.Context,
+	source *AgentExecution,
+	authToken string,
+) {
+	if authToken == "" || source == nil || source.RuntimeName != agentruntime.RuntimeDocker ||
+		source.TaskEnvironmentID == "" || m.executionStore == nil {
+		return
+	}
+	for _, execution := range m.executionStore.List() {
+		if execution == nil || execution.TaskEnvironmentID != source.TaskEnvironmentID ||
+			execution.RuntimeName != agentruntime.RuntimeDocker {
+			continue
+		}
+		if client := execution.GetAgentCtlClient(); client != nil {
+			client.SetAuthToken(authToken)
+		}
+		if execution.IsTaskHost {
+			continue
+		}
+		if execution != source {
+			m.persistAuthToken(ctx, &ExecutorInstance{
+				InstanceID: execution.ID,
+				AuthToken:  authToken,
+			}, execution)
+		}
+		m.persistExecutorRunning(ctx, execution)
+	}
 }
 
 func (m *Manager) persistRequiredKubernetesRuntimeSecrets(
