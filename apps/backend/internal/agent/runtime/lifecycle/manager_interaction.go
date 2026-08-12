@@ -1306,6 +1306,8 @@ func (m *Manager) StopAgentWithReason(ctx context.Context, executionID string, r
 		if err != nil {
 			return fmt.Errorf("delete runtime secrets for execution %s: %w", executionID, err)
 		}
+ 	} else if reason != StopReasonBackendShutdown {
+		if err := m.deleteExecutionRuntimeSecrets(ctx, execution); err != nil { return fmt.Errorf("delete execution runtime secrets: %w", err) }
 	}
 
 	// The runtime is now terminal. Detach agentctl under its own short critical

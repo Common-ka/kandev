@@ -915,6 +915,9 @@ func (m *Manager) cleanupStaleExecution(ctx context.Context, execution *AgentExe
 	}
 	execution.detachAgentctlClient()
 	execution.agentctlLifecycleMu.Unlock()
+	if err := m.deleteExecutionRuntimeSecrets(ctx, execution); err != nil {
+		return fmt.Errorf("delete stale execution runtime secrets: %w", err)
+	}
 
 	// Remove from execution store
 	m.RemoveExecution(execution.ID)

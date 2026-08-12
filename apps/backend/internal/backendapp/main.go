@@ -1061,7 +1061,7 @@ func startGatewayAndServe(
 		services.Task,
 		repos.Task,
 		services.User,
-		newTaskLSPTaskHostAdapter(lifecycleMgr),
+		newTaskLSPTaskHostAdapter(lifecycleMgr, services.Task),
 		eventBus,
 	)
 	if services.TaskLSP != nil {
