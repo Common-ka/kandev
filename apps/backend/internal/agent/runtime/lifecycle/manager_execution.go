@@ -1053,6 +1053,8 @@ func (m *Manager) createExecutionWithMode(
 	if err := resumeRemoteInstancePreflight(launchCtx, inputs.runtime, inputs.preparation.request); err != nil {
 		return nil, err
 	}
+	releaseCredentials := m.lockTaskEnvironmentCredentials(info.ExecutorType, info.TaskEnvironmentID)
+	defer releaseCredentials()
 
 	runtimeInstance, err := inputs.runtime.CreateInstance(launchCtx, inputs.preparation.request)
 	if err != nil {
@@ -1632,15 +1634,38 @@ func (m *Manager) persistRuntimeSecrets(
 			)
 		}
 	}
+	if err := m.persistTaskEnvironmentRuntimeSecretRefs(ctx, execution); err != nil { return err }
 	m.propagateDockerTaskEnvironmentAuthToken(ctx, execution, instance.AuthToken)
+	return nil
+}
+
+func (m *Manager) persistTaskEnvironmentRuntimeSecretRefs(ctx context.Context, execution *AgentExecution) error {
+	if execution == nil || execution.RuntimeName != agentruntime.RuntimeDocker ||
+		execution.TaskEnvironmentID == "" {
+		return nil
+	}
+	if m.taskEnvironmentRuntimeSecretWriter == nil {
+		return errors.New("task-environment runtime secret writer is not configured")
+	}
+	metadata := execution.MetadataSnapshot()
+	authSecretID := getMetadataString(metadata, MetadataKeyAuthTokenSecret)
+	bootstrapSecretID := getMetadataString(metadata, MetadataKeyBootstrapNonceSecret)
+	if authSecretID == "" && bootstrapSecretID == "" {
+		return nil
+	}
+	if err := m.taskEnvironmentRuntimeSecretWriter.UpdateTaskEnvironmentRuntimeSecretRefs(
+		ctx, execution.TaskEnvironmentID, authSecretID, bootstrapSecretID,
+	); err != nil {
+		return fmt.Errorf("persist task-environment runtime secret references: %w", err)
+	}
 	return nil
 }
 
 // propagateDockerTaskEnvironmentAuthToken adopts a rotated Docker control
 // credential across every live client for the task environment. The token is
 // transport state shared by the container's agentctl server, not session-owned
-// lifecycle state. Session executor rows remain the existing durable encrypted
-// mirror so recovery can reconnect before the task host exists.
+// lifecycle state. Task-environment secret references are the durable owner;
+// live session rows retain a compatibility mirror for reconnect recovery.
 func (m *Manager) propagateDockerTaskEnvironmentAuthToken(
 	ctx context.Context,
 	source *AgentExecution,
@@ -1662,10 +1687,14 @@ func (m *Manager) propagateDockerTaskEnvironmentAuthToken(
 			continue
 		}
 		if execution != source {
-			m.persistAuthToken(ctx, &ExecutorInstance{
+			if err := m.persistAuthToken(ctx, &ExecutorInstance{
 				InstanceID: execution.ID,
 				AuthToken:  authToken,
-			}, execution)
+			}, execution); err != nil {
+				m.logger.Error("failed to mirror Docker auth token to session execution",
+					zap.String("execution_id", execution.ID), zap.Error(err))
+				continue
+			}
 		}
 		m.persistExecutorRunning(ctx, execution)
 	}
@@ -1706,19 +1735,19 @@ func (m *Manager) persistRequiredKubernetesRuntimeSecrets(
 
 // persistAuthToken stores the agentctl handshake auth token in SecretStore
 // and saves the secret ID in the execution's metadata for recovery after restart.
-func (m *Manager) persistAuthToken(ctx context.Context, instance *ExecutorInstance, execution *AgentExecution) {
-	m.persistRuntimeSecret(ctx, instance, execution, MetadataKeyAuthTokenSecret, "agentctl-auth", instance.AuthToken)
+func (m *Manager) persistAuthToken(ctx context.Context, instance *ExecutorInstance, execution *AgentExecution) error {
+	return m.persistRuntimeSecret(ctx, instance, execution, MetadataKeyAuthTokenSecret, "agentctl-auth", instance.AuthToken)
 }
 
-func (m *Manager) persistBootstrapNonce(ctx context.Context, instance *ExecutorInstance, execution *AgentExecution) {
-	m.persistRuntimeSecret(ctx, instance, execution, MetadataKeyBootstrapNonceSecret, "agentctl-bootstrap", instance.BootstrapNonce)
+func (m *Manager) persistBootstrapNonce(ctx context.Context, instance *ExecutorInstance, execution *AgentExecution) error {
+	return m.persistRuntimeSecret(ctx, instance, execution, MetadataKeyBootstrapNonceSecret, "agentctl-bootstrap", instance.BootstrapNonce)
 }
 
-func (m *Manager) persistContainerControlAuthToken(ctx context.Context, instance *ExecutorInstance, execution *AgentExecution) {
+func (m *Manager) persistContainerControlAuthToken(ctx context.Context, instance *ExecutorInstance, execution *AgentExecution) error {
 	if instance == nil || instance.ContainerID == "" {
-		return
+		return nil
 	}
-	m.persistRuntimeSecret(ctx, instance, execution, MetadataKeyContainerControlAuthSecret, "agentctl-container-control", instance.AuthToken)
+	return m.persistRuntimeSecret(ctx, instance, execution, MetadataKeyContainerControlAuthSecret, "agentctl-container-control", instance.AuthToken)
 }
 
 func (m *Manager) persistRuntimeSecret(
@@ -1728,18 +1757,15 @@ func (m *Manager) persistRuntimeSecret(
 	metadataKey string,
 	secretNamePrefix string,
 	value string,
-) {
-	if value == "" || m.secretStore == nil {
-		return
+) error {
+	if value == "" {
+		return nil
 	}
-	if _, err := m.persistRuntimeSecretResult(
-		ctx, instance, execution, metadataKey, secretNamePrefix, value,
-	); err != nil {
-		m.logger.Error("failed to persist runtime secret",
-			zap.String("instance_id", instance.InstanceID),
-			zap.String("metadata_key", metadataKey),
-			zap.Error(err))
+	if m.secretStore == nil {
+		return errors.New("runtime secret store is not configured")
 	}
+ 	_, err := m.persistRuntimeSecretResult(ctx, instance, execution, metadataKey, secretNamePrefix, value)
+	return err
 }
 
 func (m *Manager) persistRuntimeSecretResult(
@@ -1766,7 +1792,8 @@ func (m *Manager) persistRuntimeSecretResult(
 		execution.setMetadataValue(metadataKey, secretID)
 		return false, nil
 	}
-	secretID := execution.metadataString(metadataKey)
+	secretID := deterministicRuntimeSecretID(execution, metadataKey)
+	if secretID == "" { secretID = execution.metadataString(metadataKey) }
 	if secretID == "" {
 		resourceInstanceID := execution.metadataString(MetadataKeyKubernetesResourceInstanceID)
 		if resourceInstanceID == "" {
@@ -1884,6 +1911,47 @@ func isProvisionalKubernetesInventory(metadata map[string]interface{}) bool {
 	default:
 		return false
 	}
+}
+
+func (m *Manager) storeRuntimeSecret(ctx context.Context, secret *secrets.SecretWithValue, id string) error {
+	if id == "" {
+		if err := m.secretStore.Create(ctx, secret); err != nil {
+			return fmt.Errorf("create runtime secret: %w", err)
+		}
+		return nil
+	}
+
+	secret.ID = id
+	name := secret.Name
+	value := secret.Value
+	if err := m.secretStore.Update(ctx, id, &secrets.UpdateSecretRequest{
+		Name: &name, Value: &value,
+	}); err == nil {
+		return nil
+	} else if !errors.Is(err, secrets.ErrNotFound) {
+		return fmt.Errorf("update runtime secret: %w", err)
+	}
+	if err := m.secretStore.Create(ctx, secret); err != nil {
+		return fmt.Errorf("create runtime secret: %w", err)
+	}
+	return nil
+}
+
+func deterministicRuntimeSecretID(execution *AgentExecution, metadataKey string) string {
+	if execution == nil || execution.RuntimeName != agentruntime.RuntimeDocker ||
+		execution.TaskEnvironmentID == "" {
+		return ""
+	}
+	kind := ""
+	switch metadataKey {
+	case MetadataKeyAuthTokenSecret:
+		kind = "agentctl-auth"
+	case MetadataKeyBootstrapNonceSecret:
+		kind = "agentctl-bootstrap"
+	default:
+		return ""
+	}
+	return fmt.Sprintf("runtime:task-environment:%s:%s", execution.TaskEnvironmentID, kind)
 }
 
 // revealRuntimeSecretValue reveals a configured runtime secret and preserves

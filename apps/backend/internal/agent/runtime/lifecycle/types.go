@@ -1134,6 +1134,7 @@ type RepoLaunchSpec struct {
 	RepositoryPath     string
 	RepositoryURL      string // Clone URL for remote executors that need to clone
 	RepoName           string // Repository name used as subdirectory inside TaskDirName
+	Position           int    // Durable order among all task workspace sources
 	BaseBranch         string
 	IntegrationRef     string
 	DefaultBranch      string // Repository's default_branch, used as fallback when BaseBranch is missing
@@ -1176,6 +1177,7 @@ type RepoLaunchSpec struct {
 type WorkspaceFolderSpec struct {
 	Name      string
 	LocalPath string
+	Position  int
 }
 
 // WorkspaceRepositorySpec is the durable host-side source needed to recreate
@@ -1203,6 +1205,7 @@ type WorkspaceRepositorySpec struct {
 	RemoteSyncHandled       bool
 	BranchSlug              string
 	BranchIdentitySlug      string
+	Position int
 }
 
 // RouteOverride carries a fully resolved provider profile for one

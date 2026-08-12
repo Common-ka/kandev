@@ -299,6 +299,8 @@ func (s *HandoffService) archiveTaskTree(
 		return nil, err
 	}
 	out := &CascadeOutcome{CascadeID: cascadeID}
+	releaseLSPMutations := s.acquireTaskLSPMutationGuards(all)
+	defer releaseLSPMutations()
 	// Archive cleanup must not tear down a shared workspace while an active
 	// group member remains. Transfer ownership before taking the cleanup
 	// snapshot, using the same ownership handoff as delete cascades.
@@ -579,6 +581,8 @@ func (s *HandoffService) deleteTaskTreeWithReasonAndOptions(
 	if err != nil {
 		return nil, err
 	}
+	releaseLSPMutations := s.acquireTaskLSPMutationGuards(all)
+	defer releaseLSPMutations()
 	if checker, ok := s.resourceCleaner.(taskDeleteWorktreeAdmissionChecker); ok {
 		if err := checker.ValidateTaskDeleteWorktrees(deleteCtx, all, options.DiscardWorktreeChanges); err != nil {
 			return nil, err
@@ -959,6 +963,31 @@ func (s *HandoffService) cleanupTaskLSPBeforeMutation(
 		}
 	}
 	return nil
+}
+
+func (s *HandoffService) acquireTaskLSPMutationGuards(taskIDs []string) func() {
+	guard, ok := s.resourceCleaner.(taskLSPMutationGuard)
+	if !ok {
+		return func() {}
+	}
+	ordered := append([]string(nil), taskIDs...)
+	sort.Strings(ordered)
+	releases := make([]func(), 0, len(ordered))
+	previous := ""
+	for _, taskID := range ordered {
+		if taskID == "" || taskID == previous {
+			continue
+		}
+		previous = taskID
+		if release := guard.acquireTaskLSPMutation(taskID); release != nil {
+			releases = append(releases, release)
+		}
+	}
+	return func() {
+		for index := len(releases) - 1; index >= 0; index-- {
+			releases[index]()
+		}
+	}
 }
 
 // transferSharedWorkspaceEnvironmentOwnership moves a materialized environment

@@ -2433,6 +2433,8 @@ func (s *Service) ArchiveTask(ctx context.Context, id string) error {
 	if err := s.authorizeTaskScope(archiveCtx, id, authz.ScopeTaskWrite); err != nil {
 		return err
 	}
+	releaseLSPMutation := s.acquireTaskLSPMutation(id)
+	defer releaseLSPMutation()
 	// 1. Get task and verify it exists
 	task, err := s.tasks.GetTask(archiveCtx, id)
 	if err != nil {
@@ -3099,6 +3101,8 @@ func (s *Service) deleteTaskWithReasonAndDBDelete(
 	archiveDeadline := archivecascade.ArchiveDeadline(ctx)
 	operationCtx, cancelOperation := context.WithDeadline(ctx, archiveDeadline)
 	defer cancelOperation()
+	releaseLSPMutation := s.acquireTaskLSPMutation(id)
+	defer releaseLSPMutation()
 
 	// 1. Get task (sync, fast)
 	task, err := s.tasks.GetTask(operationCtx, id)

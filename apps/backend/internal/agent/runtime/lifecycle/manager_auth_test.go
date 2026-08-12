@@ -112,6 +112,7 @@ func (s *inMemorySecretStore) Update(ctx context.Context, id string, req *secret
 	if s.rejectCanceledCalls && ctx.Err() != nil {
 		return ctx.Err()
 	}
+	if s.err != nil { return s.err }
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	stored, ok := s.store[id]
@@ -233,7 +234,9 @@ func TestPersistAuthToken(t *testing.T) {
 			metadata: make(map[string]interface{}),
 		}
 
-		m.persistAuthToken(context.Background(), instance, execution)
+		if err := m.persistAuthToken(context.Background(), instance, execution); err != nil {
+			t.Fatal(err)
+		}
 
 		// Verify secret was stored
 		if len(store.store) != 1 {
@@ -319,7 +322,9 @@ func TestPersistRuntimeSecrets(t *testing.T) {
 	}
 	execution := &AgentExecution{metadata: make(map[string]interface{})}
 
-	m.persistRuntimeSecrets(context.Background(), instance, execution)
+	if err := m.persistRuntimeSecrets(context.Background(), instance, execution); err != nil {
+		t.Fatal(err)
+	}
 
 	rawAuth, _ := execution.metadataValue(MetadataKeyAuthTokenSecret)
 	authSecretID, ok := rawAuth.(string)
@@ -899,10 +904,8 @@ func TestPersistRuntimeSecretsPropagatesRotatedDockerTokenAcrossTaskEnvironment(
 	store := newInMemorySecretStore()
 	writer := &captureExecutorRunningWriter{}
 	m := &Manager{
-		logger:         log,
-		secretStore:    store,
-		executionStore: NewExecutionStore(),
-		runningWriter:  writer,
+		logger: log, secretStore: store, executionStore: NewExecutionStore(), runningWriter: writer,
+		taskEnvironmentRuntimeSecretWriter: &captureTaskEnvironmentRuntimeSecretWriter{},
 	}
 
 	sessionClient := agentctl.NewClient("127.0.0.1", 41001, log, agentctl.WithAuthToken("stale-token"))
@@ -922,9 +925,11 @@ func TestPersistRuntimeSecretsPropagatesRotatedDockerTokenAcrossTaskEnvironment(
 		t.Fatal(err)
 	}
 
-	m.persistRuntimeSecrets(context.Background(), &ExecutorInstance{
+	if err := m.persistRuntimeSecrets(context.Background(), &ExecutorInstance{
 		InstanceID: "resumed-session", AuthToken: "rotated-token",
-	}, session)
+	}, session); err != nil {
+		t.Fatal(err)
+	}
 
 	for name, client := range map[string]*agentctl.Client{"session": sessionClient, "task host": hostClient} {
 		if got := client.AuthToken(); got != "rotated-token" {
@@ -944,10 +949,8 @@ func TestTaskHostRotatedDockerTokenUpdatesSessionCredentialOwner(t *testing.T) {
 	store := newInMemorySecretStore()
 	writer := &captureExecutorRunningWriter{}
 	m := &Manager{
-		logger:         log,
-		secretStore:    store,
-		executionStore: NewExecutionStore(),
-		runningWriter:  writer,
+		logger: log, secretStore: store, executionStore: NewExecutionStore(), runningWriter: writer,
+		taskEnvironmentRuntimeSecretWriter: &captureTaskEnvironmentRuntimeSecretWriter{},
 	}
 
 	sessionClient := agentctl.NewClient("127.0.0.1", 41001, log, agentctl.WithAuthToken("stale-token"))
@@ -967,9 +970,11 @@ func TestTaskHostRotatedDockerTokenUpdatesSessionCredentialOwner(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	m.persistRuntimeSecrets(context.Background(), &ExecutorInstance{
+	if err := m.persistRuntimeSecrets(context.Background(), &ExecutorInstance{
 		InstanceID: "task-host", AuthToken: "rotated-token",
-	}, host)
+	}, host); err != nil {
+		t.Fatal(err)
+	}
 
 	if got := sessionClient.AuthToken(); got != "rotated-token" {
 		t.Fatalf("session auth token = %q, want task-host rotation", got)
@@ -979,5 +984,61 @@ func TestTaskHostRotatedDockerTokenUpdatesSessionCredentialOwner(t *testing.T) {
 	}
 	if got := m.revealRuntimeSecret(context.Background(), writer.running.Metadata, MetadataKeyAuthTokenSecret); got != "rotated-token" {
 		t.Fatalf("durable auth token = %q, want rotated token", got)
+	}
+}
+
+type captureTaskEnvironmentRuntimeSecretWriter struct {
+	environmentID string
+	authSecretID  string
+	nonceSecretID string
+}
+
+func (w *captureTaskEnvironmentRuntimeSecretWriter) UpdateTaskEnvironmentRuntimeSecretRefs(
+	_ context.Context,
+	environmentID, authSecretID, nonceSecretID string,
+) error {
+	w.environmentID = environmentID
+	w.authSecretID = authSecretID
+	w.nonceSecretID = nonceSecretID
+	return nil
+}
+
+func TestTaskHostPersistsDockerCredentialsToTaskEnvironmentOwner(t *testing.T) {
+	log, _ := logger.NewLogger(logger.LoggingConfig{Level: "error", Format: "json"})
+	store := newInMemorySecretStore()
+	writer := &captureTaskEnvironmentRuntimeSecretWriter{}
+	m := &Manager{
+		logger: log, secretStore: store, executionStore: NewExecutionStore(),
+		taskEnvironmentRuntimeSecretWriter: writer,
+	}
+	host := &AgentExecution{
+		ID: "task-host", TaskID: "task-1", SessionID: taskHostRuntimeSessionPrefix + "env-1",
+		TaskEnvironmentID: "env-1", RuntimeName: agentruntime.RuntimeDocker, IsTaskHost: true,
+	}
+	for _, token := range []string{"rotated-token-1", "rotated-token-2", "rotated-token"} {
+		if err := m.persistRuntimeSecrets(context.Background(), &ExecutorInstance{
+			InstanceID: "task-host", AuthToken: token, BootstrapNonce: "bootstrap-nonce",
+		}, host); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if writer.environmentID != "env-1" || writer.authSecretID == "" || writer.nonceSecretID == "" {
+		t.Fatalf("task-environment credential refs = %#v", writer)
+	}
+	metadata := host.MetadataSnapshot()
+	if got := m.revealRuntimeSecret(context.Background(), metadata, MetadataKeyAuthTokenSecret); got != "rotated-token" {
+		t.Fatalf("persisted task-host auth token = %q", got)
+	}
+	if got := m.revealRuntimeSecret(context.Background(), metadata, MetadataKeyBootstrapNonceSecret); got != "bootstrap-nonce" {
+		t.Fatalf("persisted task-host nonce = %q", got)
+	}
+	if len(store.store) != 2 {
+		t.Fatalf("runtime secret count after repeated rotation = %d, want 2 stable entries", len(store.store))
+	}
+	for id := range store.store {
+		if !secrets.IsInternalID(id) {
+			t.Fatalf("runtime credential %q is user-visible", id)
+		}
 	}
 }

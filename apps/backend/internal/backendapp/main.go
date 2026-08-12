@@ -683,6 +683,7 @@ func startAgentInfrastructure(
 	// once a real consumer (workflow-engine / cron-driven trigger handlers) exists.
 	// Allocating the facade in Phase 1 without a caller is dead code.
 
+	lifecycleMgr.SetTaskEnvironmentRuntimeSecretWriter(repos.Task)
 	// Lets user shell terminals export the executor profile's env vars, so the
 	// terminal sees the same variables the agent subprocess and the repository
 	// setup script get.

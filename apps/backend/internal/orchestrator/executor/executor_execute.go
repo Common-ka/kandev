@@ -2361,7 +2361,9 @@ func (e *Executor) buildLaunchAgentRequest(ctx context.Context, task *v1.Task, s
 	} else {
 		for _, f := range folders {
 			if f != nil {
-				req.WorkspaceFolders = append(req.WorkspaceFolders, WorkspaceFolderSpec{Name: f.DisplayName, LocalPath: f.LocalPath})
+				req.WorkspaceFolders = append(req.WorkspaceFolders, WorkspaceFolderSpec{
+					Name: f.DisplayName, LocalPath: f.LocalPath, Position: f.Position,
+				})
 			}
 		}
 	}
@@ -2437,6 +2439,7 @@ func buildRepoSpecs(allRepos []*repoInfo) []RepoSpec {
 			TaskRepositoryID:           info.TaskRepositoryID,
 			RepositoryID:               info.RepositoryID,
 			RepositoryPath:             info.RepositoryPath,
+			Position:                   info.Position,
 			BaseBranch:                 info.BaseBranch,
 			IntegrationRef:             info.IntegrationRef,
 			CheckoutBranch:             info.CheckoutBranch,

@@ -604,7 +604,11 @@ type LaunchAgentRequest struct {
 	RouteOverride *RouteOverride
 }
 
-type WorkspaceFolderSpec struct{ Name, LocalPath string }
+type WorkspaceFolderSpec struct {
+	Name      string
+	LocalPath string
+	Position  int
+}
 
 // RepoSpec describes one repository for a multi-repo task launch from the
 // orchestrator. Mirrors lifecycle.RepoLaunchSpec; kept as a separate type so
@@ -616,6 +620,7 @@ type RepoSpec struct {
 	RepositoryPath          string
 	RepositoryURL           string
 	RepoName                string
+	Position                int
 	BaseBranch              string
 	IntegrationRef          string
 	DefaultBranch           string // Repository's default_branch, used as fallback when BaseBranch is missing

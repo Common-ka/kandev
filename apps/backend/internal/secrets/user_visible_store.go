@@ -12,6 +12,7 @@ const (
 	internalGitHubSecretPrefix            = "github:"
 	internalRuntimeSecretPrefix           = "kandev-runtime:"
 	internalAutomationWebhookSecretPrefix = "automation-webhook:"
+	internalTaskRuntimeSecretPrefix = "runtime:"
 )
 
 // IsInternalID reports whether a secret is owned by backend infrastructure
@@ -20,7 +21,8 @@ func IsInternalID(id string) bool {
 	normalized := strings.ToLower(strings.TrimSpace(id))
 	return strings.HasPrefix(normalized, internalGitHubSecretPrefix) ||
 		strings.HasPrefix(normalized, internalRuntimeSecretPrefix) ||
-		strings.HasPrefix(normalized, internalAutomationWebhookSecretPrefix)
+		strings.HasPrefix(normalized, internalAutomationWebhookSecretPrefix) ||
+		strings.HasPrefix(normalized, internalTaskRuntimeSecretPrefix)
 }
 
 // UserVisibleStore restricts a SecretStore to user-managed credentials. The
