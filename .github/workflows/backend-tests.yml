@@ -762,11 +762,11 @@ jobs:
         # terminate a healthy suite before the workflow's 30-minute job cap.
         run: go test -race -v -timeout 25m ./internal/agentctl/server/process/... ./internal/agent/runtime/agentctl/launcher/... ./internal/common/ptyexec/... ./internal/backendapp/ownershiplock/... ./internal/system/storage/workspaces/...
 
-	      - name: Test Windows managed runtime cache repair
-	        run: go test -race -v ./internal/agent/managedruntime -run TestRemoveNpxExecutionTreeTreatsMissingWindowsChildAsAbsent
+      - name: Test Windows managed runtime cache repair
+        run: go test -race -v ./internal/agent/managedruntime -run TestRemoveNpxExecutionTreeTreatsMissingWindowsChildAsAbsent
 
-	      - name: Test task LSP UNC containment
-	        run: go test -race -v ./internal/agentctl/server/lsp -run '^TestDocumentWorkspaceRejectsUntrustedUNCBeforeResolution$'
+      - name: Test task LSP UNC containment
+        run: go test -race -v ./internal/agentctl/server/lsp -run '^TestDocumentWorkspaceRejects(UntrustedUNC|InRootUNCReparse)BeforeResolution$'
 
       # Keep port-collision coverage targeted: the instance package contains
       # broader stdio MCP fixture tests that depend on Unix command behavior.
