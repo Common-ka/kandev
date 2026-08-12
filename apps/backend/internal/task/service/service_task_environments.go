@@ -333,6 +333,8 @@ func (s *Service) ResetTaskEnvironment(ctx context.Context, taskID string, opts 
 	if err := s.AuthorizeTaskScope(ctx, taskID, authz.ScopeTaskWrite); err != nil {
 		return err
 	}
+	releaseReset := s.acquireTaskLSPReset(taskID)
+	defer releaseReset()
 	env, err := s.taskEnvironments.GetTaskEnvironmentByTaskID(ctx, taskID)
 	if err != nil {
 		return fmt.Errorf("lookup environment: %w", err)

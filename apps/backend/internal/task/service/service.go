@@ -416,6 +416,7 @@ var (
 	ErrWorkspaceSourceConflict    = errors.New("workspace source conflict")
 	ErrWorkspaceSourceActive      = errors.New("workspace source task is active")
 	ErrUnsupportedWorkspaceSource = errors.New("unsupported workspace source")
+	ErrTaskLSPAdmissionBlocked    = errors.New("task environment lifecycle transition in progress")
 	ErrWorkspaceSourceMaterialize = errors.New("workspace source materialization failed")
 )
 
@@ -541,6 +542,8 @@ type Service struct {
 	taskDeletePreviewMu             sync.Mutex
 	taskDeletePreviews              map[string]taskDeletePreview
 	managementClaimLocks            parentMutex
+	taskLSPAdmissionMu              sync.Mutex
+	taskLSPAdmissions               map[string]*sync.RWMutex
 	providerProber                  ProviderDefaultBranchProber
 	gitArchiveCapture               GitArchiveCapture
 	workflowStepCreator             WorkflowStepCreator
@@ -694,6 +697,48 @@ type taskLifecycleCoordinatorWithReason interface {
 // not persist workspace groups.
 type WorkspacePolicyMembershipReleaser interface {
 	ReleaseWorkspacePolicy(ctx context.Context, taskID, reason string) error
+}
+
+// AcquireTaskLSPAdmission holds shared task admission while a language-server
+// launch probes or acquires runtime resources. Environment reset holds the
+// exclusive side across LSP cleanup, resource teardown, and row deletion.
+func (s *Service) AcquireTaskLSPAdmission(
+	ctx context.Context,
+	taskID string,
+) (func(), error) {
+	if err := context.Cause(ctx); err != nil {
+		return nil, err
+	}
+	lock := s.taskLSPAdmissionLock(taskID)
+	if !lock.TryRLock() {
+		return nil, ErrTaskLSPAdmissionBlocked
+	}
+	if err := context.Cause(ctx); err != nil {
+		lock.RUnlock()
+		return nil, err
+	}
+	var once sync.Once
+	return func() { once.Do(lock.RUnlock) }, nil
+}
+
+func (s *Service) taskLSPAdmissionLock(taskID string) *sync.RWMutex {
+	s.taskLSPAdmissionMu.Lock()
+	defer s.taskLSPAdmissionMu.Unlock()
+	if s.taskLSPAdmissions == nil {
+		s.taskLSPAdmissions = make(map[string]*sync.RWMutex)
+	}
+	lock := s.taskLSPAdmissions[taskID]
+	if lock == nil {
+		lock = &sync.RWMutex{}
+		s.taskLSPAdmissions[taskID] = lock
+	}
+	return lock
+}
+
+func (s *Service) acquireTaskLSPReset(taskID string) func() {
+	lock := s.taskLSPAdmissionLock(taskID)
+	lock.Lock()
+	return lock.Unlock
 }
 
 // SetAttachmentService wires the file-backed prompt attachment owner into the
