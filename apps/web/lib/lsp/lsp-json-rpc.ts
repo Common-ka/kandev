@@ -37,7 +37,6 @@ export type LSPConnection = {
   ws: WebSocket;
   rpc: JsonRpcConnection | null;
   initialized: boolean;
-  refCount: number;
   openDocuments: Map<string, OpenDocument>;
   providerDisposables: IDisposable[];
   serverCapabilities: Record<string, unknown> | null;

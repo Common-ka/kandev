@@ -285,7 +285,9 @@ func (r *StandaloneExecutor) CreateInstance(ctx context.Context, req *ExecutorCr
 	var reused bool
 	var err error
 	if req.IsTaskHost {
-		resp, reused, err = ensureStandaloneTaskHostInstance(ctx, r.ctl, createReq)
+		resp, reused, err = ensureStandaloneTaskHostInstance(
+			ctx, r.ctl, createReq, req.RequireExistingInstance,
+		)
 	} else {
 		resp, err = r.ctl.CreateInstance(ctx, createReq)
 	}
@@ -335,6 +337,7 @@ func ensureStandaloneTaskHostInstance(
 	ctx context.Context,
 	control taskHostStandaloneControl,
 	request *agentctl.CreateInstanceRequest,
+	requireExisting bool,
 ) (*agentctl.CreateInstanceResponse, bool, error) {
 	existing, err := control.GetInstance(ctx, request.ID)
 	if err == nil {
@@ -342,6 +345,9 @@ func ensureStandaloneTaskHostInstance(
 	}
 	if !errors.Is(err, agentctl.ErrInstanceNotFound) {
 		return nil, false, fmt.Errorf("inspect existing task-host instance: %w", err)
+	}
+	if requireExisting {
+		return nil, false, errTaskHostRuntimeNotFound
 	}
 	created, createErr := control.CreateInstance(ctx, request)
 	if createErr == nil {
