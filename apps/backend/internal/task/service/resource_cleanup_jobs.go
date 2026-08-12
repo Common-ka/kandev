@@ -198,27 +198,13 @@ func (s *Service) persistTaskResourceCleanup(
 			ID: attachment.ID, OwnerID: attachment.OwnerID, StorageKey: attachment.StorageKey,
 		})
 	}
-	worktreeTaskDirNames := captureWorktreeTaskDirNames(worktrees)
-	worktreeBranchMetadata := captureWorktreeBranchMetadata(worktrees)
-	snapshot := taskResourceCleanupSnapshot{
-		Sessions:               sessions,
-		Worktrees:              worktrees,
-		WorktreeHeadOIDs:       worktreeHeadOIDs,
-		WorktreeTaskDirNames:   worktreeTaskDirNames,
-		WorktreeBranchMetadata: worktreeBranchMetadata,
-		DiscardWorktreeChanges: envCleanup.discardWorktreeChanges,
-		StopTargets:            persistStopTargets(stopTargets),
-		Attachments:            persistedAttachments,
-		WorkspaceID:            workspaceID,
-		TaskEnvironment:        envCleanup.env,
-		DeleteEnvironmentRow:   envCleanup.deleteRow,
-		DeleteEnvironmentSecrets: envCleanup.deleteSecrets,
-		LegacyWorktreeCleanup:  s.hasLegacyWorktreeCleanup(),
-	}
-	if envCleanup.env != nil {
-		snapshot.TaskEnvironmentAuthSecretID = envCleanup.env.AgentctlAuthSecretID
-		snapshot.TaskEnvironmentBootstrapSecretID = envCleanup.env.AgentctlBootstrapSecretID
-	}
+	snapshot := s.buildTaskResourceCleanupSnapshot(sessions, worktrees, stopTargets, envCleanup)
+	snapshot.WorktreeHeadOIDs = worktreeHeadOIDs
+	snapshot.WorktreeTaskDirNames = captureWorktreeTaskDirNames(worktrees)
+	snapshot.WorktreeBranchMetadata = captureWorktreeBranchMetadata(worktrees)
+	snapshot.DiscardWorktreeChanges = envCleanup.discardWorktreeChanges
+	snapshot.Attachments = persistedAttachments
+	snapshot.WorkspaceID = workspaceID
 	if collectSSH {
 		sshTaskDirs, err := s.gatherSSHReclaimTargets(ctx, taskID)
 		if err != nil {
@@ -398,6 +384,27 @@ func captureWorktreeBranchMetadata(worktrees []*worktree.Worktree) map[string]pe
 		return nil
 	}
 	return metadata
+}
+
+func (s *Service) buildTaskResourceCleanupSnapshot(
+	sessions []*models.TaskSession,
+	worktrees []*worktree.Worktree,
+	stopTargets []taskStopTarget,
+	envCleanup taskEnvironmentCleanup,
+) taskResourceCleanupSnapshot {
+	snapshot := taskResourceCleanupSnapshot{
+		Sessions: sessions, Worktrees: worktrees,
+		StopTargets:              persistStopTargets(stopTargets),
+		TaskEnvironment:          envCleanup.env,
+		DeleteEnvironmentRow:     envCleanup.deleteRow,
+		DeleteEnvironmentSecrets: envCleanup.deleteSecrets,
+		LegacyWorktreeCleanup:    s.hasLegacyWorktreeCleanup(),
+	}
+	if envCleanup.env != nil {
+		snapshot.TaskEnvironmentAuthSecretID = envCleanup.env.AgentctlAuthSecretID
+		snapshot.TaskEnvironmentBootstrapSecretID = envCleanup.env.AgentctlBootstrapSecretID
+	}
+	return snapshot
 }
 
 func persistStopTargets(targets []taskStopTarget) []persistedTaskStopTarget {
@@ -1665,20 +1672,22 @@ func (s *Service) PrepareTaskResourceCleanupWithOptions(
 	if err != nil {
 		return cancelPrepared(fmt.Errorf("list remote task directories for cleanup snapshot: %w", err))
 	}
-	snapshot := taskResourceCleanupSnapshot{
-		Sessions:               sessions,
-		Worktrees:              worktrees,
-		WorktreeHeadOIDs:       worktreeHeadOIDs,
-		WorktreeTaskDirNames:   worktreeTaskDirNames,
-		WorktreeBranchMetadata: worktreeBranchMetadata,
-		StopTargets:            persistStopTargets(stopTargets),
-		TaskEnvironment:        taskEnv,
-		DeleteEnvironmentRow:   deleteEnvironmentRow,
-		DiscardWorktreeChanges: discardWorktreeChanges,
-		LegacyWorktreeCleanup:  s.hasLegacyWorktreeCleanup(),
-		SSHTaskDirs:            sshTaskDirs,
-		WorkspaceID:            task.WorkspaceID,
-	}
+	snapshot := s.buildTaskResourceCleanupSnapshot(
+		sessions,
+		worktrees,
+		stopTargets,
+		taskEnvironmentCleanup{
+			env:           taskEnv,
+			deleteRow:     deleteEnvironmentRow,
+			deleteSecrets: deleteEnvironmentRow,
+		},
+	)
+	snapshot.WorktreeHeadOIDs = worktreeHeadOIDs
+	snapshot.SSHTaskDirs = sshTaskDirs
+	snapshot.WorktreeTaskDirNames = worktreeTaskDirNames
+	snapshot.WorktreeBranchMetadata = worktreeBranchMetadata
+	snapshot.DiscardWorktreeChanges = discardWorktreeChanges
+	snapshot.WorkspaceID = task.WorkspaceID
 	encoded, err := json.Marshal(snapshot)
 	if err != nil {
 		return cancelPrepared(fmt.Errorf("encode task resource cleanup snapshot: %w", err))
