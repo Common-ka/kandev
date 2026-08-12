@@ -301,16 +301,26 @@ func (s *HandoffService) archiveTaskTree(
 	out := &CascadeOutcome{CascadeID: cascadeID}
 	releaseLSPMutations := s.acquireTaskLSPMutationGuards(all)
 	defer releaseLSPMutations()
+	releaseEnvironmentMutations, err := s.acquireTaskLSPEnvironmentMutationGuards(ctx, all)
+	if err != nil {
+		return out, err
+	}
+	defer releaseEnvironmentMutations()
+	ownershipTransfers, err := s.preserveTaskEnvironmentsForTerminalMutation(ctx, all)
+	if err != nil {
+		return out, err
+	}
 	// Archive cleanup must not tear down a shared workspace while an active
 	// group member remains. Transfer ownership before taking the cleanup
 	// snapshot, using the same ownership handoff as delete cascades.
 	transferCompensationCtx, cancelTransferCompensation := archivecascade.ContinuationContextUntil(ctx, archiveDeadline)
 	defer cancelTransferCompensation()
-	ownershipTransfers, err := s.transferSharedWorkspaceEnvironmentOwnership(
+	groupTransfers, err := s.transferSharedWorkspaceEnvironmentOwnership(
 		archiveCtx, transferCompensationCtx, all, true)
 	if err != nil {
 		return out, err
 	}
+	ownershipTransfers = append(ownershipTransfers, groupTransfers...)
 	cleanupOps, err := s.prepareCascadeResourceCleanupWithCompensation(
 		archiveCtx, transferCompensationCtx, archiveDeadline, all, cascadeID,
 		models.TaskResourceCleanupTriggerCascadeArchive, false)
@@ -412,8 +422,12 @@ func (s *HandoffService) applyArchiveTaskMutations(
 			ctx, all[i], cascadeID, autoArchiveCandidate,
 		)
 		if err != nil {
-			cancelErr := s.cancelCascadeResourceCleanupRange(ctx, all[:i+1], cleanupOps)
-			return nil, errors.Join(fmt.Errorf("archive %s: %w", all[i], err), cancelErr)
+			cancelErr := s.cancelCascadeResourceCleanupRange(postArchiveCtx, all[:i+1], cleanupOps)
+			archiveErr := errors.Join(fmt.Errorf("archive %s: %w", all[i], err), cancelErr)
+			if len(out.ArchivedTaskIDs) == 0 {
+				archiveErr = s.rollbackWorkspaceEnvironmentOwnershipAfterFailure(postArchiveCtx, ownershipTransfers, archiveErr)
+			}
+			return out, archiveErr
 		}
 		if ok {
 			out.ArchivedTaskIDs = append(out.ArchivedTaskIDs, all[i])
@@ -583,6 +597,11 @@ func (s *HandoffService) deleteTaskTreeWithReasonAndOptions(
 	}
 	releaseLSPMutations := s.acquireTaskLSPMutationGuards(all)
 	defer releaseLSPMutations()
+	releaseEnvironmentMutations, err := s.acquireTaskLSPEnvironmentMutationGuards(ctx, all)
+	if err != nil {
+		return out, err
+	}
+	defer releaseEnvironmentMutations()
 	if checker, ok := s.resourceCleaner.(taskDeleteWorktreeAdmissionChecker); ok {
 		if err := checker.ValidateTaskDeleteWorktrees(deleteCtx, all, options.DiscardWorktreeChanges); err != nil {
 			return nil, err
@@ -988,6 +1007,28 @@ func (s *HandoffService) acquireTaskLSPMutationGuards(taskIDs []string) func() {
 			releases[index]()
 		}
 	}
+}
+
+func (s *HandoffService) acquireTaskLSPEnvironmentMutationGuards(
+	ctx context.Context,
+	taskIDs []string,
+) (func(), error) {
+	guard, ok := s.resourceCleaner.(taskLSPEnvironmentMutationGuard)
+	if !ok {
+		return func() {}, nil
+	}
+	return guard.acquireTaskLSPEnvironmentMutations(ctx, taskIDs)
+}
+
+func (s *HandoffService) preserveTaskEnvironmentsForTerminalMutation(
+	ctx context.Context,
+	taskIDs []string,
+) ([]workspaceEnvironmentOwnershipTransfer, error) {
+	guard, ok := s.resourceCleaner.(taskLSPEnvironmentMutationGuard)
+	if !ok {
+		return nil, nil
+	}
+	return guard.preserveTaskEnvironmentsForTerminalMutation(ctx, taskIDs)
 }
 
 // transferSharedWorkspaceEnvironmentOwnership moves a materialized environment

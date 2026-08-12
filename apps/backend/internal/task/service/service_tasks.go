@@ -140,6 +140,14 @@ type taskEnvironmentSessionBorrowerFinder interface {
 	FindActiveTaskSessionTaskIDByTaskEnvironmentExcludingTask(ctx context.Context, taskEnvironmentID, taskID string) (string, error)
 }
 
+type taskEnvironmentLiveTaskBorrowerFinder interface {
+	FindLiveTaskSessionTaskIDByTaskEnvironmentExcludingTask(ctx context.Context, taskEnvironmentID, taskID string) (string, error)
+}
+
+type taskEnvironmentLiveTaskBorrowerLister interface {
+	ListLiveTaskSessionTaskIDsByTaskEnvironment(ctx context.Context, taskEnvironmentID string) ([]string, error)
+}
+
 type taskEnvironmentOwnerTransferer interface {
 	TransferTaskEnvironmentOwnership(
 		ctx context.Context,
@@ -2501,6 +2509,21 @@ func (s *Service) ArchiveTask(ctx context.Context, id string) error {
 	if err != nil {
 		return fmt.Errorf("lookup task environment for archive: %w", err)
 	}
+	releaseEnvironmentMutation, err := s.acquireTaskLSPEnvironmentMutationForTask(ctx, id)
+	if err != nil {
+		return fmt.Errorf("lock physical task environment for archive: %w", err)
+	}
+	defer releaseEnvironmentMutation()
+	ownershipTransfer, preserveErr := s.preserveTaskEnvironmentForLiveBorrower(ctx, id, taskEnv)
+	if preserveErr != nil {
+		return preserveErr
+	}
+	if ownershipTransfer != nil {
+		s.logger.Info("transferred borrowed task environment before task archive",
+			zap.String("task_id", id),
+			zap.String("env_id", taskEnvironmentID(taskEnv)),
+			zap.String("new_owner_task_id", taskEnv.TaskID))
+	}
 	envCleanup := taskEnvironmentCleanup{
 		env: taskEnv, deleteRow: false, deleteSecrets: true, preserveBranches: true,
 	}
@@ -2509,12 +2532,14 @@ func (s *Service) ArchiveTask(ctx context.Context, id string) error {
 		sessions, worktrees, stopTargets, nil, envCleanup, true, true, task.WorkspaceID,
 	)
 	if err != nil {
-		return err
+		return s.rollbackTaskEnvironmentOwnershipAfterFailure(ctx, ownershipTransfer, err)
 	}
 	if s.taskLSP != nil {
 		if err := s.taskLSP.CleanupTask(ctx, id, "task_archived"); err != nil {
 			s.resolveTaskResourceCleanupAfterMutationError(ctx, cleanupJob)
-			return fmt.Errorf("stop task language servers before archive: %w", err)
+			return s.rollbackTaskEnvironmentOwnershipAfterFailure(
+				ctx, ownershipTransfer, fmt.Errorf("stop task language servers before archive: %w", err),
+			)
 		}
 	}
 
@@ -2535,7 +2560,7 @@ func (s *Service) ArchiveTask(ctx context.Context, id string) error {
 	}
 	if archiveErr != nil {
 		s.resolveTaskResourceCleanupAfterMutationError(archiveCtx, cleanupJob)
-		return archiveErr
+		return s.rollbackTaskEnvironmentOwnershipAfterFailure(archiveCtx, ownershipTransfer, archiveErr)
 	}
 
 	// Register the exact inventory before CANCELLED becomes visible. A launch
@@ -3136,6 +3161,11 @@ func (s *Service) deleteTaskWithReasonAndDBDelete(
 	if err != nil {
 		return false, fmt.Errorf("lookup task environment for delete: %w", err)
 	}
+	releaseEnvironmentMutation, err := s.acquireTaskLSPEnvironmentMutationForTask(ctx, id)
+	if err != nil {
+		return false, fmt.Errorf("lock physical task environment for delete: %w", err)
+	}
+	defer releaseEnvironmentMutation()
 	var attachments []*models.TaskMessageAttachment
 	attachmentRepo := s.attachments
 	if attachmentRepo == nil && s.attachmentSvc != nil {
@@ -3175,9 +3205,11 @@ func (s *Service) deleteTaskWithReasonAndDBDelete(
 	if err != nil {
 		return false, err
 	}
-	if preserved, err := s.preserveTaskEnvironmentForActiveBorrower(operationCtx, id, taskEnv); err != nil {
+	ownershipTransfer, err := s.preserveTaskEnvironmentForLiveBorrower(ctx, id, taskEnv)
+	if err != nil {
 		return false, err
-	} else if preserved {
+	}
+	if ownershipTransfer != nil {
 		s.logger.Info("transferred borrowed task environment before task delete",
 			zap.String("task_id", id),
 			zap.String("env_id", taskEnvironmentID(taskEnv)),
@@ -3200,12 +3232,14 @@ func (s *Service) deleteTaskWithReasonAndDBDelete(
 		operationCtx, id, trigger, "", sessions, worktrees, stopTargets, attachments, envCleanup, true, true, task.WorkspaceID,
 	)
 	if err != nil {
-		return false, err
+		return false, s.rollbackTaskEnvironmentOwnershipAfterFailure(ctx, ownershipTransfer, err)
 	}
 	if s.taskLSP != nil {
 		if err := s.taskLSP.CleanupTask(ctx, id, "task_deleted"); err != nil {
 			s.resolveTaskResourceCleanupAfterMutationError(ctx, cleanupJob)
-			return false, fmt.Errorf("stop task language servers before delete: %w", err)
+			return false, s.rollbackTaskEnvironmentOwnershipAfterFailure(
+				ctx, ownershipTransfer, fmt.Errorf("stop task language servers before delete: %w", err),
+			)
 		}
 	}
 
@@ -3214,10 +3248,13 @@ func (s *Service) deleteTaskWithReasonAndDBDelete(
 	if err != nil {
 		s.resolveTaskResourceCleanupAfterMutationError(operationCtx, cleanupJob)
 		s.logger.Error("failed to delete task", zap.String("task_id", id), zap.Error(err))
-		return false, err
+		return false, s.rollbackTaskEnvironmentOwnershipAfterFailure(ctx, ownershipTransfer, err)
 	}
 	if !deleted {
 		s.resolveTaskResourceCleanupAfterMutationError(operationCtx, cleanupJob)
+		if ownershipTransfer != nil {
+			return false, s.rollbackTaskEnvironmentOwnershipAfterFailure(operationCtx, ownershipTransfer, nil)
+		}
 		return false, nil
 	}
 	if s.attachmentSvc != nil {
@@ -3352,7 +3389,7 @@ func (s *Service) CleanupTaskResources(ctx context.Context, taskID string, delet
 		return
 	}
 	if deleteEnvRow {
-		preserved, err := s.preserveTaskEnvironmentForActiveBorrower(ctx, taskID, taskEnv)
+		ownershipTransfer, err := s.preserveTaskEnvironmentForLiveBorrower(ctx, taskID, taskEnv)
 		if err != nil {
 			s.logger.Warn("skipping cascade cleanup because task environment could not be preserved for borrower",
 				zap.String("task_id", taskID),
@@ -3360,7 +3397,7 @@ func (s *Service) CleanupTaskResources(ctx context.Context, taskID string, delet
 				zap.Error(err))
 			return
 		}
-		if preserved {
+		if ownershipTransfer != nil {
 			deleteEnvRow = false
 			s.logger.Info("transferred borrowed task environment before cascade delete",
 				zap.String("task_id", taskID),
@@ -4356,32 +4393,182 @@ func (s *Service) hasOtherLiveTasksForEnvironment(ctx context.Context, taskID st
 	return s.hasActiveOtherTaskSessionsForEnvironment(ctx, taskID, env)
 }
 
-func (s *Service) preserveTaskEnvironmentForActiveBorrower(ctx context.Context, taskID string, env *models.TaskEnvironment) (bool, error) {
+func (s *Service) preserveTaskEnvironmentForLiveBorrower(
+	ctx context.Context,
+	taskID string,
+	env *models.TaskEnvironment,
+) (*workspaceEnvironmentOwnershipTransfer, error) {
 	if env == nil || env.ID == "" || s.sessions == nil {
-		return false, nil
+		return nil, nil
 	}
-	finder, ok := s.sessions.(taskEnvironmentSessionBorrowerFinder)
-	if !ok {
-		return false, nil
-	}
-	borrowerTaskID, err := finder.FindActiveTaskSessionTaskIDByTaskEnvironmentExcludingTask(ctx, env.ID, taskID)
+	borrowerTaskID, err := s.findLiveTaskEnvironmentBorrower(
+		ctx, env.ID, map[string]struct{}{taskID: {}},
+	)
 	if err != nil {
-		return false, fmt.Errorf("find task environment borrower %s: %w", env.ID, err)
+		return nil, fmt.Errorf("find task environment borrower %s: %w", env.ID, err)
 	}
 	if borrowerTaskID == "" {
-		return false, nil
+		return nil, nil
 	}
 	ownerTransfer, ok := s.taskEnvironments.(taskEnvironmentOwnerTransferer)
 	if !ok {
-		return false, fmt.Errorf("task environment repository cannot transfer borrowed environment %s", env.ID)
+		return nil, fmt.Errorf("task environment repository cannot transfer borrowed environment %s", env.ID)
 	}
+	oldOwnerTaskID := env.TaskID
 	if err := ownerTransfer.TransferTaskEnvironmentOwnership(
 		ctx, env.ID, env.TaskID, env.OwnershipGeneration, borrowerTaskID,
 	); err != nil {
-		return false, fmt.Errorf("transfer task environment %s to %s: %w", env.ID, borrowerTaskID, err)
+		return nil, fmt.Errorf("transfer task environment %s to %s: %w", env.ID, borrowerTaskID, err)
 	}
 	env.TaskID = borrowerTaskID
-	return true, nil
+	return &workspaceEnvironmentOwnershipTransfer{
+		environmentID: env.ID, oldOwnerTaskID: oldOwnerTaskID, newOwnerTaskID: borrowerTaskID,
+	}, nil
+}
+
+func (s *Service) rollbackTaskEnvironmentOwnershipAfterFailure(
+	ctx context.Context,
+	transfer *workspaceEnvironmentOwnershipTransfer,
+	cause error,
+) error {
+	if transfer == nil {
+		return cause
+	}
+	return s.rollbackTaskEnvironmentOwnershipTransfersAfterFailure(
+		ctx, []workspaceEnvironmentOwnershipTransfer{*transfer}, cause,
+	)
+}
+
+func (s *Service) rollbackTaskEnvironmentOwnershipTransfersAfterFailure(
+	ctx context.Context,
+	transfers []workspaceEnvironmentOwnershipTransfer,
+	cause error,
+) error {
+	if len(transfers) == 0 {
+		return cause
+	}
+	ownershipRepository, ok := s.taskEnvironments.(taskEnvironmentOwnerTransferer)
+	if !ok {
+		return errors.Join(cause, errors.New("task environment repository cannot restore ownership"))
+	}
+	rollbackCtx := context.WithoutCancel(ctx)
+	var rollbackErrors []error
+	for index := len(transfers) - 1; index >= 0; index-- {
+		transfer := transfers[index]
+		environment, err := s.taskEnvironments.GetTaskEnvironment(rollbackCtx, transfer.environmentID)
+		if err == nil {
+			switch {
+			case environment == nil:
+				err = errors.New("environment not found")
+			case environment.TaskID == transfer.oldOwnerTaskID:
+				continue
+			case environment.TaskID != transfer.newOwnerTaskID:
+				err = fmt.Errorf(
+					"owner changed from rollback target %s to %s",
+					transfer.newOwnerTaskID, environment.TaskID,
+				)
+			default:
+				err = ownershipRepository.TransferTaskEnvironmentToTask(
+					rollbackCtx, transfer.environmentID, transfer.oldOwnerTaskID,
+				)
+			}
+		}
+		if err != nil {
+			rollbackErrors = append(rollbackErrors, fmt.Errorf("environment %s: %w", transfer.environmentID, err))
+			continue
+		}
+		s.logger.Info("restored task environment ownership after aborted terminal mutation",
+			zap.String("environment_id", transfer.environmentID),
+			zap.String("owner_task_id", transfer.oldOwnerTaskID))
+	}
+	if rollbackErr := errors.Join(rollbackErrors...); rollbackErr != nil {
+		return errors.Join(cause, fmt.Errorf("rollback task environment ownership: %w", rollbackErr))
+	}
+	return cause
+}
+
+func (s *Service) findLiveTaskEnvironmentBorrower(
+	ctx context.Context,
+	environmentID string,
+	excluded map[string]struct{},
+) (string, error) {
+	if lister, ok := s.sessions.(taskEnvironmentLiveTaskBorrowerLister); ok {
+		borrowers, err := lister.ListLiveTaskSessionTaskIDsByTaskEnvironment(ctx, environmentID)
+		if err != nil {
+			return "", err
+		}
+		for _, borrowerTaskID := range borrowers {
+			if _, skip := excluded[borrowerTaskID]; !skip {
+				return borrowerTaskID, nil
+			}
+		}
+		return "", nil
+	}
+	if len(excluded) != 1 {
+		return "", nil
+	}
+	var excludedTaskID string
+	for taskID := range excluded {
+		excludedTaskID = taskID
+	}
+	if finder, ok := s.sessions.(taskEnvironmentLiveTaskBorrowerFinder); ok {
+		return finder.FindLiveTaskSessionTaskIDByTaskEnvironmentExcludingTask(
+			ctx, environmentID, excludedTaskID,
+		)
+	}
+	if finder, ok := s.sessions.(taskEnvironmentSessionBorrowerFinder); ok {
+		return finder.FindActiveTaskSessionTaskIDByTaskEnvironmentExcludingTask(
+			ctx, environmentID, excludedTaskID,
+		)
+	}
+	return "", nil
+}
+
+func (s *Service) preserveTaskEnvironmentsForTerminalMutation(
+	ctx context.Context,
+	taskIDs []string,
+) ([]workspaceEnvironmentOwnershipTransfer, error) {
+	excluded := make(map[string]struct{}, len(taskIDs))
+	for _, taskID := range taskIDs {
+		excluded[taskID] = struct{}{}
+	}
+	transfers := make([]workspaceEnvironmentOwnershipTransfer, 0)
+	seen := make(map[string]struct{})
+	for _, taskID := range taskIDs {
+		environment, err := s.taskEnvironments.GetTaskEnvironmentByTaskID(ctx, taskID)
+		if err != nil {
+			cause := fmt.Errorf("load task %s owned environment: %w", taskID, err)
+			return nil, s.rollbackTaskEnvironmentOwnershipTransfersAfterFailure(ctx, transfers, cause)
+		}
+		if environment == nil || environment.ID == "" {
+			continue
+		}
+		if _, duplicate := seen[environment.ID]; duplicate {
+			continue
+		}
+		seen[environment.ID] = struct{}{}
+		borrowerTaskID, err := s.findLiveTaskEnvironmentBorrower(ctx, environment.ID, excluded)
+		if err != nil {
+			cause := fmt.Errorf("find surviving borrower for environment %s: %w", environment.ID, err)
+			return nil, s.rollbackTaskEnvironmentOwnershipTransfersAfterFailure(ctx, transfers, cause)
+		}
+		if borrowerTaskID == "" {
+			continue
+		}
+		ownershipRepository, ok := s.taskEnvironments.(taskEnvironmentOwnerTransferer)
+		if !ok {
+			cause := fmt.Errorf("task environment repository cannot transfer environment %s", environment.ID)
+			return nil, s.rollbackTaskEnvironmentOwnershipTransfersAfterFailure(ctx, transfers, cause)
+		}
+		if err := ownershipRepository.TransferTaskEnvironmentToTask(ctx, environment.ID, borrowerTaskID); err != nil {
+			cause := fmt.Errorf("transfer task environment %s to %s: %w", environment.ID, borrowerTaskID, err)
+			return nil, s.rollbackTaskEnvironmentOwnershipTransfersAfterFailure(ctx, transfers, cause)
+		}
+		transfers = append(transfers, workspaceEnvironmentOwnershipTransfer{
+			environmentID: environment.ID, oldOwnerTaskID: taskID, newOwnerTaskID: borrowerTaskID,
+		})
+	}
+	return transfers, nil
 }
 
 func (s *Service) filterOwnedWorktreesForTaskCleanup(

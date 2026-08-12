@@ -316,12 +316,15 @@ func (m *Manager) GetTaskHostForEnvironment(
 func (m *Manager) StopTaskHostForEnvironment(
 	ctx context.Context,
 	taskEnvironmentID, reason string,
-) error {
+) (bool, error) {
 	execution, exists, err := m.GetTaskHostForEnvironment(ctx, taskEnvironmentID)
 	if err != nil || !exists {
-		return err
+		return false, err
 	}
-	return m.StopAgentWithReason(ctx, execution.ID, reason, false)
+	if err := m.StopAgentWithReason(ctx, execution.ID, reason, false); err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 // RecoverTaskHostForEnvironment evicts a proven-dead task-host execution so
