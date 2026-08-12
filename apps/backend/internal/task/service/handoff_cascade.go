@@ -422,8 +422,8 @@ func (s *HandoffService) applyArchiveTaskMutations(
 			ctx, all[i], cascadeID, autoArchiveCandidate,
 		)
 		if err != nil {
-			cancelErr := s.cancelCascadeResourceCleanupRange(postArchiveCtx, all[:i+1], cleanupOps)
-			archiveErr := errors.Join(fmt.Errorf("archive %s: %w", all[i], err), cancelErr)
+			s.resolveCascadeResourceCleanupRange(postArchiveCtx, all[:i+1], cleanupOps)
+			archiveErr := fmt.Errorf("archive %s: %w", all[i], err)
 			archiveErr = s.rollbackWorkspaceEnvironmentOwnershipAfterFailure(
 				postArchiveCtx,
 				ownershipTransfersForTasks(ownershipTransfers, all[:i+1]),
@@ -790,7 +790,7 @@ func (s *HandoffService) deleteTaskTreeRows(
 		if err != nil {
 			restoreErr := s.restoreTaskDependencyEdgesLocked(deleteCompensationCtx, dependencySnapshot)
 			dependencyUnlock()
-			cancelErr := s.cancelCascadeResourceCleanupRange(deleteCompensationCtx, all[:i+1], cleanupOps)
+			cancelErr := s.resolveCascadeResourceCleanupRange(deleteCompensationCtx, all[:i+1], cleanupOps)
 			deleteErr := fmt.Errorf("delete %s: %w", all[i], err)
 			deleteErr = s.rollbackWorkspaceEnvironmentOwnershipAfterFailure(
 				deleteCompensationCtx,
@@ -1359,6 +1359,31 @@ func (s *HandoffService) cancelCascadeResourceCleanupRange(
 		}
 	}
 	return errors.Join(errs...)
+}
+
+func (s *HandoffService) resolveCascadeResourceCleanupRange(
+	ctx context.Context,
+	taskIDs []string,
+	operations map[string]string,
+) {
+	resolver, ok := s.resourceCleaner.(taskResourceCleanupResolver)
+	if !ok {
+		// Older focused cleaners can still provide prepare/start/cancel without
+		// durable outcome probing. Their mutation errors are known synchronous
+		// failures, so retain the previous safe cancellation behavior.
+		s.cancelCascadeResourceCleanupRange(ctx, taskIDs, operations)
+		return
+	}
+	for _, taskID := range taskIDs {
+		operationID := operations[taskID]
+		if operationID == "" {
+			continue
+		}
+		if err := resolver.ResolvePreparedTaskResourceCleanup(ctx, operationID); err != nil {
+			s.logf().Error("resolve cascade resource cleanup",
+				zap.String("operation_id", operationID), zap.Error(err))
+		}
+	}
 }
 
 func (s *HandoffService) startCascadeResourceCleanup(ctx context.Context, operationID string) error {
