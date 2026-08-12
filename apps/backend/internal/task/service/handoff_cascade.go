@@ -424,9 +424,11 @@ func (s *HandoffService) applyArchiveTaskMutations(
 		if err != nil {
 			cancelErr := s.cancelCascadeResourceCleanupRange(postArchiveCtx, all[:i+1], cleanupOps)
 			archiveErr := errors.Join(fmt.Errorf("archive %s: %w", all[i], err), cancelErr)
-			if len(out.ArchivedTaskIDs) == 0 {
-				archiveErr = s.rollbackWorkspaceEnvironmentOwnershipAfterFailure(postArchiveCtx, ownershipTransfers, archiveErr)
-			}
+			archiveErr = s.rollbackWorkspaceEnvironmentOwnershipAfterFailure(
+				postArchiveCtx,
+				ownershipTransfersForTasks(ownershipTransfers, all[:i+1]),
+				archiveErr,
+			)
 			return out, archiveErr
 		}
 		if ok {
@@ -790,10 +792,12 @@ func (s *HandoffService) deleteTaskTreeRows(
 			dependencyUnlock()
 			cancelErr := s.cancelCascadeResourceCleanupRange(deleteCompensationCtx, all[:i+1], cleanupOps)
 			deleteErr := fmt.Errorf("delete %s: %w", all[i], err)
-			if len(out.ArchivedTaskIDs) == 0 {
-				deleteErr = s.rollbackWorkspaceEnvironmentOwnershipAfterFailure(deleteCompensationCtx, ownershipTransfers, deleteErr)
-			}
-			return nil, errors.Join(deleteErr, restoreErr, cancelErr)
+			deleteErr = s.rollbackWorkspaceEnvironmentOwnershipAfterFailure(
+				deleteCompensationCtx,
+				ownershipTransfersForTasks(ownershipTransfers, all[:i+1]),
+				deleteErr,
+			)
+			return out, errors.Join(deleteErr, restoreErr, cancelErr)
 		}
 		dependencyUnlock()
 		s.publishDeletedTaskDependencies(postDeleteCtx, dependencySnapshot)
@@ -1191,6 +1195,23 @@ func (s *HandoffService) rollbackAutoArchiveCASLoss(
 	return s.rollbackWorkspaceEnvironmentOwnershipAfterFailure(
 		ctx, transfers, errors.Join(cleanupErrors...),
 	)
+}
+
+func ownershipTransfersForTasks(
+	transfers []workspaceEnvironmentOwnershipTransfer,
+	taskIDs []string,
+) []workspaceEnvironmentOwnershipTransfer {
+	owners := make(map[string]struct{}, len(taskIDs))
+	for _, taskID := range taskIDs {
+		owners[taskID] = struct{}{}
+	}
+	selected := make([]workspaceEnvironmentOwnershipTransfer, 0, len(transfers))
+	for _, transfer := range transfers {
+		if _, ok := owners[transfer.oldOwnerTaskID]; ok {
+			selected = append(selected, transfer)
+		}
+	}
+	return selected
 }
 
 func (s *HandoffService) rollbackWorkspaceEnvironmentOwnershipTransfers(

@@ -128,6 +128,22 @@ type taskEnvironmentCleanup struct {
 	deleteSecrets bool
 }
 
+func taskCleanupEnvironmentIDs(
+	sessions []*models.TaskSession,
+	environment *models.TaskEnvironment,
+) []string {
+	ids := make([]string, 0, len(sessions)+1)
+	if environment != nil {
+		ids = append(ids, environment.ID)
+	}
+	for _, session := range sessions {
+		if session != nil {
+			ids = append(ids, session.TaskEnvironmentID)
+		}
+	}
+	return ids
+}
+
 type taskEnvironmentSessionUsageChecker interface {
 	HasActiveTaskSessionsByTaskEnvironmentExcludingTask(ctx context.Context, taskEnvironmentID, taskID string) (bool, error)
 }
@@ -2505,15 +2521,15 @@ func (s *Service) ArchiveTask(ctx context.Context, id string) error {
 	if err != nil {
 		return fmt.Errorf("list worktrees for archive: %w", err)
 	}
-	taskEnv, err := s.gatherTaskEnvironmentForCleanup(archiveCtx, id)
-	if err != nil {
-		return fmt.Errorf("lookup task environment for archive: %w", err)
-	}
 	releaseEnvironmentMutation, err := s.acquireTaskLSPEnvironmentMutationForTask(ctx, id)
 	if err != nil {
 		return fmt.Errorf("lock physical task environment for archive: %w", err)
 	}
 	defer releaseEnvironmentMutation()
+	taskEnv, err := s.gatherTaskEnvironmentForCleanup(ctx, id)
+	if err != nil {
+		return fmt.Errorf("lookup task environment for archive: %w", err)
+	}
 	ownershipTransfer, preserveErr := s.preserveTaskEnvironmentForLiveBorrower(ctx, id, taskEnv)
 	if preserveErr != nil {
 		return preserveErr
@@ -3157,15 +3173,15 @@ func (s *Service) deleteTaskWithReasonAndDBDelete(
 			return false, err
 		}
 	}
-	taskEnv, err := s.gatherTaskEnvironmentForCleanup(operationCtx, id)
-	if err != nil {
-		return false, fmt.Errorf("lookup task environment for delete: %w", err)
-	}
 	releaseEnvironmentMutation, err := s.acquireTaskLSPEnvironmentMutationForTask(ctx, id)
 	if err != nil {
 		return false, fmt.Errorf("lock physical task environment for delete: %w", err)
 	}
 	defer releaseEnvironmentMutation()
+	taskEnv, err := s.gatherTaskEnvironmentForCleanup(operationCtx, id)
+	if err != nil {
+		return false, fmt.Errorf("lookup task environment for delete: %w", err)
+	}
 	var attachments []*models.TaskMessageAttachment
 	attachmentRepo := s.attachments
 	if attachmentRepo == nil && s.attachmentSvc != nil {
@@ -3480,6 +3496,10 @@ func (s *Service) runTaskCleanup(
 	cleanupStart := time.Now()
 	cleanupCtx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
+	releaseEnvironmentMutations := s.acquireTaskLSPEnvironmentMutationIDs(
+		taskCleanupEnvironmentIDs(sessions, envCleanup.env),
+	)
+	defer releaseEnvironmentMutations()
 	refreshedTargets, err := s.refreshTaskRuntimeStopTargets(cleanupCtx, id, stopTargets)
 	if err != nil {
 		s.logger.Warn(cleanupMsg+" deferred because runtime inventory refresh failed",
