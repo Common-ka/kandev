@@ -131,6 +131,8 @@ type taskResourceCleanupSnapshot struct {
 	TaskEnvironmentAuthSecretID      string                    `json:"task_environment_auth_secret_id,omitempty"`
 	TaskEnvironmentBootstrapSecretID string                    `json:"task_environment_bootstrap_secret_id,omitempty"`
 	DeleteEnvironmentSecrets         bool                      `json:"delete_environment_secrets,omitempty"`
+	TaskEnvironmentContainerControlSecretID string `json:"task_environment_container_control_secret_id,omitempty"`
+	TaskEnvironmentContainerBootstrapSecretID string `json:"task_environment_container_bootstrap_secret_id,omitempty"`
 	// SSHTaskDirs records the remote task directories this task launched into.
 	// Additive and absent-tolerant: a job row written by an older backend
 	// decodes with an empty list and reclaims nothing.
@@ -431,6 +433,8 @@ func (s *Service) buildTaskResourceCleanupSnapshot(
 	if envCleanup.env != nil {
 		snapshot.TaskEnvironmentAuthSecretID = envCleanup.env.AgentctlAuthSecretID
 		snapshot.TaskEnvironmentBootstrapSecretID = envCleanup.env.AgentctlBootstrapSecretID
+		snapshot.TaskEnvironmentContainerControlSecretID = envCleanup.env.ContainerControlAuthTokenSecretID
+		snapshot.TaskEnvironmentContainerBootstrapSecretID = envCleanup.env.ContainerBootstrapNonceSecretID
 	}
 	return snapshot
 }
@@ -1525,6 +1529,8 @@ func restoreTaskEnvironmentCleanup(snapshot taskResourceCleanupSnapshot) taskEnv
 		copy := *environment
 		copy.AgentctlAuthSecretID = snapshot.TaskEnvironmentAuthSecretID
 		copy.AgentctlBootstrapSecretID = snapshot.TaskEnvironmentBootstrapSecretID
+		copy.ContainerControlAuthTokenSecretID = snapshot.TaskEnvironmentContainerControlSecretID
+		copy.ContainerBootstrapNonceSecretID = snapshot.TaskEnvironmentContainerBootstrapSecretID
 		environment = &copy
 	}
 	return taskEnvironmentCleanup{

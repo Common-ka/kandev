@@ -991,16 +991,21 @@ func startAgentInfrastructure(
 // startOrchestratorAndAutomationConsumers establishes the startup chain in
 // dependency order: the HTTP listener must be bound (so the launcher's
 // liveness probe can succeed) before the orchestrator runs its startup
-// recovery sweeps, which can run long. The GitHub poller performs an
-// immediate sweep on start, so both downstream consumers must be ready
-// before it is started.
+// recovery sweeps, which can run long. Task-LSP capacity adoption runs first
+// after the bind so later task/environment events cannot race an empty ledger.
+// The GitHub poller performs an immediate sweep on start, so both downstream
+// consumers must be ready before it is started.
 func startOrchestratorAndAutomationConsumers(
 	bindListeners func() error,
+	startTaskLSP func() error,
 	startOrchestrator func() error,
 	startAutomation func(),
 	startGitHubPoller func(),
 ) error {
 	if err := bindListeners(); err != nil {
+		return err
+	}
+	if err := startTaskLSP(); err != nil {
 		return err
 	}
 	if err := startOrchestrator(); err != nil {
@@ -1058,6 +1063,7 @@ func startGatewayAndServe(
 	sshReachabilityPoller *reachabilitypkg.Poller,
 ) bool {
 	services.TaskLSP = newTaskLSPController(
+		cfg,
 		services.Task,
 		repos.Task,
 		services.User,
@@ -1321,6 +1327,10 @@ func startGatewayAndServe(
 	// ============================================
 	if err := startOrchestratorAndAutomationConsumers(
 		bindListeners,
+		func() error {
+			startTaskLSPReconciler(ctx, services.TaskLSP, log)
+			return nil
+		},
 		func() error { return orchestratorSvc.Start(ctx) },
 		func() {
 			if services.Automation == nil {
