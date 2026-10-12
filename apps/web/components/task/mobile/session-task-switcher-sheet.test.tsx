@@ -23,6 +23,7 @@ import { DrawerTitle } from "@kandev/ui/drawer";
 import { MobileActionConfirmation } from "@/components/confirmation/mobile-action-confirmation";
 import { TaskSwitcherDrawer } from "./task-switcher-drawer";
 import { TaskPickerSurface } from "./task-picker-surface";
+import { WorkspaceSwitcher } from "../workspace-switcher";
 
 const mocks = vi.hoisted(() => ({
   toggleSidebarGroupCollapsed: vi.fn(),
@@ -42,6 +43,8 @@ const mocks = vi.hoisted(() => ({
 }));
 
 const TASK_FILTER_LABEL = "Task filter";
+const WORKSPACE_A = "Workspace A";
+const WORKSPACE_B = "Workspace B";
 
 type MockAppState = typeof mocks.appState & {
   toggleSidebarGroupCollapsed: typeof mocks.toggleSidebarGroupCollapsed;
@@ -133,6 +136,109 @@ it("keeps the Tasks drawer as the sole modal during confirmation and restores it
   } finally {
     view.unmount();
     Object.defineProperty(window, "innerWidth", { configurable: true, value: previousWidth });
+  }
+});
+
+it("restores the original pointer style when workspace selection unmounts the nested menu and drawer", async () => {
+  const originalPointerEvents = document.body.style.pointerEvents;
+  document.body.style.pointerEvents = "auto";
+  function Navigation() {
+    const [mounted, setMounted] = useState(true);
+    return mounted ? (
+      <TaskSwitcherDrawer open onOpenChange={vi.fn()}>
+        <DrawerTitle>Tasks</DrawerTitle>
+        <WorkspaceSwitcher
+          workspaces={[
+            { id: "a", name: WORKSPACE_A },
+            { id: "b", name: WORKSPACE_B },
+          ]}
+          activeWorkspaceId="a"
+          onSelect={() => setMounted(false)}
+        />
+      </TaskSwitcherDrawer>
+    ) : (
+      <button>Destination</button>
+    );
+  }
+  const view = render(<Navigation />);
+  try {
+    expect(document.body.style.pointerEvents).toBe("none");
+    fireEvent.keyDown(screen.getByRole("button", { name: WORKSPACE_A }), { key: "Enter" });
+    await screen.findByRole("menuitem", { name: WORKSPACE_B });
+    fireEvent.click(screen.getByRole("menuitem", { name: WORKSPACE_B }));
+    await screen.findByRole("button", { name: "Destination" });
+    await waitFor(() => expect(document.body.style.pointerEvents).toBe("auto"));
+  } finally {
+    view.unmount();
+    document.body.style.pointerEvents = originalPointerEvents;
+  }
+});
+
+it.each(["", "auto"])(
+  "restores pointer style '%s' if navigation disposes the drawer during the menu exit animation",
+  async (pointerStyle) => {
+    const originalPointerEvents = document.body.style.pointerEvents;
+    document.body.style.pointerEvents = pointerStyle;
+    const styles = document.createElement("style");
+    styles.textContent = `[data-slot="dropdown-menu-content"] { animation-name: menu-in; }
+    [data-slot="dropdown-menu-content"][data-state="closed"] { animation-name: menu-out; }`;
+    document.head.append(styles);
+    const view = render(
+      <TaskSwitcherDrawer open onOpenChange={vi.fn()}>
+        <DrawerTitle>Tasks</DrawerTitle>
+        <WorkspaceSwitcher
+          workspaces={[
+            { id: "a", name: WORKSPACE_A },
+            { id: "b", name: WORKSPACE_B },
+          ]}
+          activeWorkspaceId="a"
+          onSelect={vi.fn()}
+        />
+      </TaskSwitcherDrawer>,
+    );
+    try {
+      fireEvent.keyDown(screen.getByRole("button", { name: WORKSPACE_A }), { key: "Enter" });
+      const item = await screen.findByRole("menuitem", { name: WORKSPACE_B });
+      const menu = screen.getByRole("menu");
+      fireEvent.animationStart(menu, { animationName: "menu-in" });
+      fireEvent.click(item);
+      expect(menu.getAttribute("data-state")).toBe("closed");
+      expect(menu.isConnected).toBe(true);
+      expect(document.body.style.pointerEvents).toBe("none");
+      view.unmount();
+      await waitFor(() => expect(document.body.style.pointerEvents).toBe(pointerStyle));
+    } finally {
+      view.unmount();
+      styles.remove();
+      document.body.style.pointerEvents = originalPointerEvents;
+    }
+  },
+);
+
+it("keeps standalone workspace menus modal and restores their original pointer style", async () => {
+  const originalPointerEvents = document.body.style.pointerEvents;
+  document.body.style.pointerEvents = "auto";
+  const onSelect = vi.fn();
+  const view = render(
+    <WorkspaceSwitcher
+      workspaces={[
+        { id: "a", name: WORKSPACE_A },
+        { id: "b", name: WORKSPACE_B },
+      ]}
+      activeWorkspaceId="a"
+      onSelect={onSelect}
+    />,
+  );
+  try {
+    fireEvent.keyDown(screen.getByRole("button", { name: WORKSPACE_A }), { key: "Enter" });
+    await screen.findByRole("menuitem", { name: WORKSPACE_B });
+    expect(document.body.style.pointerEvents).toBe("none");
+    fireEvent.click(screen.getByRole("menuitem", { name: WORKSPACE_B }));
+    expect(onSelect).toHaveBeenCalledWith("b");
+    await waitFor(() => expect(document.body.style.pointerEvents).toBe("auto"));
+  } finally {
+    view.unmount();
+    document.body.style.pointerEvents = originalPointerEvents;
   }
 });
 
