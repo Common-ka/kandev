@@ -194,3 +194,47 @@ The corrected static cache path also ran successfully on GitHub in job
 and saved separate compilation and lint generations; discovery did not fall
 back to disabled caching. That static run was cold for the new build/lint keys
 and is correctness evidence, not a warm static performance sample.
+
+## Follow-up validation at 60690a432
+
+[Backend run 38581011695](https://github.com/kdlbs/kandev/actions/runs/38581011695)
+passed all 12 jobs. The previously failing Postgres mutation-fence case passed
+in 0.71s without changing its assertion or the production 250ms work limit.
+It also passed 20 consecutive local race-detector executions against disposable
+Postgres before this hosted run.
+
+[E2E run 38581011809](https://github.com/kdlbs/kandev/actions/runs/38581011809)
+failed shard 14 on the transcript frozen-position assertion. The report gate
+correctly propagated that failure. Its complete artifact audit found 3914
+first-attempt passes, six passes after retries, one final failure and 40 skips.
+The report produced these results using the published lightweight image;
+its whole job took 73s, including failure reporting. This run does not establish
+successful full-PR validation.
+
+The E2E Build took 699s and missed both caches despite unchanged keys. Earlier
+PR-scoped entries had disappeared. Repository cache usage was 9,813,117,958
+bytes against its configured 10 GB capacity, consistent with eviction under
+pressure; the available evidence does not identify an individual eviction.
+No shared caches were deleted and no paid storage setting was changed.
+The paired warm-cache result remains valid, but cache retention and sustained
+total CI improvement remain unproven under the current capacity.
+
+The failing scrolling spec and its product implementation are byte-identical
+between this PR head and main `73c5ddb8c9550744655432d03edbe5872b6bbb80`.
+The exact failed case passed locally with a fresh managed build and retries
+disabled (18.6s). All seven cases in that spec then passed with one worker
+restricted to two CPU cores (1.5m). These local passes do not explain the hosted
+position failure.
+
+The hosted live-follow trace does prove a selector defect: substring matching
+finds both the submitted script and the agent response. The follow-up test-only
+change scopes live-follow markers to agent message bodies and uses exact text
+for response waits in the position test. This also prevents those waits from
+succeeding on the submitted prompt before a response arrives. All seven cases
+passed again under the same two-core limit with retries disabled (1.5m), and
+the changed spec passed ESLint and Prettier. Assertions, timeout budgets and
+product behavior are unchanged; hosted validation is still required.
+
+The repository-tooltip case passed three consecutive runs with fresh workers,
+the same two-core limit and retries disabled (28.5s total). Its hosted retry
+failure remains unexplained; no tooltip code or assertion was changed.
