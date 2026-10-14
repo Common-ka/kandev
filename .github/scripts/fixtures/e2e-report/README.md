@@ -15,7 +15,9 @@ full JSON reports, timing profiles, retry summaries, flake history, and attachme
 hashes; only report-generation timestamps are removed. HTML must exist.
 
 Both images receive independent disposable copies and fresh dependency installs.
-Host dependencies, credentials and the Docker socket are never mounted. The
+Only tracked source files enter the archive; stage new fixture files before a
+local replay. Untracked files, host dependencies, credentials and the Docker
+socket are never mounted. The
 container runs as root, matching Actions job containers and the existing image's
 Corepack cache. Output ownership is returned to the invoking user on exit.
 `REPORT_DOCKER_NETWORK` can select an existing local Docker network when the

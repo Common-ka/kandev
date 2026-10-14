@@ -65,3 +65,31 @@ are in `/tmp/kandev-ci-evidence/`; the run links are the durable source.
    design. Distinguish observational samples with different source/workloads
    from controlled evidence. Report job occupied time must include container
    startup and installation; a faster merge step alone is insufficient.
+
+## Published candidate and review corrections
+
+User authorized publication on October 14. [Publication run 38568106690](https://github.com/kdlbs/kandev/actions/runs/38568106690)
+used definition/source `1c22f1675a0a987464993a76003f4432c2e5b76c` with
+`report_only=true`; runtime, build, desktop and Postgres publication steps were
+skipped. Report build, smoke, and publication passed in 120 seconds.
+
+- Published tag: `ghcr.io/kdlbs/kandev-ci:report-sha-8699e598697b`.
+- Index: `sha256:599d8a800bdd141f99924d9503988843c9d6ea386bfc57d04c83f1aa17f579aa`.
+- Linux/amd64 manifest: `sha256:5f88da53eb2941e18a62952a1341f32dfad924fafeabe2f26d1ea9b68da68532`.
+- Compressed layers: 121,784,187 bytes; runtime: 1,007,649,604 bytes (87.9% smaller).
+- Anonymous pull used an empty Docker config. The published index passed
+  `test-e2e-report-image.sh --image ghcr.io/kdlbs/kandev-ci@sha256:599d8a800bdd141f99924d9503988843c9d6ea386bfc57d04c83f1aa17f579aa --self-test --compare-image ghcr.io/kdlbs/kandev-ci@sha256:780b2a90f12011a44b8257bf47bf76e818156764e5834af85a8f9e8a8b0b921e`.
+  Full semantic JSON and attachment hashes matched.
+
+Initial PR workflows 38544495936 (E2E) and 38544495952 (backend), attempt 1,
+passed. They are cold-cache samples, not speedup evidence: E2E build took 668s,
+including 130s of cache post-save; backend shards took 1576s/1415s, including
+116s/137s of post-save. The report still used the runtime image (104s).
+Static checks took 893s with caching disabled: review identified an unsupported
+`golangci-lint cache path` command. The correction uses an explicit
+`GOLANGCI_LINT_CACHE` shared by identity discovery and the actual linter and adds
+a successful CLI regression. First-run cold costs are retained in comparisons.
+
+Review also added tracked-only container input and executable target-selection
+coverage: report-script-only edits do not build/publish core images. Report
+summary output distinguishes an unpublished local build from a published digest.

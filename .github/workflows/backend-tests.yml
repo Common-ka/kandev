@@ -154,6 +154,8 @@ jobs:
 
   static_checks:
     name: Backend Static Checks
+    env:
+      GOLANGCI_LINT_CACHE: /tmp/golangci-lint
     needs: changes
     if: needs.changes.outputs.run == 'true'
     # Checkout receives the short-lived job token. Keep this credential-bearing

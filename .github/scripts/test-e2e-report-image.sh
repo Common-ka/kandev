@@ -16,7 +16,7 @@ cd "$root"
 scratch="$(mktemp -d)"
 trap 'rm -rf "$scratch"' EXIT
 # Include candidate files, never host dependencies, credentials, or build outputs.
-git ls-files --cached --others --exclude-standard -z > "$scratch/files"
+git ls-files --cached -z > "$scratch/files"
 tar --null --files-from="$scratch/files" -cf "$scratch/source.tar"
 mkdir "$scratch/candidate" "$scratch/baseline"
 run_image() {

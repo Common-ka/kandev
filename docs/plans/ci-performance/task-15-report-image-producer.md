@@ -128,5 +128,5 @@ reference into required CI to bypass the producer/publication ordering.
 
 Report target built locally. Frozen installation, mixed-root real Playwright
 replay, required-gate cases, and identical-byte baseline semantic/attachment
-comparison passed. Isolated publication is implemented; registry publication
-and published-digest replay remain pending. See [evidence](cache-report-evidence.md).
+comparison passed. Isolated publication is implemented; authorized publication run 38568106690 and anonymous published-digest replay
+passed. Compressed layers are 87.9% smaller than the runtime baseline. See [evidence](cache-report-evidence.md).

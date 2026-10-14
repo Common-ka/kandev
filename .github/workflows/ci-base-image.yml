@@ -53,6 +53,33 @@ jobs:
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           persist-credentials: false
+          fetch-depth: 0
+
+      - name: Select image targets
+        id: targets
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REPORT_ONLY: ${{ inputs.report_only }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          set -euo pipefail
+          core=true
+          if [[ "$EVENT_NAME" == workflow_dispatch ]]; then
+            if [[ "$REPORT_ONLY" == true ]]; then core=false; fi
+          elif git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
+            changed="$(mktemp)"
+            trap 'rm -f "$changed"' EXIT
+            if git diff --name-only -z "$BASE_SHA" HEAD > "$changed"; then
+              core=false
+              while IFS= read -r -d '' file; do
+                case "$file" in
+                  .github/docker/ci-base/*|.github/workflows/ci-base-image.yml|apps/backend/go.mod|apps/pnpm-lock.yaml|apps/web/package.json)
+                    core=true ;;
+                esac
+              done < "$changed"
+            fi
+          fi
+          echo "core=$core" >> "$GITHUB_OUTPUT"
 
       - name: Set up Buildx
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
@@ -78,7 +105,7 @@ jobs:
       # so the upstream digest remains valid at the mirrored location.
       - name: Mirror Postgres to GHCR
         if: |
-          !inputs.report_only && (github.event_name == 'workflow_dispatch'
+          steps.targets.outputs.core == 'true' && (github.event_name == 'workflow_dispatch'
           || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
         run: |
           set -euo pipefail
@@ -131,7 +158,7 @@ jobs:
       # Consumed by the `e2e` shards and `e2e-report`, where the smaller pull
       # is the speedup that pays for the split.
       - name: Build and push runtime
-        if: ${{ !inputs.report_only }}
+        if: steps.targets.outputs.core == 'true'
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
@@ -150,7 +177,7 @@ jobs:
       # `cache-from` includes the runtime scope so the shared lower layers
       # only build once across both pushes.
       - name: Build and push build
-        if: ${{ !inputs.report_only }}
+        if: steps.targets.outputs.core == 'true'
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
@@ -169,7 +196,7 @@ jobs:
       # Stage 3: desktop (runtime + Tauri Linux dependencies + Rust).
       # Consumed by the host-independent desktop smoke job.
       - name: Build and push desktop
-        if: ${{ !inputs.report_only }}
+        if: steps.targets.outputs.core == 'true'
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
@@ -217,10 +244,14 @@ jobs:
         run: |
           {
             echo "### Kandev CI base image"
-            echo "- report candidate: ${IMAGE_NAME}:report-sha-${IMAGE_TAG}@${REPORT_DIGEST}"
+            if [[ -n "$REPORT_DIGEST" ]]; then
+              echo "- report candidate: ${IMAGE_NAME}:report-sha-${IMAGE_TAG}@${REPORT_DIGEST}"
+            else
+              echo "- report candidate (built only): ${IMAGE_NAME}:report-sha-${IMAGE_TAG}"
+            fi
             echo "- report-only publication: ${REPORT_ONLY}"
             echo ""
-            if [[ "$REPORT_ONLY" != true ]]; then
+            if [[ "$CORE_IMAGES" == true ]]; then
             echo "- runtime: \`${IMAGE_NAME}:runtime-sha-${IMAGE_TAG}\` / \`runtime-latest\`"
             echo "- build:   \`${IMAGE_NAME}:build-sha-${IMAGE_TAG}\` / \`build-latest\`"
             echo "- desktop: \`${IMAGE_NAME}:desktop-sha-${IMAGE_TAG}\` / \`desktop-latest\`"
@@ -230,6 +261,7 @@ jobs:
             echo "- pushed:  \`${PUSHED}\`"
           } >> "$GITHUB_STEP_SUMMARY"
         env:
+          CORE_IMAGES: ${{ steps.targets.outputs.core }}
           REPORT_DIGEST: ${{ steps.report.outputs.digest }}
           REPORT_ONLY: ${{ inputs.report_only }}
           IMAGE_TAG: ${{ steps.tag.outputs.image_tag }}

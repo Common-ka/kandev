@@ -1,7 +1,7 @@
 ---
 id: "16-report-image-consumer"
 title: "Adopt and measure the report image"
-status: pending
+status: in_progress
 wave: 3
 depends_on: ["15-report-image-producer"]
 plan: "plan.md"
@@ -125,4 +125,9 @@ reference and tool bootstrap, leaving cache work and verification policy intact.
 
 ## Results
 
-Pending. The required report job still uses its existing image.
+The report consumer now selects the verified published index digest
+`sha256:599d8a800bdd141f99924d9503988843c9d6ea386bfc57d04c83f1aa17f579aa`.
+Anonymous Linux/amd64 pull and identical-input replay against runtime digest
+`sha256:780b2a90f12011a44b8257bf47bf76e818156764e5834af85a8f9e8a8b0b921e`
+passed. Compressed layers are 121,784,187 versus 1,007,649,604 bytes.
+Hosted timing acceptance remains open; see [evidence](cache-report-evidence.md).

@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import subprocess
 import tempfile
+import textwrap
 import unittest
 
 
@@ -265,6 +266,66 @@ cat "${FAKE_DOCKER_MANIFEST}"
             attempts = int(count_file.read_text(encoding="utf-8")) if count_file.exists() else 0
             return result, attempts
 
+    def test_report_only_edits_do_not_build_core_images(self):
+        workflow = IMAGE_WORKFLOW.read_text()
+        marker = "      - name: Select image targets\n"
+        self.assertIn(marker, workflow)
+        step = workflow.split(marker, 1)[1].split("      - name:", 1)[0]
+        script = textwrap.dedent(step.split("        run: |\n", 1)[1])
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            subprocess.run(["git", "init", "-q", directory], check=True)
+            for name in ["apps/web/e2e/scripts/report.ts", ".github/docker/ci-base/Dockerfile"]:
+                target = root / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text("original")
+            def commit():
+                subprocess.run(["git", "add", "."], cwd=root, check=True)
+                subprocess.run(["git", "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "-qm", "fixture"], cwd=root, check=True)
+            commit()
+            base = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
+            (root / "apps/web/e2e/scripts/report.ts").write_text("changed")
+            commit()
+            env = {**os.environ, "BASE_SHA": base, "EVENT_NAME": "pull_request", "REPORT_ONLY": "false",
+                   "GITHUB_OUTPUT": str(root / "output")}
+            def scope(overrides):
+                (root / "output").write_text("")
+                result = subprocess.run(["bash", "-euo", "pipefail", "-c", script], cwd=root,
+                                        env={**env, **overrides}, capture_output=True, text=True)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                return (root / "output").read_text()
+            self.assertEqual(scope({}), "core=false\n")
+            self.assertEqual(scope({"EVENT_NAME": "push"}), "core=false\n")
+            self.assertEqual(scope({"EVENT_NAME": "workflow_dispatch"}), "core=true\n")
+            self.assertEqual(scope({"EVENT_NAME": "workflow_dispatch", "REPORT_ONLY": "true"}), "core=false\n")
+            self.assertEqual(scope({"BASE_SHA": "missing"}), "core=true\n")
+            (root / ".github/docker/ci-base/Dockerfile").write_text("changed")
+            commit()
+            self.assertEqual(scope({}), "core=true\n")
+
+    def test_report_context_excludes_untracked_files(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            subprocess.run(["git", "init", "-q", directory], check=True)
+            (root / "tracked.txt").write_text("source")
+            (root / "untracked-credential.txt").write_text("synthetic secret")
+            subprocess.run(["git", "add", "tracked.txt"], cwd=root, check=True)
+            (root / "bin").mkdir()
+            docker = root / "bin/docker"
+            docker.write_text("""#!/usr/bin/env python3
+import os, sys, tarfile
+archive = next(arg.split(':')[0] for arg in sys.argv if arg.endswith(':/source.tar:ro'))
+with tarfile.open(archive) as source:
+    open(os.environ['CAPTURE_FILES'], 'w').write('\\n'.join(source.getnames()))
+""")
+            docker.chmod(0o755)
+            result = subprocess.run(["bash", str(REPO_ROOT / ".github/scripts/test-e2e-report-image.sh"),
+                                     "--image", "fixture", "--self-test"], cwd=root, capture_output=True, text=True,
+                                    env={**os.environ, "PATH": str(root / "bin") + os.pathsep + os.environ["PATH"],
+                                         "CAPTURE_FILES": str(root / "captured")})
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual((root / "captured").read_text(), "tracked.txt")
+
     def test_e2e_build_cache_preserves_required_commands(self):
         workflow = E2E_WORKFLOW.read_text()
         build = job_block(workflow, "build", "e2e")
@@ -282,9 +343,9 @@ cat "${FAKE_DOCKER_MANIFEST}"
         self.assertIn("scope=report", image_workflow)
         self.assertIn("report_only", image_workflow)
         for target in ("runtime", "build", "desktop"):
-            self.assertIn(f"name: Build and push {target}\n        if: ${{{{ !inputs.report_only }}}}", image_workflow)
+            self.assertIn(f"name: Build and push {target}\n        if: steps.targets.outputs.core == 'true'", image_workflow)
         mirror = image_workflow.split("name: Mirror Postgres to GHCR", 1)[1].split("      - name:", 1)[0]
-        self.assertIn("!inputs.report_only", mirror)
+        self.assertIn("steps.targets.outputs.core == 'true'", mirror)
         publish = image_workflow.split("name: Publish report image", 1)[1].split("      - name:", 1)[0]
         self.assertNotIn("latest", publish)
         self.assertIn("github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')", publish)
