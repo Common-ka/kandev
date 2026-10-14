@@ -265,6 +265,31 @@ cat "${FAKE_DOCKER_MANIFEST}"
             attempts = int(count_file.read_text(encoding="utf-8")) if count_file.exists() else 0
             return result, attempts
 
+    def test_e2e_build_cache_preserves_required_commands(self):
+        workflow = E2E_WORKFLOW.read_text()
+        build = job_block(workflow, "build", "e2e")
+        self.assertIn("family: e2e-build", build)
+        self.assertIn("make build-backend", build)
+        self.assertIn("make build-web-e2e", build)
+        self.assertNotIn("steps.cache", build)
+        self.assertIn(".github/actions/cache-go/**", workflow)
+
+    def test_report_image_is_browser_free_and_smoked_before_publication(self):
+        dockerfile = (REPO_ROOT / ".github/docker/ci-base/Dockerfile").read_text()
+        self.assertRegex(dockerfile, r"FROM node:24-bookworm-slim@sha256:[a-f0-9]{64} AS report")
+        image_workflow = (REPO_ROOT / ".github/workflows/ci-base-image.yml").read_text()
+        self.assertLess(image_workflow.index("name: Smoke report image"), image_workflow.index("name: Publish report image"))
+        self.assertIn("scope=report", image_workflow)
+        self.assertIn("report_only", image_workflow)
+        for target in ("runtime", "build", "desktop"):
+            self.assertIn(f"name: Build and push {target}\n        if: ${{{{ !inputs.report_only }}}}", image_workflow)
+        mirror = image_workflow.split("name: Mirror Postgres to GHCR", 1)[1].split("      - name:", 1)[0]
+        self.assertIn("!inputs.report_only", mirror)
+        publish = image_workflow.split("name: Publish report image", 1)[1].split("      - name:", 1)[0]
+        self.assertNotIn("latest", publish)
+        self.assertIn("github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')", publish)
+
+
     def test_desktop_image_contains_pinned_toolchain_and_system_dependencies(self) -> None:
         dockerfile = DOCKERFILE.read_text(encoding="utf-8")
 

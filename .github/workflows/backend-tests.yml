@@ -88,6 +88,8 @@ jobs:
             apps/web/lib/settings-discovery/contract.generated.json
             apps/web/lib/settings-discovery/profile-contract.generated.json
             scripts/settings-contract-ci.test.mjs
+            .github/actions/cache-go/**
+            .github/scripts/go-cache-identity.*
             scripts/check-agentctl-deps.sh
             # check-make-shells also lints the root Makefile's $(shell ...)
             # probes, so a change there has to be able to trip it.
@@ -184,17 +186,10 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      - name: Cache Go modules
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      - name: Cache Go modules and compilation
+        uses: ./.github/actions/cache-go
         with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-            ~/.cache/golangci-lint
-          key: go-static-${{ runner.os }}-${{ hashFiles('apps/backend/go.mod', 'apps/backend/go.sum') }}
-          restore-keys: |
-            go-static-${{ runner.os }}-
-            go-${{ runner.os }}-
+          family: static
 
       - name: Build
         run: go build -v ./cmd/kandev
@@ -331,16 +326,10 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      - name: Cache Go modules
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      - name: Cache Go modules and compilation
+        uses: ./.github/actions/cache-go
         with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: go-test-${{ matrix.shard }}-${{ runner.os }}-${{ hashFiles('apps/backend/go.mod', 'apps/backend/go.sum') }}
-          restore-keys: |
-            go-test-${{ matrix.shard }}-${{ runner.os }}-
-            go-${{ runner.os }}-
+          family: test-${{ matrix.shard }}
 
       - name: Run tests
         env:
@@ -540,16 +529,10 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      - name: Cache Go modules
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      - name: Cache Go modules and compilation
+        uses: ./.github/actions/cache-go
         with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: go-ambient-env-${{ runner.os }}-${{ hashFiles('apps/backend/go.mod', 'apps/backend/go.sum') }}
-          restore-keys: |
-            go-ambient-env-${{ runner.os }}-
-            go-${{ runner.os }}-
+          family: ambient
 
       - name: Run GitLab-facing packages under a poisoned host environment
         env:

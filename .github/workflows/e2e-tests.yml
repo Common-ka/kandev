@@ -91,7 +91,11 @@ jobs:
             apps/packages/**
             apps/pnpm-lock.yaml
             apps/pnpm-workspace.yaml
+            .github/actions/cache-go/**
+            .github/scripts/go-cache-identity.*
             .github/docker/ci-base/**
+            .github/scripts/test-e2e-report-image.sh
+            .github/scripts/fixtures/e2e-report/**
             .github/scripts/resolve-image-digest.sh
             .github/workflows/ci-base-image.yml
             .github/workflows/e2e-tests.yml

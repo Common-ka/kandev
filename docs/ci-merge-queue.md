@@ -421,3 +421,26 @@ scheduling delays. Missing or unfinished execution is unknown, not free.
 An optional `--graph` accepts exact workflow identity and expanded job-name
 edges to calculate execution critical path and dependency-ready delay.
 Do not label that delay as capacity queueing without additional evidence.
+
+## Go cache generations and report image bootstrap
+
+Linux backend verification and the E2E build use `.github/actions/cache-go`.
+Module downloads have exact dependency/toolchain/platform keys. Compilation
+snapshots additionally include the job family, image recipe, compiler/build
+environment and UTC day. A new day can restore the previous compatible snapshot
+and save the successful job's updated cache. Within a day, immutable cache entries
+are reused. Static analysis has an independent linter/configuration identity.
+Missing identity or cache-service failures fall back to ordinary compilation;
+required builds and tests never depend on a hit. Cache logs show the resolved
+keys, exact/fallback/miss decisions, sizes and transfer durations. Measure total
+job time including post-save cost. The first new-namespace run is a cold sample.
+Rollback can restore the previous workflow cache blocks without deleting caches.
+
+The CI image workflow has an opt-in `report_only` manual input for bootstrapping
+an immutable report candidate on a PR. It skips every runtime/build/desktop
+publication and Postgres mirror, and never updates a `latest` tag. Publication
+requires operator authorization and a successful image replay. The report consumer
+must keep its existing runtime image until the new Linux/amd64 digest is publicly
+pullable and passes the same replay. Roll back by selecting the recorded prior
+runtime digest. See [report replay instructions](../.github/scripts/fixtures/e2e-report/README.md)
+and [acceptance evidence](plans/ci-performance/cache-report-evidence.md).

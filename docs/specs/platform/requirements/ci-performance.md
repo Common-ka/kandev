@@ -97,6 +97,27 @@ The existing external-runner contract retains ownership of fleet selection and t
 - **AC-PLATFORM-CI-PERFORMANCE-007.2:** Every selected backend, PostgreSQL 16/18, native Windows, frontend, normal/container E2E, desktop and Kubernetes compatibility check shall remain required. Partitions shall preserve selected identities, assertions, platform coverage, race checks, isolation, retries and failure propagation.
 - **AC-PLATFORM-CI-PERFORMANCE-007.3:** Evidence shall distinguish full-workflow elapsed time, execution, waiting and runner-minutes. Baseline/candidate comparisons shall identify source and selection differences; path-filtered or cancelled runs shall never establish achievement.
 - **AC-PLATFORM-CI-PERFORMANCE-007.4:** Candidates may redistribute work across existing hosted jobs after measuring setup costs and available capacity. Paid capacity activation and trust-boundary expansion remain separate operator decisions. Reject coverage loss and loaded feedback regression; report any occupancy increase explicitly.
+### REQ-PLATFORM-CI-PERFORMANCE-007: Refreshable Go compilation caches
+
+**Intent:** Reuse recent compilation work when application source changes without dependency changes, with bounded cache publication.
+
+#### Acceptance criteria
+
+- **AC-PLATFORM-CI-PERFORMANCE-007.1:** Compatible successful Go verification runs shall reuse downloaded modules independently of compilation snapshots. A source-only change shall be eligible to refresh compilation snapshots in the next daily generation without requiring a dependency change; repeated runs within that generation shall reuse its immutable snapshot.
+- **AC-PLATFORM-CI-PERFORMANCE-007.2:** Compilation reuse shall remain within the same execution family, platform, toolchain, dependency set, and build-environment compatibility boundary. Existing branch and contributor trust restrictions shall continue to apply.
+- **AC-PLATFORM-CI-PERFORMANCE-007.3:** A cache miss or cache-service failure shall permit ordinary compilation and verification. A cache hit shall never substitute for a required command or hide its failure. Failed or cancelled verification shall not publish a new compilation snapshot.
+- **AC-PLATFORM-CI-PERFORMANCE-007.4:** Evidence shall distinguish exact hits, compatible fallback restores, cold runs, and successful snapshot saves. Performance acceptance shall include restore and save overhead and report cache size as well as execution time.
+
+### REQ-PLATFORM-CI-PERFORMANCE-008: Lightweight E2E report execution
+
+**Intent:** Reduce final reporting overhead while preserving the evidence and verdict used to admit a merge.
+
+#### Acceptance criteria
+
+- **AC-PLATFORM-CI-PERFORMANCE-008.1:** Report processing shall support an environment without browser binaries, Go, Rust, or Docker tooling. Given the same reports and source, it shall retain test identities, outcomes, retries, attachments, timing provenance, flake history, and merged HTML/JSON evidence.
+- **AC-PLATFORM-CI-PERFORMANCE-008.2:** The required E2E result shall retain its name and dependency coverage. Mandatory failures, cancellation, malformed or incomplete evidence, and report-processing errors shall block success; an explicit irrelevant-change decision shall retain its successful skip outcome.
+- **AC-PLATFORM-CI-PERFORMANCE-008.3:** A required reporting job shall adopt a replacement environment only after that exact published version is available and has passed report compatibility checks. Rollback shall restore a recorded working environment without altering verification policy.
+- **AC-PLATFORM-CI-PERFORMANCE-008.4:** Adoption shall demonstrate lower median report-job execution across at least three comparable hosted baseline/candidate samples, including environment initialization and dependency setup. Sampling shall preserve the existing runner capacity and disclose failures and unavailable measurements.
 
 ## Out of scope
 

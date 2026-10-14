@@ -6,6 +6,10 @@ on:
     paths:
       - .github/docker/ci-base/**
       - .github/workflows/ci-base-image.yml
+      - .github/scripts/test-e2e-report-image.sh
+      - .github/scripts/fixtures/e2e-report/**
+      - apps/web/e2e/scripts/**
+      - apps/web/e2e/playwright.config.ts
       - apps/backend/go.mod
       - apps/pnpm-lock.yaml
       - apps/web/package.json
@@ -14,10 +18,19 @@ on:
     paths:
       - .github/docker/ci-base/**
       - .github/workflows/ci-base-image.yml
+      - .github/scripts/test-e2e-report-image.sh
+      - .github/scripts/fixtures/e2e-report/**
+      - apps/web/e2e/scripts/**
+      - apps/web/e2e/playwright.config.ts
       - apps/backend/go.mod
       - apps/pnpm-lock.yaml
       - apps/web/package.json
   workflow_dispatch:
+    inputs:
+      report_only:
+        description: Publish only the immutable report candidate (no latest tags)
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -38,6 +51,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
 
       - name: Set up Buildx
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
@@ -63,8 +78,8 @@ jobs:
       # so the upstream digest remains valid at the mirrored location.
       - name: Mirror Postgres to GHCR
         if: |
-          github.event_name == 'workflow_dispatch'
-          || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+          !inputs.report_only && (github.event_name == 'workflow_dispatch'
+          || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
         run: |
           set -euo pipefail
 
@@ -116,6 +131,7 @@ jobs:
       # Consumed by the `e2e` shards and `e2e-report`, where the smaller pull
       # is the speedup that pays for the split.
       - name: Build and push runtime
+        if: ${{ !inputs.report_only }}
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
@@ -134,6 +150,7 @@ jobs:
       # `cache-from` includes the runtime scope so the shared lower layers
       # only build once across both pushes.
       - name: Build and push build
+        if: ${{ !inputs.report_only }}
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
@@ -152,6 +169,7 @@ jobs:
       # Stage 3: desktop (runtime + Tauri Linux dependencies + Rust).
       # Consumed by the host-independent desktop smoke job.
       - name: Build and push desktop
+        if: ${{ !inputs.report_only }}
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
@@ -167,18 +185,52 @@ jobs:
             ${{ env.IMAGE_NAME }}:desktop-sha-${{ steps.tag.outputs.image_tag }}
             ${{ env.IMAGE_NAME }}:desktop-latest
 
+      - name: Build report image for smoke
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          file: .github/docker/ci-base/Dockerfile
+          target: report
+          platforms: linux/amd64
+          load: true
+          tags: kandev-ci-report:smoke
+          cache-from: type=gha,scope=report
+          cache-to: type=gha,scope=report,mode=max
+
+      - name: Smoke report image
+        run: bash .github/scripts/test-e2e-report-image.sh --image kandev-ci-report:smoke --self-test
+
+      - name: Publish report image
+        id: report
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          file: .github/docker/ci-base/Dockerfile
+          target: report
+          platforms: linux/amd64
+          push: true
+          cache-from: type=gha,scope=report
+          tags: ${{ env.IMAGE_NAME }}:report-sha-${{ steps.tag.outputs.image_tag }}
+
       - name: Summarize
         run: |
           {
             echo "### Kandev CI base image"
+            echo "- report candidate: ${IMAGE_NAME}:report-sha-${IMAGE_TAG}@${REPORT_DIGEST}"
+            echo "- report-only publication: ${REPORT_ONLY}"
             echo ""
+            if [[ "$REPORT_ONLY" != true ]]; then
             echo "- runtime: \`${IMAGE_NAME}:runtime-sha-${IMAGE_TAG}\` / \`runtime-latest\`"
             echo "- build:   \`${IMAGE_NAME}:build-sha-${IMAGE_TAG}\` / \`build-latest\`"
             echo "- desktop: \`${IMAGE_NAME}:desktop-sha-${IMAGE_TAG}\` / \`desktop-latest\`"
             echo "- postgres: \`${POSTGRES_TARGET}@${POSTGRES_DIGEST}\`"
             echo "- postgres 18: \`${POSTGRES_18_TARGET}@${POSTGRES_18_DIGEST}\`"
+            fi
             echo "- pushed:  \`${PUSHED}\`"
           } >> "$GITHUB_STEP_SUMMARY"
         env:
+          REPORT_DIGEST: ${{ steps.report.outputs.digest }}
+          REPORT_ONLY: ${{ inputs.report_only }}
           IMAGE_TAG: ${{ steps.tag.outputs.image_tag }}
           PUSHED: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}

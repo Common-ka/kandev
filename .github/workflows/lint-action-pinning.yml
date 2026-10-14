@@ -134,6 +134,9 @@ jobs:
         with:
           node-version: "24"
 
+      - name: Test Go cache generations
+        run: node --test .github/scripts/go-cache-identity.test.mjs
+
       - name: Test runtime bundle contract
         run: bash scripts/release/runtime-bundle.test.sh
 

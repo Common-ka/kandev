@@ -9,6 +9,7 @@ requirements:
   - REQ-PLATFORM-CI-PERFORMANCE-005
   - REQ-PLATFORM-CI-PERFORMANCE-006
   - REQ-PLATFORM-CI-PERFORMANCE-007
+  - REQ-PLATFORM-CI-PERFORMANCE-008
   - REQ-PLATFORM-E2E-DURATION-AWARE-SHARDING-001
   - REQ-PLATFORM-DURABLE-AGENT-DELIVERY-001
   - REQ-TASKS-TASK-ACTIONS-MENU-004
@@ -49,6 +50,82 @@ the primary session. No new paid capacity is authorized.
    revise candidates, resolve reviews, and merge only after the full target passes.
 
 ## October delivery sequence
+
+### October 14 cache and reporting continuation
+
+The user selected Go cache freshness and a lighter E2E reporting image after
+reviewing the recent pipeline improvements. The user subsequently authorized implementation and PR checks, including
+measured comparison with main. Earlier work-order statuses and historical measurements are retained.
+
+Platform owns cache reuse, CI execution cost, and required-result integrity.
+The adjacent CI automation system continues to own contributor and publication
+authority. The existing capacity ADR covers this work; the cache-generation
+policy and image dependencies are sufficiently captured in the system design,
+so no new ADR is required. There is no application UI, public API, release, or
+public-documentation change. Internal operating notes belong in
+`docs/ci-merge-queue.md` during implementation.
+
+1. Task 14: introduce separate dependency and daily compilation caches for
+   the existing Linux Go cache consumers; verify reuse, failure behavior, and
+   occupied time with restore/save overhead included.
+2. Task 15: build and smoke-test a browser-free Node reporting image; deliver
+   its producer separately while the required report job keeps its current image.
+3. Task 16: after successful publication, verify the immutable image digest,
+   replay reports, switch the report consumer, and collect hosted acceptance.
+
+Task 15 does not depend on cache implementation, but execution is sequential
+and both can edit shared workflow contract tests. Task 16 depends on task 15
+and actual image availability, not merely on a Dockerfile in the branch.
+Use separate producer and consumer commits so a required job never pulls a
+nonexistent image. The isolated `report_only=true` manual dispatch supports
+explicitly authorized report-tag publication before the PR consumer cutover. Commit, push, merge, manual dispatch, and image publication
+retain their session authorization boundaries. This package creates no tasks,
+sessions, paid capacity, or automatic benchmark fan-out.
+
+The observed E2E run [38510354669, attempt 1](https://github.com/kdlbs/kandev/actions/runs/38510354669)
+is diagnostic evidence: Build took 313 seconds (158 seconds in the combined
+backend/web build step); the report job took 120 seconds, including 55 seconds
+of container initialization. It is not a controlled cache benchmark or a
+promise of recoverable time. Node 24 and pnpm 9.15.9 are current workflow inputs.
+Cache immutability is documented in the
+[GitHub cache reference](https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching).
+
+#### Continuation acceptance and verification
+
+| Criteria | Required evidence |
+| --- | --- |
+| 007.1–007.2 | Proposed `go-cache-identity.test.mjs`: daily rollover with unchanged dependencies, within-day reuse, and compatibility/family separation; real Go source-change probe |
+| 007.3 | Existing backend/E2E workflow contract suites extended for unconditional required commands, best-effort caches and successful-job-only publication; hosted failed/cancelled save observations |
+| 007.4; 004.1–004.2; 005.1 | Cache logs and three comparable samples, including compressed size and restore/save cost; missing hosted evidence remains pending |
+| 008.1 | Proposed report-image replay harness: identical test/attempt/outcome/attachment records, mixed roots, complete saved hosted inputs when available |
+| 008.2 | Actual report gate exercised for failures, cancellation, malformed/missing evidence and deliberate skips; existing required-check/dependency contracts |
+| 008.3 | Producer-only delivery, published Linux/amd64 digest pull/replay, consumer-only switch, recorded rollback digest |
+| 008.4; 005.5 | Three hosted baseline/candidate samples with lower median report-job execution; no new jobs, workers, retries or capacity |
+
+Daily snapshot generations are a deliberate trade-off: source-only changes
+refresh on the next successful day, while same-day runs avoid repeated large
+uploads. Per-commit/run snapshots and broad cross-family restore prefixes are
+excluded. A slim image that fails frozen dependency installation or report
+replay is rejected before consumer cutover. A size reduction alone does not
+satisfy the hosted timing criterion. Revert each candidate independently if
+it changes required outcomes or fails its performance gate.
+
+New helper/test paths in the work orders are implementation deliverables, not
+files already present at this checkpoint. Use `/tdd` for their logic and the
+exact work-order commands. No application browser suite is needed merely to
+validate cache wiring or replay saved reports. Existing full CI remains the
+integration check once the deliveries are authorized.
+
+Design validation on 2026-10-14: documentation catalog validation passed
+(381 decisions and 1,603 specifications), all specification files passed lint,
+and all 36 specification-linter tests passed. The PR documentation coverage
+preflight classified the actual six-document diff as exempt and separately
+validated all three new work orders against the proposed workflow/Dockerfile
+path set with no reference errors. `git diff --check` passed. These are design
+checks only; implementation, Docker replay, publication and performance
+acceptance remain pending.
+
+### Earlier October sequence
 
 1. Task 07: add a read-only measurement helper and capture comparable baselines.
 2. Task 03: expand reviewed frontend setup assignments, using the complete inventory and sample experiment.
@@ -188,6 +265,9 @@ No browser E2E is needed for CI-only behavior. Existing application E2E coverage
 - [ ] [Task 14: Partition frontend and Windows verification](task-14-partition-independent-checks.md)
 - [ ] [Task 15: Shorten remaining critical paths](task-15-remaining-critical-paths.md)
 - [ ] [Task 16: Measure and deliver complete CI](task-16-complete-ci-delivery.md)
+- [ ] [Task 14: Refresh Go compilation caches](task-14-go-cache-freshness.md)
+- [ ] [Task 15: Produce the lightweight report image](task-15-report-image-producer.md)
+- [ ] [Task 16: Adopt and measure the report image](task-16-report-image-consumer.md)
 
 ## Execution and evidence
 
