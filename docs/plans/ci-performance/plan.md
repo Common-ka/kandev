@@ -125,6 +125,18 @@ path set with no reference errors. `git diff --check` passed. These are design
 checks only; implementation, Docker replay, publication and performance
 acceptance remain pending.
 
+#### Continuation implementation evidence
+
+The report producer was published with explicit user authorization, then pulled
+anonymously and replayed before the consumer adopted its immutable digest.
+Three hosted report pairs preserved all semantic output and reduced median
+occupied replay time from 82 to 61 seconds. Go cold/warm samples and their
+cache sizes are recorded in [cache/report evidence](cache-report-evidence.md).
+Final medians and latest-head CI remain externally tracked on
+[PR #4486](https://github.com/kdlbs/kandev/pull/4486); natural next-day cache
+rotation and hosted failed/cancelled save observations remain open for task 14.
+No complete-pipeline speedup is inferred from the report replay or a cache hit.
+
 ### Earlier October sequence
 
 1. Task 07: add a read-only measurement helper and capture comparable baselines.
@@ -266,8 +278,8 @@ No browser E2E is needed for CI-only behavior. Existing application E2E coverage
 - [ ] [Task 15: Shorten remaining critical paths](task-15-remaining-critical-paths.md)
 - [ ] [Task 16: Measure and deliver complete CI](task-16-complete-ci-delivery.md)
 - [ ] [Task 14: Refresh Go compilation caches](task-14-go-cache-freshness.md)
-- [ ] [Task 15: Produce the lightweight report image](task-15-report-image-producer.md)
-- [ ] [Task 16: Adopt and measure the report image](task-16-report-image-consumer.md)
+- [x] [Task 15: Produce the lightweight report image](task-15-report-image-producer.md)
+- [x] [Task 16: Adopt and measure the report image](task-16-report-image-consumer.md)
 
 ## Execution and evidence
 

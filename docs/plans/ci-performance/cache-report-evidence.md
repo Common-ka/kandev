@@ -1,7 +1,11 @@
 # Go cache and report image acceptance evidence
 
-Implementation is in progress. No performance improvement is claimed until
-comparable hosted candidate evidence is available. Tasks 14–16 remain open.
+The lightweight report image has passed publication and paired hosted replay.
+Three samples reduced median complete replay job time from 82 to 61 seconds
+(25.6%). Go cache evidence includes cold population and compatible reuse below.
+Final sample medians and verification of the latest head are maintained in
+[PR #4486](https://github.com/kdlbs/kandev/pull/4486), so recording this evidence
+does not mistake a documentation commit for an already verified PR head.
 
 ## Baseline
 
@@ -54,17 +58,13 @@ are in `/tmp/kandev-ci-evidence/`; the run links are the durable source.
 
 ## Outstanding acceptance
 
-1. Finish identical-byte replay against the baseline runtime and published report
-   digest; record compressed registry layer sizes.
-2. Publish only the immutable candidate through an explicitly authorized
-   `report_only=true` dispatch; verify anonymous pull before consumer cutover.
-3. Capture PR CI, including the initial cold cache run, subsequent compatible
-   reuse, cache restore/save sizes and costs, failed/cancelled save behavior,
-   and an actual next-day generation save/restore.
-4. Compare at least three representative hosted baseline/candidate samples per
-   design. Distinguish observational samples with different source/workloads
-   from controlled evidence. Report job occupied time must include container
-   startup and installation; a faster merge step alone is insufficient.
+1. Observe an actual next-day generation save/restore and hosted failed/cancelled
+   save absence. Deterministic rollover and failure-boundary tests pass, but
+   they do not substitute for those operational observations.
+2. Verify the latest PR head and retain the complete three-pair Go comparison
+   in the linked PR. Distinguish observational full CI runs from controlled
+   replay/build measurements; neither proves lower total pipeline elapsed time
+   without comparable complete-run evidence.
 
 ## Published candidate and review corrections
 
@@ -93,3 +93,82 @@ a successful CLI regression. First-run cold costs are retained in comparisons.
 Review also added tracked-only container input and executable target-selection
 coverage: report-script-only edits do not build/publish core images. Report
 summary output distinguishes an unpublished local build from a published digest.
+
+## Controlled hosted report comparison
+
+[Run 38570183864](https://github.com/kdlbs/kandev/actions/runs/38570183864),
+attempt 1, succeeded at source/definition
+`6fa51456637abf9caa5238c6335b5ad879f0eccd`. The manual
+`performance_probe=report` mode replayed saved blobs and manifests from main run
+38524205488 in six sequential GitHub-hosted jobs. Baseline and candidate used
+the immutable runtime and report index digests recorded above, identical source,
+lockfile, and saved artifact bytes. No images were published by this probe.
+
+| Image | Sample 1 seconds | Sample 2 seconds | Sample 3 seconds | Median seconds |
+| --- | ---: | ---: | ---: | ---: |
+| Baseline runtime | 88 | 82 | 75 | 82 |
+| Candidate report | 60 | 65 | 61 | 61 |
+
+These are complete occupied-job times, including container initialization,
+dependency cache/install, saved artifact downloads, report generation and gate
+checks, and semantic evidence upload. The median reduction is 21 seconds
+(25.6%). They measure controlled report replay, not complete E2E workflow elapsed
+time. The replay does not perform the production job's optional history-run
+selection API calls. All six jobs succeeded; the run occupied 7.2 runner-minutes
+and elapsed 444 seconds including scheduling.
+
+All six normalized full semantic outputs were byte-identical, SHA-256
+`9d937ba181f10b004abf8fd2a724272b4c95245bae7025627dbf7e3588bda548`.
+They retained 3,958 test identities (3,911 first-pass, 7 after retry, 40 skipped,
+zero final failures/timeouts) and 66 attachment hashes. Only generated/recorded
+timestamps were normalized. The run's `report-probe-{baseline,candidate}-{1,2,3}`
+artifacts retain the semantic JSON for seven days; the workflow and run logs
+provide the reproducible procedure and execution record.
+
+The actual [PR E2E run 38570176939](https://github.com/kdlbs/kandev/actions/runs/38570176939),
+attempt 1 at the same source, also passed. Its report job took 73s, including
+8s container initialization, 11s install and 7s merge, versus 88s in the recorded
+main run. The whole workflow elapsed 1872s and occupied 328.7 runner-minutes,
+versus main's 1721s/305.23 minutes: this full cold-cache run was slower overall.
+Its Build job took 510s, including 8s cache setup/restore and 87s post-save.
+This observational run confirms report integration; it does not establish
+complete-pipeline improvement. Later head verification is tracked in the PR.
+
+## Controlled hosted Go comparison
+
+[Run 38570188498](https://github.com/kdlbs/kandev/actions/runs/38570188498),
+attempt 1, uses definition and checkout
+`6fa51456637abf9caa5238c6335b5ad879f0eccd`. The bounded manual
+`performance_probe=go` matrix runs serially: baseline/candidate sample zero,
+then three baseline/candidate pairs. It executes the production backend,
+delivery-fixture and web build commands, with identical source and dependency
+lockfiles. The baseline restores main's original combined cache; the candidate
+uses the new module/build action. No images are published.
+
+The first complete pair used build image
+`sha256:b77c5f217a44e0554436b734e21b3fd4d25b0465c981c117a79d496ac750eff1`
+on both sides (Go 1.26.0 in the image recipe). Baseline sample zero took 436s
+and hit the existing 828,095,058-byte combined cache; it was not a cold baseline.
+Candidate sample zero took 595s, missing both new keys and saving 721,075,403
+bytes of compiled output plus 295,349,784 bytes of modules. Its cache post-save
+occupied about 131 seconds. This population cost is retained, not discarded.
+
+The first warm pair took 425s baseline versus 144s candidate. Candidate logs
+confirm exact-key restoration of both archives, roughly 30 seconds combined,
+and no re-upload because both primary keys matched. The build generation is
+`2026-10-14`; all eight jobs and their step timings remain available in the run.
+The complete three-pair median belongs in the linked PR after the run finishes;
+the first pair alone is not the final performance acceptance result.
+
+Cache keys and sizes are visible in the job logs. The candidate module key is
+`go-mod-v2-db818dda829283c1a86d2ea894d44bd7d5066f427167818a8522a3e7b4eb1010`;
+the build compatibility hash is
+`2cf5d91d46d1c43eec48de6ecc25f5dbaa8b21a917e74d1fac24ed05b8774e73`.
+The manual run caches are scoped to the feature branch; PR merge-ref caches
+are separate. No caches were deleted to manufacture misses.
+
+The pinned [cache action manifest](https://github.com/actions/cache/blob/55cc8345863c7cc4c66a329aec7e433d2d1c52a9/action.yml)
+declares `post-if: success()`. The optional-cache regression also runs the real
+extracted build/test commands after an injected cache-boundary failure. These
+establish the configured behavior; a hosted failed/cancelled publication
+observation and a natural next-day generation remain open for task 14.

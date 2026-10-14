@@ -1,7 +1,7 @@
 ---
 id: "16-report-image-consumer"
 title: "Adopt and measure the report image"
-status: in_progress
+status: done
 wave: 3
 depends_on: ["15-report-image-producer"]
 plan: "plan.md"
@@ -135,4 +135,9 @@ The report consumer now selects the verified published index digest
 Anonymous Linux/amd64 pull and identical-input replay against runtime digest
 `sha256:780b2a90f12011a44b8257bf47bf76e818156764e5834af85a8f9e8a8b0b921e`
 passed. Compressed layers are 121,784,187 versus 1,007,649,604 bytes.
-Hosted timing acceptance remains open; see [evidence](cache-report-evidence.md).
+Three paired hosted replay samples in run 38570183864 reduced median occupied
+job time from 82 to 61 seconds (25.6%), including startup and installation.
+All six normalized outputs matched for 3,958 test identities and 66 attachment
+hashes. Full E2E run 38570176939 passed with the published image; its report
+job took 73 seconds versus 88 seconds in the recorded main run. Latest-head
+verification after evidence updates is tracked in the PR; see [evidence](cache-report-evidence.md).

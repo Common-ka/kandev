@@ -1,7 +1,7 @@
 ---
 id: "15-report-image-producer"
 title: "Produce the lightweight report image"
-status: in_progress
+status: done
 wave: 2
 depends_on: []
 plan: "plan.md"
@@ -128,5 +128,6 @@ reference into required CI to bypass the producer/publication ordering.
 
 Report target built locally. Frozen installation, mixed-root real Playwright
 replay, required-gate cases, and identical-byte baseline semantic/attachment
-comparison passed. Isolated publication is implemented; authorized publication run 38568106690 and anonymous published-digest replay
+comparison passed. Isolated publication is implemented; authorized publication
+run 38568106690 and anonymous published-digest replay
 passed. Compressed layers are 87.9% smaller than the runtime baseline. See [evidence](cache-report-evidence.md).
