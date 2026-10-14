@@ -66,6 +66,11 @@ test retries, reporting schemas, test selection, runner placement or capacity.
 Run from repository root. Substitute the literal verified report and runtime
 digests from task 15 when recording the executed replay command. Do not dispatch
 extra full suites solely to generate reports; replay existing artifacts first.
+The user authorized complete PR timing checks against main. The optional
+`performance_probe=report|go` dispatch modes in `ci-base-image.yml` run one
+comparison job at a time and never publish images. Report probes replay saved
+blobs with both verified digests; Go probes use identical source/build commands
+and retain sample zero as cold-start evidence. Normal PR CI has no extra jobs.
 Use naturally occurring hosted runs where comparable. Any separately authorized
 benchmark runs must be bounded and avoid simultaneous full baseline/candidate suites.
 

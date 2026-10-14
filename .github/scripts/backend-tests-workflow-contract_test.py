@@ -92,6 +92,8 @@ class BackendTestsWorkflowContractTest(unittest.TestCase):
             # action. Honor its declared continue policy, then execute real Go work.
             # Hosted post-save behavior remains a separate acceptance condition.
             for cache_status in (0, 1):
+                for output in ("kandev", "test-results-1.json"):
+                    (root / output).unlink(missing_ok=True)
                 for cache_step in cache_steps:
                     restored = subprocess.run(["bash", "-c", f"exit {cache_status}"], cwd=root)
                     if restored.returncode:

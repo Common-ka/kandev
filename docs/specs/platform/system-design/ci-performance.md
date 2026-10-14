@@ -435,6 +435,11 @@ outputs per image; never share host `node_modules` or mount host credentials.
 Replay a complete saved hosted blob/manifests/history set as additional
 compatibility evidence when available; expired artifacts do not count as proof.
 
+Manual `performance_probe=report|go` dispatches in the image workflow provide
+bounded comparisons without publication or additional normal PR jobs. Report
+samples reuse saved blobs; Go samples use identical source/build commands and
+separate the cold sample. Both matrices run one job at a time.
+
 For both continuations, extend the existing CI performance plan with separate
 cache, image-producer, and report-consumer work orders. The image must be
 materially smaller (target at most half the runtime image's compressed size),
