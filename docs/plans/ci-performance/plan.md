@@ -130,9 +130,10 @@ acceptance remain pending.
 The report producer was published with explicit user authorization, then pulled
 anonymously and replayed before the consumer adopted its immutable digest.
 Three hosted report pairs preserved all semantic output and reduced median
-occupied replay time from 82 to 61 seconds. Go cold/warm samples and their
-cache sizes are recorded in [cache/report evidence](cache-report-evidence.md).
-Final medians and latest-head CI remain externally tracked on
+occupied replay time from 82 to 61 seconds. Three warm Go pairs reduced median
+build-job time from 425 to 144 seconds. Cold population costs and cache sizes
+are retained in [cache/report evidence](cache-report-evidence.md).
+Latest-head CI remains externally tracked on
 [PR #4486](https://github.com/kdlbs/kandev/pull/4486); natural next-day cache
 rotation and hosted failed/cancelled save observations remain open for task 14.
 No complete-pipeline speedup is inferred from the report replay or a cache hit.

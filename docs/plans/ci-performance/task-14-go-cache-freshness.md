@@ -137,11 +137,12 @@ cannot establish service behavior. Avoid broad fallback when identity fails.
 
 Implemented the shared optional cache action and daily identity helper, with
 separate module/build/lint paths. Local identity, real-Go reuse, workflow and
-gate checks pass. Hosted run 38570188498 records the bounded cold/warm comparison:
-the first warm pair took 425s baseline versus 144s candidate, with both candidate
-cache hits verified and same-day uploads skipped. The cold candidate took 595s,
+gate checks pass. Hosted run 38570188498 passed all eight bounded cold/warm jobs.
+Three warm pairs reduced median occupied time from 425s baseline to 144s
+candidate (66.1%), with both candidate cache hits verified and same-day uploads
+skipped. The cold candidate took 595s,
 including about 131s of post-save, versus 436s for the already cached baseline.
-The complete comparison and latest-head CI results are maintained in
+The complete comparison is recorded in the evidence file; latest-head CI is maintained in
 [PR #4486](https://github.com/kdlbs/kandev/pull/4486).
 Actual next-day generation and failed/cancelled hosted save observations remain
 open, so this work order is not marked done; see [evidence](cache-report-evidence.md).

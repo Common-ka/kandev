@@ -2,8 +2,9 @@
 
 The lightweight report image has passed publication and paired hosted replay.
 Three samples reduced median complete replay job time from 82 to 61 seconds
-(25.6%). Go cache evidence includes cold population and compatible reuse below.
-Final sample medians and verification of the latest head are maintained in
+(25.6%). Three warm Go build pairs reduced median complete job time from 425 to
+144 seconds (66.1%); cold population and compatible reuse are recorded below.
+Verification of the latest head is maintained in
 [PR #4486](https://github.com/kdlbs/kandev/pull/4486), so recording this evidence
 does not mistake a documentation commit for an already verified PR head.
 
@@ -61,8 +62,7 @@ are in `/tmp/kandev-ci-evidence/`; the run links are the durable source.
 1. Observe an actual next-day generation save/restore and hosted failed/cancelled
    save absence. Deterministic rollover and failure-boundary tests pass, but
    they do not substitute for those operational observations.
-2. Verify the latest PR head and retain the complete three-pair Go comparison
-   in the linked PR. Distinguish observational full CI runs from controlled
+2. Verify the latest PR head in the linked PR. Distinguish observational full CI runs from controlled
    replay/build measurements; neither proves lower total pipeline elapsed time
    without comparable complete-run evidence.
 
@@ -153,12 +153,28 @@ Candidate sample zero took 595s, missing both new keys and saving 721,075,403
 bytes of compiled output plus 295,349,784 bytes of modules. Its cache post-save
 occupied about 131 seconds. This population cost is retained, not discarded.
 
-The first warm pair took 425s baseline versus 144s candidate. Candidate logs
-confirm exact-key restoration of both archives, roughly 30 seconds combined,
-and no re-upload because both primary keys matched. The build generation is
-`2026-10-14`; all eight jobs and their step timings remain available in the run.
-The complete three-pair median belongs in the linked PR after the run finishes;
-the first pair alone is not the final performance acceptance result.
+All eight jobs succeeded. Complete occupied-job timings, including startup,
+installation and cache transfer, are:
+
+| Cache strategy | Sample 1 seconds | Sample 2 seconds | Sample 3 seconds | Median seconds |
+| --- | ---: | ---: | ---: | ---: |
+| Baseline combined cache | 425 | 391 | 483 | 425 |
+| Candidate separate caches | 144 | 145 | 134 | 144 |
+
+The median reduction is 281 seconds (66.1%). Every sample used the same image
+digest recorded above. All baseline samples restored the existing main cache;
+all warm candidate samples restored both exact keys and skipped re-upload.
+Baseline cache restore took 24/24/26 seconds; candidate discovery and restore
+took 31/31/25 seconds. The backend/web build step itself took 331/272/385 seconds
+for baseline versus 34/26/29 seconds for candidate. Thus the complete-job benefit
+survives the somewhat larger cache transfer. The build generation is
+`2026-10-14`. The full comparison occupied 45.9 runner-minutes and elapsed 2864
+seconds including scheduling; no unsuccessful samples were omitted.
+
+This establishes warm E2E-build improvement for the measured source and cache
+state, not every backend family or total PR wall time. The first cold candidate
+was slower as recorded above. Later generations can incur a new snapshot save;
+the next-day observation remains open.
 
 Cache keys and sizes are visible in the job logs. The candidate module key is
 `go-mod-v2-db818dda829283c1a86d2ea894d44bd7d5066f427167818a8522a3e7b4eb1010`;
@@ -172,3 +188,9 @@ declares `post-if: success()`. The optional-cache regression also runs the real
 extracted build/test commands after an injected cache-boundary failure. These
 establish the configured behavior; a hosted failed/cancelled publication
 observation and a natural next-day generation remain open for task 14.
+
+The corrected static cache path also ran successfully on GitHub in job
+115873191487 of backend run 38570176792. It restored the shared module cache
+and saved separate compilation and lint generations; discovery did not fall
+back to disabled caching. That static run was cold for the new build/lint keys
+and is correctness evidence, not a warm static performance sample.
