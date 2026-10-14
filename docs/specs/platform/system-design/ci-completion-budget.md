@@ -35,10 +35,10 @@ for each experiment. PR #4457 already met the distinct 50% E2E-step target.
 
 ## First candidate: independent frontend and Windows work
 
-Run the existing frontend static checks and build independently of four built-in
+Run the existing frontend static checks and build independently of two built-in
 Vitest file shards. Keep the same package script (including pretest generation),
 production NODE_ENV guard, isolated projects, container, cache discovery and
-worker-budget resolver. Register the four standard-tier jobs in the existing
+worker-budget resolver. Register the two standard-tier jobs in the existing
 runner planner. Each shard emits a distinct JSON report. Compare the complete
 file/test identity multiset and outcomes against an unsharded same-source run;
 retain unknown files in their existing full setup. The required frontend gate
@@ -46,28 +46,68 @@ joins the static job and every shard, rejecting failed/cancelled/unexpected
 skips and absent reports. Keep the public check name unchanged.
 
 Partition the native Windows command sequence into compilation, native platform,
-persistence and settings groups. Keep the process cohort unchanged initially.
-Move whole existing steps, including their environment, commands and timeouts;
+persistence and settings groups. The initial process cohort stayed unchanged and measured 19m08s in hosted
+job 115897903616. Execute its existing two native cohorts on separate Windows
+jobs. The native runner gains a bounded `-cohort=1|2` selector; omitted/zero
+retains its existing local two-process mode. Enumeration and exact per-cohort
+completion validation remain mandatory, and both hosted results join the backend
+gate. Reports record the selected cohort so a single-job report cannot claim
+full package coverage. Reject other cohort numbers before starting work.
+Move whole existing steps, retaining their commands and timeouts;
 do not derive coverage from source-name guesses. Every prior native step has
 exactly one owner. All groups remain on windows-latest and join the existing
-backend aggregate. Fail-fast stays false. This isolates compilation and groups
+backend aggregate. Targeted native compilation uses GOMAXPROCS=2 and a 2 GiB
+Go soft memory limit on the existing hosted Windows runner, so cold race builds
+do not thrash under the former 512 MiB heap. Test and step alarms stay intact.
+Fail-fast stays false. This isolates compilation and groups
 related tagged persistence checks without changing test selections.
 
 ## Subsequent bounded candidates
 
-Inspect complete Go JSON and PostgreSQL timings before choosing package or
-within-package partitions. Preserve the explicit PostgreSQL package catalog,
-service version, race checks and existing SQLite-only scale exclusion. A long
-package cannot be accelerated just by adding package shards; native top-level
-inventory and complete disjoint result checks are required for any cohort split.
-Do not use substring filters that silently omit new tests.
+The first backend candidate isolates `internal/task/repository/sqlite` from the
+two existing package-hash jobs and partitions it into three hosted jobs. The
+explicit PostgreSQL 16 catalog retains one ordinary-packages job plus the same
+three repository cohorts. Other packages keep their existing commands.
+
+A narrow repository-only Python launcher enumerates native Go tests with the same
+race/coverage flags as execution. It accepts only successful JSON package
+completion and native top-level Test/Fuzz/Example names. Sort names and distribute
+round-robin into three nonempty cohorts; use exact anchored selectors with no
+slash so all nested subtests and fuzz seeds remain selected. Unknown new names
+enter the inventory automatically. Reject malformed/duplicate/missing enumeration,
+unselected execution, missing/duplicate terminal test records, or failed package
+completion. The test command's exit is authoritative even when its report exists.
+
+Normal repository cohorts retain race detection, atomic coverage and the
+120-minute deadlock bound; PostgreSQL cohorts retain race detection, the
+90-minute bound and only the existing nested SQLite million-fixture exclusion.
+Each cohort uploads inventory, selected names, raw Go JSON, diagnostics and
+coverage where applicable. All cohort results join the unchanged backend gate.
+Keep the full explicit PostgreSQL catalog in the workflow and assert that its
+sole repository exclusion delegates to all three required repository cohorts.
+The launcher is not a generic scheduler and does not alter local test commands.
+
+The workflow-sensitive sidebar resource lane is also part of complete acceptance.
+Its memory job has 84 sort/group/direction cases plus alternating, preparation
+and maximum-input checks. Partition only its whole isolated child scenarios into
+three hosted groups. Group one retains the original three top-level tests and
+skips only the five explicitly delegated pool-sort keys; group two selects
+state/updatedAt and group three createdAt/title/custom. New sort keys remain in group
+one by default. Preserve all nested groups/directions, 100-read plateau loops,
+GOMAXPROCS=4 child measurement, native-memory limits and deadlines. Keep the
+populated SQLite/PostgreSQL benchmark lane unchanged. Native Go fixture tests
+prove complete disjoint leaf selection, including a future sort key.
 
 For E2E retain duration-aware manifests, complete report reconciliation, guarded
 one-worker processes, build identity and Docker/Kind coverage. Measure build,
 container startup, test fixture work, browser execution and report overhead
-separately. Start with avoidable work and dependency edges; expand hosted fan-out
-only when measured service demand and queues support it. Every such change gets
-its own source-specific work-order update before implementation.
+separately. The first candidate uses 28 normal jobs, retaining two guarded processes per job
+and six container jobs. Main profile 38554759444 predicts a 514.7-second slowest
+process for the unchanged 3,808-test normal catalog, versus 1,027.8 at fourteen
+jobs; measured queue and occupancy decide adoption. Run backend and web builds
+concurrently inside the existing build job and join both before producing the
+delivery fixture and identity manifest. A failed child remains a build failure.
+Every further change gets a source-specific work-order update before implementation.
 
 ## Evidence, acceptance and rollback
 

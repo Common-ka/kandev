@@ -21,7 +21,7 @@ system_design:
 
 ## Outcome and scope
 
-Move frontend unit execution into four built-in shards parallel to static checks; partition whole Windows native steps into compilation, platform, persistence and settings groups. Preserve original commands and gates.
+Move frontend unit execution into two built-in shards parallel to static checks; partition whole Windows native steps into compilation, platform, persistence and settings groups. Preserve original commands and gates.
 
 ## Exclusions
 
@@ -61,3 +61,43 @@ pending; local contracts and enumeration do not prove speed.
 
 Public documentation is unchanged: this affects repository CI scheduling only.
 The contributor runbook and internal delivery documents describe the new layout.
+
+### First hosted attempt and remediation
+
+Head `6025705717` frontend run 38577314508 failed before tests: pnpm 9 parsed
+`test --shard` as pnpm options. Use `run test` explicitly; the real package
+script under production NODE_ENV passed the six worker-budget tests with shard
+and JSON options forwarded and its pretest generators executed.
+
+Backend run 38577314273 retained passing compile and native groups, but the
+new persistence/settings groups hit their original six-minute step budgets
+while cold-compiling dependencies with a 512 MiB Go memory limit. The restored
+setup-go cache was only 276 MiB and still needed module downloads and race
+compilation. Give the existing two-process Go compiler a 2 GiB soft heap budget
+on the hosted Windows runner. Preserve every test selector, four-minute test
+alarm and six-minute step deadline. These failed attempts are not performance
+acceptance; rerun the complete groups before claiming improvement.
+
+The next candidate uses two frontend shards instead of four: the measured first
+attempt's startup cost repeats per job, and two partitions should fit within the
+full-CI budget while retaining the 10% runner-minute adoption constraint. Four
+shards remain only the initial failed-attempt configuration and enumeration
+evidence. Same-source hosted one-versus-two comparisons decide adoption.
+
+### Windows process follow-up
+
+The unchanged process job 115897903616 completed successfully in 19m08s, including
+17m44s in the two-process package step. Move its existing two native cohorts to
+two hosted Windows jobs with the same inventory/selector/completion validator.
+Keep the no-argument local mode, make selected-cohort scope explicit in each
+report, preserve race/deadlock budgets and join both jobs in the required gate.
+Verify with `go test -trimpath -race ./cmd/windows-process-tests` from
+`apps/backend`, the backend workflow contracts, and native hosted results.
+
+### Second candidate local verification
+
+The native Vitest sequencer retains the same 2,948 files exactly once across two
+1,474-file shards. The selected Windows cohort launcher passes its race-enabled
+unit suite (2.036 seconds), retaining the no-argument two-cohort mode and rejecting
+invalid selection. Backend workflow contracts pass 22 cases, including executable
+sidebar nested-selection coverage and both required Windows process jobs.

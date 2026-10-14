@@ -2,6 +2,9 @@
 """Contract tests for the E2E workflow and prebuilt images."""
 
 import hashlib
+import json
+import re
+import textwrap
 import os
 from pathlib import Path
 import subprocess
@@ -41,6 +44,53 @@ def job_block(workflow: str, job: str, next_job: str) -> str:
 
 
 class E2EWorkflowContractTest(unittest.TestCase):
+    def test_normal_matrix_matches_the_planner_and_keeps_guarded_processes(self) -> None:
+        workflow = E2E_WORKFLOW.read_text()
+        planner = (REPO_ROOT / "apps/web/e2e/scripts/plan-shards.ts").read_text()
+        count = int(re.search(r"NORMAL_SHARD_COUNT = (\d+)", planner).group(1))
+        self.assertEqual(count, 28)
+        families = workflow.split("families: >-\n", 1)[1].split("burst:", 1)[0]
+        family = next(f for f in json.loads(families) if f["name"] == "e2e")
+        self.assertEqual(family["instances"], [{"shard": n} for n in range(1, count + 1)])
+        self.assertIn("name: E2E Shard ${{ matrix.shard }}/28", workflow)
+
+    def test_parallel_build_joins_both_children_and_preserves_each_failure(self) -> None:
+        source = E2E_WORKFLOW.read_text().split("      - name: Build backend and web\n", 1)[1]
+        script = textwrap.dedent(source.split("        run: |\n", 1)[1].split("\n      #", 1)[0])
+        # Exercise the actual shell step with independent fake make children.
+        for failing in ("", "build-backend", "build-web-e2e"):
+            with self.subTest(failing=failing), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                make = root / "make"
+                make.write_text("""#!/usr/bin/env bash
+set -eu
+target=$1
+if [[ "$target" == build-backend || "$target" == build-web-e2e ]]; then
+  touch "$target.started"
+  other=build-backend
+  if [[ "$target" == build-backend ]]; then other=build-web-e2e; fi
+  for ((i=0;i<200;i++)); do
+    [[ -f "$other.started" ]] && break
+    sleep 0.01
+  done
+  [[ -f "$other.started" ]] || exit 91
+  touch "$target.joined"
+  [[ "$FAIL_TARGET" != "$target" ]] || exit 7
+else
+  [[ -f build-backend.joined && -f build-web-e2e.joined ]] || exit 92
+  touch fixture.built
+fi
+""")
+                make.chmod(0o755)
+                result = subprocess.run(["bash", "-c", script], cwd=root, timeout=10,
+                                        env={**os.environ, "PATH": str(root) + os.pathsep + os.environ["PATH"],
+                                             "FAIL_TARGET": failing, "GITHUB_SHA": "test-source"},
+                                        capture_output=True, text=True)
+                self.assertEqual(result.returncode == 0, not failing, result.stderr)
+                self.assertTrue((root / "build-backend.joined").exists())
+                self.assertTrue((root / "build-web-e2e.joined").exists())
+                self.assertEqual((root / "fixture.built").exists(), not failing)
+
     def run_image_digest_resolver(
         self,
         *,

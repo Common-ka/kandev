@@ -127,7 +127,7 @@ class FrontendTestsWorkflowContractTest(unittest.TestCase):
         self.assertIn("needs: [changes]", shards)
         self.assertIn("fail-fast: false", shards)
         self.assertIn("matrix: ${{ fromJSON(needs.changes.outputs.plan).frontend_tests_matrix }}", shards)
-        self.assertIn("pnpm --filter @kandev/web test --shard=", shards)
+        self.assertIn("pnpm --filter @kandev/web run test --shard=", shards)
         self.assertIn("NODE_ENV: production", shards)
         self.assertIn("pnpm install --frozen-lockfile", shards)
         self.assertNotIn("continue-on-error", run_tests_step(workflow))
@@ -138,10 +138,10 @@ class FrontendTestsWorkflowContractTest(unittest.TestCase):
         families = workflow.split("families: >-\n", 1)[1].split("burst:", 1)[0]
         family = next(f for f in json.loads(families) if f["name"] == "frontend_tests")
         self.assertEqual(family["tier"], "standard")
-        self.assertEqual(family["instances"], [{"shard": n} for n in range(1, 5)])
+        self.assertEqual(family["instances"], [{"shard": n} for n in range(1, 3)])
         step = run_tests_step(workflow)
         self.assertIn('FRONTEND_TEST_SHARD: ${{ matrix.shard }}', step)
-        self.assertIn('--shard="${FRONTEND_TEST_SHARD}/4"', step)
+        self.assertIn('--shard="${FRONTEND_TEST_SHARD}/2"', step)
 
     def test_reports_are_required_and_partitioned(self) -> None:
         workflow = WORKFLOW.read_text(encoding="utf-8")
@@ -172,7 +172,7 @@ class FrontendTestsWorkflowContractTest(unittest.TestCase):
             "CI image sets no NODE_ENV, Vitest defaults it to 'test', and the "
             "suite passes with or without the pin.",
         )
-        self.assertIn("pnpm --filter @kandev/web test", step)
+        self.assertIn("pnpm --filter @kandev/web run test", step)
 
     def test_vitest_config_still_pins_the_mode(self) -> None:
         config = VITEST_CONFIG.read_text(encoding="utf-8")

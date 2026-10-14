@@ -63,7 +63,7 @@ jobs:
           families: >-
             [
               {"name":"frontend","tier":"standard"},
-              {"name":"frontend_tests","tier":"standard","instances":[{"shard":1},{"shard":2},{"shard":3},{"shard":4}]},
+              {"name":"frontend_tests","tier":"standard","instances":[{"shard":1},{"shard":2}]},
               {"name":"frontend_gate","tier":"light"}
             ]
           burst: ${{ vars.KANDEV_CI_EXTERNAL_ENABLED }}
@@ -384,7 +384,7 @@ jobs:
         run: pnpm --filter @kandev/web build
 
   frontend_tests:
-    name: Frontend Tests (${{ matrix.shard }}/4)
+    name: Frontend Tests (${{ matrix.shard }}/2)
     needs: [changes]
     if: needs.changes.outputs.run == 'true'
     runs-on: ${{ matrix.runner }}
@@ -442,7 +442,7 @@ jobs:
           NODE_COMPILE_CACHE: ${{ runner.temp }}/kandev-node-compile-cache
           FRONTEND_TEST_SHARD: ${{ matrix.shard }}
         run: >-
-          pnpm --filter @kandev/web test --shard="${FRONTEND_TEST_SHARD}/4"
+          pnpm --filter @kandev/web run test --shard="${FRONTEND_TEST_SHARD}/2"
           --reporter=default --reporter=json
           --outputFile="test-results-${FRONTEND_TEST_SHARD}.json"
 

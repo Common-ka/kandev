@@ -255,7 +255,7 @@ Common flags: `--shard=1/4`, `-g "fragment of test name"`, `--repeat-each=3` (fl
 ### Duration-aware CI sharding
 
 CI creates an ephemeral manifest for each cohort from the current test catalog.
-The normal cohort has 14 shards and runs `chromium` plus `mobile-chrome`; the
+The normal cohort has 28 shards and runs `chromium` plus `mobile-chrome`; the
 container cohort has 6 shards and runs `containers`. The independent
 `kubernetes-compat` matrix is deliberately excluded from both catalogs. The manifest assigns
 project/file units with a deterministic longest-processing-time planner. Matrix
@@ -791,7 +791,7 @@ for a result it could never receive.
 
 `.github/workflows/e2e-tests.yml` defines two test cohorts and a report job:
 
-- `e2e` — a 14-entry matrix executing the generated normal manifests.
+- `e2e` — a 28-entry matrix executing the generated normal manifests.
 - `e2e-containers` — a 6-entry matrix executing the generated container
   manifests and requiring Docker. A shard assigned `tests/kubernetes/**`
   installs checksum-pinned Kind/kubectl, then performs exact-name teardown.
