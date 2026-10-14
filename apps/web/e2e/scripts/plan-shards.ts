@@ -12,7 +12,7 @@ import {
 } from "./e2e-timings";
 
 export const SHARD_MANIFEST_VERSION = 1;
-export const NORMAL_SHARD_COUNT = 14;
+export const NORMAL_SHARD_COUNT = 28;
 export const CONTAINER_SHARD_COUNT = 6;
 export const DEFAULT_NORMAL_TEST_SECONDS = 10;
 export const DEFAULT_CONTAINER_TEST_SECONDS = 20;

@@ -103,6 +103,9 @@ jobs:
       - name: Test backend tests workflow contract
         run: python3 .github/scripts/backend-tests-workflow-contract_test.py
 
+      - name: Check repository cohort coverage contract
+        run: python3 .github/scripts/repository-test-shard_test.py
+
       - name: Test stale merge approval revocation workflow contract
         run: python3 .github/scripts/revoke-ready-to-merge-workflow-contract_test.py
 

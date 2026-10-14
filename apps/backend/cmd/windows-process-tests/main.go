@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -74,14 +75,15 @@ func (cmd *recordedCommand) closeFiles() error {
 }
 
 type runReport struct {
-	Inventory inventory
-	Cohorts   [2]cohort
-	Commands  []*recordedCommand
-	Complete  bool
-	Failure   string
+	Inventory      inventory
+	Cohorts        []cohort
+	SelectedCohort int
+	Commands       []*recordedCommand
+	Complete       bool
+	Failure        string
 }
 
-func runNative(directory string) (report runReport, result error) {
+func runNative(directory string, selected int) (report runReport, result error) {
 	listing := newCommand(directory, "inventory", "")
 	report.Commands = append(report.Commands, listing)
 	if err := joinCommands([]command{listing}); err != nil {
@@ -92,13 +94,22 @@ func runNative(directory string) (report runReport, result error) {
 		return report, err
 	}
 	report.Inventory = inv
-	report.Cohorts, err = partition(inv)
+	groups, err := partition(inv)
+	if err != nil {
+		return report, err
+	}
+	report.SelectedCohort = selected
+	report.Cohorts, err = selectCohorts(groups, selected)
 	if err != nil {
 		return report, err
 	}
 	var commands []command
 	for index, group := range report.Cohorts {
-		cmd := newCommand(directory, fmt.Sprintf("cohort-%d", index+1), group.Selector)
+		number := index + 1
+		if selected != 0 {
+			number = selected
+		}
+		cmd := newCommand(directory, fmt.Sprintf("cohort-%d", number), group.Selector)
 		report.Commands = append(report.Commands, cmd)
 		commands = append(commands, cmd)
 	}
@@ -164,6 +175,12 @@ func publishFile(path string) (result error) {
 }
 
 func main() {
+	selected := flag.Int("cohort", 0, "Native cohort to run: 0 (both), 1 or 2")
+	flag.Parse()
+	if *selected < 0 || *selected > 2 || flag.NArg() != 0 {
+		fmt.Fprintln(os.Stderr, "Specify only -cohort=0, -cohort=1 or -cohort=2")
+		os.Exit(1)
+	}
 	if runtime.GOOS != "windows" {
 		fmt.Fprintln(os.Stderr, "Windows process cohorts require a native Windows runner")
 		os.Exit(1)
@@ -173,7 +190,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	report, err := runNative(directory)
+	report, err := runNative(directory, *selected)
 	err = errors.Join(err, publishReport(directory, report, err))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)

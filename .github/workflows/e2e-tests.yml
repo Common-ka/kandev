@@ -70,7 +70,10 @@ jobs:
                 {"shard":1},{"shard":2},{"shard":3},{"shard":4},
                 {"shard":5},{"shard":6},{"shard":7},{"shard":8},
                 {"shard":9},{"shard":10},{"shard":11},{"shard":12},
-                {"shard":13},{"shard":14}
+                {"shard":13},{"shard":14},{"shard":15},{"shard":16},
+                {"shard":17},{"shard":18},{"shard":19},{"shard":20},
+                {"shard":21},{"shard":22},{"shard":23},{"shard":24},
+                {"shard":25},{"shard":26},{"shard":27},{"shard":28}
               ]}
             ]
           burst: ${{ vars.KANDEV_CI_EXTERNAL_ENABLED }}
@@ -202,10 +205,21 @@ jobs:
       # needs it. See apps/web/lib/i18n/bundling.ts.
       - name: Build backend and web
         run: |
+          set -euo pipefail
           # PR merge refs are untagged; helper manifests require a SemVer version.
-          VERSION="0.0.0-e2e.${GITHUB_SHA}" make build-backend
+          VERSION="0.0.0-e2e.${GITHUB_SHA}" make build-backend &
+          backend_pid=$!
+          make build-web-e2e &
+          web_pid=$!
+          backend_status=0
+          wait "$backend_pid" || backend_status=$?
+          web_status=0
+          wait "$web_pid" || web_status=$?
+          if (( backend_status != 0 || web_status != 0 )); then
+            echo "Build failed: backend=$backend_status web=$web_status" >&2
+            exit 1
+          fi
           make build-e2e-delivery-fixture
-          make build-web-e2e
 
       # Fixture plugin package consumed by the plugin E2E specs. Built here
       # (the build job has the Go toolchain) and shipped to the shards as its
@@ -409,7 +423,7 @@ jobs:
           retention-days: 1
 
   e2e:
-    name: E2E Shard ${{ matrix.shard }}/14
+    name: E2E Shard ${{ matrix.shard }}/28
     needs: [changes, build]
     if: needs.changes.outputs.run == 'true'
     runs-on: ${{ matrix.runner }}
@@ -504,7 +518,7 @@ jobs:
       # enabled for these shards), and spam every shard.
       # Cross-job archive extraction does not preserve useful mtimes. Validate
       # the source revision and every required artifact checksum instead.
-      - name: Run planned E2E tests (shard ${{ matrix.shard }}/14)
+      - name: Run planned E2E tests (shard ${{ matrix.shard }}/28)
         working-directory: apps/web
         env:
           E2E_SHARD: ${{ matrix.shard }}
