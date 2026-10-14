@@ -822,13 +822,13 @@ jobs:
     needs: changes
     if: needs.changes.outputs.run == 'true'
     runs-on: windows-latest
-    # Isolate the large process suite from build/vet and targeted native checks.
+    # Keep compilation, process, platform, persistence and settings work independent.
     # A cold Windows race build and test can exceed 60 minutes before cleanup.
     timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
-        suite: [process, native]
+        suite: [process, native, compile, persistence, settings]
     # Least-privilege: this job only reads source and runs tests, no PR/issue
     # writes or release operations. Flagged by CodeQL workflow audit + matching
     # CodeRabbit nitpick.
@@ -866,11 +866,11 @@ jobs:
       # launcher, shell, signals, sysprocattr, vscode cleanup, …). The rest of
       # the suite is build-tag-gated out automatically.
       - name: Build
-        if: matrix.suite == 'native'
+        if: matrix.suite == 'compile'
         run: go build ./...
 
       - name: Vet
-        if: matrix.suite == 'native'
+        if: matrix.suite == 'compile'
         run: go vet ./...
 
       - name: Test Windows process cohort runner
@@ -954,7 +954,7 @@ jobs:
           ./internal/task/service
 
       - name: Test Windows document attachment publication
-        if: matrix.suite == 'native'
+        if: matrix.suite == 'persistence'
         timeout-minutes: 6
         run: |
           $env:GOMAXPROCS = '2'
@@ -963,7 +963,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Test Windows profile enabled omission
-        if: matrix.suite == 'native'
+        if: matrix.suite == 'settings'
         timeout-minutes: 6
         run: |
           $env:GOMAXPROCS = '2'
@@ -972,7 +972,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Test Windows executor profile scripts
-        if: matrix.suite == 'native'
+        if: matrix.suite == 'persistence'
         timeout-minutes: 6
         run: |
           $env:GOMAXPROCS = '2'
@@ -990,7 +990,7 @@ jobs:
           go test -race -tags fts5 -v ./internal/task/inventoryrepair -run '^TestOpenDatabase(Reads|Writes)NativeAbsolutePath$'
 
       - name: Test Windows workspace settings persistence
-        if: matrix.suite == 'native'
+        if: matrix.suite == 'persistence'
         timeout-minutes: 30
         env:
           GOMAXPROCS: '2'
@@ -1001,7 +1001,7 @@ jobs:
           ./internal/task/service ./internal/task/repository/sqlite ./internal/task/handlers
 
       - name: Test Windows workflow start selection
-        if: matrix.suite == 'native'
+        if: matrix.suite == 'settings'
         timeout-minutes: 6
         env:
           GOMAXPROCS: '2'
@@ -1011,7 +1011,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Test Windows repository checkout defaults
-        if: matrix.suite == 'native'
+        if: matrix.suite == 'persistence'
         timeout-minutes: 6
         env:
           GOMAXPROCS: '2'

@@ -101,7 +101,7 @@ class BackendTestsWorkflowContractTest(unittest.TestCase):
 
     def test_windows_suites_run_independently_without_fail_fast(self) -> None:
         windows_job = self.workflow.partition("  test-windows:\n")[2]
-        self.assertIn("suite: [process, native]", windows_job)
+        self.assertIn("suite: [process, native, compile, persistence, settings]", windows_job)
         self.assertIn("fail-fast: false", windows_job)
         self.assertIn("name: Backend (windows, ${{ matrix.suite }})", windows_job)
         self.assertNotIn("continue-on-error", windows_job)
@@ -126,7 +126,7 @@ class BackendTestsWorkflowContractTest(unittest.TestCase):
         for name in (
             "Test Windows isolated instance safety",
             "Test Windows copy-file glob tokenization",
-            "Build", "Vet", "Test windows-sensitive packages",
+            "Test windows-sensitive packages",
             "Test Windows helper console behavior",
             "Test Windows Git executable memo",
             "Test Windows Hermes ACP detection",
@@ -143,6 +143,26 @@ class BackendTestsWorkflowContractTest(unittest.TestCase):
         self.assertIn("- test-windows", gate)
         self.assertIn("TEST_WINDOWS_RESULT: ${{ needs['test-windows'].result }}", gate)
         self.assertIn('"test-windows:${TEST_WINDOWS_RESULT}"', gate)
+
+    def test_windows_expensive_steps_have_one_required_owner(self) -> None:
+        windows = self.workflow.split("  test-windows:\n", 1)[1]
+        groups = {
+            "compile": ("Build", "Vet"),
+            "persistence": ("Test Windows document attachment publication",
+                            "Test Windows executor profile scripts",
+                            "Test Windows workspace settings persistence",
+                            "Test Windows repository checkout defaults"),
+            "settings": ("Test Windows profile enabled omission",
+                         "Test Windows workflow start selection"),
+        }
+        for group, steps in groups.items():
+            for name in steps:
+                with self.subTest(step=name):
+                    self.assertEqual(windows.count(f"      - name: {name}\n"), 1)
+                    block = step_block(windows, name)
+                    self.assertIn(f"if: matrix.suite == '{group}'", block)
+                    self.assertNotIn("continue-on-error", block)
+        self.assertIn("runs-on: windows-latest", windows)
 
     def test_windows_git_executable_memo_runs_in_native_suite(self) -> None:
         step = step_block(self.workflow, "Test Windows Git executable memo")

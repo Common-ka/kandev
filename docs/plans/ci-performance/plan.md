@@ -8,10 +8,12 @@ requirements:
   - REQ-PLATFORM-CI-PERFORMANCE-004
   - REQ-PLATFORM-CI-PERFORMANCE-005
   - REQ-PLATFORM-CI-PERFORMANCE-006
+  - REQ-PLATFORM-CI-PERFORMANCE-007
   - REQ-PLATFORM-E2E-DURATION-AWARE-SHARDING-001
   - REQ-PLATFORM-DURABLE-AGENT-DELIVERY-001
   - REQ-TASKS-TASK-ACTIONS-MENU-004
 system_design:
+  - ../../specs/platform/system-design/ci-completion-budget.md
   - ../../specs/platform/system-design/ci-performance.md
   - ../../specs/platform/system-design/e2e-duration-aware-sharding.md
   - ../../specs/platform/system-design/durable-agent-delivery.md
@@ -31,6 +33,20 @@ Frontend sharding follows measurement of the cheaper setup. Additional E2E shard
 The user authorized implementation after planning. The October changes passed
 local validation; hosted performance acceptance remains open. Historical
 September results remain separate from the current experiment.
+
+## October 14 complete-CI continuation
+
+The maintainer now requires fifteen-minute complete CI and continuous execution
+through measurement, fixes and merge. Tasks 14–16 follow the
+[complete-CI design](../../specs/platform/system-design/ci-completion-budget.md).
+Earlier fixed E2E fan-out limits describe Task 13, whose separate 50% test-step
+target passed and merged in PR #4457. Do not reopen that PR. All work remains in
+the primary session. No new paid capacity is authorized.
+
+1. Task 14: preserve full frontend/Windows selections while removing serial work.
+2. Task 15: use measured package/fixture evidence to shorten remaining backend/E2E paths.
+3. Task 16: account for all test identities, full elapsed time and occupancy;
+   revise candidates, resolve reviews, and merge only after the full target passes.
 
 ## October delivery sequence
 
@@ -169,7 +185,11 @@ No browser E2E is needed for CI-only behavior. Existing application E2E coverage
 - [x] [Task 10: Attribute E2E fixture and planner costs](task-10-profile-e2e-fixture-costs.md)
 - [x] [Task 11: Reject journal operations after shutdown](task-11-journal-shutdown.md)
 - [x] [Task 12: Keep closed task menus closed during processing](task-12-task-menu-recovery.md)
-- [ ] [Task 13: Reduce E2E execution within existing runners](task-13-e2e-runner-processes.md)
+- [x] [Task 13: Reduce E2E execution within existing runners](task-13-e2e-runner-processes.md)
+
+- [ ] [Task 14: Partition frontend and Windows verification](task-14-partition-independent-checks.md)
+- [ ] [Task 15: Shorten remaining critical paths](task-15-remaining-critical-paths.md)
+- [ ] [Task 16: Measure and deliver complete CI](task-16-complete-ci-delivery.md)
 
 ## Execution and evidence
 
