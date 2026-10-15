@@ -49,7 +49,8 @@ GATED_WORKFLOWS = {
         ["apps/backend/internal/orchestrator/orchestrator.go", "apps/web/README.md"],
     ),
     "e2e-tests.yml": (
-        ["apps/web/e2e/specs/kanban.spec.ts", ".github/actions/select-e2e-tests/action.yml"],
+        ["apps/web/e2e/specs/kanban.spec.ts", ".github/actions/select-e2e-tests/action.yml",
+         ".github/actions/resolve-playwright-runtime/action.yml"],
         ["docs/public/install.md", "README.md"],
     ),
 }

@@ -51,7 +51,7 @@ class E2EWorkflowContractTest(unittest.TestCase):
         self.assertIn('--catalog "$GITHUB_WORKSPACE/e2e-manifests/native-catalog.json"', collection)
         manifest_download = report.partition("      - name: Download E2E shard manifests\n")[2].partition("      - name:")[0]
         self.assertNotIn("continue-on-error", manifest_download)
-        for job in (job_block(workflow, "e2e", "playwright_image"), job_block(workflow, "e2e-containers", "e2e-kubernetes-compatibility"), report):
+        for job in (job_block(workflow, "e2e", "e2e-containers"), job_block(workflow, "e2e-containers", "e2e-kubernetes-compatibility"), report):
             self.assertIn("KANDEV_E2E_CATALOG_PRODUCER_ATTEMPT: ${{ needs.build.outputs.catalog_attempt }}", job)
         build = job_block(workflow, "build", "changes")
         self.assertIn("catalog_attempt: ${{ steps.e2e_catalog.outputs.attempt }}", build)
@@ -84,6 +84,28 @@ class E2EWorkflowContractTest(unittest.TestCase):
         self.assertNotIn("uses: actions/setup-go@", report)
         self.assertNotIn("if: steps.pnpm_store", build)
         self.assertNotIn("if: steps.pnpm_store", report)
+
+    def test_platform_preparations_start_before_browser_fanout(self) -> None:
+        workflow = E2E_WORKFLOW.read_text()
+        for role, following in (("helper_compile", "e2e"), ("desktop-e2e", "e2e-report")):
+            with self.subTest(role=role):
+                block = job_block(workflow, role, following)
+                self.assertNotRegex(block.partition("    steps:\n")[0], r"(?m)^    (needs|if):")
+                self.assertIn("run: ${{ steps.selection.outputs.run }}", block)
+                self.assertIn("fetch-depth: 0", block)
+                self.assertIn("uses: ./.github/actions/select-e2e-tests", block)
+                self.assertLess(block.index("Mark workspace safe for git"), block.index("Select application E2E"))
+                work = block.partition("uses: ./.github/actions/select-e2e-tests")[2]
+                for step in work.split("      - name:")[1:]:
+                    self.assertIn("if: steps.selection.outputs.run == 'true'", step)
+        self.assertNotIn("  playwright_image:\n", workflow)
+        build = job_block(workflow, "build", "changes")
+        lookup = build.partition("      - name: Resolve immutable Playwright runtime image\n")[2].partition("      - name:")[0]
+        self.assertIn("uses: ./.github/actions/resolve-playwright-runtime", lookup)
+        self.assertIn("timeout-minutes: 5", lookup)
+        self.assertIn("token: ${{ secrets.GITHUB_TOKEN }}", lookup)
+        for output in ("runtime_image_ref", "runtime_image_digest"):
+            self.assertIn(output + ": ${{ steps.runtime_image.outputs.", build)
 
     def test_normal_matrix_matches_the_planner_and_keeps_guarded_processes(self) -> None:
         workflow = E2E_WORKFLOW.read_text()
@@ -166,11 +188,11 @@ fi
         workflow = E2E_WORKFLOW.read_text()
         helpers = job_block(workflow, "helper_compile", "e2e")
         build = job_block(workflow, "build", "changes")
-        self.assertIn("needs: changes", helpers)
+        self.assertNotRegex(helpers.partition("    steps:\n")[0], r"(?m)^    (needs|if):")
         self.assertIn("runs-on: ubuntu-latest", helpers)
-        self.assertIn("if: needs.changes.outputs.run == 'true'", helpers)
+        self.assertIn("uses: ./.github/actions/select-e2e-tests", helpers)
         self.assertNotIn("continue-on-error", helpers)
-        self.assertNotIn("helper_compile", job_block(workflow, "e2e", "playwright_image"))
+        self.assertNotIn("helper_compile", job_block(workflow, "e2e", "e2e-containers"))
         host = ["build-kandev", "build-agentctl", "build-agentctl-linux", "build-mock-agent"]
         other = ["build-agentctl-linux-arm64", "build-agentctl-darwin-arm64",
                  "build-agentctl-darwin-amd64", "build-acpdbg", "build-codexdbg", "build-winjob"]
@@ -188,7 +210,7 @@ fi
         report = workflow.split("  e2e-report:\n", 1)[1]
         self.assertIn("needs: [changes, helper_compile, build,", report)
         self.assertIn("HELPER_COMPILE_RESULT: ${{ needs.helper_compile.result }}", report)
-        self.assertIn('"helper_compile:${HELPER_COMPILE_RESULT}"', report)
+        self.assertIn('"${HELPER_COMPILE_RESULT}" != "success"', report)
 
     def run_image_digest_resolver(
         self,
@@ -352,7 +374,7 @@ cat "${FAKE_DOCKER_MANIFEST}"
 
     def test_normal_shard_has_queue_safe_timeout(self) -> None:
         workflow = E2E_WORKFLOW.read_text(encoding="utf-8")
-        normal_job = job_block(workflow, "e2e", "playwright_image")
+        normal_job = job_block(workflow, "e2e", "e2e-containers")
 
         self.assertIn(
             "# 45 min covers the serial count-fallback tail and setup overhead",
@@ -363,7 +385,7 @@ cat "${FAKE_DOCKER_MANIFEST}"
 
     def test_normal_resource_observation_preserves_native_execution_and_artifacts(self) -> None:
         workflow = E2E_WORKFLOW.read_text(encoding="utf-8")
-        normal = job_block(workflow, "e2e", "playwright_image")
+        normal = job_block(workflow, "e2e", "e2e-containers")
         self.assertIn("Capture E2E resource budget", normal)
         self.assertIn("Capture E2E resource outcome", normal)
         self.assertIn("TIMEFORMAT=", normal)
@@ -400,7 +422,7 @@ cat "${FAKE_DOCKER_MANIFEST}"
 
     def test_only_normal_jobs_request_bounded_in_runner_processes(self) -> None:
         workflow = E2E_WORKFLOW.read_text(encoding="utf-8")
-        normal_job = job_block(workflow, "e2e", "playwright_image")
+        normal_job = job_block(workflow, "e2e", "e2e-containers")
         self.assertIn('E2E_RUNNER_PROCESSES: "4"', normal_job)
         self.assertEqual(workflow.count("E2E_RUNNER_PROCESSES:"), 1)
         wrapper = REPO_ROOT / "apps/web/e2e/scripts/run-planned-shard.sh"
@@ -422,7 +444,7 @@ cat "${FAKE_DOCKER_MANIFEST}"
         self.assertNotIn("    needs:", changes)
         self.assertNotIn("    if:", changes.split("    steps:\n", 1)[0])
         self.assertNotIn("  e2e-gate:\n", workflow)
-        e2e_job = job_block(workflow, "e2e", "playwright_image")
+        e2e_job = job_block(workflow, "e2e", "e2e-containers")
         self.assertIn("runs-on: ${{ matrix.runner }}", e2e_job)
         self.assertIn(
             "matrix: ${{ fromJSON(needs.build.outputs.plan).e2e_matrix }}",
@@ -431,7 +453,6 @@ cat "${FAKE_DOCKER_MANIFEST}"
 
         protected_jobs = {
             "e2e-report": "e2e-gate",
-            "playwright_image": "e2e-containers",
             "e2e-containers": "e2e-kubernetes-compatibility",
             "e2e-kubernetes-compatibility": "desktop-e2e",
             "desktop-e2e": "e2e-report",
@@ -515,7 +536,9 @@ cat "${FAKE_DOCKER_MANIFEST}"
     # @covers AC-PLATFORM-E2E-DURATION-AWARE-SHARDING-002.2
     def test_container_job_reuses_verified_browser_cache_with_fallback(self) -> None:
         workflow = E2E_WORKFLOW.read_text(encoding="utf-8")
-        resolver_job = job_block(workflow, "playwright_image", "e2e-containers")
+        build = job_block(workflow, "build", "changes")
+        self.assertIn("uses: ./.github/actions/resolve-playwright-runtime", build)
+        resolver_job = (REPO_ROOT / ".github/actions/resolve-playwright-runtime/action.yml").read_text()
         container_job = job_block(workflow, "e2e-containers", "e2e-kubernetes-compatibility")
 
         self.assertIn(
@@ -526,10 +549,10 @@ cat "${FAKE_DOCKER_MANIFEST}"
             "uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9",
             container_job,
         )
-        self.assertIn("needs: [changes, build, playwright_image]", container_job)
+        self.assertIn("needs: [changes, build]", container_job)
         self.assertNotIn("docker buildx imagetools inspect", container_job)
         self.assertIn(
-            "if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository\n        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f",
+            "if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository\n      uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f",
             resolver_job,
         )
         self.assertIn(
@@ -537,19 +560,20 @@ cat "${FAKE_DOCKER_MANIFEST}"
             resolver_job,
         )
         self.assertIn(
-            "digest: ${{ steps.resolve.outputs.digest }}",
+            "value: ${{ steps.resolve.outputs.digest }}",
             resolver_job,
         )
         gate_job = workflow.partition("  e2e-report:\n")[2]
-        self.assertIn("PLAYWRIGHT_IMAGE_RESULT", gate_job)
-        self.assertIn('"playwright-image:${PLAYWRIGHT_IMAGE_RESULT}"', gate_job)
+        self.assertIn("PLAYWRIGHT_IMAGE_REF: ${{ needs.build.outputs.runtime_image_ref }}", gate_job)
+        self.assertIn('${PLAYWRIGHT_IMAGE_REF}', gate_job)
+        self.assertNotIn("PLAYWRIGHT_IMAGE_RESULT", gate_job)
         self.assertIn(
-            "key: e2e-playwright-${{ runner.os }}-v1.61.1-noble-${{ needs.playwright_image.outputs.digest }}-${{ github.run_id }}-${{ github.run_attempt }}",
+            "key: e2e-playwright-${{ runner.os }}-v1.61.1-noble-${{ needs.build.outputs.runtime_image_digest }}-${{ github.run_id }}-${{ github.run_attempt }}",
             container_job,
         )
         self.assertIn("path: /tmp/ms-playwright", container_job)
         self.assertIn(
-            "restore-keys: e2e-playwright-${{ runner.os }}-v1.61.1-noble-${{ needs.playwright_image.outputs.digest }}-",
+            "restore-keys: e2e-playwright-${{ runner.os }}-v1.61.1-noble-${{ needs.build.outputs.runtime_image_digest }}-",
             container_job,
         )
         self.assertIn("id: playwright_cache", container_job)
@@ -568,7 +592,7 @@ cat "${FAKE_DOCKER_MANIFEST}"
             container_job,
         )
         self.assertIn(
-            "PLAYWRIGHT_RUNTIME_REF: ${{ needs.playwright_image.outputs.ref }}",
+            "PLAYWRIGHT_RUNTIME_REF: ${{ needs.build.outputs.runtime_image_ref }}",
             container_job,
         )
         self.assertIn('docker pull "$PLAYWRIGHT_RUNTIME_REF"', container_job)

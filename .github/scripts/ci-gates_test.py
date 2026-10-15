@@ -33,7 +33,9 @@ class GateTests(unittest.TestCase):
                            RUNNER_PLAN="{}", SKIP_REASON="irrelevant-paths",
                            GITHUB_STEP_SUMMARY=str(Path(directory)/"summary"))
                 if job == "e2e-report":
-                    env["BUILD_RUN_REQUIRED"] = "true"
+                    env.update(BUILD_RUN_REQUIRED="true", HELPER_RUN_REQUIRED="true",
+                               DESKTOP_RUN_REQUIRED="true",
+                               PLAYWRIGHT_IMAGE_REF="ghcr.io/kdlbs/kandev-ci:runtime-latest@sha256:" + "a" * 64)
                 # The consolidated report must prove reports exist, not only green shard jobs.
                 for filename in ("apps/web/e2e/retry-summary.json", "apps/web/e2e/timing-profile.json", "apps/web/e2e/merged-report.json"):
                     target = Path(directory) / filename
@@ -53,14 +55,19 @@ class GateTests(unittest.TestCase):
                         self.assertNotEqual(run({key: outcome}), 0, (workflow, key, outcome))
                 preparation = {"CHANGES_RESULT", "REPORT_RESULT"}
                 if job == "e2e-report":
-                    preparation.add("BUILD_RESULT")
+                    preparation.update({"BUILD_RESULT", "HELPER_COMPILE_RESULT", "DESKTOP_E2E_RESULT"})
                 skipped = {k: "skipped" for k in env if k.endswith("_RESULT") and k not in preparation}
                 filtered = {"RUN_REQUIRED": "false"}
                 if job == "e2e-report":
-                    filtered["BUILD_RUN_REQUIRED"] = "false"
-                    for verdict in ("false", "", "unknown"):
-                        self.assertNotEqual(run({"BUILD_RUN_REQUIRED": verdict}), 0)
-                    self.assertNotEqual(run({**skipped, **filtered, "BUILD_RUN_REQUIRED": "true"}), 0)
+                    for key in ("BUILD_RUN_REQUIRED", "HELPER_RUN_REQUIRED", "DESKTOP_RUN_REQUIRED"):
+                        filtered[key] = "false"
+                        for verdict in ("false", "", "unknown"):
+                            self.assertNotEqual(run({key: verdict}), 0, key)
+                    for key in ("BUILD_RUN_REQUIRED", "HELPER_RUN_REQUIRED", "DESKTOP_RUN_REQUIRED"):
+                        for verdict in ("true", "", "unknown"):
+                            self.assertNotEqual(run({**skipped, **filtered, key: verdict}), 0, key)
+                    for image in ("", "ghcr.io/kdlbs/kandev-ci:runtime-latest", "other@sha256:" + "a" * 64):
+                        self.assertNotEqual(run({"PLAYWRIGHT_IMAGE_REF": image}), 0)
                 self.assertEqual(run({**skipped, **filtered}), 0)
                 for verdict in ("", "unknown"):
                     invalid = {**skipped, **filtered, "RUN_REQUIRED": verdict}
@@ -104,7 +111,7 @@ class GateTests(unittest.TestCase):
     def test_go_test_exemption_only_overrides_a_verified_relevant_pr_diff(self):
         workflow = (WORKFLOWS / "e2e-tests.yml").read_text()
         selector = E2E_SELECTOR.read_text()
-        self.assertEqual(workflow.count("uses: ./.github/actions/select-e2e-tests"), 2)
+        self.assertEqual(workflow.count("uses: ./.github/actions/select-e2e-tests"), 4)
         self.assertIn("value: ${{ steps.test-only.outputs.run || steps.detect.outputs.run }}", selector)
         self.assertIn("if: github.event_name == 'pull_request' && steps.detect.outputs.run == 'true' && steps.detect.outputs.base != ''", selector)
         self.assertIn("BASE_SHA: ${{ steps.detect.outputs.base }}", selector)

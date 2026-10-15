@@ -27,6 +27,7 @@ runs:
           .github/workflows/e2e-tests.yml
           .github/actions/cache-go/**
           .github/actions/select-e2e-tests/**
+          .github/actions/resolve-playwright-runtime/**
           .github/scripts/go-cache-identity.*
           .github/actions/download-artifact-retry/**
           .github/scripts/ci-test-only-changes.py

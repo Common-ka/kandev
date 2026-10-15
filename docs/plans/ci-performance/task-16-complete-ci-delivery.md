@@ -53,6 +53,28 @@ git diff --check
 
 Hosted evidence remains mandatory; local contracts do not prove speed.
 
+### Candidate thirty-one: preserve the frozen control and move preparation
+
+The thirty-first candidate changes only CI preparation. Its local executable
+contracts first fail against candidate thirty and then pass the four-root
+placement, matching-verdict and immutable-image requirements. All existing
+commands, deadlines, worker guards and coverage selections are preserved by a
+parsed comparison with frozen source `06f94acc9dd6`. The full roster drops from
+71 to seventy solely by moving the image-resolution operation into Build.
+Helper compilation and desktop smoke become independent selecting roots.
+
+Workflow, required-gate, runner-placement, path-selection, independent-Go-test,
+repository-contract and SHA-pinning checks pass. Official actionlint 1.7.12,
+document validation and specification lint pass. Zizmor reports the same
+baseline findings plus three advisory local-action-reference suggestions for
+the added calls; the new composite itself has zero findings. Authentication
+conditions, action pins and read-only permissions are preserved. No new trust
+boundary or credential scope is introduced.
+
+Keep the remote control unchanged until its complete hosted set terminates.
+Freeze the next committed source and graph separately before dispatch. No
+hosted saving or fifteen-minute acceptance is established by these local checks.
+
 ### Candidate thirty: retain both failing browser contracts
 
 The mobile action-bar failure reproduces locally with sixfold Chromium CPU

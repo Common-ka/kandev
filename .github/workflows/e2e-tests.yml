@@ -47,6 +47,8 @@ jobs:
     outputs:
       plan: ${{ steps.plan.outputs.plan }}
       run: ${{ steps.selection.outputs.run }}
+      runtime_image_digest: ${{ steps.runtime_image.outputs.digest }}
+      runtime_image_ref: ${{ steps.runtime_image.outputs.ref }}
       catalog_attempt: ${{ steps.e2e_catalog.outputs.attempt }}
     env:
       COREPACK_HOME: /tmp/kandev-corepack
@@ -86,6 +88,14 @@ jobs:
       - name: Select application E2E
         id: selection
         uses: ./.github/actions/select-e2e-tests
+
+      - name: Resolve immutable Playwright runtime image
+        if: steps.selection.outputs.run == 'true'
+        id: runtime_image
+        timeout-minutes: 5
+        uses: ./.github/actions/resolve-playwright-runtime
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up pnpm
         if: steps.selection.outputs.run == 'true'
@@ -388,11 +398,11 @@ jobs:
 
   helper_compile:
     name: Compile remaining helper platforms
-    needs: changes
-    if: needs.changes.outputs.run == 'true'
     runs-on: ubuntu-latest
     container: ghcr.io/kdlbs/kandev-ci:build-latest
     timeout-minutes: 20
+    outputs:
+      run: ${{ steps.selection.outputs.run }}
     defaults:
       run:
         shell: bash
@@ -400,12 +410,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Mark workspace safe for git
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
+      - name: Select application E2E
+        id: selection
+        uses: ./.github/actions/select-e2e-tests
+
       - name: Cache Go modules
+        if: steps.selection.outputs.run == 'true'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
@@ -419,6 +435,7 @@ jobs:
             go-${{ runner.os }}-
 
       - name: Compile remote platforms and diagnostic commands
+        if: steps.selection.outputs.run == 'true'
         run: >-
           VERSION="0.0.0-e2e.${GITHUB_SHA}"
           make -C apps/backend build-agentctl-linux-arm64 build-agentctl-darwin-arm64 build-agentctl-darwin-amd64 build-acpdbg build-codexdbg build-winjob
@@ -567,44 +584,9 @@ jobs:
           path: apps/web/e2e/test-results/
           retention-days: 7
 
-  # Resolve the runtime tag once before the six container shards start. Fork
+  # Build resolves the runtime tag once before the six container shards start. Fork
   # pull requests use the public package anonymously, so sharing one bounded
   # lookup avoids multiplying transient GHCR failures across the matrix.
-  playwright_image:
-    name: Resolve Playwright runtime image
-    needs: changes
-    if: needs.changes.outputs.run == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    outputs:
-      digest: ${{ steps.resolve.outputs.digest }}
-      ref: ${{ steps.resolve.outputs.ref }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
-        with:
-          persist-credentials: false
-
-      - name: Log in to GHCR
-        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Resolve immutable Playwright runtime image
-        id: resolve
-        run: |
-          set -euo pipefail
-          image=ghcr.io/kdlbs/kandev-ci:runtime-latest
-          digest="$(bash .github/scripts/resolve-image-digest.sh "$image")"
-          {
-            echo "digest=$digest"
-            echo "ref=$image@$digest"
-          } >> "$GITHUB_OUTPUT"
-
   # Real-container E2E: exercises the Docker, SSH, and Kubernetes executors.
   # ubuntu-latest ships with Docker preinstalled, so no service container is
   # required. Container-bound tests are slow (up to ~3 min each), so we shard across
@@ -616,7 +598,7 @@ jobs:
   # Sharded 6 ways — each shard is its own runner. See apps/web/e2e/README.md.
   e2e-containers:
     name: E2E Containers Shard ${{ matrix.shard }}/6
-    needs: [changes, build, playwright_image]
+    needs: [changes, build]
     if: needs.changes.outputs.run == 'true'
     # This job intentionally runs on the host ubuntu runner (NOT the kandev-ci
     # container image): the containers project needs direct access to the
@@ -716,8 +698,8 @@ jobs:
         continue-on-error: true
         with:
           path: /tmp/ms-playwright
-          key: e2e-playwright-${{ runner.os }}-v1.61.1-noble-${{ needs.playwright_image.outputs.digest }}-${{ github.run_id }}-${{ github.run_attempt }}
-          restore-keys: e2e-playwright-${{ runner.os }}-v1.61.1-noble-${{ needs.playwright_image.outputs.digest }}-
+          key: e2e-playwright-${{ runner.os }}-v1.61.1-noble-${{ needs.build.outputs.runtime_image_digest }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: e2e-playwright-${{ runner.os }}-v1.61.1-noble-${{ needs.build.outputs.runtime_image_digest }}-
 
       - name: Configure Playwright browser path
         run: echo "PLAYWRIGHT_BROWSERS_PATH=/tmp/ms-playwright" >> "$GITHUB_ENV"
@@ -759,7 +741,7 @@ jobs:
         id: playwright_extract
         if: steps.playwright_cache.outputs.cache-hit == '' || steps.playwright_cache_verify.outcome != 'success'
         env:
-          PLAYWRIGHT_RUNTIME_REF: ${{ needs.playwright_image.outputs.ref }}
+          PLAYWRIGHT_RUNTIME_REF: ${{ needs.build.outputs.runtime_image_ref }}
         run: |
           set -euo pipefail
           docker pull "$PLAYWRIGHT_RUNTIME_REF"
@@ -812,7 +794,7 @@ jobs:
         continue-on-error: true
         with:
           path: /tmp/ms-playwright
-          key: e2e-playwright-${{ runner.os }}-v1.61.1-noble-${{ needs.playwright_image.outputs.digest }}-${{ github.run_id }}-${{ github.run_attempt }}
+          key: e2e-playwright-${{ runner.os }}-v1.61.1-noble-${{ needs.build.outputs.runtime_image_digest }}-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Summarize Playwright browser setup
         if: always()
@@ -822,7 +804,7 @@ jobs:
           CACHE_VERIFY_OUTCOME: ${{ steps.playwright_cache_verify.outcome }}
           CACHE_EXTRACT_OUTCOME: ${{ steps.playwright_extract.outcome }}
           CACHE_SAVE_OUTCOME: ${{ steps.playwright_cache_save.outcome }}
-          IMAGE_DIGEST: ${{ needs.playwright_image.outputs.digest }}
+          IMAGE_DIGEST: ${{ needs.build.outputs.runtime_image_digest }}
           SETUP_STARTED_AT: ${{ steps.browser_setup_timer.outputs.started_at }}
         run: |
           set -euo pipefail
@@ -1151,8 +1133,6 @@ jobs:
 
   desktop-e2e:
     name: Desktop E2E Smoke
-    needs: changes
-    if: needs.changes.outputs.run == 'true'
     runs-on: ubuntu-latest
     # The desktop image contains the Rust toolchain, Tauri dependencies, and
     # Xvfb. Go is installed below for the packaged-launcher smoke.
@@ -1160,6 +1140,8 @@ jobs:
       image: ghcr.io/kdlbs/kandev-ci:desktop-latest
       options: --ipc=host
     timeout-minutes: 45
+    outputs:
+      run: ${{ steps.selection.outputs.run }}
     defaults:
       run:
         shell: bash
@@ -1168,20 +1150,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
+          fetch-depth: 0
           persist-credentials: false
 
+      - name: Mark workspace safe for git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Select application E2E
+        id: selection
+        uses: ./.github/actions/select-e2e-tests
+
       - name: Set up Go
+        if: steps.selection.outputs.run == 'true'
         uses: actions/setup-go@5064d95ba18d4a9dda7c4cc67adeb03aea1a2a14 # v7.0.0 + upstream dependency refresh
         with:
           go-version-file: apps/backend/go.mod
           cache-dependency-path: apps/backend/go.sum
 
-      - name: Mark workspace safe for git
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-
       # The desktop image uses /root as HOME, so this matches the store path
       # used by the other container jobs.
       - name: Cache pnpm store
+        if: steps.selection.outputs.run == 'true'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.local/share/pnpm/store
@@ -1189,22 +1178,25 @@ jobs:
           restore-keys: pnpm-${{ runner.os }}-
 
       - name: Cache Rust build
+        if: steps.selection.outputs.run == 'true'
         uses: Swatinem/rust-cache@42dc69e1aa15d09112580998cf2ef0119e2e91ae # v2
         with:
           workspaces: apps/desktop/src-tauri -> target
           key: desktop-e2e
 
       - name: Install dependencies
+        if: steps.selection.outputs.run == 'true'
         working-directory: apps
         run: pnpm install --frozen-lockfile
 
       - name: Run desktop smoke
+        if: steps.selection.outputs.run == 'true'
         working-directory: apps
         run: pnpm --filter @kandev/desktop e2e
 
   e2e-report:
     name: E2E Tests Passed
-    needs: [changes, helper_compile, build, playwright_image, e2e, e2e-containers, e2e-kubernetes-compatibility, desktop-e2e]
+    needs: [changes, helper_compile, build, e2e, e2e-containers, e2e-kubernetes-compatibility, desktop-e2e]
     if: always()
     # Report aggregation queries GitHub history and downloads artifacts with the
     # job token, so it remains on a GitHub-hosted runner during the pilot.
@@ -1573,18 +1565,20 @@ jobs:
           RUNNER_PLAN: ${{ needs.build.outputs.plan }}
           RUN_REQUIRED: ${{ needs.changes.outputs.run }}
           BUILD_RUN_REQUIRED: ${{ needs.build.outputs.run }}
+          HELPER_RUN_REQUIRED: ${{ needs.helper_compile.outputs.run }}
+          DESKTOP_RUN_REQUIRED: ${{ needs['desktop-e2e'].outputs.run }}
+          PLAYWRIGHT_IMAGE_REF: ${{ needs.build.outputs.runtime_image_ref }}
           REPORT_RESULT: ${{ job.status }}
           SKIP_REASON: ${{ needs.changes.outputs.reason }}
           HELPER_COMPILE_RESULT: ${{ needs.helper_compile.result }}
           BUILD_RESULT: ${{ needs.build.result }}
-          PLAYWRIGHT_IMAGE_RESULT: ${{ needs.playwright_image.result }}
           E2E_RESULT: ${{ needs.e2e.result }}
           E2E_CONTAINERS_RESULT: ${{ needs['e2e-containers'].result }}
           E2E_KUBERNETES_COMPATIBILITY_RESULT: ${{ needs['e2e-kubernetes-compatibility'].result }}
           DESKTOP_E2E_RESULT: ${{ needs['desktop-e2e'].result }}
         run: |
           set -euo pipefail
-          if [[ "${CHANGES_RESULT}" != "success" || "${BUILD_RESULT}" != "success" || -z "${RUNNER_PLAN}" ]]; then
+          if [[ "${CHANGES_RESULT}" != "success" || "${BUILD_RESULT}" != "success" || "${HELPER_COMPILE_RESULT}" != "success" || "${DESKTOP_E2E_RESULT}" != "success" || -z "${RUNNER_PLAN}" ]]; then
             echo "E2E preparation failed or produced no runner plan: selection=${CHANGES_RESULT} build=${BUILD_RESULT}" >&2
             exit 1
           fi
@@ -1592,19 +1586,22 @@ jobs:
             echo "Missing change-selection verdict." >&2
             exit 1
           fi
-          if [[ "${BUILD_RUN_REQUIRED}" != "${RUN_REQUIRED}" ]]; then
-            echo "E2E preparation verdicts disagree or are missing." >&2
+          for verdict in "${BUILD_RUN_REQUIRED}" "${HELPER_RUN_REQUIRED}" "${DESKTOP_RUN_REQUIRED}"; do
+            if [[ "${verdict}" != "${RUN_REQUIRED}" ]]; then
+              echo "E2E preparation verdicts disagree or are missing." >&2
+              exit 1
+            fi
+          done
+          if [[ "${RUN_REQUIRED}" == "true" && ! "${PLAYWRIGHT_IMAGE_REF}" =~ ^ghcr\.io/kdlbs/kandev-ci:runtime-latest@sha256:[0-9a-f]{64}$ ]]; then
+            echo "Missing or invalid immutable Playwright runtime image." >&2
             exit 1
           fi
           expected=skipped
           if [[ "${RUN_REQUIRED}" == "true" ]]; then expected=success; fi
           for entry in \
-            "helper_compile:${HELPER_COMPILE_RESULT}" \
-            "playwright-image:${PLAYWRIGHT_IMAGE_RESULT}" \
             "e2e:${E2E_RESULT}" \
             "e2e-containers:${E2E_CONTAINERS_RESULT}" \
-            "e2e-kubernetes-compatibility:${E2E_KUBERNETES_COMPATIBILITY_RESULT}" \
-            "desktop-e2e:${DESKTOP_E2E_RESULT}"; do
+            "e2e-kubernetes-compatibility:${E2E_KUBERNETES_COMPATIBILITY_RESULT}"; do
             name="${entry%%:*}"
             result="${entry#*:}"
             required="${expected}"

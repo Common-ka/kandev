@@ -61,6 +61,44 @@ git diff --check
 
 ## Results
 
+### Candidate thirty-one: admit preparation before browser fanout
+
+The frozen `06f94acc9dd6` control finishes Build at 10:11:36 UTC and queues
+normal browser jobs at 10:11:37. Auxiliary selection finishes at 10:11:39;
+helper compilation, image resolution and desktop smoke are admitted afterward.
+The image job waits 3,577 seconds before executing for nineteen seconds at
+11:11:16. All six container shards remain unscheduled until it completes.
+This establishes avoidable preparation handoffs, without attributing every
+queue delay to source or assuming a configured runner limit.
+
+Resolve the unchanged image login/digest operation within root Build through
+one composite step with the original five-minute bound. Keep Build's twenty-
+minute deadline and the same login predicate, token scopes and resolver retry
+limits. Remove its separate runner; container cache keys and execution use
+Build's immutable digest/ref outputs.
+
+Start helper compilation and desktop smoke independently through the same
+shared selection action and full-history checkouts. Mark container workspaces
+safe before selection; both existing images have verified Python 3.12.3.
+Preserve selected-run steps and conditions, platform coverage, resource guards
+and twenty/forty-five-minute deadlines. The report requires successful root
+preparations, matching explicit verdicts, a plan and a valid selected-run image.
+Only browser/container/compatibility children may skip a filtered run.
+
+All 3,957 E2E identities, twenty-four normal and six container jobs remain.
+The full roster becomes seventy jobs only because image-resolution work moves
+into Build. Required public contexts are unchanged; the separate image lookup
+is not required by the current main ruleset. Local implementation may proceed
+against the frozen control while its remote head stays unchanged. Do not push
+or dispatch this candidate until the control terminates. Measure each source
+against its own frozen workflow graph and preserve failed/over-budget samples.
+
+Executable gate and DAG contracts first reject the old placement and missing
+root-verdict/image checks. Validate full and filtered failure/cancellation/
+unknown/missing cases, action pins and fork login boundaries before rollout.
+This candidate changes CI preparation only; retain all lifecycle waits and
+assertions, including the LSP ninety-five-second orchestrator-reaper check.
+
 ### Local next-candidate prototype: keep detection and Build on one runner
 
 The fixed twenty-four-shard trial runs separately at head `1650142a72e8`.

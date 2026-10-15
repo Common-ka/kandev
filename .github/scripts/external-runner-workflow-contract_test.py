@@ -58,7 +58,7 @@ class ExternalRunnerWorkflowContractTest(unittest.TestCase):
         build = job_block(workflow, "build", "changes")
         self.assertIn("runs-on: ubuntu-latest", build)
         self.assertNotIn("runner_plan", build)
-        e2e = job_block(workflow, "e2e", "playwright_image")
+        e2e = job_block(workflow, "e2e", "e2e-containers")
         self.assertIn(
             "matrix: ${{ fromJSON(needs.build.outputs.plan).e2e_matrix }}",
             e2e,
@@ -69,7 +69,6 @@ class ExternalRunnerWorkflowContractTest(unittest.TestCase):
         self.assertNotIn("runner_plan", report)
         self.assertNotIn("  e2e-gate:\n", workflow)
         for job, next_job in (
-            ("playwright_image", "e2e-containers"),
             ("e2e-containers", "e2e-kubernetes-compatibility"),
             ("e2e-kubernetes-compatibility", "desktop-e2e"),
             ("desktop-e2e", "e2e-report"),

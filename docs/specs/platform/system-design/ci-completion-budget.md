@@ -33,31 +33,43 @@ for each experiment. PR #4457 already met the distinct 50% E2E-step target.
 | REQ-PLATFORM-CI-PERFORMANCE-005 | Occupancy and loaded feedback comparison |
 | REQ-PLATFORM-CI-PERFORMANCE-007 | Full workflow budget and staged delivery |
 
-## Proposed bounded preparation consolidation
+## Root preparation before browser fanout
 
-Keep the twenty-four-shard measurement fixed while testing the next workflow
-locally. Its separate Build scheduling instance waits 166 seconds before a
-116-second execution. Start Build directly on its existing GitHub-hosted runner,
-with the existing planner and a shared exact-source selection action. The small
-auxiliary selection job calls the same action independently, preserving the
-parallel start of helper compilation, image resolution and desktop coverage.
-Build owns its runner plan and catalog outputs; normal browser jobs need only
-Build. Container/platform prerequisite unions remain otherwise unchanged.
+Build, auxiliary selection, remaining-helper compilation and desktop smoke are
+independent GitHub-hosted roots. Each uses one shared exact-source path and
+independent-Go-test selection action on a full-history checkout. Container jobs
+mark the workspace safe before selection. Build alone runs the existing runner
+planner and owns its plan, native catalog and build artifacts.
 
-Both preparation jobs retain full-history checkouts. The selection action owns
-the existing path patterns and independent-Go-test exemption; its own files are
-relevant inputs too. Build keeps its twenty-minute and auxiliary selection its
-ten-minute deadline. Only selected runs execute the original build operations.
-The required gate always requires successful preparations, matching explicit
-boolean selection verdicts and a nonempty plan. Failed/cancelled preparation,
-unknown or divergent verdicts, unexpected skips and missing selected-run evidence
-cannot pass, including when the other preparation chooses to filter the run.
+Resolve the immutable Playwright runtime in a composite Build step, rather than
+waiting for another runner after selection. Keep the original same-repository
+login predicate, read-only token scopes, resolver script and retries. The whole
+lookup retains its five-minute bound. Container jobs consume Build's digest/ref
+for existing cache validation and execution; no tag-only or unverified image is
+admitted. Normal browsers depend only on Build. Other platform prerequisite
+unions remain unchanged except removal of the separate image lookup job.
 
-All test, helper, container, desktop and Kubernetes operations remain under the
-same platform, credential, resource, retry and deadline boundaries. The complete
-selected roster stays 71 jobs, with no additional runners or shards. Retain all
-native identities and compare whole-graph hosted time before adopting this
-prototype. Do not serialize independent platform jobs behind compilation.
+Build retains twenty minutes, auxiliary selection ten, helper compilation twenty
+and desktop smoke forty-five. Selected runs execute the original operations and
+conditions. The platform roots initialize their existing images before selecting
+work, so filtered-run setup is not free; do not count a filtered run as full
+performance acceptance. No new image publication or paid capacity is required.
+
+The always-running report requires all four successful roots, explicit matching
+boolean verdicts and a nonempty runner plan. A selected run also requires the
+validated immutable image and successful browser, container and compatibility
+children, report processing and all native evidence. Failed/cancelled roots,
+unknown/divergent verdicts, missing image, unexpected skips or absent evidence
+cannot pass. Only the child test roles may skip a legitimately filtered run.
+
+All test, helper, container, desktop and Kubernetes commands retain their
+platform, credential, resource, retry and deadline boundaries. The complete
+roster becomes seventy jobs solely because image resolution reuses Build.
+Keep twenty-four normal and six container shards with the existing guarded
+process budget. Compare each complete hosted set with its own frozen graph;
+never overlap hosted rollout candidates or infer queue guarantees from job
+creation order. Local implementation may proceed while a fixed remote control
+finishes, without pushing or changing that control's source.
 
 ## First candidate: independent frontend and Windows work
 
@@ -239,8 +251,10 @@ Planner, workflow and complete-report expectations change together. A complete
 metadata set requires all 24 normal and six container identities; partial,
 duplicate or old-count metadata cannot establish a complete catalog. Native
 report reconciliation still requires every case from the source-bound catalog.
-The selected core roster becomes 71 jobs; its four fewer normal scheduling
-instances retain their tests through redistribution into the other jobs.
+This shard-only change selects 71 core jobs; its four fewer normal scheduling
+instances retain their tests through redistribution into the other jobs. The
+later root-preparation change above selects seventy jobs by moving immutable
+image resolution into Build, with no additional test redistribution.
 
 Compare both plans with identical catalog and timing inputs before rollout.
 Require disjoint complete assignment and the same catalog checksum, unit work,
