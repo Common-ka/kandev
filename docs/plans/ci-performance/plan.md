@@ -10,6 +10,7 @@ requirements:
   - REQ-PLATFORM-CI-PERFORMANCE-006
   - REQ-PLATFORM-CI-PERFORMANCE-007
   - REQ-PLATFORM-CI-PERFORMANCE-008
+  - REQ-PLATFORM-CI-PERFORMANCE-009
   - REQ-PLATFORM-E2E-DURATION-AWARE-SHARDING-001
   - REQ-PLATFORM-DURABLE-AGENT-DELIVERY-001
   - REQ-TASKS-TASK-ACTIONS-MENU-004
@@ -65,16 +66,16 @@ so no new ADR is required. There is no application UI, public API, release, or
 public-documentation change. Internal operating notes belong in
 `docs/ci-merge-queue.md` during implementation.
 
-1. Task 14: introduce separate dependency and daily compilation caches for
+1. Task 17: introduce separate dependency and daily compilation caches for
    the existing Linux Go cache consumers; verify reuse, failure behavior, and
    occupied time with restore/save overhead included.
-2. Task 15: build and smoke-test a browser-free Node reporting image; deliver
+2. Task 18: build and smoke-test a browser-free Node reporting image; deliver
    its producer separately while the required report job keeps its current image.
-3. Task 16: after successful publication, verify the immutable image digest,
+3. Task 19: after successful publication, verify the immutable image digest,
    replay reports, switch the report consumer, and collect hosted acceptance.
 
-Task 15 does not depend on cache implementation, but execution is sequential
-and both can edit shared workflow contract tests. Task 16 depends on task 15
+Task 18 does not depend on cache implementation, but execution is sequential
+and both can edit shared workflow contract tests. Task 19 depends on task 18
 and actual image availability, not merely on a Dockerfile in the branch.
 Use separate producer and consumer commits so a required job never pulls a
 nonexistent image. The isolated `report_only=true` manual dispatch supports
@@ -94,9 +95,9 @@ Cache immutability is documented in the
 
 | Criteria | Required evidence |
 | --- | --- |
-| 007.1–007.2 | Proposed `go-cache-identity.test.mjs`: daily rollover with unchanged dependencies, within-day reuse, and compatibility/family separation; real Go source-change probe |
-| 007.3 | Existing backend/E2E workflow contract suites extended for unconditional required commands, best-effort caches and successful-job-only publication; hosted failed/cancelled save observations |
-| 007.4; 004.1–004.2; 005.1 | Cache logs and three comparable samples, including compressed size and restore/save cost; missing hosted evidence remains pending |
+| 009.1–009.2 | Proposed `go-cache-identity.test.mjs`: daily rollover with unchanged dependencies, within-day reuse, and compatibility/family separation; real Go source-change probe |
+| 009.3 | Existing backend/E2E workflow contract suites extended for unconditional required commands, best-effort caches and successful-job-only publication; hosted failed/cancelled save observations |
+| 009.4; 004.1–004.2; 005.1 | Cache logs and three comparable samples, including compressed size and restore/save cost; missing hosted evidence remains pending |
 | 008.1 | Proposed report-image replay harness: identical test/attempt/outcome/attachment records, mixed roots, complete saved hosted inputs when available |
 | 008.2 | Actual report gate exercised for failures, cancellation, malformed/missing evidence and deliberate skips; existing required-check/dependency contracts |
 | 008.3 | Producer-only delivery, published Linux/amd64 digest pull/replay, consumer-only switch, recorded rollback digest |
@@ -135,7 +136,7 @@ build-job time from 425 to 144 seconds. Cold population costs and cache sizes
 are retained in [cache/report evidence](cache-report-evidence.md).
 Latest-head CI remains externally tracked on
 [PR #4486](https://github.com/kdlbs/kandev/pull/4486); natural next-day cache
-rotation and hosted failed/cancelled save observations remain open for task 14.
+rotation and hosted failed/cancelled save observations remain open for task 17.
 No complete-pipeline speedup is inferred from the report replay or a cache hit.
 
 ### Earlier October sequence
@@ -278,9 +279,9 @@ No browser E2E is needed for CI-only behavior. Existing application E2E coverage
 - [ ] [Task 14: Partition frontend and Windows verification](task-14-partition-independent-checks.md)
 - [ ] [Task 15: Shorten remaining critical paths](task-15-remaining-critical-paths.md)
 - [ ] [Task 16: Measure and deliver complete CI](task-16-complete-ci-delivery.md)
-- [ ] [Task 14: Refresh Go compilation caches](task-14-go-cache-freshness.md)
-- [x] [Task 15: Produce the lightweight report image](task-15-report-image-producer.md)
-- [x] [Task 16: Adopt and measure the report image](task-16-report-image-consumer.md)
+- [ ] [Task 17: Refresh Go compilation caches](task-17-go-cache-freshness.md)
+- [x] [Task 18: Produce the lightweight report image](task-18-report-image-producer.md)
+- [x] [Task 19: Adopt and measure the report image](task-19-report-image-consumer.md)
 
 ## Execution and evidence
 
@@ -485,3 +486,12 @@ and cleanup. After a fresh build, both desktop continuity cases and both dialog 
 cases passed without retries. All 82 workflow, gate, path-selection, and runner-plan
 contract tests passed, as did Actionlint, focused ESLint/Prettier, catalog/specification
 checks, and harness lint. Hosted verification remains pending the rebased push.
+
+## October 15 rebase assessment
+
+PR #4489 is now the base. Tasks 17–19 preserve this branch's historical cache
+and report work without reusing main's task 14–16 identifiers. E2E cache logic
+and the scrolling selector fixes are already upstream. Native hosted reporting
+supersedes task 19's container adoption; its completed results are historical.
+Only backend cache extension remains a distinct performance candidate, with no
+measured gain against the new main yet. See `cache-report-evidence.md`.

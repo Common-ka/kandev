@@ -1,5 +1,5 @@
 ---
-id: "15-report-image-producer"
+id: "18-report-image-producer"
 title: "Produce the lightweight report image"
 status: done
 wave: 2
@@ -15,7 +15,7 @@ system_design:
   - ../../specs/platform/system-design/ci-performance.md
 ---
 
-# Task 15: Produce the lightweight report image
+# Task 18: Produce the lightweight report image
 
 ## Summary
 
@@ -104,7 +104,7 @@ is a delivery checkpoint, not something local tests can simulate as complete.
 ## Dependencies
 
 No code dependency on task 14. Execute sequentially because shared workflow
-tests and evidence files overlap. Task 16 requires actual published image
+tests and evidence files overlap. Task 19 requires actual published image
 availability and successful digest replay from this task.
 
 ## Risks
@@ -131,3 +131,11 @@ replay, required-gate cases, and identical-byte baseline semantic/attachment
 comparison passed. Isolated publication is implemented; authorized publication
 run 38568106690 and anonymous published-digest replay
 passed. Compressed layers are 87.9% smaller than the runtime baseline. See [evidence](cache-report-evidence.md).
+
+## Rebase assessment, October 15
+
+PR #4489 superseded the runtime-container report baseline with native hosted
+Node/pnpm and GitHub CLI artifact downloads. The rebase preserves that consumer;
+the report-image producer and historical evidence remain for assessment only.
+The old container comparison does not establish a gain against current main,
+and this published image lacks the new consumer's GitHub CLI/Python tools.

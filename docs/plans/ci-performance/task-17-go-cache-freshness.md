@@ -1,19 +1,19 @@
 ---
-id: "14-go-cache-freshness"
+id: "17-go-cache-freshness"
 title: "Refresh Go compilation caches"
 status: in_progress
 wave: 1
 depends_on: []
 plan: "plan.md"
 requirements:
-  - REQ-PLATFORM-CI-PERFORMANCE-007
+  - REQ-PLATFORM-CI-PERFORMANCE-009
   - REQ-PLATFORM-CI-PERFORMANCE-004
   - REQ-PLATFORM-CI-PERFORMANCE-005
 acceptance_criteria:
-  - AC-PLATFORM-CI-PERFORMANCE-007.1
-  - AC-PLATFORM-CI-PERFORMANCE-007.2
-  - AC-PLATFORM-CI-PERFORMANCE-007.3
-  - AC-PLATFORM-CI-PERFORMANCE-007.4
+  - AC-PLATFORM-CI-PERFORMANCE-009.1
+  - AC-PLATFORM-CI-PERFORMANCE-009.2
+  - AC-PLATFORM-CI-PERFORMANCE-009.3
+  - AC-PLATFORM-CI-PERFORMANCE-009.4
   - AC-PLATFORM-CI-PERFORMANCE-004.1
   - AC-PLATFORM-CI-PERFORMANCE-004.2
   - AC-PLATFORM-CI-PERFORMANCE-005.1
@@ -21,7 +21,7 @@ system_design:
   - ../../specs/platform/system-design/ci-performance.md
 ---
 
-# Task 14: Refresh Go compilation caches
+# Task 17: Refresh Go compilation caches
 
 ## Summary
 
@@ -146,3 +146,10 @@ The complete comparison is recorded in the evidence file; latest-head CI is main
 [PR #4486](https://github.com/kdlbs/kandev/pull/4486).
 Actual next-day generation and failed/cancelled hosted save observations remain
 open, so this work order is not marked done; see [evidence](cache-report-evidence.md).
+
+## Rebase assessment, October 15
+
+PR #4489 merged the shared cache action and E2E Build consumer into main.
+This branch now extends that existing action to backend static checks, four
+ordinary test shards and ambient verification. Historical E2E build timings
+do not measure the remaining backend benefit. Rebased hosted acceptance is open.

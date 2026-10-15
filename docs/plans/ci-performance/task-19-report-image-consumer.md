@@ -1,9 +1,9 @@
 ---
-id: "16-report-image-consumer"
+id: "19-report-image-consumer"
 title: "Adopt and measure the report image"
 status: done
 wave: 3
-depends_on: ["15-report-image-producer"]
+depends_on: ["18-report-image-producer"]
 plan: "plan.md"
 requirements:
   - REQ-PLATFORM-CI-PERFORMANCE-008
@@ -22,7 +22,7 @@ system_design:
   - ../../specs/platform/system-design/ci-performance.md
 ---
 
-# Task 16: Adopt and measure the report image
+# Task 19: Adopt and measure the report image
 
 ## Summary
 
@@ -106,7 +106,7 @@ source/definition/image identity with the report-job step comparison.
 
 ## Dependencies
 
-Task 15 and its published digest are mandatory. This is a separate consumer
+Task 18 and its published digest are mandatory. This is a separate consumer
 delivery after producer publication; a successful local build is insufficient.
 
 ## Risks
@@ -125,7 +125,7 @@ reference and tool bootstrap, leaving cache work and verification policy intact.
 
 - [Requirements 008, 004 and 005](../../specs/platform/requirements/ci-performance.md)
 - [Lightweight E2E reporting](../../specs/platform/system-design/ci-performance.md#lightweight-e2e-reporting)
-- [Producer work order](task-15-report-image-producer.md)
+- [Producer work order](task-18-report-image-producer.md)
 - [External runner boundary](../../decisions/2026-09-06-opt-in-external-e2e-runners.md)
 
 ## Results
@@ -141,3 +141,11 @@ All six normalized outputs matched for 3,958 test identities and 66 attachment
 hashes. Full E2E run 38570176939 passed with the published image; its report
 job took 73 seconds versus 88 seconds in the recorded main run. Latest-head
 verification after evidence updates is tracked in the PR; see [evidence](cache-report-evidence.md).
+
+## Rebase assessment, October 15
+
+PR #4489 superseded the runtime-container report baseline with native hosted
+Node/pnpm and GitHub CLI artifact downloads. The rebase preserves that consumer;
+the report-image producer and historical evidence remain for assessment only.
+The old container comparison does not establish a gain against current main,
+and this published image lacks the new consumer's GitHub CLI/Python tools.

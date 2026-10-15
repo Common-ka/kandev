@@ -117,7 +117,10 @@ class BackendTestsWorkflowContractTest(unittest.TestCase):
             self.assertIn("family: " + family, self.workflow)
         for name in ("Build", "Run tests", "Run GitLab-facing packages under a poisoned host environment"):
             self.assertNotIn("if:", step_block(self.workflow, name))
-        self.assertNotIn("go-${{ runner.os }}-", self.workflow)
+        for job in ("static_checks", "test_shards", "test_ambient_env"):
+            block = self.workflow.split(f"  {job}:\n", 1)[1]
+            block = re.split(r"\n  [a-zA-Z0-9_-]+:\n", block, maxsplit=1)[0]
+            self.assertNotIn("go-${{ runner.os }}-", block)
 
     def test_postgres_16_uses_fixed_catalog_commands(self) -> None:
         self.assertNotIn("PostgresDSNFromEnv", self.workflow)

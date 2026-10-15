@@ -187,7 +187,7 @@ The pinned [cache action manifest](https://github.com/actions/cache/blob/55cc834
 declares `post-if: success()`. The optional-cache regression also runs the real
 extracted build/test commands after an injected cache-boundary failure. These
 establish the configured behavior; a hosted failed/cancelled publication
-observation and a natural next-day generation remain open for task 14.
+observation and a natural next-day generation remain open for task 17.
 
 The corrected static cache path also ran successfully on GitHub in job
 115873191487 of backend run 38570176792. It restored the shared module cache
@@ -238,3 +238,29 @@ product behavior are unchanged; hosted validation is still required.
 The repository-tooltip case passed three consecutive runs with fresh workers,
 the same two-core limit and retries disabled (28.5s total). Its hosted retry
 failure remains unexplained; no tooltip code or assertion was changed.
+
+## October 15 rebase onto PR #4489
+
+The branch was rebased onto main `68bad6c7702cdccbc906b340c7193d10f73b1c9d`.
+The shared Go cache action/helper and E2E Build use are already upstream.
+Main also contains the scrolling selector changes and further wheel-settling
+fixes; this branch retains no scrolling-spec diff. Main's host-based report
+consumer is preserved, including GitHub CLI/Python blob downloads. The published
+slim image lacks those tools and is no longer selected by this branch. Historical
+runtime-versus-slim measurements do not establish a benefit over native hosting.
+The remaining backend cache migration covers static checks, four ordinary test
+shards and ambient verification. No rebased hosted performance result exists.
+
+The actual successful post-merge main runs are E2E 38699936990 (2852s, 295.92
+runner-minutes), backend 38699936984 (2231s, 276.12 runner-minutes), and frontend
+38699936970 (782s, 29.18 runner-minutes). They started together. Full elapsed time
+was 47m32s, including scheduling; combined occupancy was 601.22 runner-minutes.
+The report job itself took 83s. These measurements differ from PR #4489's last
+pre-merge successful set (16m18s); neither sample alone establishes repeatability.
+Shard 10 was created at 07:42:48 UTC and started at 08:11:13, a 28m25s
+scheduling gap before 548s execution. Its exact scheduling cause is not proven.
+Build missed both Go caches, then saved the October 15 generation successfully.
+
+The old benchmark workflow remains historical test tooling. Its E2E build commands
+and runtime-container report baseline predate main's host execution and parallel
+build changes; it must not be dispatched as a current-main comparison unchanged.

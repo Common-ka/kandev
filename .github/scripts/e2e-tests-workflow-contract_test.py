@@ -344,7 +344,7 @@ with tarfile.open(archive) as source:
         workflow = E2E_WORKFLOW.read_text()
         build = job_block(workflow, "build", "e2e")
         self.assertIn("family: e2e-build", build)
-        self.assertIn("make build-backend", build)
+        self.assertIn("make -C apps/backend build-kandev build-agentctl build-agentctl-linux build-mock-agent", build)
         self.assertIn("make build-web-e2e", build)
         self.assertNotIn("steps.cache", build)
         self.assertIn(".github/actions/cache-go/**", workflow)

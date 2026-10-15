@@ -9,7 +9,7 @@ requirements:
   - REQ-PLATFORM-CI-PERFORMANCE-004
   - REQ-PLATFORM-CI-PERFORMANCE-005
   - REQ-PLATFORM-CI-PERFORMANCE-006
-  - REQ-PLATFORM-CI-PERFORMANCE-007
+  - REQ-PLATFORM-CI-PERFORMANCE-009
   - REQ-PLATFORM-CI-PERFORMANCE-008
 ---
 
@@ -40,7 +40,7 @@ No database, public API, or runtime feature flag changes are required.
 | REQ-PLATFORM-CI-PERFORMANCE-004 | Measurement and capacity assessment |
 | REQ-PLATFORM-CI-PERFORMANCE-005 | October capacity-constrained continuation |
 | REQ-PLATFORM-CI-PERFORMANCE-006 | Conservative test-only selection |
-| REQ-PLATFORM-CI-PERFORMANCE-007 | Go cache generations |
+| REQ-PLATFORM-CI-PERFORMANCE-009 | Go cache generations |
 | REQ-PLATFORM-CI-PERFORMANCE-008 | Lightweight E2E reporting |
 
 ## Review budget
