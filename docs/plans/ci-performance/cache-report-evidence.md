@@ -118,3 +118,58 @@ all produce isolated compilation keys with a shared module key. It failed with
 unsupported family bounds remain rejected. Shared-helper edits now trigger E2E
 verification through change filters, while E2E execution/report commands remain
 unchanged. Fresh hosted validation is required after this correction.
+
+## Corrected-head cold population
+
+At `cdae54bda`, backend run 38727632804 enabled caching and successfully
+published compilation snapshots. Initial occupied times include restore/save:
+
+| Job | Main `530256667`, warm (seconds) | Candidate, cold (seconds) |
+| --- | ---: | ---: |
+| Static checks | 437 | 772 |
+| Ordinary shard 2 | 446 | 864 |
+| Ordinary shard 3 | 362 | 705 |
+| Ordinary shard 4 | 414 | 796 |
+| Ambient verification | 471 | 620 |
+
+These individual main jobs passed, but its full backend run 38714650144 failed
+on `TestGitCredentialHelperSupportsRepeatedRequests` with `Text file busy`.
+The table is diagnostic, not a successful paired workflow comparison. The
+candidate's initial population is slower; no warm backend benefit is established.
+Both runs used build image digest
+`sha256:b77c5f217a44e0554436b734e21b3fd4d25b0465c981c117a79d496ac750eff1`.
+Shard 3 spent 552s testing and 89s saving caches. Static checks saved separate
+compilation and linter generations. Ambient and static reused the module entry
+saved by shard 3 and skipped its upload.
+
+The host E2E module path is `/home/runner/go/pkg/mod`; backend containers use
+`/root/go/pkg/mod`. Their visible module keys match, but GitHub's cache versions
+include archive paths and differ. The host entry still existed when the first
+container lookup missed. This miss is not evidence of eviction. Backend
+consumers sharing the container path subsequently reused the container entry.
+
+A complete 11:53 UTC repository snapshot included every nonterminal workflow
+status and found twenty executing jobs across other PRs, thirteen Ubuntu and
+seven Windows. A workflow can be `queued` while some of its jobs execute;
+enumerating only `in_progress` workflows undercounts occupied capacity.
+
+## E2E validation findings
+
+Run 38727632745 failed two tests after the cold build. The queued-prompt
+cancellation test missed its 300ms pending-state window: its first attempt
+observed pending state before the button disappeared, and its retry waited for
+pending after cancellation had settled. Both DOM snapshots showed a cancelled
+turn and one retained queued message. One isolated local run and five
+single-CPU repetitions passed with retries disabled, so local reproduction was
+not established. The fixture now uses the existing cancellation-progress
+pattern of an 8s mock hold and 12s test-only join budget on desktop and mobile.
+All state, queue, execution-continuity and UI assertions remain intact.
+
+The mobile goal drawer test measured its close control about 300ms after
+opening and received `43.999969482421875` instead of at least 44 pixels. It
+now waits for finite drawer animations using the helper already used later
+in that test. The strict 44px assertion remains unchanged. These test-only
+remediations passed nine focused single-CPU runs with one worker and retries
+disabled: three desktop cancellation, three mobile cancellation and three
+mobile drawer checks. A new hosted run remains required. They do not
+change application behavior, worker counts, retries or locator timeouts.

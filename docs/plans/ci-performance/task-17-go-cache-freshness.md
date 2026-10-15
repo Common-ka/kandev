@@ -150,3 +150,17 @@ On October 15 the user approved this reduced backend-cache scope and a read-only
 scheduling investigation. Report-image work and obsolete benchmark workflows
 are removed. Shared cache code and E2E consumers are already on main. Historical
 E2E measurements above do not satisfy the new backend performance acceptance.
+
+## Hosted validation remediation
+
+The corrected cache run exposed two E2E observation races. Preserve the
+queued-cancellation assertions by using the existing longer mock hold and
+matching test-only join budget on desktop and mobile. Settle the mobile goal
+drawer's finite animations before measuring its strict 44px touch target.
+Validate these existing tests with retries disabled and retain the original
+hosted failures in the evidence. Application behavior and required coverage
+remain unchanged; warm backend performance acceptance remains open.
+
+Focused remediation validation passed three repetitions each of desktop
+cancellation, mobile cancellation and mobile goal-drawer behavior, on one CPU
+with one worker and retries disabled. The committed retry policy is unchanged.

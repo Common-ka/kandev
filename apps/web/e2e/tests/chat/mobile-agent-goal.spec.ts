@@ -93,6 +93,7 @@ test.describe("mobile agent goal visibility", () => {
     await expect(drawer).toBeVisible();
     await expect(drawer).toContainText("Coordinate contributor PR reviews");
     await expect(drawer).toContainText("The agent may continue automatically between replies.");
+    await waitForFiniteAnimations(drawer);
     await assertNoDocumentHorizontalOverflow(testPage, "mobile agent goal drawer");
 
     const close = testPage.getByRole("button", { name: "Close goal details" });

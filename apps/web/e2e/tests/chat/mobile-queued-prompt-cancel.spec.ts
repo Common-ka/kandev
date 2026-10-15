@@ -19,7 +19,10 @@ test.describe("mobile: queued prompt pause", () => {
   let releaseBackendEnv: (() => Promise<void>) | undefined;
 
   test.beforeEach(async ({ backend }) => {
-    releaseBackendEnv = await backend.useEnv({ KANDEV_E2E_CANCEL_HOLD_DURATION: "300ms" });
+    releaseBackendEnv = await backend.useEnv({
+      KANDEV_E2E_CANCEL_HOLD_DURATION: "8s",
+      KANDEV_E2E_PROMPT_CANCEL_JOIN_TIMEOUT: "12s",
+    });
   });
 
   test.afterEach(async () => {
