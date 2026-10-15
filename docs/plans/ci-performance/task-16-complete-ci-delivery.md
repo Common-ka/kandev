@@ -104,8 +104,35 @@ This is local case evidence, not a hosted pipeline improvement. The navigation,
 canonical-overview and task-route consumers pass eighty-nine unit cases; five
 new navigation regressions are explicit additions to the frontend inventory.
 No E2E identity, assertion, timeout or retry budget is removed or increased.
-Finish phone and desktop task-action checks, synchronize with current main,
-then collect a new complete hosted set before any performance acceptance.
+Seven desktop task-action cases and five phone task-action/shortcut cases pass
+against a fresh build after synchronizing with main `5302566674b5`, without
+retries. The frozen source is `06f94acc9dd6`; all three hosted dispatches are
+fresh first attempts. Backend `38717914320` passes in 50m36s, frontend
+`38717917611` in 25m09s, and E2E `38717921044` in 1h43m41s. The complete
+set takes 6,224 seconds (1h43m44s), including the four-second dispatch spread.
+All 71 core jobs pass. Total occupancy is 529.12 runner-minutes, below the
+existing 574.475-minute upper bound. This over-budget sample is rejected for
+fifteen-minute acceptance and remains recorded.
+
+All 35,594 native backend executions retain their expected outcomes, including
+thirteen additions from synchronized main. Frontend retains 26,558 cases in
+2,956 files, including the five navigation regressions. All 3,957 native E2E
+identities reconcile: 3,910 first passes, seven retry passes, forty identical
+existing skips, zero final failures/timeouts or additional skips. All thirty
+blob artifacts and 102 raw reports are present; ten retry attempts and their
+errors remain visible. Both repaired browser contracts pass their first hosted
+attempt: phone progression in 18.974 seconds and six-provider shortcuts in
+27.420 seconds. Other observed retries are not waived as coverage evidence.
+
+The E2E execution critical path is 1,016 seconds (16m56s), compared with
+6,221 seconds of complete workflow time. The nineteen-second image-resolution
+job waits 3,577 seconds before starting and prevents all six container shards
+from being admitted. The aggregate reporting job also queues after every test
+finishes. These observations support moving preparation before fanout; they
+do not establish a configured runner cap or guarantee the next elapsed time.
+All twenty-four normal resource artifacts report four CPUs, 7.82-9.97 GiB
+peaks, zero swap and zero memory-limit events. No additional paid capacity,
+worker override, deadline increase or assertion removal is used.
 
 ### Twenty-ninth complete set: two browser failures with twenty-four normal jobs
 
