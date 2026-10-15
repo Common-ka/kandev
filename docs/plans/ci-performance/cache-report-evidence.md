@@ -93,3 +93,11 @@ verified. Earlier planning's approximate sixty-slot assumption is not supported
 by this current account readback. The 20 GB cache allowance changes storage,
 not concurrency. No plan, paid capacity, scheduling policy or other run was
 changed or cancelled during this investigation.
+
+A cross-check of the final pre-merge successful set (backend 38694389776,
+frontend 38694389805, E2E 38694389881) includes 75 runner-assigned execution
+intervals and reaches sixty simultaneous jobs at 06:52:19 UTC. Thus the Free
+plan readback alone does not explain the difference. Effective capacity differs
+between the observed windows; account-limit history, custom overrides and
+competing work outside this repository remain unknown. Do not assume the current
+default applied to the earlier run or attribute the entire slowdown to cache code.
