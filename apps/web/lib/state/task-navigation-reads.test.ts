@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "@/lib/api/client";
 import { createAppStore } from "@/lib/state/store";
+import { toKanbanTask } from "@/lib/kanban/map-task";
+import { registerTasksHandlers } from "@/lib/ws/handlers/tasks";
 import type { TaskNavigationIdentity } from "./task-navigation-reads";
 import {
   beginTaskNavigation,
@@ -32,6 +34,30 @@ function identity(taskId: string): TaskNavigationIdentity {
     task: { id: taskId } as TaskNavigationIdentity["task"],
     allSessionsResponse: { sessions: [], total: 0 },
   };
+}
+
+function activeTaskFixture(onBoard = true) {
+  const store = createAppStore();
+  const task = {
+    id: "task-a",
+    workspace_id: "workspace-a",
+    workflow_id: "workflow-a",
+    workflow_step_id: "in-progress",
+    title: "Active task",
+    state: "SCHEDULING",
+    created_at: "2026-10-15T09:00:00Z",
+    updated_at: "2026-10-15T09:00:00Z",
+  } as TaskNavigationIdentity["task"];
+  store.getState().setActiveWorkspace("workspace-a");
+  store.getState().setActiveTask(task.id);
+  store.getState().retainTaskOverviews("detail", [toKanbanTask(task)]);
+  if (onBoard) {
+    store.setState((state) => {
+      state.kanban = { workflowId: task.workflow_id, steps: [], tasks: [toKanbanTask(task)] };
+    });
+  }
+  apiMocks.listTaskSessions.mockResolvedValue({ sessions: [], total: 0 });
+  return { store, task };
 }
 
 afterEach(() => {
@@ -409,6 +435,92 @@ describe("task navigation attempt cancellation", () => {
 });
 
 describe("task navigation store scope", () => {
+  it.each([true, false])(
+    "reconciles fresh active task placement with board membership %s",
+    async (onBoard) => {
+      const { store, task } = activeTaskFixture(onBoard);
+      apiMocks.fetchTask.mockResolvedValue({
+        ...task,
+        workflow_step_id: "review",
+        state: "REVIEW",
+        updated_at: "2026-10-15T09:00:01Z",
+      });
+
+      await readTaskNavigationIdentity(store, task.id);
+
+      expect(store.getState().taskOverview.byId[task.id]).toMatchObject({
+        workflowStepId: "review",
+        state: "REVIEW",
+      });
+      expect(store.getState().kanban.tasks).toEqual(
+        onBoard ? [store.getState().taskOverview.byId[task.id]] : [],
+      );
+      expect(store.getState().taskOverview.reads).toEqual({});
+    },
+  );
+
+  it("preserves a live workflow move received during an older task read", async () => {
+    const { store, task } = activeTaskFixture();
+    const response = deferred<TaskNavigationIdentity["task"]>();
+    apiMocks.fetchTask.mockReturnValue(response.promise);
+    const result = readTaskNavigationIdentity(store, task.id);
+    const handlers = registerTasksHandlers(store);
+    handlers["task.updated"]?.({
+      type: "notification",
+      action: "task.updated",
+      payload: {
+        task_id: task.id,
+        workspace_id: task.workspace_id,
+        workflow_id: task.workflow_id,
+        title: task.title,
+        is_ephemeral: false,
+        workflow_step_id: "done",
+        state: "COMPLETED",
+      },
+    } as Parameters<NonNullable<(typeof handlers)["task.updated"]>>[0]);
+    response.resolve({
+      ...task,
+      workflow_step_id: "review",
+      state: "REVIEW",
+      updated_at: "2026-10-15T09:00:01Z",
+    });
+    await result;
+
+    expect(store.getState().taskOverview.byId[task.id]).toMatchObject({
+      workflowStepId: "done",
+      state: "COMPLETED",
+    });
+    expect(store.getState().taskOverview.reads).toEqual({});
+  });
+
+  it("does not publish a task response from an abandoned workspace", async () => {
+    const { store, task } = activeTaskFixture();
+    const response = deferred<TaskNavigationIdentity["task"]>();
+    apiMocks.fetchTask.mockReturnValue(response.promise);
+    const result = readTaskNavigationIdentity(store, task.id);
+    store.getState().setActiveWorkspace("workspace-b");
+    response.resolve({ ...task, workflow_step_id: "review", state: "REVIEW" });
+
+    await expect(result).rejects.toMatchObject({ name: "AbortError" });
+    expect(store.getState().taskOverview.byId[task.id]).toBeUndefined();
+    expect(store.getState().taskOverview.reads).toEqual({});
+  });
+
+  it("does not publish a superseded route response even while its task remains active", async () => {
+    const { store, task } = activeTaskFixture();
+    const response = deferred<TaskNavigationIdentity["task"]>();
+    apiMocks.fetchTask.mockReturnValue(response.promise);
+    const owner = {};
+    const context = beginTaskNavigation(store, owner, "/t/task-a");
+    const result = readTaskNavigationIdentity(store, task.id, { context });
+    beginTaskNavigation(store, owner, "/t/task-b");
+    response.resolve({ ...task, workflow_step_id: "review", state: "REVIEW" });
+
+    await expect(result).rejects.toMatchObject({ name: "AbortError" });
+    expect(store.getState().taskOverview.byId[task.id].workflowStepId).toBe("in-progress");
+    expect(store.getState().taskOverview.reads).toEqual({});
+  });
+
   it("keeps task identity available when the session list fails", async () => {
     apiMocks.fetchTask.mockResolvedValue({
       id: "task-a",

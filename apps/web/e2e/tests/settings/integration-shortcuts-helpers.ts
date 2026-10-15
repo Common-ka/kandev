@@ -5,13 +5,18 @@ import { waitForHttp } from "../../helpers/causal-waits";
 export const INTEGRATION_SHORTCUTS_SETTINGS_PATH = "/settings/preferences/keyboard-shortcuts";
 export const INTEGRATION_CHORD = "Control+Alt+g";
 
-export async function recordIntegrationShortcut(page: Page, slug: string, touch = false) {
+export async function recordIntegrationShortcut(
+  page: Page,
+  slug: string,
+  touch = false,
+  chord = INTEGRATION_CHORD,
+) {
   const recorder = page.getByTestId(`shortcut-recorder-integration:${slug}`);
   await expect(recorder).toHaveCount(1);
   if (touch) await recorder.tap();
   else await recorder.click();
   await expect(recorder).toHaveAttribute("data-shortcut-recording", "true");
-  await page.keyboard.press(INTEGRATION_CHORD);
+  await page.keyboard.press(chord);
   await expect(recorder).toHaveAttribute("data-shortcut-recording", "false");
   return recorder;
 }

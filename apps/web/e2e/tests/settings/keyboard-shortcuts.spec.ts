@@ -256,14 +256,15 @@ test.describe("Integration navigation hotkeys", () => {
   test("records, saves, reloads, opens and resets every integration page", async ({
     testPage,
     apiClient,
+    seedData,
   }) => {
     const destinations = [
-      ["azure-devops", "/azure-devops"],
-      ["github", "/github"],
-      ["gitlab", "/gitlab"],
-      ["jira", "/jira"],
-      ["linear", "/linear"],
-      ["sentry", "/settings/integrations/sentry"],
+      ["azure-devops", "/azure-devops", "a"],
+      ["github", "/github", "g"],
+      ["gitlab", "/gitlab", "l"],
+      ["jira", "/jira", "j"],
+      ["linear", "/linear", "n"],
+      ["sentry", `/settings/workspaces/${seedData.workspaceId}/integrations/sentry`, "s"],
     ];
     await testPage.goto(KEYBOARD_SETTINGS_PATH);
     for (const [slug] of destinations) {
@@ -271,28 +272,39 @@ test.describe("Integration navigation hotkeys", () => {
         "Unbound",
       );
     }
-    for (const [slug, destination] of destinations) {
-      await recordIntegrationShortcut(testPage, slug);
-      await saveIntegrationShortcuts(testPage);
-      await testPage.reload();
+    for (const [slug, , key] of destinations) {
+      await recordIntegrationShortcut(testPage, slug, false, `Control+Alt+${key}`);
+    }
+    await saveIntegrationShortcuts(testPage);
+    await testPage.reload();
+    for (const [slug, , key] of destinations) {
       const recorder = testPage.getByTestId(`shortcut-recorder-integration:${slug}`);
-      await expect(recorder).toContainText("G");
+      await expect(recorder).toHaveAccessibleDescription(`Ctrl+Alt+${key.toUpperCase()}`);
       // Re-recording the already saved chord must stay in settings.
-      await recordIntegrationShortcut(testPage, slug);
+      await recordIntegrationShortcut(testPage, slug, false, `Control+Alt+${key}`);
       await expect(testPage).toHaveURL(new RegExp(`${KEYBOARD_SETTINGS_PATH}$`));
+    }
+    for (const [, destination, key] of destinations) {
       await testPage.goto("/");
-      await testPage.keyboard.press(INTEGRATION_CHORD);
+      await expect(testPage.getByTestId("kanban-board")).toBeVisible();
+      await testPage.keyboard.press(`Control+Alt+${key}`);
       await expect(testPage).toHaveURL(new RegExp(`${destination}$`));
-      await testPage.goto(KEYBOARD_SETTINGS_PATH);
+    }
+    await testPage.goto(KEYBOARD_SETTINGS_PATH);
+    for (const [slug] of destinations) {
+      const recorder = testPage.getByTestId(`shortcut-recorder-integration:${slug}`);
       await recorder.locator("..").getByRole("button", { name: "Reset (clear shortcut)" }).click();
-      await saveIntegrationShortcuts(testPage);
-      await testPage.reload();
+    }
+    await saveIntegrationShortcuts(testPage);
+    await testPage.reload();
+    const saved = (await apiClient.getUserSettings()).settings.keyboard_shortcuts ?? {};
+    for (const [slug] of destinations) {
+      const recorder = testPage.getByTestId(`shortcut-recorder-integration:${slug}`);
       await expect(recorder).toContainText("Unbound");
-      expect(
-        (await apiClient.getUserSettings()).settings.keyboard_shortcuts ?? {},
-      ).not.toHaveProperty(`integration:${slug}`);
+      expect(saved).not.toHaveProperty(`integration:${slug}`);
     }
     await testPage.goto("/");
+    await expect(testPage.getByTestId("kanban-board")).toBeVisible();
     await testPage.keyboard.press("Control+k");
     await expect(testPage.getByRole("dialog")).toBeVisible();
   });

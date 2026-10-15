@@ -53,6 +53,38 @@ git diff --check
 
 Hosted evidence remains mandatory; local contracts do not prove speed.
 
+### Candidate thirty: retain both failing browser contracts
+
+The mobile action-bar failure reproduces locally with sixfold Chromium CPU
+throttling and retries disabled: the canonical task and board remain In Progress
+while the backend has advanced to Review. A fresh navigation task response was
+kept only by the task page, leaving the canonical progression consumer stale.
+Two real-store placement regressions fail before the repair. Reconcile active
+navigation reads through the existing overview read journal and detail owner,
+guarded by abort and authenticated workspace scope. Preserve live updates over
+older responses, inactive-task ownership, route cancellation and scope isolation.
+The original mobile scenario passes against a fresh production build under the
+same rendering pressure; all original geometry and real-action assertions remain.
+
+The six-provider shortcut scenario also fails locally without retries at its
+original sixty-second budget. Repeated recording/save/reload/reset cycles reach
+Sentry's retired install-level URL expectation; its actual settings destination
+now redirects into the active workspace. Record distinct bindings for all six
+providers, save/reload once, assert every persisted binding and recording guard,
+invoke each actual shortcut from a hydrated home page, then reset/save/reload
+once and assert every key is absent. Require Sentry's exact active-workspace
+destination. The existing conflict, retryable draft, plugin, keyboard focus and
+phone tests remain independent keepers.
+
+All eleven desktop shortcut cases pass without retries; the consolidated case
+takes 20.545 seconds, compared with the original local sixty-second failure.
+This is local case evidence, not a hosted pipeline improvement. The navigation,
+canonical-overview and task-route consumers pass eighty-nine unit cases; five
+new navigation regressions are explicit additions to the frontend inventory.
+No E2E identity, assertion, timeout or retry budget is removed or increased.
+Finish phone and desktop task-action checks, synchronize with current main,
+then collect a new complete hosted set before any performance acceptance.
+
 ### Twenty-ninth complete set: two browser failures with twenty-four normal jobs
 
 Head `1650142a72e8` runs a fresh, fully selected workflow-dispatch set:

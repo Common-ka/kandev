@@ -1,11 +1,12 @@
 import { useSyncExternalStore } from "react";
 import type { StoreApi } from "zustand";
 import { ApiError } from "@/lib/api/client";
-import { fetchTask, listTaskSessions } from "@/lib/api";
+import { listTaskSessions } from "@/lib/api";
 import { getBackendConfig } from "@/lib/config";
 import { getTaskSessionReads, type TaskSessionReads } from "@/lib/state/task-session-reads";
 import type { Task, TaskSessionsResponse } from "@/lib/types/http";
 import type { AppState } from "./store";
+import { fetchTaskForNavigation } from "./task-navigation-task";
 
 export type TaskNavigationIdentity = {
   task: Task;
@@ -443,11 +444,13 @@ export function createTaskNavigationReads(
 }
 
 function fetchTaskNavigationIdentity(
+  store: StoreApi<AppState>,
+  scopeIsCurrent: () => boolean,
   taskId: string,
   signal: AbortSignal,
   sessionReads?: TaskSessionReads,
 ): Promise<TaskNavigationIdentity> {
-  const taskRequest = fetchTask(taskId, { cache: "no-store", init: { signal } });
+  const taskRequest = fetchTaskForNavigation(store, taskId, signal, scopeIsCurrent);
   const sessionList = sessionReads
     ? (() => {
         const release = sessionReads.retain(taskId);
@@ -504,9 +507,12 @@ function getTaskNavigationOwner(store: StoreApi<AppState>): NavigationReadOwner 
       token: Object.freeze({}),
     } as NavigationReadOwner;
     const sessionReads = getTaskSessionReads(store);
+    const scopeIsCurrent = () =>
+      owners.get(store) === nextOwner && storeIdentity(store.getState()) === identity;
     nextOwner.reads = new TaskNavigationReads(
-      (taskId, signal) => fetchTaskNavigationIdentity(taskId, signal, sessionReads),
-      () => owners.get(store) === nextOwner && storeIdentity(store.getState()) === identity,
+      (taskId, signal) =>
+        fetchTaskNavigationIdentity(store, scopeIsCurrent, taskId, signal, sessionReads),
+      scopeIsCurrent,
     );
     owner = nextOwner;
     owners.set(store, nextOwner);
