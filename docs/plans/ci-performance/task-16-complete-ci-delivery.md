@@ -53,6 +53,22 @@ git diff --check
 
 Hosted evidence remains mandatory; local contracts do not prove speed.
 
+### Green baseline merged before the scheduling follow-up
+
+The user explicitly authorized merging the green version and continuing the
+performance work separately. PR #4489 was squash-merged at 07:36:51 UTC on
+2026-10-15 as `68bad6c7702cd`, from head `6ae25c07cec3`. Its final stable
+snapshot has 91 passed checks, eleven ancillary skips, zero failures or pending
+checks, and no unresolved review threads. All 75 core jobs pass; full elapsed
+time remains 16m18s. This delivery does not establish fifteen-minute
+repeatability, which remains 1/3. Task 16 stays in progress.
+
+The unpublished twenty-four-shard experiment was excluded from that merge.
+Its follow-up starts from the actual main squash commit, whose tree matches
+the tested green head. All nine cherry-picked files match their validated
+source hashes. Measure this experiment independently against the green control
+before claiming an improvement or merging it.
+
 ### Twenty-ninth candidate: twenty-four normal scheduling instances
 
 The complete green control still exceeds fifteen minutes because its last
