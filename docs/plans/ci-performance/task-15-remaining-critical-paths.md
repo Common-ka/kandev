@@ -61,6 +61,36 @@ git diff --check
 
 ## Results
 
+### Local next-candidate prototype: keep detection and Build on one runner
+
+The fixed twenty-four-shard trial runs separately at head `1650142a72e8`.
+Its Build job is created at 08:31:31 UTC on 2026-10-15, waits until 08:34:17,
+then executes for 116 seconds. The extra 166-second handoff is on every browser
+shard's dependency path. This establishes a scheduling opportunity, not a
+guaranteed gain under another run's load.
+
+Prototype starting Build directly with the existing runner-planning step and
+one shared selection action. The small auxiliary selection job calls that same
+action independently, so helper, image-resolution and desktop jobs keep their
+parallel starts. Keep both full-history checkouts and all existing selection
+rules; add the shared action itself to its relevant-path inputs. Build owns its
+plan and catalog outputs. Normal browser jobs depend only on Build, while
+container and platform jobs retain their existing prerequisite union. Preserve
+Build's twenty-minute and auxiliary selection's ten-minute deadlines.
+
+The required report must require both preparations to succeed, an explicit
+boolean selection verdict, matching Build/auxiliary verdicts and a nonempty
+runner plan, even for legitimately filtered runs. Reject failure, cancellation,
+unknown or divergent selection, unexpected skips and absent evidence. Preserve
+every test selection, command, artifact, platform, retry, deadline, credential
+boundary, resource guard and required public check name. The selected roster
+stays seventy-one jobs: no new runners or shards. This is separate from the
+live trial, whose workflow definitions are frozen for measurement. Do not push
+or start this prototype while that trial runs. Exercise failure, agreement and
+filtered paths before changing the workflow, then run affected contracts and
+source-preservation checks. The simpler serial preparation prototype is not
+adopted because independent platform work must keep its parallel start.
+
 ### Reduce simultaneous normal E2E scheduling requests
 
 Candidate 28 passes every selected core job, but its complete E2E workflow

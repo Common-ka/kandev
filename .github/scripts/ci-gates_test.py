@@ -10,6 +10,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 WORKFLOWS = ROOT / ".github/workflows"
+E2E_SELECTOR = ROOT / ".github/actions/select-e2e-tests/action.yml"
 
 
 def gate(workflow, job):
@@ -31,6 +32,8 @@ class GateTests(unittest.TestCase):
                 env.update(RUN_REQUIRED="true", SIDEBAR_REQUIRED="false",
                            RUNNER_PLAN="{}", SKIP_REASON="irrelevant-paths",
                            GITHUB_STEP_SUMMARY=str(Path(directory)/"summary"))
+                if job == "e2e-report":
+                    env["BUILD_RUN_REQUIRED"] = "true"
                 # The consolidated report must prove reports exist, not only green shard jobs.
                 for filename in ("apps/web/e2e/retry-summary.json", "apps/web/e2e/timing-profile.json", "apps/web/e2e/merged-report.json"):
                     target = Path(directory) / filename
@@ -48,9 +51,26 @@ class GateTests(unittest.TestCase):
                 for key in [k for k in env if k.endswith("_RESULT") and k != "SIDEBAR_RESOURCES_RESULT"]:
                     for outcome in ("failure", "cancelled", "skipped", ""):
                         self.assertNotEqual(run({key: outcome}), 0, (workflow, key, outcome))
-                skipped = {k: "skipped" for k in env if k.endswith("_RESULT") and k not in ("CHANGES_RESULT", "REPORT_RESULT")}
-                self.assertEqual(run({**skipped, "RUN_REQUIRED": "false"}), 0)
-                self.assertNotEqual(run({**skipped, "RUN_REQUIRED": ""}), 0)
+                preparation = {"CHANGES_RESULT", "REPORT_RESULT"}
+                if job == "e2e-report":
+                    preparation.add("BUILD_RESULT")
+                skipped = {k: "skipped" for k in env if k.endswith("_RESULT") and k not in preparation}
+                filtered = {"RUN_REQUIRED": "false"}
+                if job == "e2e-report":
+                    filtered["BUILD_RUN_REQUIRED"] = "false"
+                    for verdict in ("false", "", "unknown"):
+                        self.assertNotEqual(run({"BUILD_RUN_REQUIRED": verdict}), 0)
+                    self.assertNotEqual(run({**skipped, **filtered, "BUILD_RUN_REQUIRED": "true"}), 0)
+                self.assertEqual(run({**skipped, **filtered}), 0)
+                for verdict in ("", "unknown"):
+                    invalid = {**skipped, **filtered, "RUN_REQUIRED": verdict}
+                    if job == "e2e-report":
+                        invalid["BUILD_RUN_REQUIRED"] = verdict
+                    self.assertNotEqual(run(invalid), 0)
+                for key in preparation & env.keys():
+                    for outcome in ("failure", "cancelled", "skipped", ""):
+                        self.assertNotEqual(run({**skipped, **filtered, key: outcome}), 0,
+                                            (workflow, "filtered", key, outcome))
                 if job == "test":
                     self.assertEqual(run({**skipped, "RUN_REQUIRED": "false", "SIDEBAR_REQUIRED": "true", "SIDEBAR_RESOURCES_RESULT": "success"}), 0)
                     self.assertNotEqual(run({"SIDEBAR_REQUIRED": "true", "SIDEBAR_RESOURCES_RESULT": "skipped"}), 0)
@@ -63,9 +83,9 @@ class GateTests(unittest.TestCase):
                     self.assertNotEqual(run({}), 0)
 
     def test_unknown_pr_base_runs_e2e_instead_of_creating_an_exemption(self):
-        workflow = (WORKFLOWS / "e2e-tests.yml").read_text()
-        step = workflow.split("      - name: Detect relevant changes\n", 1)[1].split("      - name:", 1)[0]
-        script = textwrap.dedent(step.split("        run: |\n", 1)[1])
+        selector = E2E_SELECTOR.read_text()
+        step = selector.split("    - name: Detect relevant changes\n", 1)[1].split("    - name:", 1)[0]
+        script = textwrap.dedent(step.split("      run: |\n", 1)[1])
         with tempfile.TemporaryDirectory() as directory:
             subprocess.run(["git", "init", "-q", directory], check=True)
             output = Path(directory) / "outputs"
@@ -83,17 +103,20 @@ class GateTests(unittest.TestCase):
 
     def test_go_test_exemption_only_overrides_a_verified_relevant_pr_diff(self):
         workflow = (WORKFLOWS / "e2e-tests.yml").read_text()
-        self.assertIn("run: ${{ steps.test-only.outputs.run || steps.detect.outputs.run }}", workflow)
-        self.assertIn("if: github.event_name == 'pull_request' && steps.detect.outputs.run == 'true' && steps.detect.outputs.base != ''", workflow)
-        self.assertIn("BASE_SHA: ${{ steps.detect.outputs.base }}", workflow)
-        self.assertIn('ci-test-only-changes.py --base "$BASE_SHA" --event pull_request', workflow)
+        selector = E2E_SELECTOR.read_text()
+        self.assertEqual(workflow.count("uses: ./.github/actions/select-e2e-tests"), 2)
+        self.assertIn("value: ${{ steps.test-only.outputs.run || steps.detect.outputs.run }}", selector)
+        self.assertIn("if: github.event_name == 'pull_request' && steps.detect.outputs.run == 'true' && steps.detect.outputs.base != ''", selector)
+        self.assertIn("BASE_SHA: ${{ steps.detect.outputs.base }}", selector)
+        self.assertIn('ci-test-only-changes.py --base "$BASE_SHA" --event pull_request', selector)
         self.assertIn("SKIP_REASON: ${{ needs.changes.outputs.reason }}", workflow)
 
     def test_bootstrap_does_not_wait_for_a_separate_allocation_job(self):
         for workflow in ("backend-tests.yml", "frontend-tests.yml", "e2e-tests.yml"):
             source = (WORKFLOWS / workflow).read_text()
             self.assertNotIn("  runner_plan:\n", source)
-            changes = re.split(r"\n  [\w-]+:\n", source.split("  changes:\n", 1)[1])[0]
+            entry_job = "build" if workflow == "e2e-tests.yml" else "changes"
+            changes = re.split(r"\n  [\w-]+:\n", source.split(f"  {entry_job}:\n", 1)[1])[0]
             self.assertIn("runs-on: ubuntu-latest", changes)
             self.assertNotIn("    needs:", changes)
             self.assertIn("plan: ${{ steps.plan.outputs.plan }}", changes)

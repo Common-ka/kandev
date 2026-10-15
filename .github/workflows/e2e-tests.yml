@@ -38,23 +38,26 @@ env:
   COREPACK_HOME: /root/.cache/node/corepack
 
 jobs:
-  # The former trigger-level `paths:` list, applied one level down so a skip
-  # still produces a conclusion. `.github/scripts/changed-paths.py` implements
-  # the same last-match-wins semantics GitHub applies to `paths:`.
-  changes:
-    name: Detect relevant changes
+  build:
+    name: Build
+    # Build reads the GitHub API and downloads a timing artifact with the job token.
+    # Keep this credential-bearing path on the GitHub-hosted boundary.
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     outputs:
       plan: ${{ steps.plan.outputs.plan }}
-      run: ${{ steps.test-only.outputs.run || steps.detect.outputs.run }}
-      reason: ${{ steps.test-only.outputs.reason }}
+      run: ${{ steps.selection.outputs.run }}
+      catalog_attempt: ${{ steps.e2e_catalog.outputs.attempt }}
+    env:
+      COREPACK_HOME: /tmp/kandev-corepack
+    defaults:
+      run:
+        shell: bash
 
     steps:
       - name: Checkout code
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
-          # The base commit has to be present locally for the diff below.
           fetch-depth: 0
           persist-credentials: false
 
@@ -80,154 +83,38 @@ jobs:
           light-label: ${{ vars.KANDEV_CI_RUNNER_LIGHT }}
           standard-label: ${{ vars.KANDEV_CI_RUNNER_STANDARD }}
 
-      - name: Detect relevant changes
-        id: detect
-        env:
-          PATTERNS: |
-            apps/backend/**
-            apps/desktop/**
-            apps/web/**
-            apps/packages/**
-            apps/pnpm-lock.yaml
-            apps/pnpm-workspace.yaml
-            .github/docker/ci-base/**
-            .github/scripts/resolve-image-digest.sh
-            .github/workflows/ci-base-image.yml
-            .github/workflows/e2e-tests.yml
-            .github/actions/cache-go/**
-            .github/scripts/go-cache-identity.*
-            .github/actions/download-artifact-retry/**
-            .github/scripts/ci-test-only-changes.py
-            .github/scripts/changed-paths.py
-            .github/scripts/runner-plan.py
-            .github/actions/plan-external-runners/**
-            !**/*.md
-          EVENT_NAME: ${{ github.event_name }}
-          BASE_REF: ${{ github.base_ref }}
-          MERGE_GROUP_BASE_SHA: ${{ github.event.merge_group.base_sha }}
-          PUSH_BEFORE: ${{ github.event.before }}
-        run: |
-          set -euo pipefail
-
-          case "${EVENT_NAME}" in
-            # The checkout is the merge ref, whose first parent is the base
-            # branch tip. Diffing against that tip directly collapses to a
-            # two-dot diff over everything main landed since the PR opened, so
-            # take the fork point instead.
-            pull_request) BASE="$(git merge-base HEAD "origin/${BASE_REF}" 2>/dev/null || true)" ;;
-            # The queue branch is cut from this commit, so it is a true ancestor.
-            merge_group) BASE="${MERGE_GROUP_BASE_SHA}" ;;
-            push) BASE="${PUSH_BEFORE}" ;;
-            # workflow_dispatch is an explicit request to run the suite.
-            *) BASE="" ;;
-          esac
-
-          # Fail open. A first push to a branch, a force push, or a manual
-          # dispatch leaves no usable base, and running the suite needlessly is
-          # cheaper than merging something no job ever looked at.
-          if [[ -z "${BASE}" || "${BASE}" == "0000000000000000000000000000000000000000" ]] \
-             || ! git cat-file -e "${BASE}^{commit}" 2>/dev/null; then
-            echo "No usable base commit for '${EVENT_NAME}'; running everything."
-            echo "run=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          # `-z`, not plain --name-only: git quotes non-ASCII paths under its
-          # default core.quotePath, and a quoted path matches no pattern, so a
-          # change to one would skip every job and still report success.
-          echo "base=${BASE}" >> "$GITHUB_OUTPUT"
-          git diff --name-only -z "${BASE}" HEAD \
-            | python3 .github/scripts/changed-paths.py
-
-      - name: Check independent Go test changes
-        id: test-only
-        if: github.event_name == 'pull_request' && steps.detect.outputs.run == 'true' && steps.detect.outputs.base != ''
-        env:
-          BASE_SHA: ${{ steps.detect.outputs.base }}
-        run: python3 .github/scripts/ci-test-only-changes.py --base "$BASE_SHA" --event pull_request
-
-  helper_compile:
-    name: Compile remaining helper platforms
-    needs: changes
-    if: needs.changes.outputs.run == 'true'
-    runs-on: ubuntu-latest
-    container: ghcr.io/kdlbs/kandev-ci:build-latest
-    timeout-minutes: 20
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
-        with:
-          persist-credentials: false
-
-      - name: Mark workspace safe for git
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-
-      - name: Cache Go modules
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: go-e2e-helpers-${{ runner.os }}-${{ hashFiles('apps/backend/go.mod', 'apps/backend/go.sum') }}-${{ github.sha }}
-          restore-keys: |
-            go-e2e-helpers-${{ runner.os }}-${{ hashFiles('apps/backend/go.mod', 'apps/backend/go.sum') }}-
-            go-e2e-helpers-${{ runner.os }}-
-            go-e2e-build-${{ runner.os }}-
-            go-${{ runner.os }}-
-
-      - name: Compile remote platforms and diagnostic commands
-        run: >-
-          VERSION="0.0.0-e2e.${GITHUB_SHA}"
-          make -C apps/backend build-agentctl-linux-arm64 build-agentctl-darwin-arm64 build-agentctl-darwin-amd64 build-acpdbg build-codexdbg build-winjob
-
-  build:
-    name: Build
-    needs: changes
-    if: needs.changes.outputs.run == 'true'
-    # Build reads the GitHub API and downloads a timing artifact with the job token.
-    # Keep this credential-bearing path on the GitHub-hosted boundary.
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    outputs:
-      catalog_attempt: ${{ steps.e2e_catalog.outputs.attempt }}
-    env:
-      COREPACK_HOME: /tmp/kandev-corepack
-    defaults:
-      run:
-        shell: bash
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
-        with:
-          persist-credentials: false
+      - name: Select application E2E
+        id: selection
+        uses: ./.github/actions/select-e2e-tests
 
       - name: Set up pnpm
+        if: steps.selection.outputs.run == 'true'
         uses: pnpm/action-setup@a8198c4bff370c8506180b035930dea56dbd5288 # v5
         with:
           version: 9.15.9
           run_install: false
 
       - name: Set up Node.js
+        if: steps.selection.outputs.run == 'true'
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: '24'
 
       - name: Set up Go
+        if: steps.selection.outputs.run == 'true'
         uses: actions/setup-go@5064d95ba18d4a9dda7c4cc67adeb03aea1a2a14 # v7.0.0 + upstream dependency refresh
         with:
           go-version-file: apps/backend/go.mod
           cache: false
 
       - name: Resolve pnpm store
+        if: steps.selection.outputs.run == 'true'
         id: pnpm_store
         working-directory: apps
         run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
 
       - name: Cache pnpm store
+        if: steps.selection.outputs.run == 'true'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ steps.pnpm_store.outputs.path }}
@@ -235,11 +122,13 @@ jobs:
           restore-keys: pnpm-e2e-host-${{ runner.os }}-
 
       - name: Cache Go modules and compilation
+        if: steps.selection.outputs.run == 'true'
         uses: ./.github/actions/cache-go
         with:
           family: e2e-build
 
       - name: Install dependencies
+        if: steps.selection.outputs.run == 'true'
         working-directory: apps
         run: pnpm install --frozen-lockfile
 
@@ -247,6 +136,7 @@ jobs:
       # bundles the pseudo QA catalog, and tests/i18n/pseudo-coverage.spec.ts
       # needs it. See apps/web/lib/i18n/bundling.ts.
       - name: Build backend and web
+        if: steps.selection.outputs.run == 'true'
         run: |
           set -euo pipefail
           # PR merge refs are untagged; helper manifests require a SemVer version.
@@ -268,14 +158,17 @@ jobs:
       # (the build job has the Go toolchain) and shipped to the shards as its
       # own artifact; global-setup fails fast if it is missing.
       - name: Build E2E fixture plugin package
+        if: steps.selection.outputs.run == 'true'
         run: make -C apps/backend e2e-plugin-ui e2e-plugin-package
 
       # The backend build already produced agentctl-linux-amd64. Build the
       # remaining mock helper once for Docker, SSH and Kind scenarios.
       - name: Build Docker E2E helper binaries
+        if: steps.selection.outputs.run == 'true'
         run: make -C apps/backend build-mock-agent-linux
 
       - name: Record immutable E2E build identity
+        if: steps.selection.outputs.run == 'true'
         run: |
           set -euo pipefail
           node <<'NODE'
@@ -313,6 +206,7 @@ jobs:
           NODE
 
       - name: Locate latest successful main timing profile artifact
+        if: steps.selection.outputs.run == 'true'
         id: main-timing-run
         env:
           GH_TOKEN: ${{ github.token }}
@@ -392,7 +286,7 @@ jobs:
           NODE
 
       - name: Download selected main timing profile
-        if: steps.main-timing-run.outputs.run_id != ''
+        if: steps.selection.outputs.run == 'true' && (steps.main-timing-run.outputs.run_id != '')
         continue-on-error: true
         uses: ./.github/actions/download-artifact-retry
         with:
@@ -403,7 +297,7 @@ jobs:
           github-token: ${{ github.token }}
 
       - name: Upload selected timing baseline for report job
-        if: always()
+        if: steps.selection.outputs.run == 'true' && (always())
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: e2e-selected-main-timing-profile
@@ -412,6 +306,7 @@ jobs:
           retention-days: 3
 
       - name: Generate duration-aware E2E shard manifests
+        if: steps.selection.outputs.run == 'true'
         id: e2e_catalog
         working-directory: apps/web
         run: |
@@ -432,6 +327,7 @@ jobs:
           printf 'attempt=%s\n' "$GITHUB_RUN_ATTEMPT" >> "$GITHUB_OUTPUT"
 
       - name: Upload E2E shard manifests
+        if: steps.selection.outputs.run == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: e2e-shard-manifests
@@ -439,6 +335,7 @@ jobs:
           retention-days: 3
 
       - name: Upload backend build
+        if: steps.selection.outputs.run == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: e2e-backend-build
@@ -446,6 +343,7 @@ jobs:
           retention-days: 1
 
       - name: Upload E2E fixture plugin package
+        if: steps.selection.outputs.run == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: e2e-plugin-package
@@ -457,19 +355,78 @@ jobs:
 
       # Tar the Vite dist directory so shards can reuse the same static web build.
       - name: Package web build
+        if: steps.selection.outputs.run == 'true'
         run: tar -cf apps/web/web-dist.tar -C apps/web dist
 
       - name: Upload web build
+        if: steps.selection.outputs.run == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: e2e-web-build
           path: apps/web/web-dist.tar
           retention-days: 1
 
+  changes:
+    name: Detect relevant changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      run: ${{ steps.selection.outputs.run }}
+      reason: ${{ steps.selection.outputs.reason }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          # The base commit has to be present locally for the diff below.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Select application E2E
+        id: selection
+        uses: ./.github/actions/select-e2e-tests
+
+  helper_compile:
+    name: Compile remaining helper platforms
+    needs: changes
+    if: needs.changes.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    container: ghcr.io/kdlbs/kandev-ci:build-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+
+      - name: Mark workspace safe for git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Cache Go modules
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: go-e2e-helpers-${{ runner.os }}-${{ hashFiles('apps/backend/go.mod', 'apps/backend/go.sum') }}-${{ github.sha }}
+          restore-keys: |
+            go-e2e-helpers-${{ runner.os }}-${{ hashFiles('apps/backend/go.mod', 'apps/backend/go.sum') }}-
+            go-e2e-helpers-${{ runner.os }}-
+            go-e2e-build-${{ runner.os }}-
+            go-${{ runner.os }}-
+
+      - name: Compile remote platforms and diagnostic commands
+        run: >-
+          VERSION="0.0.0-e2e.${GITHUB_SHA}"
+          make -C apps/backend build-agentctl-linux-arm64 build-agentctl-darwin-arm64 build-agentctl-darwin-amd64 build-acpdbg build-codexdbg build-winjob
+
   e2e:
     name: E2E Shard ${{ matrix.shard }}/24
-    needs: [changes, build]
-    if: needs.changes.outputs.run == 'true'
+    needs: [build]
+    if: needs.build.outputs.run == 'true'
     runs-on: ${{ matrix.runner }}
     # Pre-baked image bundles Node 24, pnpm 9.15.9, and the Playwright browser
     # binaries (Chromium etc.) — see .github/docker/ci-base/Dockerfile. This is
@@ -500,7 +457,7 @@ jobs:
       KANDEV_E2E_CATALOG_PRODUCER_ATTEMPT: ${{ needs.build.outputs.catalog_attempt }}
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.changes.outputs.plan).e2e_matrix }}
+      matrix: ${{ fromJSON(needs.build.outputs.plan).e2e_matrix }}
 
     steps:
       - name: Checkout code
@@ -1613,8 +1570,9 @@ jobs:
         if: always()
         env:
           CHANGES_RESULT: ${{ needs.changes.result }}
-          RUNNER_PLAN: ${{ needs.changes.outputs.plan }}
+          RUNNER_PLAN: ${{ needs.build.outputs.plan }}
           RUN_REQUIRED: ${{ needs.changes.outputs.run }}
+          BUILD_RUN_REQUIRED: ${{ needs.build.outputs.run }}
           REPORT_RESULT: ${{ job.status }}
           SKIP_REASON: ${{ needs.changes.outputs.reason }}
           HELPER_COMPILE_RESULT: ${{ needs.helper_compile.result }}
@@ -1626,19 +1584,22 @@ jobs:
           DESKTOP_E2E_RESULT: ${{ needs['desktop-e2e'].result }}
         run: |
           set -euo pipefail
-          if [[ "${CHANGES_RESULT}" != "success" || -z "${RUNNER_PLAN}" ]]; then
-            echo "Change detection or runner planning failed or produced no plan: ${CHANGES_RESULT}" >&2
+          if [[ "${CHANGES_RESULT}" != "success" || "${BUILD_RESULT}" != "success" || -z "${RUNNER_PLAN}" ]]; then
+            echo "E2E preparation failed or produced no runner plan: selection=${CHANGES_RESULT} build=${BUILD_RESULT}" >&2
             exit 1
           fi
           if [[ "${RUN_REQUIRED}" != "true" && "${RUN_REQUIRED}" != "false" ]]; then
             echo "Missing change-selection verdict." >&2
             exit 1
           fi
+          if [[ "${BUILD_RUN_REQUIRED}" != "${RUN_REQUIRED}" ]]; then
+            echo "E2E preparation verdicts disagree or are missing." >&2
+            exit 1
+          fi
           expected=skipped
           if [[ "${RUN_REQUIRED}" == "true" ]]; then expected=success; fi
           for entry in \
             "helper_compile:${HELPER_COMPILE_RESULT}" \
-            "build:${BUILD_RESULT}" \
             "playwright-image:${PLAYWRIGHT_IMAGE_RESULT}" \
             "e2e:${E2E_RESULT}" \
             "e2e-containers:${E2E_CONTAINERS_RESULT}" \

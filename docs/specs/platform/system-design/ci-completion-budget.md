@@ -33,6 +33,32 @@ for each experiment. PR #4457 already met the distinct 50% E2E-step target.
 | REQ-PLATFORM-CI-PERFORMANCE-005 | Occupancy and loaded feedback comparison |
 | REQ-PLATFORM-CI-PERFORMANCE-007 | Full workflow budget and staged delivery |
 
+## Proposed bounded preparation consolidation
+
+Keep the twenty-four-shard measurement fixed while testing the next workflow
+locally. Its separate Build scheduling instance waits 166 seconds before a
+116-second execution. Start Build directly on its existing GitHub-hosted runner,
+with the existing planner and a shared exact-source selection action. The small
+auxiliary selection job calls the same action independently, preserving the
+parallel start of helper compilation, image resolution and desktop coverage.
+Build owns its runner plan and catalog outputs; normal browser jobs need only
+Build. Container/platform prerequisite unions remain otherwise unchanged.
+
+Both preparation jobs retain full-history checkouts. The selection action owns
+the existing path patterns and independent-Go-test exemption; its own files are
+relevant inputs too. Build keeps its twenty-minute and auxiliary selection its
+ten-minute deadline. Only selected runs execute the original build operations.
+The required gate always requires successful preparations, matching explicit
+boolean selection verdicts and a nonempty plan. Failed/cancelled preparation,
+unknown or divergent verdicts, unexpected skips and missing selected-run evidence
+cannot pass, including when the other preparation chooses to filter the run.
+
+All test, helper, container, desktop and Kubernetes operations remain under the
+same platform, credential, resource, retry and deadline boundaries. The complete
+selected roster stays 71 jobs, with no additional runners or shards. Retain all
+native identities and compare whole-graph hosted time before adopting this
+prototype. Do not serialize independent platform jobs behind compilation.
+
 ## First candidate: independent frontend and Windows work
 
 Run the existing frontend static checks and build independently of two built-in

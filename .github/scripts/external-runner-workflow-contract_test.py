@@ -25,7 +25,8 @@ class ExternalRunnerWorkflowContractTest(unittest.TestCase):
         self, workflow_name: str, workflow_key: str, families: tuple[str, ...]
     ) -> str:
         workflow = (WORKFLOW_ROOT / workflow_name).read_text(encoding="utf-8")
-        planner = workflow.split("  changes:\n", 1)[1].split("      - name: Detect relevant changes", 1)[0]
+        entry_job = "build" if workflow_name == "e2e-tests.yml" else "changes"
+        planner = workflow.split(f"  {entry_job}:\n", 1)[1].split("      - name: Detect relevant changes", 1)[0]
         self.assertIn("runs-on: ubuntu-latest", planner)
         self.assertIn("plan: ${{ steps.plan.outputs.plan }}", planner)
         self.assertIn("uses: ./.github/actions/plan-external-runners", planner)
@@ -48,18 +49,18 @@ class ExternalRunnerWorkflowContractTest(unittest.TestCase):
         )
         self.assertIn(
             "runs-on: ubuntu-latest",
-            job_block(workflow, "changes", "helper_compile"),
+            job_block(workflow, "build", "changes"),
         )
-        helpers = job_block(workflow, "helper_compile", "build")
+        helpers = job_block(workflow, "helper_compile", "e2e")
         self.assertIn("runs-on: ubuntu-latest", helpers)
         self.assertNotIn("runner_plan", helpers)
         self.assertNotIn("KANDEV_CI_EXTERNAL", helpers)
-        build = job_block(workflow, "build", "e2e")
+        build = job_block(workflow, "build", "changes")
         self.assertIn("runs-on: ubuntu-latest", build)
         self.assertNotIn("runner_plan", build)
         e2e = job_block(workflow, "e2e", "playwright_image")
         self.assertIn(
-            "matrix: ${{ fromJSON(needs.changes.outputs.plan).e2e_matrix }}",
+            "matrix: ${{ fromJSON(needs.build.outputs.plan).e2e_matrix }}",
             e2e,
         )
         self.assertIn("runs-on: ${{ matrix.runner }}", e2e)

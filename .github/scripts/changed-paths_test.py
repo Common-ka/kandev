@@ -49,23 +49,34 @@ GATED_WORKFLOWS = {
         ["apps/backend/internal/orchestrator/orchestrator.go", "apps/web/README.md"],
     ),
     "e2e-tests.yml": (
-        ["apps/web/e2e/specs/kanban.spec.ts"],
+        ["apps/web/e2e/specs/kanban.spec.ts", ".github/actions/select-e2e-tests/action.yml"],
         ["docs/public/install.md", "README.md"],
     ),
 }
 
 
+def selection_source(workflow: str) -> Path:
+    return (REPO_ROOT / ".github/actions/select-e2e-tests/action.yml"
+            if workflow == "e2e-tests.yml" else WORKFLOWS / workflow)
+
+
 def patterns_block(workflow: str) -> str:
-    """Return the `PATTERNS:` heredoc-style YAML block of the `changes` job."""
-    text = (WORKFLOWS / workflow).read_text(encoding="utf-8")
-    match = re.search(r"(?m)^          PATTERNS: \|\n((?:^            .*\n|^\n)+)", text)
+    """Return patterns from the workflow or its shared E2E selector."""
+    text = selection_source(workflow).read_text(encoding="utf-8")
+    match = re.search(r"(?m)^( +)PATTERNS: \|\n", text)
     if match is None:
         raise AssertionError(
-            f"{workflow} has no `PATTERNS: |` block in its `changes` job. The "
+            f"{workflow} has no `PATTERNS: |` block in its selection source. The "
             "gating job cannot filter anything without one, so every job it "
             "guards would run on every event -- or none would."
         )
-    return match.group(1)
+    indentation = len(match.group(1)) + 2
+    lines = []
+    for line in text[match.end():].splitlines(keepends=True):
+        if line.strip() and not line.startswith(" " * indentation):
+            break
+        lines.append(line)
+    return "".join(lines)
 
 
 class MatcherTest(unittest.TestCase):
@@ -314,11 +325,11 @@ class WorkflowPatternsTest(unittest.TestCase):
         """
         for workflow in GATED_WORKFLOWS:
             with self.subTest(workflow=workflow):
-                text = (WORKFLOWS / workflow).read_text(encoding="utf-8")
+                text = selection_source(workflow).read_text(encoding="utf-8")
                 self.assertIn(
                     'git diff --name-only -z "${BASE}" HEAD',
                     text,
-                    f"{workflow}'s `changes` job must pass -z to git diff. "
+                    f"{workflow}'s selector must pass -z to git diff. "
                     "Without it git quotes non-ASCII paths, they match no "
                     "pattern, and every job is skipped on a green gate.",
                 )

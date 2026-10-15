@@ -1,0 +1,81 @@
+name: Select application E2E
+description: Select application E2E from exact-source paths and independent Go test evidence
+outputs:
+  run:
+    description: Explicit true or false application E2E selection
+    value: ${{ steps.test-only.outputs.run || steps.detect.outputs.run }}
+  reason:
+    description: Verified independent Go test exemption reason, when applicable
+    value: ${{ steps.test-only.outputs.reason }}
+runs:
+  using: composite
+  steps:
+    - name: Detect relevant changes
+      shell: bash
+      id: detect
+      env:
+        PATTERNS: |
+          apps/backend/**
+          apps/desktop/**
+          apps/web/**
+          apps/packages/**
+          apps/pnpm-lock.yaml
+          apps/pnpm-workspace.yaml
+          .github/docker/ci-base/**
+          .github/scripts/resolve-image-digest.sh
+          .github/workflows/ci-base-image.yml
+          .github/workflows/e2e-tests.yml
+          .github/actions/cache-go/**
+          .github/actions/select-e2e-tests/**
+          .github/scripts/go-cache-identity.*
+          .github/actions/download-artifact-retry/**
+          .github/scripts/ci-test-only-changes.py
+          .github/scripts/changed-paths.py
+          .github/scripts/runner-plan.py
+          .github/actions/plan-external-runners/**
+          !**/*.md
+        EVENT_NAME: ${{ github.event_name }}
+        BASE_REF: ${{ github.base_ref }}
+        MERGE_GROUP_BASE_SHA: ${{ github.event.merge_group.base_sha }}
+        PUSH_BEFORE: ${{ github.event.before }}
+      run: |
+        set -euo pipefail
+
+        case "${EVENT_NAME}" in
+          # The checkout is the merge ref, whose first parent is the base
+          # branch tip. Diffing against that tip directly collapses to a
+          # two-dot diff over everything main landed since the PR opened, so
+          # take the fork point instead.
+          pull_request) BASE="$(git merge-base HEAD "origin/${BASE_REF}" 2>/dev/null || true)" ;;
+          # The queue branch is cut from this commit, so it is a true ancestor.
+          merge_group) BASE="${MERGE_GROUP_BASE_SHA}" ;;
+          push) BASE="${PUSH_BEFORE}" ;;
+          # workflow_dispatch is an explicit request to run the suite.
+          *) BASE="" ;;
+        esac
+
+        # Fail open. A first push to a branch, a force push, or a manual
+        # dispatch leaves no usable base, and running the suite needlessly is
+        # cheaper than merging something no job ever looked at.
+        if [[ -z "${BASE}" || "${BASE}" == "0000000000000000000000000000000000000000" ]] \
+           || ! git cat-file -e "${BASE}^{commit}" 2>/dev/null; then
+          echo "No usable base commit for '${EVENT_NAME}'; running everything."
+          echo "run=true" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        # `-z`, not plain --name-only: git quotes non-ASCII paths under its
+        # default core.quotePath, and a quoted path matches no pattern, so a
+        # change to one would skip every job and still report success.
+        echo "base=${BASE}" >> "$GITHUB_OUTPUT"
+        git diff --name-only -z "${BASE}" HEAD \
+          | python3 .github/scripts/changed-paths.py
+
+    - name: Check independent Go test changes
+      shell: bash
+      id: test-only
+      if: github.event_name == 'pull_request' && steps.detect.outputs.run == 'true' && steps.detect.outputs.base != ''
+      env:
+        BASE_SHA: ${{ steps.detect.outputs.base }}
+      run: python3 .github/scripts/ci-test-only-changes.py --base "$BASE_SHA" --event pull_request
+

@@ -53,13 +53,13 @@ class E2EWorkflowContractTest(unittest.TestCase):
         self.assertNotIn("continue-on-error", manifest_download)
         for job in (job_block(workflow, "e2e", "playwright_image"), job_block(workflow, "e2e-containers", "e2e-kubernetes-compatibility"), report):
             self.assertIn("KANDEV_E2E_CATALOG_PRODUCER_ATTEMPT: ${{ needs.build.outputs.catalog_attempt }}", job)
-        build = job_block(workflow, "build", "e2e")
+        build = job_block(workflow, "build", "changes")
         self.assertIn("catalog_attempt: ${{ steps.e2e_catalog.outputs.attempt }}", build)
         self.assertIn('"$GITHUB_RUN_ATTEMPT" >> "$GITHUB_OUTPUT"', build)
 
     def test_browser_free_jobs_bootstrap_host_tools_and_share_one_store_writer(self) -> None:
         workflow = E2E_WORKFLOW.read_text()
-        build = job_block(workflow, "build", "e2e")
+        build = job_block(workflow, "build", "changes")
         report = workflow.partition("  e2e-report:\n")[2]
         for job in (build, report):
             self.assertNotIn("COREPACK_HOME: ${{ runner.", job.partition("    steps:\n")[0])
@@ -100,20 +100,21 @@ class E2EWorkflowContractTest(unittest.TestCase):
     def test_independent_helper_cache_snapshots_refresh_after_source_changes(self) -> None:
         workflow = E2E_WORKFLOW.read_text()
         dependency = "${{ runner.os }}-${{ hashFiles('apps/backend/go.mod', 'apps/backend/go.sum') }}"
-        block = job_block(workflow, "helper_compile", "build")
+        block = job_block(workflow, "helper_compile", "e2e")
         prefix = f"go-e2e-helpers-{dependency}"
         self.assertIn(f"key: {prefix}-${{{{ github.sha }}}}", block)
         self.assertIn(f"restore-keys: |\n            {prefix}-\n", block)
 
     def test_build_reuses_optional_daily_cache_without_conditioning_verification(self) -> None:
         workflow = E2E_WORKFLOW.read_text()
-        build = job_block(workflow, "build", "e2e")
+        build = job_block(workflow, "build", "changes")
         self.assertIn("uses: ./.github/actions/cache-go", build)
         self.assertIn("family: e2e-build", build)
         self.assertNotIn("key: go-e2e-build-", build)
         self.assertNotIn("steps.cache", build)
-        self.assertIn(".github/actions/cache-go/**", workflow)
-        self.assertIn(".github/scripts/go-cache-identity.*", workflow)
+        selector = (REPO_ROOT / ".github/actions/select-e2e-tests/action.yml").read_text()
+        self.assertIn(".github/actions/cache-go/**", selector)
+        self.assertIn(".github/scripts/go-cache-identity.*", selector)
         self.assertIn("make -C apps/backend build-kandev", build)
         self.assertIn("make build-web-e2e", build)
         action = (REPO_ROOT / ".github/actions/cache-go/action.yml").read_text()
@@ -163,8 +164,8 @@ fi
 
     def test_browser_build_and_parallel_compile_preserve_the_original_binary_union(self) -> None:
         workflow = E2E_WORKFLOW.read_text()
-        helpers = job_block(workflow, "helper_compile", "build")
-        build = job_block(workflow, "build", "e2e")
+        helpers = job_block(workflow, "helper_compile", "e2e")
+        build = job_block(workflow, "build", "changes")
         self.assertIn("needs: changes", helpers)
         self.assertIn("runs-on: ubuntu-latest", helpers)
         self.assertIn("if: needs.changes.outputs.run == 'true'", helpers)
@@ -341,7 +342,7 @@ cat "${FAKE_DOCKER_MANIFEST}"
         ):
             self.assertNotIn(forbidden, desktop_job)
 
-        changes_job = job_block(workflow, "changes", "helper_compile")
+        changes_job = (REPO_ROOT / ".github/actions/select-e2e-tests/action.yml").read_text()
         for pattern in (
             ".github/docker/ci-base/**",
             ".github/scripts/resolve-image-digest.sh",
@@ -416,19 +417,19 @@ cat "${FAKE_DOCKER_MANIFEST}"
     def test_external_runner_tiers_are_toggleable_for_eligible_jobs(self) -> None:
         workflow = E2E_WORKFLOW.read_text(encoding="utf-8")
 
-        changes = job_block(workflow, "changes", "helper_compile")
+        changes = job_block(workflow, "build", "changes")
         self.assertIn("runs-on: ubuntu-latest", changes)
         self.assertNotIn("    needs:", changes)
+        self.assertNotIn("    if:", changes.split("    steps:\n", 1)[0])
         self.assertNotIn("  e2e-gate:\n", workflow)
         e2e_job = job_block(workflow, "e2e", "playwright_image")
         self.assertIn("runs-on: ${{ matrix.runner }}", e2e_job)
         self.assertIn(
-            "matrix: ${{ fromJSON(needs.changes.outputs.plan).e2e_matrix }}",
+            "matrix: ${{ fromJSON(needs.build.outputs.plan).e2e_matrix }}",
             e2e_job,
         )
 
         protected_jobs = {
-            "build": "e2e",
             "e2e-report": "e2e-gate",
             "playwright_image": "e2e-containers",
             "e2e-containers": "e2e-kubernetes-compatibility",

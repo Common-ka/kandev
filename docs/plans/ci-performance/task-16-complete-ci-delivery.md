@@ -53,6 +53,39 @@ git diff --check
 
 Hosted evidence remains mandatory; local contracts do not prove speed.
 
+### Twenty-ninth complete set: two browser failures with twenty-four normal jobs
+
+Head `1650142a72e8` runs a fresh, fully selected workflow-dispatch set:
+backend `38706111986` passes in 33m59s, frontend `38706116838` in 13m07s,
+and E2E `38706121399` fails in 44m48s. Complete elapsed is 2,692 seconds
+(44m52s), including the four-second spread between workflow creation times.
+All 71 core jobs are selected; occupancy is 467.05 runner-minutes. This failed,
+over-budget sample does not count toward fifteen-minute acceptance.
+
+All 3,957 native E2E IDs remain accounted for: 3,908 first passes, seven retry
+passes, one final failure, one final timeout and forty existing skips. The
+integration-navigation shortcut scenario times out while recording/saving/
+reloading/navigating/resetting six providers; one attempt also loses navigation
+after a fresh home load. The mobile task-action-bar scenario cannot find its
+manual progression control. Both exhaust four attempts. Retain their navigation,
+persistence, touch geometry, canonical-task and workflow assertions; diagnose
+fixture readiness and overlapping setup before changing production behavior.
+No timeout or retry increase, generic interaction fallback or coverage removal.
+
+All 35,581 native backend executions and outcomes remain; frontend retains all
+26,553 cases in 2,956 files. Backend's execution critical path is 673 seconds,
+frontend's 724 seconds and E2E's 892 seconds. Waiting remains material. All
+24 resource artifacts show four CPUs, zero swap/memory events and 8.15-9.40 GiB
+lifetime peaks. Build waits 166 seconds before a 116-second execution.
+
+The separate next prototype starts Build directly, preserving independent
+platform starts through one shared selection action. It keeps all 71 jobs,
+commands, platforms, deadlines and resource guards. Real gate tests first reject
+the old filtered/preparation contract and missing verdict agreement, then pass
+the new failure/cancellation/skip/unknown/divergent-verdict cases. The prototype
+remains local while the two native failures are investigated. No hosted gain
+is inferred from the lower occupancy or from changes in cache/concurrent load.
+
 ### Post-merge control: all coverage passes in 47m33s under concurrent load
 
 Main squash `68bad6c7702cd` has exactly the green PR head's source tree.

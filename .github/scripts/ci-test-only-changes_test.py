@@ -46,7 +46,8 @@ class TestOnlyChangesTests(unittest.TestCase):
                      change(test)+change("apps/web/x.test.ts"),
                      change(test)+change("apps/cli/bin/cli.js"),
                      change("apps/backend/internal/a/testdata/value_test.go"),
-                     change(test)+change(".github/workflows/e2e-tests.yml")):
+                     change(test)+change(".github/workflows/e2e-tests.yml"),
+                     change(test)+change(".github/actions/select-e2e-tests/action.yml")):
             self.assertFalse(self.check(data), data)
 
     def test_malformed_unknown_or_empty_diff_never_exempts(self):

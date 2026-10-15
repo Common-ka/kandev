@@ -87,10 +87,15 @@ forever -- the exact failure the shim exists to prevent, reintroduced by the
 shim. Making the inversion correct would mean hand-deriving a second pattern
 list per workflow and keeping the two in sync by eye. Worse, the shim needs a
 job whose *name* matches the real check, which for `e2e-tests.yml` would mean
-reproducing twenty-eight shard names and six container shard names.
+reproducing twenty-four shard names and six container shard names.
 
-So: the trigger-level `paths:` filters are gone, and each expensive workflow
-grew a cheap `changes` job that applies the same list one level down.
+The trigger-level `paths:` filters are gone. Backend and frontend apply the
+same lists in a cheap `changes` job one level down. E2E's direct `build` job
+and auxiliary `changes` job call one shared selection action. Build keeps its
+hosted runner through compilation; helper, image-resolution and desktop jobs
+can still start independently through the auxiliary selector. Filtered E2E
+runs skip build operations but still require both preparations to succeed,
+matching verdicts and a valid runner plan. The diagram shows backend/frontend.
 
 ```
 changes ──> static_checks ─┐
@@ -100,8 +105,9 @@ changes ──> static_checks ─┐
 
 `.github/scripts/changed-paths.py` implements GitHub's filter-pattern semantics
 (`*`, `**`, `?`, leading `!`, last match wins) and is unit-tested in
-`changed-paths_test.py`, which also asserts the pattern lists still live in the
-workflows and still select what they used to. It rejects `+`, `[...]`, and
+`changed-paths_test.py`, which also checks each workflow's selector still
+selects its original relevant inputs. E2E's list lives in the shared selection
+action. It rejects `+`, `[...]`, and
 `{...}` rather than quietly matching them as literals.
 
 Two properties of this shape matter:
@@ -383,7 +389,7 @@ Not verified, and not verifiable until a queue is switched on:
 
 - **No `merge_group` event has ever fired against these workflows.** Everything
   about the merge-group path -- that `github.event.merge_group.base_sha` is
-  populated as expected, that the `changes` job resolves a usable base from it,
+  populated as expected, that change selection resolves a usable base from it,
   that the gate jobs report under the names in the table -- is read from
   GitHub's documented payload, not observed.
 - Whether GitHub blocks a pull request from *entering* the queue on a check that
@@ -392,7 +398,7 @@ Not verified, and not verifiable until a queue is switched on:
   it needed to be.
 - The cost. Every pull request now starts six workflows instead of however many
   its paths selected, and each merge group runs the full E2E suite. The
-  `changes` jobs keep the expensive work filtered, but the floor per pull
+  selection steps keep the expensive work filtered, but the floor per pull
   request is higher than it was.
 
 The cheapest way to close the first gap is to enable the queue on a low-traffic
