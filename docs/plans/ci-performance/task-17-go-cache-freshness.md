@@ -94,8 +94,6 @@ Do not mark the work order done from local tests alone.
 - `.github/workflows/backend-tests.yml`
 - `.github/scripts/backend-tests-workflow-contract_test.py`
 - `.github/scripts/go-cache-identity.mjs` and its matrix-driven regression
-- `.github/workflows/e2e-tests.yml` (shared-helper change selection only)
-- `.github/workflows/lint-action-pinning.yml`
 - `docs/ci-merge-queue.md`
 - `docs/plans/ci-performance/cache-report-evidence.md`
 
@@ -173,3 +171,8 @@ generated fixture ranges now exclude the protected test-process PID. All 13
 phase tests passed ten race-enabled repetitions. Hosted follow-up remains open,
 and the failed shard is excluded from timing claims. See the evidence document
 for exact source identity, job times, scheduling delays and remaining gates.
+
+The conflict refresh against main `595df36ed` preserves its completed E2E
+observation fixes and removes redundant path filters/cache-test registration.
+Those files now match main. Previous-head core CI passed; a fresh full backend
+baseline and merged-head CI are required to reconfirm the performance evidence.

@@ -7,7 +7,8 @@ checks, four ordinary Go test shards and ambient verification. Required
 commands, selections, race flags, deadlines and gates remain unchanged.
 PR #4489 already merged the helper and E2E Build consumer. The report-image
 producer, fixtures, consumer and obsolete benchmark dispatches are removed.
-No backend speedup against this new main has yet been established.
+Historical warm-job savings are recorded below. Reconfirmation against current
+main `595df36ed` remains pending.
 
 The user approved the reduced scope on October 15. Main advanced from
 `68bad6c7702cdccbc906b340c7193d10f73b1c9d` to
@@ -26,7 +27,7 @@ repository/Postgres cohorts and Windows selections. Relevant identity, workflow,
 pinning, gate, Actionlint, Zizmor, catalog and specification checks are required
 before pushing the narrowed branch. Hosted validation remains pending.
 
-## Current-main scheduling baseline
+## Historical post-4489 scheduling baseline
 
 At `68bad6c77`, successful attempt-1 runs started together on October 15:
 
@@ -213,3 +214,37 @@ contain 63 passed tests, two skips and zero retries/errors. Full hosted E2E
 completion, the PID-fixture follow-up commit, repeated paired measurements and
 natural daily rollover still need verification; do not report full CI green
 or overall elapsed-time improvement from these partial results.
+
+## Current-main conflict refresh (2026-10-15, 22:49 UTC)
+
+The follow-up head `2da2ffb8d` subsequently passed backend `38757427590`,
+frontend `38757427604` and E2E `38757427647`. Those results belong to the
+previous base and do not substitute for the new merge verification.
+
+Merged main `595df36ed` into the PR worktree. Both queued-cancellation conflicts
+resolve to main's complete versions: its explanatory comment, 8s mock hold,
+12s join budget and zero retries. The automatically duplicated drawer-animation
+wait is removed. All three observation fixtures now match main exactly.
+The E2E workflow's duplicate shared-cache path filters and the action-pinning
+workflow's duplicate cache-test step are removed because main already covers
+them. The final delta retains backend cache consumers, shard-3/shard-4 identity
+support, matrix/failure contracts and the protected-PID fixture correction.
+
+Main's latest backend push run `38805676251` is green but skipped verification
+for a web-only merge; its 49s elapsed time is not a benchmark. A full manual
+backend baseline, `38819913060`, is running on exact main `595df36ed`. The latest
+main E2E run `38805676233` failed; frontend `38805676226` passed. Fresh PR
+results and cache hit/miss observations remain pending, so earlier timing
+percentages are historical evidence until this comparison completes.
+
+Local refresh checks passed: eight cache-identity tests, 27 backend contracts,
+27 E2E contracts, five required-gate contracts, nine pinning tests, Actionlint,
+action-ref verification and full specification validation. Zizmor reported no
+medium/high findings; five low/help advisories remain. A desktop cancellation
+check first failed on a 503 after the workflow database readiness probe timed
+out. Its diagnostic run with a trace passed without changing production code,
+assertions or retry policy. This transient failure remains recorded rather
+than being treated as a cache-performance result.
+The mobile cancellation check and both mobile goal checks also passed (three
+tests, one worker, zero retries). All conflicted observations remain identical
+to main. Fresh hosted verification is the remaining correctness check.
