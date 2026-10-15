@@ -123,3 +123,15 @@ Final targeted commands:
 (cd apps/backend && GOMAXPROCS=2 /usr/local/go/bin/go test -race -trimpath -p 1 ./internal/github -run 'TestEnterpriseCrossHostConnectionCleanupFailureKeepsCommittedAuthority|TestEnterpriseReplacementNeverRebindsOld' -count=1)
 PATH=/usr/local/go/bin:$PATH GOMAXPROCS=2 bash scripts/lint-go-changed apps/backend/internal/github/service_connections.go apps/backend/internal/github/service_app_auth_connection_store.go apps/backend/internal/github/enterprise_secret_binding_test.go apps/backend/internal/github/mock_controller.go apps/backend/internal/github/mock_app_runtime.go apps/backend/internal/github/mock_app_runtime_test.go
 ```
+
+PR remediation: reconnect now compares the retained settings host inside the
+connection transaction. Switching from a disconnected enterprise host to
+GitHub.com resets host-bound settings; reconnecting the same host retains scope.
+Regression coverage includes settings/preset saves after reload, SQLite rollback
+on a settings-write failure, and a real PostgreSQL reconnect round trip.
+
+Post-remediation validation: the complete GitHub package passed with the isolated
+PostgreSQL 16 DSN in 148.846 seconds using the full-package command above.
+`go test -race -trimpath -p 1 ./internal/github -run
+'TestEnterprise(SearchResponsesCarryHost|Reconnect)' -count=1` passed in 3.775
+seconds. Remote CI and automated review remain pending until the fixup push.

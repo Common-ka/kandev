@@ -2,6 +2,7 @@ package github
 
 import (
 	"github.com/kandev/kandev/internal/testutil"
+	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
 )
@@ -69,4 +70,23 @@ func TestEnterprisePostgresAuthHostRoundTrip(t *testing.T) {
 	if err != nil || read.ConsumedAt == nil {
 		t.Fatalf("old flow remains live = %+v, error %v", read, err)
 	}
+}
+
+func TestEnterprisePostgresReconnectRetainedHost(t *testing.T) {
+	database := testutil.OpenIsolatedPostgres(t, testutil.PostgresDSNFromEnv(t))
+	_, err := database.Exec(`CREATE TABLE workspaces (id TEXT PRIMARY KEY); CREATE TABLE tasks (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL, archived_at TIMESTAMPTZ); INSERT INTO workspaces(id) VALUES ('ws-1')`)
+	require.NoError(t, err)
+	store, err := NewStore(database, database)
+	require.NoError(t, err)
+	ctx := t.Context()
+	connection := &WorkspaceConnection{WorkspaceID: "ws-1", Source: ConnectionSourcePAT, Login: "alice", GitHubHost: "git.example.com", Status: ConnectionStatusActive, CredentialGeneration: 1}
+	require.NoError(t, store.ReplaceWorkspaceHostConnection(ctx, nil, connection))
+	require.NoError(t, store.DeleteWorkspaceConnection(ctx, "ws-1"))
+	connection.GitHubHost = "github.com"
+	connection.CredentialGeneration++
+	require.NoError(t, store.ReplaceWorkspaceHostConnection(ctx, nil, connection))
+	settings, err := store.GetWorkspaceSettings(ctx, "ws-1")
+	require.NoError(t, err)
+	require.Equal(t, "github.com", settings.GitHubHost)
+	require.Equal(t, RepoScopeModeRepos, settings.RepoScopeMode)
 }

@@ -108,3 +108,14 @@ integrated production snapshot in 142.070 seconds. Combined changed-Go lint
 passed with zero issues, and Enterprise race checks passed in 19.565 seconds.
 Full persistence conformance with actual PostgreSQL and the race detector passed
 in 273.558 seconds. SQL portability checks also passed.
+
+PR remediation: paged and unpaged workspace PR/issue search responses now carry
+the captured operation's `github_host`. Response copies preserve shared provider
+and cache entries. JSON regressions cover GitHub.com, GHES, and GHE.com, including
+a repeated cached read and provider-object immutability.
+
+The complete GitHub package passed with actual PostgreSQL in 148.846 seconds.
+`go test -race -trimpath -p 1 ./internal/github -run
+'TestEnterprise(SearchResponsesCarryHost|Reconnect)' -count=1` passed in 3.775
+seconds. Specification catalog and structure checks passed. Remote CI and review
+remain pending until the fixup push.

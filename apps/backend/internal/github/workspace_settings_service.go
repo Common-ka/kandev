@@ -149,7 +149,7 @@ func (s *Service) SearchUserPRsPagedForWorkspaceUser(
 			if fetchErr != nil || result == nil {
 				return nil, 0, fetchErr
 			}
-			return result.PRs, result.TotalCount, nil
+			return prsForHost(result.PRs, resolved.host().String()), result.TotalCount, nil
 		},
 		func(items []*PR) ([]*PR, error) { return s.filterPersonalPRsByAutomation(ctx, workspaceID, items) },
 		func(result filteredPersonalSearchPage[*PR], page, perPage int) *PRSearchPage {
@@ -186,7 +186,7 @@ func (s *Service) SearchUserIssuesPagedForWorkspaceUser(
 			if fetchErr != nil || result == nil {
 				return nil, 0, fetchErr
 			}
-			return result.Issues, result.TotalCount, nil
+			return issuesForHost(result.Issues, resolved.host().String()), result.TotalCount, nil
 		},
 		func(items []*Issue) ([]*Issue, error) {
 			return s.filterPersonalIssuesByAutomation(ctx, workspaceID, items)

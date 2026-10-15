@@ -282,6 +282,7 @@ const (
 
 // PR represents a GitHub Pull Request.
 type PR struct {
+	GitHubHost          string `json:"github_host,omitempty"`
 	operationFence      *githubOperationFence
 	ID                  int64  `json:"id"`
 	NodeID              string `json:"node_id"`
@@ -1351,6 +1352,7 @@ type DailyCount struct {
 
 // Issue represents a GitHub Issue (not a PR).
 type Issue struct {
+	GitHubHost     string `json:"github_host,omitempty"`
 	operationFence *githubOperationFence
 	ID             int64      `json:"id"`
 	NodeID         string     `json:"node_id"`

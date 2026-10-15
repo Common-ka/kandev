@@ -817,7 +817,7 @@ func (s *Service) SearchUserPRsForWorkspace(
 	if err != nil {
 		return nil, err
 	}
-	return s.filterPersonalPRsByAutomation(ctx, workspaceID, filterPRsByWorkspaceScope(prs, settings))
+	return s.filterPersonalPRsByAutomation(ctx, workspaceID, filterPRsByWorkspaceScope(prsForHost(prs, resolved.host().String()), settings))
 }
 
 // SearchUserIssues searches for issues using a filter or custom query. Unless
@@ -845,7 +845,7 @@ func (s *Service) SearchUserIssuesForWorkspace(
 	if err != nil {
 		return nil, err
 	}
-	return s.filterPersonalIssuesByAutomation(ctx, workspaceID, filterIssuesByWorkspaceScope(issues, settings))
+	return s.filterPersonalIssuesByAutomation(ctx, workspaceID, filterIssuesByWorkspaceScope(issuesForHost(issues, resolved.host().String()), settings))
 }
 
 // ListAutomationPRs is the background-automation search path. It always uses

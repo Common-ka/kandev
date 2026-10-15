@@ -211,6 +211,9 @@ globally key GitHub resources by numeric IDs.
 
 Give `github_workspace_settings` an explicit host scope for repository filters
 and saved presets. Views, query caches, and API projections consume that scope.
+Workspace PR and issue search responses include the resolved operation's
+`github_host`, including cached pages. Add response metadata to resource copies
+so shared provider/cache entries remain unchanged.
 Task metadata URLs and contribution target/source identities must retain and
 validate host; avoid adding duplicate mutable identity when a canonical
 repository/connection reference already supplies it.
@@ -231,6 +234,9 @@ host/connection, increment credential generation, invalidate pending flows and
 personal bindings, and reset host-bound repository filters to an explicit empty
 selected-repository scope. Preserve task-access mode. Notify the UI that repository
 scope must be selected; do not silently widen old filters to all repositories.
+Disconnect retains settings. Reconnect compares the retained settings host in
+the connection transaction: a different host resets scope even when no active
+connection remains, while reconnecting the same host preserves that scope.
 
 Old repositories, links, and watches remain bound to their original host. Pollers
 and mutations compare record host with the operation's resolved credential before

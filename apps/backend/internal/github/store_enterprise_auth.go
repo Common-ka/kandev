@@ -2,6 +2,8 @@ package github
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 )
@@ -49,16 +51,24 @@ func (s *Store) addEnterpriseAuthFlowColumns() error {
 
 // ReplaceWorkspaceHostConnection commits host authority and its dependent settings together.
 func (s *Store) ReplaceWorkspaceHostConnection(ctx context.Context, existing, replacement *WorkspaceConnection) error {
-	if (existing == nil && defaultAuthFlowHost(replacement.GitHubHost) == defaultGitHubHost) || (existing != nil && defaultAuthFlowHost(existing.GitHubHost) == defaultAuthFlowHost(replacement.GitHubHost)) {
-		return s.UpsertWorkspaceConnection(ctx, replacement)
-	}
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return err
 	}
 	defer func() { _ = tx.Rollback() }()
+	// Disconnect preserves settings, so connection absence does not imply a
+	// public-host workspace. Read retained authority inside the same transaction.
+	retainedHost := defaultGitHubHost
+	err = tx.GetContext(ctx, &retainedHost, s.db.Rebind("SELECT github_host FROM github_workspace_settings WHERE workspace_id = ?"), replacement.WorkspaceID)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
 	if err := s.upsertWorkspaceConnection(ctx, tx, replacement); err != nil {
 		return err
+	}
+	newHost := defaultAuthFlowHost(replacement.GitHubHost)
+	if defaultAuthFlowHost(retainedHost) == newHost && (existing == nil || defaultAuthFlowHost(existing.GitHubHost) == newHost) {
+		return tx.Commit()
 	}
 	now := time.Now().UTC()
 	for _, table := range []string{"github_auth_flows", "github_app_registration_flows", "github_app_import_preparations"} {
