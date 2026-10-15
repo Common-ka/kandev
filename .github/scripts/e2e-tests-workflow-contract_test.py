@@ -53,13 +53,13 @@ class E2EWorkflowContractTest(unittest.TestCase):
         self.assertNotIn("continue-on-error", manifest_download)
         for job in (job_block(workflow, "e2e", "e2e-containers"), job_block(workflow, "e2e-containers", "e2e-kubernetes-compatibility"), report):
             self.assertIn("KANDEV_E2E_CATALOG_PRODUCER_ATTEMPT: ${{ needs.build.outputs.catalog_attempt }}", job)
-        build = job_block(workflow, "build", "changes")
+        build = job_block(workflow, "build", "helper_compile")
         self.assertIn("catalog_attempt: ${{ steps.e2e_catalog.outputs.attempt }}", build)
         self.assertIn('"$GITHUB_RUN_ATTEMPT" >> "$GITHUB_OUTPUT"', build)
 
     def test_browser_free_jobs_bootstrap_host_tools_and_share_one_store_writer(self) -> None:
         workflow = E2E_WORKFLOW.read_text()
-        build = job_block(workflow, "build", "changes")
+        build = job_block(workflow, "build", "helper_compile")
         report = workflow.partition("  e2e-report:\n")[2]
         for job in (build, report):
             self.assertNotIn("COREPACK_HOME: ${{ runner.", job.partition("    steps:\n")[0])
@@ -87,6 +87,14 @@ class E2EWorkflowContractTest(unittest.TestCase):
 
     def test_platform_preparations_start_before_browser_fanout(self) -> None:
         workflow = E2E_WORKFLOW.read_text()
+        self.assertFalse("\n  changes:\n" in workflow, "Build already owns the selector; no duplicate runner may block containers")
+        self.assertFalse("needs.changes" in workflow, "Children and report processing consume Build's selection")
+        build = job_block(workflow, "build", "helper_compile")
+        self.assertIn("reason: ${{ steps.selection.outputs.reason }}", build)
+        for role, following in (("e2e", "e2e-containers"), ("e2e-containers", "e2e-kubernetes-compatibility"), ("e2e-kubernetes-compatibility", "desktop-e2e")):
+            block = job_block(workflow, role, following)
+            self.assertRegex(block, r"(?m)^    needs: (?:build|\[build\])$")
+            self.assertIn("if: needs.build.outputs.run == 'true'", block)
         for role, following in (("helper_compile", "e2e"), ("desktop-e2e", "e2e-report")):
             with self.subTest(role=role):
                 block = job_block(workflow, role, following)
@@ -99,7 +107,7 @@ class E2EWorkflowContractTest(unittest.TestCase):
                 for step in work.split("      - name:")[1:]:
                     self.assertIn("if: steps.selection.outputs.run == 'true'", step)
         self.assertNotIn("  playwright_image:\n", workflow)
-        build = job_block(workflow, "build", "changes")
+        build = job_block(workflow, "build", "helper_compile")
         lookup = build.partition("      - name: Resolve immutable Playwright runtime image\n")[2].partition("      - name:")[0]
         self.assertIn("uses: ./.github/actions/resolve-playwright-runtime", lookup)
         self.assertIn("timeout-minutes: 5", lookup)
@@ -129,7 +137,7 @@ class E2EWorkflowContractTest(unittest.TestCase):
 
     def test_build_reuses_optional_daily_cache_without_conditioning_verification(self) -> None:
         workflow = E2E_WORKFLOW.read_text()
-        build = job_block(workflow, "build", "changes")
+        build = job_block(workflow, "build", "helper_compile")
         self.assertIn("uses: ./.github/actions/cache-go", build)
         self.assertIn("family: e2e-build", build)
         self.assertNotIn("key: go-e2e-build-", build)
@@ -187,7 +195,7 @@ fi
     def test_browser_build_and_parallel_compile_preserve_the_original_binary_union(self) -> None:
         workflow = E2E_WORKFLOW.read_text()
         helpers = job_block(workflow, "helper_compile", "e2e")
-        build = job_block(workflow, "build", "changes")
+        build = job_block(workflow, "build", "helper_compile")
         self.assertNotRegex(helpers.partition("    steps:\n")[0], r"(?m)^    (needs|if):")
         self.assertIn("runs-on: ubuntu-latest", helpers)
         self.assertIn("uses: ./.github/actions/select-e2e-tests", helpers)
@@ -208,7 +216,7 @@ fi
         self.assertEqual(outputs(host + other + ["build-mock-agent-linux", "build-e2e-delivery-fixture"]),
                          outputs(["build", "build-mock-agent-linux", "build-e2e-delivery-fixture"]))
         report = workflow.split("  e2e-report:\n", 1)[1]
-        self.assertIn("needs: [changes, helper_compile, build,", report)
+        self.assertIn("needs: [helper_compile, build,", report)
         self.assertIn("HELPER_COMPILE_RESULT: ${{ needs.helper_compile.result }}", report)
         self.assertIn('"${HELPER_COMPILE_RESULT}" != "success"', report)
 
@@ -439,7 +447,7 @@ cat "${FAKE_DOCKER_MANIFEST}"
     def test_external_runner_tiers_are_toggleable_for_eligible_jobs(self) -> None:
         workflow = E2E_WORKFLOW.read_text(encoding="utf-8")
 
-        changes = job_block(workflow, "build", "changes")
+        changes = job_block(workflow, "build", "helper_compile")
         self.assertIn("runs-on: ubuntu-latest", changes)
         self.assertNotIn("    needs:", changes)
         self.assertNotIn("    if:", changes.split("    steps:\n", 1)[0])
@@ -536,7 +544,7 @@ cat "${FAKE_DOCKER_MANIFEST}"
     # @covers AC-PLATFORM-E2E-DURATION-AWARE-SHARDING-002.2
     def test_container_job_reuses_verified_browser_cache_with_fallback(self) -> None:
         workflow = E2E_WORKFLOW.read_text(encoding="utf-8")
-        build = job_block(workflow, "build", "changes")
+        build = job_block(workflow, "build", "helper_compile")
         self.assertIn("uses: ./.github/actions/resolve-playwright-runtime", build)
         resolver_job = (REPO_ROOT / ".github/actions/resolve-playwright-runtime/action.yml").read_text()
         container_job = job_block(workflow, "e2e-containers", "e2e-kubernetes-compatibility")
@@ -549,7 +557,7 @@ cat "${FAKE_DOCKER_MANIFEST}"
             "uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9",
             container_job,
         )
-        self.assertIn("needs: [changes, build]", container_job)
+        self.assertIn("needs: build", container_job)
         self.assertNotIn("docker buildx imagetools inspect", container_job)
         self.assertIn(
             "if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository\n      uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f",

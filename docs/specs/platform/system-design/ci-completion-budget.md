@@ -35,8 +35,8 @@ for each experiment. PR #4457 already met the distinct 50% E2E-step target.
 
 ## Root preparation before browser fanout
 
-Build, auxiliary selection, remaining-helper compilation and desktop smoke are
-independent GitHub-hosted roots. Each uses one shared exact-source path and
+Build, remaining-helper compilation and desktop smoke are three independent
+GitHub-hosted roots. Each uses one shared exact-source path and
 independent-Go-test selection action on a full-history checkout. Container jobs
 mark the workspace safe before selection. Build alone runs the existing runner
 planner and owns its plan, native catalog and build artifacts.
@@ -46,16 +46,19 @@ waiting for another runner after selection. Keep the original same-repository
 login predicate, read-only token scopes, resolver script and retries. The whole
 lookup retains its five-minute bound. Container jobs consume Build's digest/ref
 for existing cache validation and execution; no tag-only or unverified image is
-admitted. Normal browsers depend only on Build. Other platform prerequisite
-unions remain unchanged except removal of the separate image lookup job.
+admitted. Normal browser, container and Kubernetes compatibility jobs depend
+only on Build. Helper compilation and desktop smoke remain independent roots
+joined by the report.
 
-Build retains twenty minutes, auxiliary selection ten, helper compilation twenty
-and desktop smoke forty-five. Selected runs execute the original operations and
+Build retains twenty minutes, helper compilation twenty and desktop smoke
+forty-five. Selected runs execute the original operations and
 conditions. The platform roots initialize their existing images before selecting
 work, so filtered-run setup is not free; do not count a filtered run as full
 performance acceptance. No new image publication or paid capacity is required.
 
-The always-running report requires all four successful roots, explicit matching
+There is no auxiliary selector runner: Build exposes the selection verdict and
+reason, and all test children/report processing consume them directly. The
+always-running report requires all three successful roots, explicit matching
 boolean verdicts and a nonempty runner plan. A selected run also requires the
 validated immutable image and successful browser, container and compatibility
 children, report processing and all native evidence. Failed/cancelled roots,
@@ -64,7 +67,8 @@ cannot pass. Only the child test roles may skip a legitimately filtered run.
 
 All test, helper, container, desktop and Kubernetes commands retain their
 platform, credential, resource, retry and deadline boundaries. The complete
-roster becomes seventy jobs solely because image resolution reuses Build.
+roster becomes sixty-nine jobs because image resolution reuses Build and the
+duplicate auxiliary selecting runner is removed.
 Keep twenty-four normal and six container shards with the existing guarded
 process budget. Compare each complete hosted set with its own frozen graph;
 never overlap hosted rollout candidates or infer queue guarantees from job
@@ -253,8 +257,9 @@ duplicate or old-count metadata cannot establish a complete catalog. Native
 report reconciliation still requires every case from the source-bound catalog.
 This shard-only change selects 71 core jobs; its four fewer normal scheduling
 instances retain their tests through redistribution into the other jobs. The
-later root-preparation change above selects seventy jobs by moving immutable
-image resolution into Build, with no additional test redistribution.
+later root-preparation change above selects sixty-nine jobs by moving immutable
+image resolution into Build and removing duplicate selection, with no additional
+test redistribution.
 
 Compare both plans with identical catalog and timing inputs before rollout.
 Require disjoint complete assignment and the same catalog checksum, unit work,

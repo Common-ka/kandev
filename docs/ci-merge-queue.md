@@ -91,11 +91,11 @@ reproducing twenty-four shard names and six container shard names.
 
 The trigger-level `paths:` filters are gone. Backend and frontend apply the
 same lists in a cheap `changes` job one level down. E2E's direct `build` job
-and auxiliary `changes` job call one shared selection action. Helper compilation
-and desktop smoke are independent roots using that same selector. Build keeps
-its hosted runner through immutable runtime-image resolution and compilation;
+calls one shared selection action and owns its verdict and reason. Helper
+compilation and desktop smoke are independent roots using that same selector.
+Build keeps its hosted runner through immutable runtime-image resolution and compilation;
 container shards consume its verified digest/ref without a separate image job.
-Filtered E2E runs skip selected operations but still require all four roots to
+Filtered E2E runs skip selected operations but still require all three roots to
 succeed, matching explicit verdicts and a valid runner plan. Only browser,
 container and compatibility children may skip. The diagram shows backend/frontend.
 

@@ -61,6 +61,42 @@ git diff --check
 
 ## Results
 
+### Candidate thirty-two: remove the duplicate selecting runner
+
+Frozen candidate thirty-one `d93b191488c6` completes Build at 12:24:05 UTC
+while its auxiliary selector is still queued. Twenty-four normal browser jobs
+are admitted, but no container or Kubernetes compatibility job is admitted.
+The image lookup now succeeds inside Build, exposing the remaining redundant
+selector as another prerequisite that can be starved after fanout.
+
+Remove only that auxiliary selecting job. Build already owns the same exact
+selection action, full-history checkout and runner plan. Expose its existing
+reason alongside its explicit verdict. All browser/container/compatibility
+children and report processing consume Build's verdict directly. Helper
+compilation and desktop smoke remain independent selecting roots.
+
+The required gate must reject failed/cancelled Build selection, missing plans,
+unknown verdicts, divergent helper/desktop verdicts, missing immutable images,
+failed selected children and missing native reports. Filtered runs still require
+all three successful roots; only test children may skip. Keep every original
+native command, platform, deadline, image, credential scope and resource guard.
+The core roster becomes sixty-nine solely by removing the duplicate selector;
+no native test identity or assertion changes.
+
+Executable gate and DAG contracts first fail against the frozen candidate.
+Implement and validate locally while its remote source remains fixed. Do not
+push or dispatch until candidate thirty-one terminates; preserve its results
+and measure each source using its own frozen graph and roster receipt.
+
+The registered gate suite first fails two assertions and the workflow suite
+three, with zero test errors. After the change all five executable gate cases,
+twenty-eight workflow cases, five runner-boundary cases, twenty-three selector
+cases, eight independent-Go-test cases and nine pinning cases pass. Actionlint,
+document validation and specification lint pass. Zizmor adds no findings. A
+parsed comparison against frozen `d93b191488c6` proves every native test step,
+image, deadline, resource guard and permission is preserved; normal, helper and
+desktop jobs are identical. This is local structural evidence, not hosted timing.
+
 ### Candidate thirty-one: admit preparation before browser fanout
 
 The frozen `06f94acc9dd6` control finishes Build at 10:11:36 UTC and queues

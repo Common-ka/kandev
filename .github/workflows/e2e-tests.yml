@@ -4,7 +4,7 @@ name: E2E Tests
 # reports no conclusion at all, and a required check that never reports leaves
 # a pull request unable to enter a merge queue and a merge group unable to
 # leave it. `merge_group` cannot carry a `paths:` filter in the first place.
-# The filter lives in the `changes` job below instead, and `e2e-report` reports
+# The filter lives in the `build` job below instead, and `e2e-report` reports
 # the single conclusion the queue waits on. See docs/ci-merge-queue.md.
 on:
   push:
@@ -47,6 +47,7 @@ jobs:
     outputs:
       plan: ${{ steps.plan.outputs.plan }}
       run: ${{ steps.selection.outputs.run }}
+      reason: ${{ steps.selection.outputs.reason }}
       runtime_image_digest: ${{ steps.runtime_image.outputs.digest }}
       runtime_image_ref: ${{ steps.runtime_image.outputs.ref }}
       catalog_attempt: ${{ steps.e2e_catalog.outputs.attempt }}
@@ -376,26 +377,6 @@ jobs:
           path: apps/web/web-dist.tar
           retention-days: 1
 
-  changes:
-    name: Detect relevant changes
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    outputs:
-      run: ${{ steps.selection.outputs.run }}
-      reason: ${{ steps.selection.outputs.reason }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
-        with:
-          # The base commit has to be present locally for the diff below.
-          fetch-depth: 0
-          persist-credentials: false
-
-      - name: Select application E2E
-        id: selection
-        uses: ./.github/actions/select-e2e-tests
-
   helper_compile:
     name: Compile remaining helper platforms
     runs-on: ubuntu-latest
@@ -598,8 +579,8 @@ jobs:
   # Sharded 6 ways — each shard is its own runner. See apps/web/e2e/README.md.
   e2e-containers:
     name: E2E Containers Shard ${{ matrix.shard }}/6
-    needs: [changes, build]
-    if: needs.changes.outputs.run == 'true'
+    needs: build
+    if: needs.build.outputs.run == 'true'
     # This job intentionally runs on the host ubuntu runner (NOT the kandev-ci
     # container image): the containers project needs direct access to the
     # host Docker daemon, and a docker-in-docker setup would break the tests'
@@ -979,8 +960,8 @@ jobs:
   # current release; this matrix keeps compatibility coverage intentionally small.
   e2e-kubernetes-compatibility:
     name: Kubernetes Compatibility (${{ matrix.kubernetes_version }})
-    needs: [changes, build]
-    if: needs.changes.outputs.run == 'true'
+    needs: build
+    if: needs.build.outputs.run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 35
     strategy:
@@ -1196,7 +1177,7 @@ jobs:
 
   e2e-report:
     name: E2E Tests Passed
-    needs: [changes, helper_compile, build, e2e, e2e-containers, e2e-kubernetes-compatibility, desktop-e2e]
+    needs: [helper_compile, build, e2e, e2e-containers, e2e-kubernetes-compatibility, desktop-e2e]
     if: always()
     # Report aggregation queries GitHub history and downloads artifacts with the
     # job token, so it remains on a GitHub-hosted runner during the pilot.
@@ -1214,32 +1195,32 @@ jobs:
 
     steps:
       - name: Checkout code
-        if: needs.changes.outputs.run == 'true'
+        if: needs.build.outputs.run == 'true'
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           persist-credentials: false
 
       - name: Set up pnpm
-        if: needs.changes.outputs.run == 'true'
+        if: needs.build.outputs.run == 'true'
         uses: pnpm/action-setup@a8198c4bff370c8506180b035930dea56dbd5288 # v5
         with:
           version: 9.15.9
           run_install: false
 
       - name: Set up Node.js
-        if: needs.changes.outputs.run == 'true'
+        if: needs.build.outputs.run == 'true'
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: '24'
 
       - name: Resolve pnpm store
-        if: needs.changes.outputs.run == 'true'
+        if: needs.build.outputs.run == 'true'
         id: pnpm_store
         working-directory: apps
         run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
 
       - name: Cache pnpm store
-        if: needs.changes.outputs.run == 'true'
+        if: needs.build.outputs.run == 'true'
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ steps.pnpm_store.outputs.path }}
@@ -1247,18 +1228,18 @@ jobs:
           restore-keys: pnpm-e2e-host-${{ runner.os }}-
 
       - name: Install dependencies
-        if: needs.changes.outputs.run == 'true'
+        if: needs.build.outputs.run == 'true'
         working-directory: apps
         run: pnpm install --frozen-lockfile
 
       - name: Verify timing report tools
-        if: needs.changes.outputs.run == 'true'
+        if: needs.build.outputs.run == 'true'
         run: |
           command -v unzip
           command -v gh
 
       - name: Download blob reports
-        if: needs.changes.outputs.run == 'true'
+        if: needs.build.outputs.run == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -1268,14 +1249,14 @@ jobs:
             --output apps/web/e2e/blob-reports
 
       - name: Download E2E shard manifests
-        if: needs.changes.outputs.run == 'true'
+        if: needs.build.outputs.run == 'true'
         uses: ./.github/actions/download-artifact-retry
         with:
           name: e2e-shard-manifests
           path: e2e-manifests
 
       - name: Download selected main timing profile
-        if: needs.changes.outputs.run == 'true'
+        if: needs.build.outputs.run == 'true'
         uses: ./.github/actions/download-artifact-retry
         continue-on-error: true
         with:
@@ -1283,7 +1264,7 @@ jobs:
           path: e2e/previous-profile
 
       - name: Collect timing and retry diagnostics
-        if: always() && needs.changes.outputs.run == 'true'
+        if: always() && needs.build.outputs.run == 'true'
         working-directory: apps/web
         run: |
           set -euo pipefail
@@ -1315,7 +1296,7 @@ jobs:
             --artifact-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID#artifacts"
 
       - name: Write E2E timing summary
-        if: always() && needs.changes.outputs.run == 'true'
+        if: always() && needs.build.outputs.run == 'true'
         working-directory: apps/web
         run: |
           node <<'NODE'
@@ -1396,7 +1377,7 @@ jobs:
           NODE
 
       - name: Upload timing profile candidate
-        if: always() && needs.changes.outputs.run == 'true'
+        if: always() && needs.build.outputs.run == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: e2e-timing-profile
@@ -1405,7 +1386,7 @@ jobs:
           retention-days: 30
 
       - name: Upload retry and shard timing summary
-        if: always() && needs.changes.outputs.run == 'true'
+        if: always() && needs.build.outputs.run == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: e2e-retry-summary
@@ -1414,7 +1395,7 @@ jobs:
           retention-days: 14
 
       - name: Upload timing diagnostics bundle
-        if: always() && needs.changes.outputs.run == 'true'
+        if: always() && needs.build.outputs.run == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: e2e-timing-diagnostics
@@ -1427,7 +1408,7 @@ jobs:
           retention-days: 14
 
       - name: Merge reports
-        if: needs.changes.outputs.run == 'true' && hashFiles('apps/web/e2e/blob-reports/**/*.zip') != ''
+        if: needs.build.outputs.run == 'true' && hashFiles('apps/web/e2e/blob-reports/**/*.zip') != ''
         working-directory: apps/web
         # `-c e2e/playwright.config.ts` is required because the blobs come from
         # two different absolute checkout paths: the containerized `e2e` shards
@@ -1459,7 +1440,7 @@ jobs:
       # to match the other lookup.
       - name: Locate latest main flake history
         id: flake-history-run
-        if: always() && needs.changes.outputs.run == 'true'
+        if: always() && needs.build.outputs.run == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           GITHUB_API_URL: ${{ github.api_url }}
@@ -1504,7 +1485,7 @@ jobs:
           NODE
 
       - name: Download previous flake history
-        if: always() && needs.changes.outputs.run == 'true' && steps.flake-history-run.outputs.run_id != ''
+        if: always() && needs.build.outputs.run == 'true' && steps.flake-history-run.outputs.run_id != ''
         continue-on-error: true
         uses: ./.github/actions/download-artifact-retry
         with:
@@ -1515,7 +1496,7 @@ jobs:
           github-token: ${{ github.token }}
 
       - name: Write E2E flake report
-        if: always() && needs.changes.outputs.run == 'true'
+        if: always() && needs.build.outputs.run == 'true'
         working-directory: apps/web
         run: |
           set -euo pipefail
@@ -1542,7 +1523,7 @@ jobs:
             --sha "$GITHUB_SHA"
 
       - name: Upload flake history
-        if: always() && needs.changes.outputs.run == 'true'
+        if: always() && needs.build.outputs.run == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: e2e-flake-history
@@ -1551,7 +1532,7 @@ jobs:
           retention-days: 90
 
       - name: Upload merged report
-        if: needs.changes.outputs.run == 'true'
+        if: needs.build.outputs.run == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: playwright-report
@@ -1561,15 +1542,13 @@ jobs:
       - name: Verify required jobs and evidence
         if: always()
         env:
-          CHANGES_RESULT: ${{ needs.changes.result }}
           RUNNER_PLAN: ${{ needs.build.outputs.plan }}
-          RUN_REQUIRED: ${{ needs.changes.outputs.run }}
-          BUILD_RUN_REQUIRED: ${{ needs.build.outputs.run }}
+          RUN_REQUIRED: ${{ needs.build.outputs.run }}
           HELPER_RUN_REQUIRED: ${{ needs.helper_compile.outputs.run }}
           DESKTOP_RUN_REQUIRED: ${{ needs['desktop-e2e'].outputs.run }}
           PLAYWRIGHT_IMAGE_REF: ${{ needs.build.outputs.runtime_image_ref }}
           REPORT_RESULT: ${{ job.status }}
-          SKIP_REASON: ${{ needs.changes.outputs.reason }}
+          SKIP_REASON: ${{ needs.build.outputs.reason }}
           HELPER_COMPILE_RESULT: ${{ needs.helper_compile.result }}
           BUILD_RESULT: ${{ needs.build.result }}
           E2E_RESULT: ${{ needs.e2e.result }}
@@ -1578,15 +1557,15 @@ jobs:
           DESKTOP_E2E_RESULT: ${{ needs['desktop-e2e'].result }}
         run: |
           set -euo pipefail
-          if [[ "${CHANGES_RESULT}" != "success" || "${BUILD_RESULT}" != "success" || "${HELPER_COMPILE_RESULT}" != "success" || "${DESKTOP_E2E_RESULT}" != "success" || -z "${RUNNER_PLAN}" ]]; then
-            echo "E2E preparation failed or produced no runner plan: selection=${CHANGES_RESULT} build=${BUILD_RESULT}" >&2
+          if [[ "${BUILD_RESULT}" != "success" || "${HELPER_COMPILE_RESULT}" != "success" || "${DESKTOP_E2E_RESULT}" != "success" || -z "${RUNNER_PLAN}" ]]; then
+            echo "E2E preparation failed or produced no runner plan: build=${BUILD_RESULT}" >&2
             exit 1
           fi
           if [[ "${RUN_REQUIRED}" != "true" && "${RUN_REQUIRED}" != "false" ]]; then
             echo "Missing change-selection verdict." >&2
             exit 1
           fi
-          for verdict in "${BUILD_RUN_REQUIRED}" "${HELPER_RUN_REQUIRED}" "${DESKTOP_RUN_REQUIRED}"; do
+          for verdict in "${HELPER_RUN_REQUIRED}" "${DESKTOP_RUN_REQUIRED}"; do
             if [[ "${verdict}" != "${RUN_REQUIRED}" ]]; then
               echo "E2E preparation verdicts disagree or are missing." >&2
               exit 1

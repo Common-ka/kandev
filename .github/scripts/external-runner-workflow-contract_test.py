@@ -49,13 +49,13 @@ class ExternalRunnerWorkflowContractTest(unittest.TestCase):
         )
         self.assertIn(
             "runs-on: ubuntu-latest",
-            job_block(workflow, "build", "changes"),
+            job_block(workflow, "build", "helper_compile"),
         )
         helpers = job_block(workflow, "helper_compile", "e2e")
         self.assertIn("runs-on: ubuntu-latest", helpers)
         self.assertNotIn("runner_plan", helpers)
         self.assertNotIn("KANDEV_CI_EXTERNAL", helpers)
-        build = job_block(workflow, "build", "changes")
+        build = job_block(workflow, "build", "helper_compile")
         self.assertIn("runs-on: ubuntu-latest", build)
         self.assertNotIn("runner_plan", build)
         e2e = job_block(workflow, "e2e", "e2e-containers")

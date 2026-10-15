@@ -53,6 +53,22 @@ git diff --check
 
 Hosted evidence remains mandatory; local contracts do not prove speed.
 
+### Candidate thirty-two: remove the remaining selector handoff locally
+
+The frozen thirty-first rollout exposes another barrier: Build completes at
+12:24:05 UTC and admits all twenty-four normal jobs, while auxiliary selection
+remains queued and no container/compatibility jobs are admitted. Its hosted
+catalog is source-bound to `d93b191488c6` and retains all 3,957 native identities.
+The complete rollout is still pending and no elapsed-time gain is established.
+
+Locally remove the duplicate selector, propagate Build's existing selection
+reason and make all test/report consumers use its verdict. Preserve independent
+helper/desktop roots and strict full/filtered failure, cancellation, missing-
+verdict, divergent-verdict, image and native-report checks. The full roster is
+sixty-nine, with every native command and coverage selection retained. Local
+contracts, actionlint, security comparison and docs checks pass. Do not push or
+dispatch while the frozen control is live; final hosted evidence remains required.
+
 ### Candidate thirty-one: preserve the frozen control and move preparation
 
 The thirty-first candidate changes only CI preparation. Its local executable
