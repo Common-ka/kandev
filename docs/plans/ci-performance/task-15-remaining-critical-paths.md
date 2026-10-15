@@ -97,6 +97,14 @@ parsed comparison against frozen `d93b191488c6` proves every native test step,
 image, deadline, resource guard and permission is preserved; normal, helper and
 desktop jobs are identical. This is local structural evidence, not hosted timing.
 
+After this replacement is committed and validated, retire the already-over-
+budget thirty-first set rather than executing superseded queued work. All
+three runs are confirmed cancelled after ordinary cancellation leaves only
+their always-running gates queued and explicit force cancellation terminates
+them. Preserve partial evidence and mark the sample ineligible; only a new,
+complete sixty-nine-job set can validate this replacement. Do not weaken
+required cancellation-failure gates to make superseded runs disappear.
+
 ### Candidate thirty-one: admit preparation before browser fanout
 
 The frozen `06f94acc9dd6` control finishes Build at 10:11:36 UTC and queues

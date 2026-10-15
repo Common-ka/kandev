@@ -59,15 +59,24 @@ The frozen thirty-first rollout exposes another barrier: Build completes at
 12:24:05 UTC and admits all twenty-four normal jobs, while auxiliary selection
 remains queued and no container/compatibility jobs are admitted. Its hosted
 catalog is source-bound to `d93b191488c6` and retains all 3,957 native identities.
-The complete rollout is still pending and no elapsed-time gain is established.
+The replacement passes local validation before this rollout is retired. Runs
+`38730616575`, `38730620829` and `38730625342` are all confirmed cancelled.
+Ordinary cancellation stops their test jobs but leaves an always-running gate
+queued in each; force cancellation terminates those three superseded runs.
+Their catalog and completed Build evidence remain recorded, including the
+two-second image-resolution step. They provide no complete native outcomes,
+full elapsed-time comparison or performance-acceptance sample. The complete,
+successful thirtieth set remains the measured control.
 
 Locally remove the duplicate selector, propagate Build's existing selection
 reason and make all test/report consumers use its verdict. Preserve independent
 helper/desktop roots and strict full/filtered failure, cancellation, missing-
 verdict, divergent-verdict, image and native-report checks. The full roster is
 sixty-nine, with every native command and coverage selection retained. Local
-contracts, actionlint, security comparison and docs checks pass. Do not push or
-dispatch while the frozen control is live; final hosted evidence remains required.
+contracts, actionlint, security comparison and docs checks pass. All three
+superseded workflows must be terminal before pushing/dispatching the replacement;
+final complete hosted evidence remains required. Required cancellation-failure
+gates retain their always-running behavior.
 
 ### Candidate thirty-one: preserve the frozen control and move preparation
 
