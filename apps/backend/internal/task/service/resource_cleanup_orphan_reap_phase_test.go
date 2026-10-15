@@ -211,7 +211,7 @@ func TestRunOrphanReapPhaseCapsCandidatesAt256(t *testing.T) {
 		verifier := newFakeOrphanReapVerifier()
 		signaler := newFakeOrphanReapSignaler()
 		for i := 1; i <= total; i++ {
-			pid := i + 1000
+			pid := os.Getpid() + 1000 + i
 			cwd := filepath.Join(root, strconv.Itoa(i))
 			snap = append(snap, hostProcess{PID: pid, PPID: 1, Cwd: cwd, Command: "sh"})
 			verifier.set(pid, cwd)
@@ -256,7 +256,7 @@ func TestRunOrphanReapPhaseDoesNotCountPermissionDeniedAgainstCandidateCap(t *te
 			t.Fatalf("RemoveAll: %v", err)
 		}
 
-		const deniedPID = 1000
+		deniedPID := os.Getpid() + 1000
 		const total = orphanReapMaxCandidates + 1
 		snap := make([]hostProcess, 0, total)
 		verifier := newFakeOrphanReapVerifier()
@@ -312,7 +312,7 @@ func TestRunOrphanReapPhaseDoesNotReportCapForTrailingPreSignalSkips(t *testing.
 		verifier := newFakeOrphanReapVerifier()
 		signaler := newFakeOrphanReapSignaler()
 		for i := 0; i < total; i++ {
-			pid := 2000 + i
+			pid := os.Getpid() + 2000 + i
 			cwd := filepath.Join(root, strconv.Itoa(i))
 			snap = append(snap, hostProcess{PID: pid, PPID: 1, Cwd: cwd, Command: "sh"})
 			if i < orphanReapMaxCandidates {
@@ -362,11 +362,13 @@ func TestRunOrphanReapPhaseSignalsLowestPIDsInAscendingOrderWhenCapped(t *testin
 		}
 
 		const total = 300
+		// Synthetic candidates must not overlap the protected test-process PID.
+		pidBase := os.Getpid() + 1000
 		snap := make([]hostProcess, 0, total)
 		verifier := newFakeOrphanReapVerifier()
 		signaler := newFakeOrphanReapSignaler()
 		for i := total; i >= 1; i-- {
-			pid := i + 1000
+			pid := pidBase + i
 			cwd := filepath.Join(root, strconv.Itoa(i))
 			snap = append(snap, hostProcess{PID: pid, PPID: 1, Cwd: cwd, Command: "sh"})
 			verifier.set(pid, cwd)
@@ -395,9 +397,9 @@ func TestRunOrphanReapPhaseSignalsLowestPIDsInAscendingOrderWhenCapped(t *testin
 			t.Fatalf("expected exactly %d SIGTERMs sent, got %d: %v", orphanReapMaxCandidates, len(sigtermPIDs), sigtermPIDs)
 		}
 		for i, pid := range sigtermPIDs {
-			wantPID := 1001 + i // the 256 lowest PIDs (1001..1256), ascending
+			wantPID := pidBase + 1 + i
 			if pid != wantPID {
-				t.Fatalf("expected SIGTERMs in ascending order over the 256 lowest PIDs starting at 1001, "+
+				t.Fatalf("expected SIGTERMs in ascending order over the 256 lowest PIDs, "+
 					"got %v at index %d (want %d)", sigtermPIDs, i, wantPID)
 			}
 		}

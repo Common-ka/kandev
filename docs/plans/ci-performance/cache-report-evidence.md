@@ -173,3 +173,43 @@ remediations passed nine focused single-CPU runs with one worker and retries
 disabled: three desktop cancellation, three mobile cancellation and three
 mobile drawer checks. A new hosted run remains required. They do not
 change application behavior, worker counts, retries or locator timeouts.
+
+## Warm backend extension and PID fixture remediation (2026-10-15)
+
+Run `38737476804` on `59e0d5bcb` restored exact compilation caches for all
+six backend consumers. Its Actions merge revision `821daf4bb` has the same
+backend source tree as main `530256667` and used the same `b77c5f...` image.
+The passing individual-job comparisons are:
+
+| Job | Main | Warm PR | Saved |
+| --- | ---: | ---: | ---: |
+| Static | 7m17s | 3m25s | 3m52s |
+| Tests 2/4 | 7m26s | 7m10s | 16s |
+| Tests 3/4 | 6m02s | 5m33s | 29s |
+| Tests 4/4 | 6m54s | 5m58s | 56s |
+| Ambient | 7m51s | 7m35s | 16s |
+| Total occupied time | 35m30s | 29m41s | 5m49s (16.4%) |
+
+These are five different jobs, one sample each. Main's workflow failed elsewhere;
+this is neither a successful full-pipeline comparison nor repeated paired
+evidence. Static also restored its exact lint cache. All five successful jobs
+skipped re-upload. Frontend passed in 73m02s elapsed, with 26.97 runner-minutes
+and a verified execution-only critical path of 12m33s. Its final three-second
+gate waited 26m15s after dependencies. Scheduling dominates elapsed time.
+
+Shard 1 failed `TestRunOrphanReapPhaseDoesNotReportCapForTrailingPreSignalSkips`:
+expected 256 simulated signals, observed 255. Its fixed synthetic PID range can
+include the test process PID, which production ownership correctly protects.
+A temporary fixture including `os.Getpid()` reproduced the exact failure. Four
+generated PID ranges now sit above the process PID; signal-count, ordering,
+permission and cap assertions remain. All 13 phase tests passed ten repetitions
+with the race detector. Production behavior and retry policies are unchanged.
+The failed hosted shard skipped both cache post-save actions. Its 4m01s result
+is excluded from performance comparisons.
+
+The two E2E catalogs before/after the observation fixes contain the same 3,957
+test identities, with no additions or removals. Initial container artifacts
+contain 63 passed tests, two skips and zero retries/errors. Full hosted E2E
+completion, the PID-fixture follow-up commit, repeated paired measurements and
+natural daily rollover still need verification; do not report full CI green
+or overall elapsed-time improvement from these partial results.

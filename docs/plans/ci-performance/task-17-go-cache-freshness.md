@@ -164,3 +164,12 @@ remain unchanged; warm backend performance acceptance remains open.
 Focused remediation validation passed three repetitions each of desktop
 cancellation, mobile cancellation and mobile goal-drawer behavior, on one CPU
 with one worker and retries disabled. The committed retry policy is unchanged.
+
+The first warm run restored all six backend compilation families. Five passing
+comparisons saved 5m49s (16.4%) combined runner time; static alone saved 53.1%.
+Shard 1 exposed a synthetic-PID collision in an existing orphan-cleanup test.
+A controlled self-PID fixture reproduced the exact 255-versus-256 failure;
+generated fixture ranges now exclude the protected test-process PID. All 13
+phase tests passed ten race-enabled repetitions. Hosted follow-up remains open,
+and the failed shard is excluded from timing claims. See the evidence document
+for exact source identity, job times, scheduling delays and remaining gates.
