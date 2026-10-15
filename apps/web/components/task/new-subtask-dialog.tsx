@@ -384,7 +384,7 @@ function NewSubtaskForm({
   useSeedParentRepository(fs, parentRepositoryId, baseBranch);
   useSeedAgentProfileId(fs, defaultProfileId);
   const handlers = useDialogHandlers(fs, availableRepositories);
-  useGitHubUrlErrorEffect(fs, isOpen);
+  useGitHubUrlErrorEffect(fs, isOpen, workspaceId);
   useDiscoverReposEffect(fs, isOpen, workspaceId, false, toast);
   const profileOptions = useAgentProfileOptions(agentProfiles, "task_create");
   const sessionOptions = useSessionOptions(parentTaskId);

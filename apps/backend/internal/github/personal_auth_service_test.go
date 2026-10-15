@@ -679,3 +679,12 @@ func activeAppWorkspace(workspaceID string, installationID int64) *WorkspaceConn
 		Status: ConnectionStatusActive, CredentialGeneration: 1,
 	}
 }
+
+func (r *personalAuthMemoryRepository) GetPersonalTokensForConnection(_ context.Context, expected *UserConnection) (GitHubOAuthTokens, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if !sameUserConnectionVersion(r.connection, expected) {
+		return GitHubOAuthTokens{}, ErrPersonalConnectionStale
+	}
+	return r.tokens, nil
+}
