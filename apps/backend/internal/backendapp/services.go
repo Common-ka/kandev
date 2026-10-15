@@ -576,6 +576,7 @@ func initThirdPartyProviders(
 		return nil, fmt.Errorf("initialize github: %w", recordErr)
 	}
 	if githubSvc != nil {
+		taskSvc.SetGitHubRepositoryOriginVerifier(gitHubRepositoryOriginVerifier{connections: githubSvc})
 		taskSvc.SetTaskStatusSummaryPRReader(&githubTaskStatusSummaryPRReader{gh: githubSvc})
 		githubSvc.SetComparisonTargetObserver(taskSvc)
 		githubSvc.SetPromptResolver(promptSvc)

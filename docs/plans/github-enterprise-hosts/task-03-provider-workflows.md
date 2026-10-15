@@ -119,3 +119,35 @@ The complete GitHub package passed with actual PostgreSQL in 148.846 seconds.
 'TestEnterprise(SearchResponsesCarryHost|Reconnect)' -count=1` passed in 3.775
 seconds. Specification catalog and structure checks passed. Remote CI and review
 remain pending until the fixup push.
+
+GHE trial remediation (AC-INTEGRATIONS-GITHUB-ENTERPRISE-003.1/003.2): task
+creation still routes the dialog's legacy `github_url` through a public-only
+parser. Correct the task-service parser and persisted origin, retain an explicit
+GitHub provider hint for arbitrary Enterprise hosts, and verify Enterprise
+origins against the workspace connection before provider probes or persistence.
+Cover legacy and explicit payloads, GHES custom ports, SSH locators, GHE Cloud,
+and mismatched/unconfigured origins with focused task-service/backendapp tests.
+This repairs the existing host-isolation contract; no UI contract changes.
+Repository registration also sends a bare `remote_url` without a provider
+hint. Resolve that shape only against the configured workspace GitHub host;
+unknown or mismatched origins remain rejected. Regression fixtures use
+synthetic hosts and repository names. No diagnostic artifacts are committed.
+
+Regression results: the task and registration preflight tests reproduced the
+invalid-selection error before correction. Host-preserving creation, bare-URL
+registration, foreign/unconfigured origin rejection before writes, public-host
+identity separation, and provider binding passed focused race tests. Existing
+public default-branch probing remains covered; Enterprise locators never use
+the public-only probe. The legacy field continues accepting known providers.
+
+Final remediation validation (2026-10-15), after the shared SSH constant cleanup:
+
+```bash
+cd apps/backend
+GOMAXPROCS=2 go test -trimpath -p 1 -race ./internal/task/service ./internal/backendapp \
+  -run 'Test(EnterpriseRepository|ParseEnterpriseRepository|CreateTaskEnterpriseRepository|RegisterEnterpriseRepository|GitHubRepositoryOriginVerifier|.*DefaultBranch.*)' -count=1
+```
+
+The targeted race suites passed. Documentation catalog validation, specification
+lint, and `git diff --check` passed. Public guidance already describes the
+supported host and repository behavior; no public documentation change is needed.
