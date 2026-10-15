@@ -1,6 +1,6 @@
 ---
 id: "17-go-cache-freshness"
-title: "Refresh Go compilation caches"
+title: "Refresh backend Go compilation caches"
 status: in_progress
 wave: 1
 depends_on: []
@@ -21,30 +21,25 @@ system_design:
   - ../../specs/platform/system-design/ci-performance.md
 ---
 
-# Task 17: Refresh Go compilation caches
+# Task 17: Refresh backend Go compilation caches
 
 ## Summary
 
-Separate module-download reuse from daily compilation snapshots across the
-existing Linux Go cache consumers. Preserve full required verification and
+Extend main's existing separate module-download and daily compilation caches
+to backend static, ordinary test-shard and ambient consumers. Preserve full required verification and
 measure the benefit after including cache transfer cost.
 
 ## In scope
 
-- Implement the proposed `.github/actions/cache-go/action.yml` and
-  `.github/scripts/go-cache-identity.mjs`, using installed toolchain paths and
-  the compatibility fields defined in the system design.
-- Replace combined caches in backend `static_checks`, `test_shards` (both
-  members), `test_ambient_env`, and E2E `build`. Preserve a separate static
-  analysis cache with its linter/configuration identity.
-- Use a new namespace and daily UTC compilation generations, with exact
-  module keys and compatibility-scoped compilation fallback. Resolve the day
-  once and retain existing success-conditioned cache publication.
-- Add TDD coverage for rollover, same-day reuse, changed dependencies/toolchain/
-  image/platform/family, paths containing spaces, missing metadata, and cache
-  failure. Extend workflow contracts and the CI contract-test registration if needed.
-- Record read-only hosted evidence in `cache-report-evidence.md` and concise
-  cache troubleshooting/rollback notes in `docs/ci-merge-queue.md`.
+- Reuse the existing `.github/actions/cache-go/action.yml` and
+  `.github/scripts/go-cache-identity.mjs` without changing their identity policy.
+- Replace combined caches in backend `static_checks`, all four `test_shards`,
+  and `test_ambient_env`. Preserve independent linter/configuration identity.
+- Retain every required command, race flag, selection and aggregate gate.
+- Exercise the real required Go commands after optional cache failure and keep
+  the existing identity/source-invalidation tests in the validation set.
+- Record cold/warm hosted evidence, comparison with current main, and scheduling
+  observations in `cache-report-evidence.md`.
 
 ## Out of scope
 
@@ -67,13 +62,9 @@ cache-management redesign.
 
 ## Verification
 
-Run from repository root. New helper/test files are deliverables. Add named
-tests `daily rollover preserves compatible restore prefix`, `same day reuses
-the generation`, `compatibility changes cannot match`, and `invalid identity
-disables optional caching` to the identity suite. Extend existing workflow
-tests with execution of cache-failure and required-command scenarios rather
-than relying only on substring checks. Reuse the disposable real-Go probe in
-`scripts/go-cache-reuse.test.sh` for compilation reuse/source invalidation.
+Run from repository root. Existing cache identity and real-Go probes cover
+rollover, compatibility and source invalidation. Backend workflow tests exercise
+unconditional required commands after injected cache failure.
 
 ```bash
 node --test .github/scripts/go-cache-identity.test.mjs
@@ -99,15 +90,11 @@ Do not mark the work order done from local tests alone.
 
 ## Files likely touched
 
-- `.github/actions/cache-go/action.yml` (new)
-- `.github/scripts/go-cache-identity.mjs` and `go-cache-identity.test.mjs` (new)
 - `.github/workflows/backend-tests.yml`
-- `.github/workflows/e2e-tests.yml` (build cache only)
 - `.github/scripts/backend-tests-workflow-contract_test.py`
-- `.github/scripts/e2e-tests-workflow-contract_test.py`
-- `.github/workflows/lint-action-pinning.yml` (register new tests if needed)
+- `.github/workflows/lint-action-pinning.yml`
 - `docs/ci-merge-queue.md`
-- `docs/plans/ci-performance/cache-report-evidence.md` (new)
+- `docs/plans/ci-performance/cache-report-evidence.md`
 
 ## Dependencies
 
@@ -128,7 +115,7 @@ cannot establish service behavior. Avoid broad fallback when identity fails.
 
 ## Inputs
 
-- [Requirements 007, 004 and 005](../../specs/platform/requirements/ci-performance.md)
+- [Requirements 009, 004 and 005](../../specs/platform/requirements/ci-performance.md)
 - [Go cache generations](../../specs/platform/system-design/ci-performance.md#go-cache-generations)
 - [Capacity decision](../../decisions/2026-10-08-capacity-aware-ci-verification.md)
 - [Plan](plan.md), October 14 continuation.
@@ -153,3 +140,10 @@ PR #4489 merged the shared cache action and E2E Build consumer into main.
 This branch now extends that existing action to backend static checks, four
 ordinary test shards and ambient verification. Historical E2E build timings
 do not measure the remaining backend benefit. Rebased hosted acceptance is open.
+
+## Approved scope after reassessment
+
+On October 15 the user approved this reduced backend-cache scope and a read-only
+scheduling investigation. Report-image work and obsolete benchmark workflows
+are removed. Shared cache code and E2E consumers are already on main. Historical
+E2E measurements above do not satisfy the new backend performance acceptance.

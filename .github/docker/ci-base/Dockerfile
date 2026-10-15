@@ -1,6 +1,6 @@
-# Kandev CI base image — split into four targets.
+# Kandev CI base image — split into three tags.
 #
-# Four stages published as separate tags on the same GHCR repo:
+# Three stages published as separate tags on the same GHCR repo:
 #
 #   - `runtime` (~700 MB): Playwright + Node + pnpm + Docker CLI. Used by the
 #     `e2e` shards and `e2e-report` — they consume pre-built backend artifacts
@@ -13,8 +13,6 @@
 #
 #   - `desktop`: runtime + Tauri Linux dependencies + Rust. Used by the
 #     desktop smoke job, so hosted-runner package mirrors are not in its setup.
-#
-#   - `report`: browser-free Node and archive tools for report processing.
 #
 # Pinned versions (keep in sync with apps/backend/go.mod, apps/web/package.json,
 # and the matching workflow inputs):
@@ -152,19 +150,3 @@ RUN set -eux; \
     pkg-config --exists webkit2gtk-4.1; \
     command -v patchelf; \
     command -v xvfb-run
-
-# =============================================================================
-# Stage 4: report — Node and archive tools, without browsers or build toolchains
-# =============================================================================
-FROM node:24-bookworm-slim@sha256:d6aa754f16b3197301076f047b5def2f02ea1dbbc2ca920407d46d7ec7f87b20 AS report
-
-ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends bash ca-certificates git unzip tar gzip \
-    && rm -rf /var/lib/apt/lists/* \
-    && npm install --global pnpm@9.15.9 \
-    && npm cache clean --force
-WORKDIR /work
-RUN node --version | grep -E '^v24\.' \
-    && pnpm --version | grep -E '^9\.15\.9$' \
-    && command -v git && command -v unzip && command -v tar

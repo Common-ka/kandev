@@ -108,17 +108,6 @@ The existing external-runner contract retains ownership of fleet selection and t
 - **AC-PLATFORM-CI-PERFORMANCE-009.3:** A cache miss or cache-service failure shall permit ordinary compilation and verification. A cache hit shall never substitute for a required command or hide its failure. Failed or cancelled verification shall not publish a new compilation snapshot.
 - **AC-PLATFORM-CI-PERFORMANCE-009.4:** Evidence shall distinguish exact hits, compatible fallback restores, cold runs, and successful snapshot saves. Performance acceptance shall include restore and save overhead and report cache size as well as execution time.
 
-### REQ-PLATFORM-CI-PERFORMANCE-008: Lightweight E2E report execution
-
-**Intent:** Reduce final reporting overhead while preserving the evidence and verdict used to admit a merge.
-
-#### Acceptance criteria
-
-- **AC-PLATFORM-CI-PERFORMANCE-008.1:** Report processing shall support an environment without browser binaries, Go, Rust, or Docker tooling. Given the same reports and source, it shall retain test identities, outcomes, retries, attachments, timing provenance, flake history, and merged HTML/JSON evidence.
-- **AC-PLATFORM-CI-PERFORMANCE-008.2:** The required E2E result shall retain its name and dependency coverage. Mandatory failures, cancellation, malformed or incomplete evidence, and report-processing errors shall block success; an explicit irrelevant-change decision shall retain its successful skip outcome.
-- **AC-PLATFORM-CI-PERFORMANCE-008.3:** A required reporting job shall adopt a replacement environment only after that exact published version is available and has passed report compatibility checks. Rollback shall restore a recorded working environment without altering verification policy.
-- **AC-PLATFORM-CI-PERFORMANCE-008.4:** Adoption shall demonstrate lower median report-job execution across at least three comparable hosted baseline/candidate samples, including environment initialization and dependency setup. Sampling shall preserve the existing runner capacity and disclose failures and unavailable measurements.
-
 ## Out of scope
 
 - Automatic approval, automatic reruns, or changes to contributor trust policy.

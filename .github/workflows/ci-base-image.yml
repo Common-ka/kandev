@@ -6,10 +6,6 @@ on:
     paths:
       - .github/docker/ci-base/**
       - .github/workflows/ci-base-image.yml
-      - .github/scripts/test-e2e-report-image.sh
-      - .github/scripts/fixtures/e2e-report/**
-      - apps/web/e2e/scripts/**
-      - apps/web/e2e/playwright.config.ts
       - apps/backend/go.mod
       - apps/pnpm-lock.yaml
       - apps/web/package.json
@@ -18,31 +14,14 @@ on:
     paths:
       - .github/docker/ci-base/**
       - .github/workflows/ci-base-image.yml
-      - .github/scripts/test-e2e-report-image.sh
-      - .github/scripts/fixtures/e2e-report/**
-      - apps/web/e2e/scripts/**
-      - apps/web/e2e/playwright.config.ts
       - apps/backend/go.mod
       - apps/pnpm-lock.yaml
       - apps/web/package.json
   workflow_dispatch:
-    inputs:
-      performance_probe:
-        description: Bounded read-only comparison (does not publish images)
-        type: choice
-        options: [none, report, go]
-        default: none
-      report_run_id:
-        description: Successful E2E run whose saved blobs the report probe replays
-        type: string
-        default: ""
-      report_only:
-        description: Publish only the immutable report candidate (no latest tags)
-        type: boolean
-        default: false
 
 permissions:
   contents: read
+  packages: write
 
 env:
   IMAGE_NAME: ghcr.io/kdlbs/kandev-ci
@@ -55,43 +34,10 @@ env:
 
 jobs:
   build-and-push:
-    permissions:
-      contents: read
-      packages: write
-    if: inputs.performance_probe != 'report' && inputs.performance_probe != 'go'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-
-      - name: Select image targets
-        id: targets
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          REPORT_ONLY: ${{ inputs.report_only }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-        run: |
-          set -euo pipefail
-          core=true
-          if [[ "$EVENT_NAME" == workflow_dispatch ]]; then
-            if [[ "$REPORT_ONLY" == true ]]; then core=false; fi
-          elif git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
-            changed="$(mktemp)"
-            trap 'rm -f "$changed"' EXIT
-            if git diff --name-only -z "$BASE_SHA" HEAD > "$changed"; then
-              core=false
-              while IFS= read -r -d '' file; do
-                case "$file" in
-                  .github/docker/ci-base/*|.github/workflows/ci-base-image.yml|apps/backend/go.mod|apps/pnpm-lock.yaml|apps/web/package.json)
-                    core=true ;;
-                esac
-              done < "$changed"
-            fi
-          fi
-          echo "core=$core" >> "$GITHUB_OUTPUT"
 
       - name: Set up Buildx
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
@@ -117,8 +63,8 @@ jobs:
       # so the upstream digest remains valid at the mirrored location.
       - name: Mirror Postgres to GHCR
         if: |
-          steps.targets.outputs.core == 'true' && (github.event_name == 'workflow_dispatch'
-          || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
+          github.event_name == 'workflow_dispatch'
+          || (github.event_name == 'push' && github.ref == 'refs/heads/main')
         run: |
           set -euo pipefail
 
@@ -170,7 +116,6 @@ jobs:
       # Consumed by the `e2e` shards and `e2e-report`, where the smaller pull
       # is the speedup that pays for the split.
       - name: Build and push runtime
-        if: steps.targets.outputs.core == 'true'
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
@@ -189,7 +134,6 @@ jobs:
       # `cache-from` includes the runtime scope so the shared lower layers
       # only build once across both pushes.
       - name: Build and push build
-        if: steps.targets.outputs.core == 'true'
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
@@ -208,7 +152,6 @@ jobs:
       # Stage 3: desktop (runtime + Tauri Linux dependencies + Rust).
       # Consumed by the host-independent desktop smoke job.
       - name: Build and push desktop
-        if: steps.targets.outputs.core == 'true'
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
@@ -224,181 +167,18 @@ jobs:
             ${{ env.IMAGE_NAME }}:desktop-sha-${{ steps.tag.outputs.image_tag }}
             ${{ env.IMAGE_NAME }}:desktop-latest
 
-      - name: Build report image for smoke
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
-        with:
-          context: .
-          file: .github/docker/ci-base/Dockerfile
-          target: report
-          platforms: linux/amd64
-          load: true
-          tags: kandev-ci-report:smoke
-          cache-from: type=gha,scope=report
-          cache-to: type=gha,scope=report,mode=max
-
-      - name: Smoke report image
-        run: bash .github/scripts/test-e2e-report-image.sh --image kandev-ci-report:smoke --self-test
-
-      - name: Publish report image
-        id: report
-        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
-        with:
-          context: .
-          file: .github/docker/ci-base/Dockerfile
-          target: report
-          platforms: linux/amd64
-          push: true
-          cache-from: type=gha,scope=report
-          tags: ${{ env.IMAGE_NAME }}:report-sha-${{ steps.tag.outputs.image_tag }}
-
       - name: Summarize
         run: |
           {
             echo "### Kandev CI base image"
-            if [[ -n "$REPORT_DIGEST" ]]; then
-              echo "- report candidate: ${IMAGE_NAME}:report-sha-${IMAGE_TAG}@${REPORT_DIGEST}"
-            else
-              echo "- report candidate (built only): ${IMAGE_NAME}:report-sha-${IMAGE_TAG}"
-            fi
-            echo "- report-only publication: ${REPORT_ONLY}"
             echo ""
-            if [[ "$CORE_IMAGES" == true ]]; then
             echo "- runtime: \`${IMAGE_NAME}:runtime-sha-${IMAGE_TAG}\` / \`runtime-latest\`"
             echo "- build:   \`${IMAGE_NAME}:build-sha-${IMAGE_TAG}\` / \`build-latest\`"
             echo "- desktop: \`${IMAGE_NAME}:desktop-sha-${IMAGE_TAG}\` / \`desktop-latest\`"
             echo "- postgres: \`${POSTGRES_TARGET}@${POSTGRES_DIGEST}\`"
             echo "- postgres 18: \`${POSTGRES_18_TARGET}@${POSTGRES_18_DIGEST}\`"
-            fi
             echo "- pushed:  \`${PUSHED}\`"
           } >> "$GITHUB_STEP_SUMMARY"
         env:
-          CORE_IMAGES: ${{ steps.targets.outputs.core }}
-          REPORT_DIGEST: ${{ steps.report.outputs.digest }}
-          REPORT_ONLY: ${{ inputs.report_only }}
           IMAGE_TAG: ${{ steps.tag.outputs.image_tag }}
           PUSHED: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
-
-  report-performance:
-    if: github.event_name == 'workflow_dispatch' && inputs.performance_probe == 'report'
-    name: Report replay (${{ matrix.image.name }}, sample ${{ matrix.sample }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 8
-    permissions:
-      contents: read
-      actions: read
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        sample: [1, 2, 3]
-        image:
-          - name: baseline
-            ref: ghcr.io/kdlbs/kandev-ci@sha256:780b2a90f12011a44b8257bf47bf76e818156764e5834af85a8f9e8a8b0b921e
-          - name: candidate
-            ref: ghcr.io/kdlbs/kandev-ci@sha256:599d8a800bdd141f99924d9503988843c9d6ea386bfc57d04c83f1aa17f579aa
-    container: ${{ matrix.image.ref }}
-    defaults:
-      run:
-        shell: bash
-    env:
-      CI: "true"
-      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
-    steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
-        with:
-          persist-credentials: false
-      - name: Cache pnpm store
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.local/share/pnpm/store
-          key: pnpm-${{ runner.os }}-${{ hashFiles('apps/pnpm-lock.yaml') }}
-          restore-keys: pnpm-${{ runner.os }}-
-      - name: Install dependencies
-        working-directory: apps
-        run: pnpm install --frozen-lockfile
-      - name: Download saved blobs
-        uses: ./.github/actions/download-artifact-retry
-        with:
-          path: /input/blobs
-          pattern: blob-report-*
-          merge-multiple: "true"
-          repository: ${{ github.repository }}
-          run-id: ${{ inputs.report_run_id }}
-          github-token: ${{ github.token }}
-      - name: Download saved manifests
-        uses: ./.github/actions/download-artifact-retry
-        with:
-          path: /input/manifests
-          name: e2e-shard-manifests
-          repository: ${{ github.repository }}
-          run-id: ${{ inputs.report_run_id }}
-          github-token: ${{ github.token }}
-      - name: Replay reports and verify gate
-        run: |
-          mkdir -p /result
-          node .github/scripts/fixtures/e2e-report/exercise.mjs
-      - name: Upload semantic evidence
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: report-probe-${{ matrix.image.name }}-${{ matrix.sample }}
-          path: /result/semantic.json
-          if-no-files-found: error
-          retention-days: 7
-
-  go-performance:
-    if: github.event_name == 'workflow_dispatch' && inputs.performance_probe == 'go'
-    name: Go build (${{ matrix.cache }}, sample ${{ matrix.sample }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    permissions:
-      contents: read
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        # Sample zero warms the new namespace; retain its cost separately.
-        sample: [0, 1, 2, 3]
-        cache: [baseline, candidate]
-    container: ghcr.io/kdlbs/kandev-ci:build-latest
-    defaults:
-      run:
-        shell: bash
-    env:
-      COREPACK_HOME: /root/.cache/node/corepack
-    steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
-        with:
-          persist-credentials: false
-      - name: Mark workspace safe for git
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      - name: Cache pnpm store
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.local/share/pnpm/store
-          key: pnpm-${{ runner.os }}-${{ hashFiles('apps/pnpm-lock.yaml') }}
-          restore-keys: pnpm-${{ runner.os }}-
-      - name: Baseline combined Go cache
-        if: matrix.cache == 'baseline'
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: go-e2e-build-${{ runner.os }}-${{ hashFiles('apps/backend/go.mod', 'apps/backend/go.sum') }}
-          restore-keys: |
-            go-e2e-build-${{ runner.os }}-
-            go-${{ runner.os }}-
-      - name: Candidate Go cache
-        if: matrix.cache == 'candidate'
-        uses: ./.github/actions/cache-go
-        with:
-          family: e2e-build
-      - name: Install dependencies
-        working-directory: apps
-        run: pnpm install --frozen-lockfile
-      - name: Build backend and web
-        run: |
-          VERSION="0.0.0-e2e.${GITHUB_SHA}" make build-backend
-          make build-e2e-delivery-fixture
-          make build-web-e2e

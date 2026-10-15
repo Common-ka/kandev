@@ -10,7 +10,6 @@ requirements:
   - REQ-PLATFORM-CI-PERFORMANCE-005
   - REQ-PLATFORM-CI-PERFORMANCE-006
   - REQ-PLATFORM-CI-PERFORMANCE-009
-  - REQ-PLATFORM-CI-PERFORMANCE-008
 ---
 
 # CI performance system design
@@ -41,7 +40,6 @@ No database, public API, or runtime feature flag changes are required.
 | REQ-PLATFORM-CI-PERFORMANCE-005 | October capacity-constrained continuation |
 | REQ-PLATFORM-CI-PERFORMANCE-006 | Conservative test-only selection |
 | REQ-PLATFORM-CI-PERFORMANCE-009 | Go cache generations |
-| REQ-PLATFORM-CI-PERFORMANCE-008 | Lightweight E2E reporting |
 
 ## Review budget
 
@@ -329,17 +327,17 @@ No results or build artifacts are reused across different source revisions.
 
 ## Go cache generations
 
-The proposed continuation replaces combined module/build snapshots in the E2E
-`build` job and backend `static_checks`, `test_shards`, and `test_ambient_env` jobs.
+This continuation replaces combined module/build snapshots in backend
+`static_checks`, all four `test_shards`, and `test_ambient_env` jobs. The E2E
+`build` consumer already uses the shared action on main and remains unchanged.
 Native Windows,
 Postgres, desktop setup-go caching, release builds, and local cache management
 remain outside this change. Required commands, test-result caching behavior,
 race flags, runner placement, and dependency graphs stay with their current owners.
 
-Add a small shared composite action at `.github/actions/cache-go/action.yml`
-and a tested identity helper at `.github/scripts/go-cache-identity.mjs` (both
-proposed). Its caller supplies a fixed family (`static`, `test-1`, `test-2`,
-`ambient`, or `e2e-build`). Resolve `GOMODCACHE`, `GOCACHE`, `GOVERSION`, `GOOS`,
+Reuse `.github/actions/cache-go/action.yml` and its tested identity helper
+`.github/scripts/go-cache-identity.mjs`. Backend callers supply `static`,
+`test-1` through `test-4`, or `ambient`. Resolve `GOMODCACHE`, `GOCACHE`, `GOVERSION`, `GOOS`,
 `GOARCH`, and `CGO_ENABLED` through the installed Go toolchain from
 `apps/backend`; do not derive Go cache locations from the home directory.
 Capture runner OS/architecture, compiler identity when CGO is enabled, the
@@ -374,83 +372,6 @@ No cache deletion, shared credentials, per-run artifact exchange, or external
 cache service is introduced. A new namespace causes one expected cold start.
 Record compressed cache size, restore/save seconds, build/test seconds, family,
 day, ref, exact Go version, and image provenance in the delivery evidence.
-
-## Lightweight E2E reporting
-
-Add an independent `report` target to `.github/docker/ci-base/Dockerfile`.
-Use an official digest-pinned Node 24 Debian slim base, resolved and recorded at
-implementation time. Install pnpm 9.15.9 as an exact global npm package and the
-small system tool set needed by checkout, artifact unpacking, and report scripts:
-Bash, Git, CA certificates, unzip, tar, and gzip. No browser, Go, Rust, Docker,
-or application binary belongs in this target. Set
-`PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1`; keep the full frozen workspace dependency
-installation in the report job for this iteration. The lockfile remains the
-owner of Playwright and tsx versions. Global pnpm avoids relying on a missing
-Corepack installation or an inherited Corepack cache in the slim base.
-
-The report image must run the existing `e2e-timings.ts`, `retry-summary.ts`,
-Playwright `merge-reports --config e2e/playwright.config.ts --reporter=html,json`,
-and `flake-report.ts` commands. Preserve config-based normalization of mixed
-absolute checkout roots and the JSON reporter's independent flake cross-check.
-Keep artifact names, retention, retry attachments, successful-main timing
-baseline selection, and completed-main flake-history selection unchanged.
-The same source and lockfile are used for paired report replay; only the image
-differs. Normalize incidental report generation timestamps and host paths only,
-never identities, attempts, outcomes, durations, or attachment bytes.
-
-Extend `.github/workflows/ci-base-image.yml` with a separate report cache scope,
-content-hash tag, and publication summary. Build/load and smoke-test the local
-report target before publishing it. PR validation does not push; publication
-keeps the existing main-push/manual-dispatch policy and existing authority.
-Add the report smoke script and fixture paths to image-workflow filters and
-E2E change detection so image contract changes receive their checks.
-
-Delivery has two publication boundaries. First deliver the producer while
-`e2e-report` retains the runtime image. An explicitly authorized manual dispatch
-with `report_only=true` can bootstrap the content-addressed report tag from the
-PR branch: it skips runtime/build/desktop builds and Postgres mirrors, and never
-moves a `latest` tag. Normal main publication remains supported. Verify anonymous
-Linux/amd64 pulls and replay the published digest before switching the consumer
-in a subsequent commit on the same PR. Never commit a placeholder digest or
-require an unpublished tag. Record the previous runtime digest for rollback.
-Future report-image updates require the same verified digest change.
-
-The final job remains `E2E Tests Passed` on GitHub-hosted capacity with its
-existing `if: always()`, timeout, dependency joins, credentials, and artifact
-policy. Replace the apt bootstrap fallback with an explicit report-tool check
-once the new image is selected. The existing required-result verification owns
-failure, cancellation, malformed/missing mandatory evidence, and deliberate
-skip semantics. Do not add a second gate or report job, suppress parser errors,
-or fetch an alternate image after initialization failure.
-
-Use a disposable replay harness (proposed
-`.github/scripts/test-e2e-report-image.sh`) with success, recovered retry,
-terminal failure, missing/corrupt blob, and mixed-root inputs. Its fixture
-builder uses the locked Playwright version without launching browsers and
-keeps scratch files outside normal E2E discovery. It runs existing report
-commands and the actual workflow gate logic, rather than implementing another
-verdict. Dependency failure/cancellation and intentional skip cases exercise
-the gate even when there are no blobs. Isolate installed dependencies and
-outputs per image; never share host `node_modules` or mount host credentials.
-Replay a complete saved hosted blob/manifests/history set as additional
-compatibility evidence when available; expired artifacts do not count as proof.
-
-Manual `performance_probe=report|go` dispatches in the image workflow provide
-bounded comparisons without publication or additional normal PR jobs. Report
-samples reuse saved blobs; Go samples use identical source/build commands and
-separate the cold sample. Both matrices run one job at a time.
-
-For both continuations, extend the existing CI performance plan with separate
-cache, image-producer, and report-consumer work orders. The image must be
-materially smaller (target at most half the runtime image's compressed size),
-but size alone is not runtime acceptance. Compare three paired hosted samples
-on the same runner class and source, accounting for pull/setup and cache
-restore/save overhead. Require lower median occupied time for cache adoption
-and lower median report-job execution for report adoption, with unchanged
-verdicts and no introduced failures. A local replay proves compatibility, not
-hosted pull-time savings. Retain current consumers when publication or benchmark
-evidence is unavailable; record that status rather than claiming completion.
-Rollback changes cache wiring or the report digest independently.
 
 ## Failure and recovery
 

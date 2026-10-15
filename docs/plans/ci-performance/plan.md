@@ -9,7 +9,6 @@ requirements:
   - REQ-PLATFORM-CI-PERFORMANCE-005
   - REQ-PLATFORM-CI-PERFORMANCE-006
   - REQ-PLATFORM-CI-PERFORMANCE-007
-  - REQ-PLATFORM-CI-PERFORMANCE-008
   - REQ-PLATFORM-CI-PERFORMANCE-009
   - REQ-PLATFORM-E2E-DURATION-AWARE-SHARDING-001
   - REQ-PLATFORM-DURABLE-AGENT-DELIVERY-001
@@ -27,7 +26,7 @@ legacy_specs: []
 
 ## Overview
 
-Reduce CI runner-minutes and PR feedback time within approximately 60 shared concurrent jobs.
+Reduce CI runner-minutes and PR feedback time within available shared hosted capacity.
 Continue the existing package instead of repeating its completed review-budget, setup-framework, and capacity-procedure work.
 The October continuation reduces frontend setup, avoids independent Go-test-only E2E runs, and removes redundant scheduling stages.
 The earlier October stage measured frontend sharding after cheaper setup and kept E2E fan-out fixed. The October 14 continuation below replaces that fixed fan-out while retaining the existing hosted fleet.
@@ -51,95 +50,6 @@ the primary session. No new paid capacity is authorized.
    revise candidates, resolve reviews, and merge only after the full target passes.
 
 ## October delivery sequence
-
-### October 14 cache and reporting continuation
-
-The user selected Go cache freshness and a lighter E2E reporting image after
-reviewing the recent pipeline improvements. The user subsequently authorized implementation and PR checks, including
-measured comparison with main. Earlier work-order statuses and historical measurements are retained.
-
-Platform owns cache reuse, CI execution cost, and required-result integrity.
-The adjacent CI automation system continues to own contributor and publication
-authority. The existing capacity ADR covers this work; the cache-generation
-policy and image dependencies are sufficiently captured in the system design,
-so no new ADR is required. There is no application UI, public API, release, or
-public-documentation change. Internal operating notes belong in
-`docs/ci-merge-queue.md` during implementation.
-
-1. Task 17: introduce separate dependency and daily compilation caches for
-   the existing Linux Go cache consumers; verify reuse, failure behavior, and
-   occupied time with restore/save overhead included.
-2. Task 18: build and smoke-test a browser-free Node reporting image; deliver
-   its producer separately while the required report job keeps its current image.
-3. Task 19: after successful publication, verify the immutable image digest,
-   replay reports, switch the report consumer, and collect hosted acceptance.
-
-Task 18 does not depend on cache implementation, but execution is sequential
-and both can edit shared workflow contract tests. Task 19 depends on task 18
-and actual image availability, not merely on a Dockerfile in the branch.
-Use separate producer and consumer commits so a required job never pulls a
-nonexistent image. The isolated `report_only=true` manual dispatch supports
-explicitly authorized report-tag publication before the PR consumer cutover. Commit, push, merge, manual dispatch, and image publication
-retain their session authorization boundaries. This package creates no tasks,
-sessions, paid capacity, or automatic benchmark fan-out.
-
-The observed E2E run [38510354669, attempt 1](https://github.com/kdlbs/kandev/actions/runs/38510354669)
-is diagnostic evidence: Build took 313 seconds (158 seconds in the combined
-backend/web build step); the report job took 120 seconds, including 55 seconds
-of container initialization. It is not a controlled cache benchmark or a
-promise of recoverable time. Node 24 and pnpm 9.15.9 are current workflow inputs.
-Cache immutability is documented in the
-[GitHub cache reference](https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching).
-
-#### Continuation acceptance and verification
-
-| Criteria | Required evidence |
-| --- | --- |
-| 009.1–009.2 | Proposed `go-cache-identity.test.mjs`: daily rollover with unchanged dependencies, within-day reuse, and compatibility/family separation; real Go source-change probe |
-| 009.3 | Existing backend/E2E workflow contract suites extended for unconditional required commands, best-effort caches and successful-job-only publication; hosted failed/cancelled save observations |
-| 009.4; 004.1–004.2; 005.1 | Cache logs and three comparable samples, including compressed size and restore/save cost; missing hosted evidence remains pending |
-| 008.1 | Proposed report-image replay harness: identical test/attempt/outcome/attachment records, mixed roots, complete saved hosted inputs when available |
-| 008.2 | Actual report gate exercised for failures, cancellation, malformed/missing evidence and deliberate skips; existing required-check/dependency contracts |
-| 008.3 | Producer-only delivery, published Linux/amd64 digest pull/replay, consumer-only switch, recorded rollback digest |
-| 008.4; 005.5 | Three hosted baseline/candidate samples with lower median report-job execution; no new jobs, workers, retries or capacity |
-
-Daily snapshot generations are a deliberate trade-off: source-only changes
-refresh on the next successful day, while same-day runs avoid repeated large
-uploads. Per-commit/run snapshots and broad cross-family restore prefixes are
-excluded. A slim image that fails frozen dependency installation or report
-replay is rejected before consumer cutover. A size reduction alone does not
-satisfy the hosted timing criterion. Revert each candidate independently if
-it changes required outcomes or fails its performance gate.
-
-New helper/test paths in the work orders are implementation deliverables, not
-files already present at this checkpoint. Use `/tdd` for their logic and the
-exact work-order commands. No application browser suite is needed merely to
-validate cache wiring or replay saved reports. Existing full CI remains the
-integration check once the deliveries are authorized.
-
-Design validation on 2026-10-14: documentation catalog validation passed
-(381 decisions and 1,603 specifications), all specification files passed lint,
-and all 36 specification-linter tests passed. The PR documentation coverage
-preflight classified the actual six-document diff as exempt and separately
-validated all three new work orders against the proposed workflow/Dockerfile
-path set with no reference errors. `git diff --check` passed. These are design
-checks only; implementation, Docker replay, publication and performance
-acceptance remain pending.
-
-#### Continuation implementation evidence
-
-The report producer was published with explicit user authorization, then pulled
-anonymously and replayed before the consumer adopted its immutable digest.
-Three hosted report pairs preserved all semantic output and reduced median
-occupied replay time from 82 to 61 seconds. Three warm Go pairs reduced median
-build-job time from 425 to 144 seconds. Cold population costs and cache sizes
-are retained in [cache/report evidence](cache-report-evidence.md).
-Latest-head CI remains externally tracked on
-[PR #4486](https://github.com/kdlbs/kandev/pull/4486); natural next-day cache
-rotation and hosted failed/cancelled save observations remain open for task 17.
-No complete-pipeline speedup is inferred from the report replay or a cache hit.
-
-### Earlier October sequence
 
 1. Task 07: add a read-only measurement helper and capture comparable baselines.
 2. Task 03: expand reviewed frontend setup assignments, using the complete inventory and sample experiment.
@@ -279,9 +189,6 @@ No browser E2E is needed for CI-only behavior. Existing application E2E coverage
 - [ ] [Task 14: Partition frontend and Windows verification](task-14-partition-independent-checks.md)
 - [ ] [Task 15: Shorten remaining critical paths](task-15-remaining-critical-paths.md)
 - [ ] [Task 16: Measure and deliver complete CI](task-16-complete-ci-delivery.md)
-- [ ] [Task 17: Refresh Go compilation caches](task-17-go-cache-freshness.md)
-- [x] [Task 18: Produce the lightweight report image](task-18-report-image-producer.md)
-- [x] [Task 19: Adopt and measure the report image](task-19-report-image-consumer.md)
 
 ## Execution and evidence
 
@@ -487,11 +394,31 @@ cases passed without retries. All 82 workflow, gate, path-selection, and runner-
 contract tests passed, as did Actionlint, focused ESLint/Prettier, catalog/specification
 checks, and harness lint. Hosted verification remains pending the rebased push.
 
-## October 15 rebase assessment
+## October 15 backend cache continuation
 
-PR #4489 is now the base. Tasks 17–19 preserve this branch's historical cache
-and report work without reusing main's task 14–16 identifiers. E2E cache logic
-and the scrolling selector fixes are already upstream. Native hosted reporting
-supersedes task 19's container adoption; its completed results are historical.
-Only backend cache extension remains a distinct performance candidate, with no
-measured gain against the new main yet. See `cache-report-evidence.md`.
+The user approved narrowing PR #4486 after PR #4489 merged the shared Go cache
+helper, E2E Build caching and native hosted reporting. This continuation only
+extends the existing cache action to backend static checks, the four ordinary
+Go test shards and ambient verification. Required commands, inventories,
+sharding and gates remain unchanged. The report-image producer, consumer,
+fixtures and obsolete benchmark dispatches are removed from this PR.
+
+- [ ] [Task 17: Refresh backend Go compilation caches](task-17-go-cache-freshness.md)
+
+Requirement 009 owns cache correctness; requirements 004–005 retain measurement
+and capacity constraints. Work remains in progress until the relevant hosted
+cache and timing evidence is collected. Earlier E2E build benchmarks are
+historical and establish no incremental backend gain. Compare the complete
+current PR workflows with main and account for cold population, warm reuse,
+transfer costs and scheduling delays. Do not infer full feedback improvement
+from faster individual jobs.
+
+The scheduling investigation is read-only: reconstruct overlapping workflow/job
+intervals and distinguish dependency wait from execution. It does not authorize
+capacity changes, test omission or new scheduling policy. Findings and historical
+measurements live in [the evidence record](cache-report-evidence.md).
+
+Current capacity readback reports the organization on Free (twenty standard
+hosted jobs by default); sampled execution peaks at twenty. Historical sixty-slot
+assumptions are not current capacity evidence. See the scheduling investigation
+in `cache-report-evidence.md`; no paid capacity change is authorized here.
