@@ -194,3 +194,10 @@ viewport (1 passed, 10.4s). Local ignored artifacts are retained at:
 - `apps/web/e2e-artifacts/github-enterprise-hosts/enterprise-pat-setup-mobile.png`
 
 These are local review artifacts, not committed public-document screenshots.
+
+PR fixup: merged the current base's reactive subtask parent defaults while retaining
+workspace-specific GitHub URL validation. Updated the subtask form-state test
+harness to supply the real state provider required by host-aware lookups. No
+product contract changed. Verification: 13 related Vitest files (127 tests),
+frontend typecheck and focused ESLint passed. Managed subtask E2E passed 3 cases
+covering sidebar creation, pasted GitHub URLs, and selected-session inheritance.
