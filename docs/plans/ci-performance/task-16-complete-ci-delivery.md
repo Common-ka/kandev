@@ -53,6 +53,41 @@ git diff --check
 
 Hosted evidence remains mandatory; local contracts do not prove speed.
 
+### Post-merge control: all coverage passes in 47m33s under concurrent load
+
+Main squash `68bad6c7702cd` has exactly the green PR head's source tree.
+Its push control starts all three workflows at 07:36:54 UTC on 2026-10-15:
+backend `38699936984` passes in 37m12s, frontend `38699936970` in 13m03s,
+and full E2E `38699936990` in 47m33s. All 75 selected core jobs pass.
+Occupancy is 601.22 runner-minutes. This slower, complete sample remains
+visible and does not count toward fifteen-minute acceptance.
+
+Source/run/attempt-bound reports retain all 3,957 native E2E identities:
+3,907 first passes, ten retry passes, no final failures/timeouts and forty
+existing skips. Frontend retains all 26,553 cases in 2,956 files with identical
+outcomes; backend retains all 35,581 native executions and outcomes across
+the ten cohorts. All 28 normal resource artifacts show four CPUs, zero swap
+or memory events and 8.12-9.45 GiB lifetime peaks.
+
+The backend execution critical path is 1,117 seconds and E2E's is 979 seconds;
+neither is the complete elapsed time. Backend jobs wait up to 1,314 seconds
+after dependencies are ready. The E2E report itself waits 138 seconds before
+executing. Main's backend/web build step takes 226 seconds versus 25 seconds
+in the green PR run; its raw log confirms misses for pnpm, Go modules and Go
+compilation caches. Normal E2E allocation and inventory match the green PR
+control exactly. Another PR has concurrent queued/running backend and E2E
+workflows. These observations establish waiting and cold setup, without proving
+a configured runner limit or attributing every delay to one cause.
+
+Keep the twenty-four-shard source fixed for the next experiment. Run a fresh
+complete workflow-dispatch set before creating its PR, because an E2E-only PR
+would otherwise path-filter unchanged backend work. Do not overlap our full
+sets or count a partial PR as full-pipeline acceptance. Compare native coverage,
+all required platform jobs, complete time and runner occupancy. A separate local
+Kubernetes reset-order prototype fails three scenarios and is rejected; the
+original six-spec fixture control passes seventeen cases and four existing
+skips with zero retries. That prototype is excluded from this candidate.
+
 ### Green baseline merged before the scheduling follow-up
 
 The user explicitly authorized merging the green version and continuing the
