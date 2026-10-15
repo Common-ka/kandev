@@ -12,8 +12,8 @@ No backend speedup against this new main has yet been established.
 The user approved the reduced scope on October 15. Main advanced from
 `68bad6c7702cdccbc906b340c7193d10f73b1c9d` to
 `5302566674b5db307a5d03fed79f4b62f884fe79` with the native async turn ownership
-fix; the working branch was rebased again before delivery. The shared cache
-implementation is unchanged. The user-applied 20 GB repository cache limit
+fix; the working branch was rebased again before delivery. The shared cache family allowlist is extended to all four backend shards;
+its key and compatibility policy is unchanged. The user-applied 20 GB repository cache limit
 remains the authorized setting; no caches have been deleted.
 
 ## Local validation
@@ -101,3 +101,20 @@ plan readback alone does not explain the difference. Effective capacity differs
 between the observed windows; account-limit history, custom overrides and
 competing work outside this repository remain unknown. Do not assume the current
 default applied to the earlier run or attribute the entire slowdown to cache code.
+
+## First narrowed-head validation and remediation
+
+At `6ce780f27`, backend run 38724737341 exposed an integration defect: shard 3
+passed its tests in job 116390150261, but identity discovery warned
+`Go caching disabled: invalid cache family`. The inherited helper allowed only
+`test-1` and `test-2`, so four-shard workflow wiring did not enable caching for
+shards 3 and 4. This 565s job is not cold-population or reuse evidence; no cache
+was saved. The superseded backend run was deliberately cancelled before the
+remaining queued jobs consumed capacity; its cancellations remain historical.
+
+A regression derives shard families from the actual backend matrix and verifies
+all produce isolated compilation keys with a shared module key. It failed with
+`invalid cache family` before the allowlist extension and passes after it;
+unsupported family bounds remain rejected. Shared-helper edits now trigger E2E
+verification through change filters, while E2E execution/report commands remain
+unchanged. Fresh hosted validation is required after this correction.

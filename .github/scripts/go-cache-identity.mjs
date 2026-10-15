@@ -28,7 +28,17 @@ export function cacheIdentity({
   compiler,
   lint,
 }) {
-  if (!["static", "test-1", "test-2", "ambient", "e2e-build"].includes(family))
+  if (
+    ![
+      "static",
+      "test-1",
+      "test-2",
+      "test-3",
+      "test-4",
+      "ambient",
+      "e2e-build",
+    ].includes(family)
+  )
     throw new Error("invalid cache family");
   if (
     !/^\d{4}-\d{2}-\d{2}$/.test(day) ||

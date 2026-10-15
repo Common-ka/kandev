@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { readFileSync } from "node:fs";
 import { cacheIdentity } from "./go-cache-identity.mjs";
 
 const identity = {
@@ -22,6 +23,34 @@ const identity = {
   compiler: "gcc 13.3.0",
 };
 // Cache compatibility is local evidence; complete CI timing is measured separately.
+
+test("every configured backend shard gets an isolated compilation cache", () => {
+  const workflow = readFileSync(
+    new URL("../workflows/backend-tests.yml", import.meta.url),
+    "utf8",
+  );
+  const job = workflow
+    .split("  test_shards:\n")[1]
+    .split("  repository_tests:\n")[0];
+  const shards = [...job.matchAll(/^\s+- shard: (\d+)$/gm)].map(
+    (match) => match[1],
+  );
+  assert.ok(shards.length > 0, "backend workflow must declare test shards");
+  const families = [
+    "static",
+    "ambient",
+    "e2e-build",
+    ...shards.map((shard) => `test-${shard}`),
+  ];
+  const caches = families.map((family) =>
+    cacheIdentity({ ...identity, family }),
+  );
+  assert.equal(
+    new Set(caches.map((cache) => cache.buildPrefix)).size,
+    families.length,
+  );
+  assert.equal(new Set(caches.map((cache) => cache.moduleKey)).size, 1);
+});
 
 test("daily rollover preserves compatible restore prefix", () => {
   const today = cacheIdentity(identity);
@@ -75,6 +104,8 @@ test("invalid identity disables optional caching", () => {
     { dependencies: "" },
     { recipe: "" },
     { family: "../invalid" },
+    { family: "test-0" },
+    { family: "test-5" },
     { day: "2026-02-30" },
     { go: { ...identity.go, GOCACHE: "off" } },
     { go: { ...identity.go, GOMODCACHE: "/tmp/bad\npath" } },

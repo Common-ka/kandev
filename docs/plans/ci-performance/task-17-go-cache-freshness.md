@@ -32,7 +32,8 @@ measure the benefit after including cache transfer cost.
 ## In scope
 
 - Reuse the existing `.github/actions/cache-go/action.yml` and
-  `.github/scripts/go-cache-identity.mjs` without changing their identity policy.
+  `.github/scripts/go-cache-identity.mjs`, extending its bounded family allowlist
+  to all four configured test shards without changing key or validation policy.
 - Replace combined caches in backend `static_checks`, all four `test_shards`,
   and `test_ambient_env`. Preserve independent linter/configuration identity.
 - Retain every required command, race flag, selection and aggregate gate.
@@ -92,6 +93,8 @@ Do not mark the work order done from local tests alone.
 
 - `.github/workflows/backend-tests.yml`
 - `.github/scripts/backend-tests-workflow-contract_test.py`
+- `.github/scripts/go-cache-identity.mjs` and its matrix-driven regression
+- `.github/workflows/e2e-tests.yml` (shared-helper change selection only)
 - `.github/workflows/lint-action-pinning.yml`
 - `docs/ci-merge-queue.md`
 - `docs/plans/ci-performance/cache-report-evidence.md`
