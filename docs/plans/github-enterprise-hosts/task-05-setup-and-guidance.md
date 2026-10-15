@@ -201,3 +201,27 @@ harness to supply the real state provider required by host-aware lookups. No
 product contract changed. Verification: 13 related Vitest files (127 tests),
 frontend typecheck and focused ESLint passed. Managed subtask E2E passed 3 cases
 covering sidebar creation, pasted GitHub URLs, and selected-session inheritance.
+
+CI remediation updates existing PR-refresh assertions to include the host, and
+separates workflow-sync config requests from GitHub status reads in the transport
+fixture. The three failing frontend files reproduced all nine CI assertions;
+the repaired scope and two adjacent lifetime suites pass (5 files, 82 tests).
+Backend status fixtures now use deterministic provider responses instead of
+contacting GitHub with fixture credentials. The issue-link cancellation test
+observes admission at the final write boundary after host/repository validation.
+These are test-only adjustments to the existing contracts; no UI recapture or
+requirement change is needed. Remote CI remains pending for the next push.
+
+The complete GitHub package passed under `go test -race -trimpath -p 1
+./internal/github -count=1` in 173.861 seconds. Temporary HTTP tracing recorded
+zero unmocked provider requests; the diagnostic file was removed afterward.
+
+The ambient CI job also exposed a cancellation-test timing race: its next
+credential read overlapped the detached rotation commit and correctly rejected
+the stale snapshot. The fixture now signals the committed rotation before that
+read, retaining the fail-closed credential binding. PostgreSQL CI reported the
+same provider-fixture leaks and issue-link cancellation assertion as SQLite.
+Focused frontend ESLint and the targeted GitHub/backendapp race tests passed.
+The complete GitHub race suite also passed with the CI ambient integration
+environment (173.161 seconds), and the issue-link cancellation boundary passed
+against PostgreSQL under the race detector (5.362 seconds).
