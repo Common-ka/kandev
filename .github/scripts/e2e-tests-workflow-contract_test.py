@@ -89,11 +89,13 @@ class E2EWorkflowContractTest(unittest.TestCase):
         workflow = E2E_WORKFLOW.read_text()
         planner = (REPO_ROOT / "apps/web/e2e/scripts/plan-shards.ts").read_text()
         count = int(re.search(r"NORMAL_SHARD_COUNT = (\d+)", planner).group(1))
-        self.assertEqual(count, 28)
+        self.assertEqual(count, 24)
         families = workflow.split("families: >-\n", 1)[1].split("burst:", 1)[0]
         family = next(f for f in json.loads(families) if f["name"] == "e2e")
         self.assertEqual(family["instances"], [{"shard": n} for n in range(1, count + 1)])
-        self.assertIn("name: E2E Shard ${{ matrix.shard }}/28", workflow)
+        self.assertIn("name: E2E Shard ${{ matrix.shard }}/24", workflow)
+        consumer = (REPO_ROOT / "apps/web/e2e/scripts/e2e-timings.ts").read_text()
+        self.assertIn(f'["normal", {count}],', consumer)
 
     def test_independent_helper_cache_snapshots_refresh_after_source_changes(self) -> None:
         workflow = E2E_WORKFLOW.read_text()

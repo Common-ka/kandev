@@ -61,6 +61,63 @@ git diff --check
 
 ## Results
 
+### Reduce simultaneous normal E2E scheduling requests
+
+Candidate 28 passes every selected core job, but its complete E2E workflow
+still takes 16m18s. The execution critical path is 734 seconds. The final normal
+shard runs for 518 seconds after 251 seconds dependency-ready delay; two other
+late shards wait 237 and 266 seconds. The delay includes scheduling and
+provisioning; its exact cause is unknown. More per-run fan-out is not the next
+experiment. Backend and frontend pass near twelve minutes and retain their
+current configuration.
+
+Test twenty-four normal shards in place of twenty-eight, retaining all six
+single-process container shards and the same guarded maximum four normal
+processes per runner. No worker, memory, CPU, deadline, retry, trust or paid
+capacity increase. Every current project/file unit is redistributed through the
+same planner, with the same native cases and source/catalog checks. The four
+removed scheduling instances carry no unique coverage after redistribution.
+Required aggregate names and all backend/PostgreSQL/Windows/frontend/desktop/
+Kubernetes compatibility jobs remain fixed. The complete selected core roster
+becomes seventy-one jobs instead of seventy-five.
+
+Change planner count, workflow family and names, and complete-report metadata
+expectations together. The latter must require all twenty-four normal and six
+container identities; reject old, partial or duplicate cohorts. Extend the
+existing cross-component workflow contract to bind the report consumer count.
+Update the E2E README and this design record. No permanent case is added or
+removed, and no native test ID/outcome change is allowed.
+
+Before configuration changes, compare both plans using the actual successful
+candidate-28 timing profile and native catalog. Require identical catalog hash,
+unit work and all 3,957 native IDs, complete disjoint coverage and unchanged
+container allocation. Existing workflow/metadata checks must reject the old
+configuration against the new expected counts before going green.
+Run affected planner, metadata and native-catalog tests, strict lint/format,
+workflow/gate/pinning contracts and docs checks. Local managed limits stay fixed.
+
+Bind the hosted acceptance helper to the exact changed workflow/planner/report
+source hashes and explicit approved 24-normal roster; do not infer selection
+from observed jobs or silently replace the 28-normal baseline. Preserve earlier
+measurements. Reject missing platform/test coverage and a measured loaded-time
+regression; keep runner-minute increases within the existing ten-percent bound.
+The successful control is 978 seconds and 522.25 runner-minutes, with E2E at
+283.55 runner-minutes. Local unit-work estimates do not establish queue savings
+or full-workflow success. Measure one complete hosted candidate before adoption;
+revert the count experiment if the result is worse. Acceptance remains 1/3.
+
+
+The controlled offline comparison retains all 3,957 native IDs, 1,337 normal
+units and 46 container units. Normal catalog checksum and total estimated work
+are unchanged; maximum estimated unit work increases from 1,034.260 to
+1,206.692 seconds. The new expected-count workflow check and complete-metadata
+case fail against the old configuration. After the update, 27 workflow checks
+and all 50 affected planner/metadata/native-catalog cases pass, with strict
+lint/format. Default acceptance and resource helpers reproduce their old
+accepted receipts exactly. Explicit new source/roster verification rejects the
+old 28-normal run. The initial gate invocation used a nonexistent filename;
+the discovered ci-gates test is used for the corrected check.
+
 ### Retain the open portable-config accordion
 
 Candidate 27's only final E2E failure is the portable-agent configuration case.

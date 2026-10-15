@@ -493,7 +493,7 @@ export function readShardMetadata(inputPath: string): ShardMetadata[] {
 
 export function hasCompleteShardSet(metadata: ShardMetadata[]): boolean {
   const expected = new Map([
-    ["normal", 28],
+    ["normal", 24],
     ["containers", 6],
   ]);
   const seen = new Set<string>();
@@ -512,7 +512,7 @@ export function hasCompleteShardSet(metadata: ShardMetadata[]): boolean {
     if (seen.has(key)) return false;
     seen.add(key);
   }
-  return seen.size === 34;
+  return seen.size === [...expected.values()].reduce((total, count) => total + count, 0);
 }
 
 export function readBlobReportJsonl(filePath: string): string {

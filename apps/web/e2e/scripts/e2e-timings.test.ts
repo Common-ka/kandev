@@ -191,7 +191,7 @@ describe("e2e timing collection", () => {
       unitIds: [],
     });
     const complete = [
-      ...Array.from({ length: 28 }, (_, index) => metadata("normal", index + 1, 28)),
+      ...Array.from({ length: 24 }, (_, index) => metadata("normal", index + 1, 24)),
       ...Array.from({ length: 6 }, (_, index) => metadata("containers", index + 1, 6)),
     ];
 

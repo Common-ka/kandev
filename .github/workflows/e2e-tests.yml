@@ -72,8 +72,7 @@ jobs:
                 {"shard":9},{"shard":10},{"shard":11},{"shard":12},
                 {"shard":13},{"shard":14},{"shard":15},{"shard":16},
                 {"shard":17},{"shard":18},{"shard":19},{"shard":20},
-                {"shard":21},{"shard":22},{"shard":23},{"shard":24},
-                {"shard":25},{"shard":26},{"shard":27},{"shard":28}
+                {"shard":21},{"shard":22},{"shard":23},{"shard":24}
               ]}
             ]
           burst: ${{ vars.KANDEV_CI_EXTERNAL_ENABLED }}
@@ -468,7 +467,7 @@ jobs:
           retention-days: 1
 
   e2e:
-    name: E2E Shard ${{ matrix.shard }}/28
+    name: E2E Shard ${{ matrix.shard }}/24
     needs: [changes, build]
     if: needs.changes.outputs.run == 'true'
     runs-on: ${{ matrix.runner }}
@@ -568,7 +567,7 @@ jobs:
 
       # Cross-job archive extraction does not preserve useful mtimes. Validate
       # the source revision and every required artifact checksum instead.
-      - name: Run planned E2E tests (shard ${{ matrix.shard }}/28)
+      - name: Run planned E2E tests (shard ${{ matrix.shard }}/24)
         working-directory: apps/web
         env:
           E2E_SHARD: ${{ matrix.shard }}

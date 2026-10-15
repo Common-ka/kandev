@@ -194,6 +194,35 @@ provider activation or matrix growth is part of the experiment. Shell timing
 preserves native exits; scoped cgroup counters are the CPU authority and missing
 counters remain unknown. Resource artifacts never replace native blob evidence.
 
+### Fewer simultaneous normal E2E jobs
+
+After the 28-job experiment, the complete candidate passes in 978 seconds with
+an E2E execution critical path of 734 seconds. Its last normal job waits 251
+seconds after dependencies are ready. Scheduling and provisioning contribute
+to that delay; its exact cause remains unknown.
+
+The next bounded experiment requests 24 normal jobs instead of 28. It keeps
+six container jobs, the four-process resource guard and local managed limits.
+The same native project/file units move through the unchanged planner; no
+case, assertion, platform or retry is removed. It trades fewer simultaneous
+runner requests for more work per normal job, without adding paid capacity.
+Backend, PostgreSQL, Windows, frontend, desktop and Kubernetes compatibility
+jobs retain their existing selections and required aggregate names.
+
+Planner, workflow and complete-report expectations change together. A complete
+metadata set requires all 24 normal and six container identities; partial,
+duplicate or old-count metadata cannot establish a complete catalog. Native
+report reconciliation still requires every case from the source-bound catalog.
+The selected core roster becomes 71 jobs; its four fewer normal scheduling
+instances retain their tests through redistribution into the other jobs.
+
+Compare both plans with identical catalog and timing inputs before rollout.
+Require disjoint complete assignment and the same catalog checksum, unit work,
+native identities and container allocation. Estimated unit work does not prove
+elapsed-time savings. A complete hosted measurement must retain all coverage,
+report queue/execution/runner-minutes separately, and reject a loaded-time
+regression or occupancy increase beyond the existing ten-percent bound.
+
 ### One native E2E catalog producer
 
 Build collects the complete configured Playwright inventory once using the

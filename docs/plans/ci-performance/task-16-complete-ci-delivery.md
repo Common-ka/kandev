@@ -53,6 +53,60 @@ git diff --check
 
 Hosted evidence remains mandatory; local contracts do not prove speed.
 
+### Twenty-ninth candidate: twenty-four normal scheduling instances
+
+The complete green control still exceeds fifteen minutes because its last
+normal E2E job waits 251 seconds before executing. Redistribute the same
+normal catalog into twenty-four jobs instead of twenty-eight. Keep six
+containers, the four-process resource guard, local limits, all backend/frontend/
+platform selections, tests, retries and deadlines. Required aggregate names stay
+fixed; complete selected core jobs become seventy-one with identical native
+coverage. Task 15 records the experiment, tradeoff and rejection criteria.
+
+With candidate 28's actual timing profile and native catalog, both plans have
+identical normal catalog checksum, unit work and all 3,957 native identities.
+There are 1,337 normal project/file units and 46 container units. Maximum
+estimated normal unit work rises from 1,034.260 to 1,206.692 seconds (about
+16.7%); this is work per shard, not an elapsed-time forecast. Existing manifest
+validation proves complete disjoint assignment. The unchanged six-container
+plan retains the same input and allocation.
+
+The workflow cross-check and complete-metadata positive case fail before the
+configuration update, then all 27 workflow contracts and 50 affected planner/
+metadata/native-catalog cases pass. Strict lint/format pass. The report requires
+twenty-four normal and six container identities, rejecting partial, duplicate
+or old-count metadata. The acceptance helper accepts the new roster only with
+an explicit descriptor bound to the exact source hashes and final head; every
+native case and unchanged platform job remains required. Its default reproduces
+the accepted set-19 receipt exactly, and its new mode rejects the old set-28
+roster/source. Full hosted time and occupancy remain unmeasured; acceptance 1/3.
+
+### Twenty-eighth complete hosted result: green in 16m18s
+
+Head `6ae25c07cec3` passes all 75 selected core jobs. Backend `38694389776`
+passes in 12m27s (213.40 runner-minutes), frontend `38694389805` in 12m26s
+(25.30), and full E2E `38694389881` in 16m18s (283.55). Complete elapsed
+is 978 seconds and occupancy 522.25 runner-minutes. It is successful but above
+900 seconds, so acceptance remains 1/3.
+
+E2E's execution critical path is 734 seconds. Its last normal shard runs for
+518 seconds after 251 seconds dependency-ready delay; two other late shards
+wait 237 and 266 seconds. That delay includes scheduling and provisioning;
+the precise cause is unknown. The required report takes 77 seconds. Keep these
+figures separate rather than crediting test execution with queue savings.
+
+Exact source/run/producer reports preserve 3,957 E2E IDs: 3,906 first passes,
+eleven retry passes, zero final failures/timeouts and forty existing skips.
+The repaired portable-config scenario passes on its first attempt in 10.217s.
+Both changed shards pass. Native audit covers 118 raw reports and 3,972 attempts,
+with fifteen retry/error attempts and zero parse errors. Backend preserves all
+35,581 native report executions and outcomes; frontend preserves 26,553 cases
+in 2,956 files. All 28 normal resource artifacts show four CPUs, zero swap or
+memory events and 7.85-9.36 GiB lifetime peaks. Fresh exact-head PR evidence has
+91 passed checks, eleven ancillary skips, zero failed/pending checks, and no
+errors, unresolved/hidden threads or current-head review bodies. No PR monitor
+or hosted set remains live before candidate 29.
+
 ### Twenty-eighth candidate: bounded fixture disposal and retained accordion state
 
 Use a one-second deletion grace only for disposable Kind workload cleanup,

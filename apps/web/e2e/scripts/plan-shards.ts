@@ -14,7 +14,7 @@ import { discoverNativeCases, writeCatalogSnapshot, type CatalogCase } from "./n
 const WORKER_PRESETS_FILE = "tests/kubernetes/kubernetes-worker-presets.spec.ts";
 
 export const SHARD_MANIFEST_VERSION = 1;
-export const NORMAL_SHARD_COUNT = 28;
+export const NORMAL_SHARD_COUNT = 24;
 export const CONTAINER_SHARD_COUNT = 6;
 export const DEFAULT_NORMAL_TEST_SECONDS = 10;
 export const DEFAULT_CONTAINER_TEST_SECONDS = 20;
