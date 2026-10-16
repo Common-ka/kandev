@@ -215,32 +215,35 @@ it.each(["", "auto"])(
   },
 );
 
-it("keeps standalone workspace menus modal and restores their original pointer style", async () => {
-  const originalPointerEvents = document.body.style.pointerEvents;
-  document.body.style.pointerEvents = "auto";
-  const onSelect = vi.fn();
-  const view = render(
-    <WorkspaceSwitcher
-      workspaces={[
-        { id: "a", name: WORKSPACE_A },
-        { id: "b", name: WORKSPACE_B },
-      ]}
-      activeWorkspaceId="a"
-      onSelect={onSelect}
-    />,
-  );
-  try {
-    fireEvent.keyDown(screen.getByRole("button", { name: WORKSPACE_A }), { key: "Enter" });
-    await screen.findByRole("menuitem", { name: WORKSPACE_B });
-    expect(document.body.style.pointerEvents).toBe("none");
-    fireEvent.click(screen.getByRole("menuitem", { name: WORKSPACE_B }));
-    expect(onSelect).toHaveBeenCalledWith("b");
-    await waitFor(() => expect(document.body.style.pointerEvents).toBe("auto"));
-  } finally {
-    view.unmount();
-    document.body.style.pointerEvents = originalPointerEvents;
-  }
-});
+it.each(["", "auto"])(
+  "keeps standalone workspace menus modal and restores pointer style '%s'",
+  async (pointerStyle) => {
+    const originalPointerEvents = document.body.style.pointerEvents;
+    document.body.style.pointerEvents = pointerStyle;
+    const onSelect = vi.fn();
+    const view = render(
+      <WorkspaceSwitcher
+        workspaces={[
+          { id: "a", name: WORKSPACE_A },
+          { id: "b", name: WORKSPACE_B },
+        ]}
+        activeWorkspaceId="a"
+        onSelect={onSelect}
+      />,
+    );
+    try {
+      fireEvent.keyDown(screen.getByRole("button", { name: WORKSPACE_A }), { key: "Enter" });
+      const item = await screen.findByRole("menuitem", { name: WORKSPACE_B });
+      await waitFor(() => expect(document.body.style.pointerEvents).toBe("none"));
+      fireEvent.click(item);
+      expect(onSelect).toHaveBeenCalledWith("b");
+      await waitFor(() => expect(document.body.style.pointerEvents).toBe(pointerStyle));
+    } finally {
+      view.unmount();
+      document.body.style.pointerEvents = originalPointerEvents;
+    }
+  },
+);
 
 it("keeps the Tasks modal through workspace changes and releases its pointer lock on close", async () => {
   const originalPointerEvents = document.body.style.pointerEvents;
