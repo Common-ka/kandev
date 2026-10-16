@@ -24,6 +24,7 @@ export type ManagedLspConnection = LSPConnection & {
   ownerId: string;
   configuration: Record<string, unknown>;
   protocolInitialized: boolean;
+  closedDocuments: Set<string>;
   diagnosticsByUri: Map<string, PublishDiagnosticsParams>;
   progress: LspProgressSnapshot;
   registeredProgressTokens: Set<LspProgressToken>;
@@ -73,6 +74,7 @@ export function createManagedLspConnection({
     rpc: null,
     initialized: false,
     openDocuments: new Map(),
+    closedDocuments: new Set(),
     diagnosticsByUri: new Map(),
     progress: EMPTY_LSP_PROGRESS,
     registeredProgressTokens: new Set(),

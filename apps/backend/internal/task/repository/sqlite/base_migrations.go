@@ -79,6 +79,28 @@ func (r *Repository) migrateSessionsAddCostColumns() {
 //
 //nolint:cyclop,funlen,maintidx // Legacy flat list of ~60 independent idempotent migration steps predating startup-step instrumentation; splitting it is out of scope here.
 func (r *Repository) runMigrations(ctx context.Context) error {
+	for _, migration := range []struct{ name, query string }{
+		{"control_server_records.process_id", `ALTER TABLE control_server_records ADD COLUMN process_id INTEGER NOT NULL DEFAULT 0`},
+		{"control_server_records.process_group_id", `ALTER TABLE control_server_records ADD COLUMN process_group_id INTEGER NOT NULL DEFAULT 0`},
+		{"control_server_records.process_session_id", `ALTER TABLE control_server_records ADD COLUMN process_session_id INTEGER NOT NULL DEFAULT 0`},
+		{"control_server_records.process_birth_token", `ALTER TABLE control_server_records ADD COLUMN process_birth_token TEXT NOT NULL DEFAULT ''`},
+		{"session_recovery_blocks.delivery_submission_id", `ALTER TABLE session_recovery_blocks ADD COLUMN delivery_submission_id TEXT NOT NULL DEFAULT ''`},
+		{"session_recovery_blocks.delivery_stream_id", `ALTER TABLE session_recovery_blocks ADD COLUMN delivery_stream_id TEXT NOT NULL DEFAULT ''`},
+		{"session_recovery_blocks.delivery_sequence", `ALTER TABLE session_recovery_blocks ADD COLUMN delivery_sequence BIGINT NOT NULL DEFAULT 0`},
+		{"session_recovery_blocks.delivery_turn_id", `ALTER TABLE session_recovery_blocks ADD COLUMN delivery_turn_id TEXT NOT NULL DEFAULT ''`},
+		{"session_recovery_blocks.delivery_outcome", `ALTER TABLE session_recovery_blocks ADD COLUMN delivery_outcome TEXT NOT NULL DEFAULT ''`},
+		{"session_restore_attempts.checkpoint_json", `ALTER TABLE session_restore_attempts ADD COLUMN checkpoint_json TEXT NOT NULL DEFAULT ''`},
+		{"agent_delivery_effects.session_id", `ALTER TABLE agent_delivery_effects ADD COLUMN session_id TEXT NOT NULL DEFAULT ''`},
+		{"agent_delivery_effects.incarnation_id", `ALTER TABLE agent_delivery_effects ADD COLUMN incarnation_id TEXT NOT NULL DEFAULT ''`},
+		{"agent_delivery_effects.harness_generation", `ALTER TABLE agent_delivery_effects ADD COLUMN harness_generation BIGINT NOT NULL DEFAULT 0`},
+		{"agent_delivery_effects.submission_id", `ALTER TABLE agent_delivery_effects ADD COLUMN submission_id TEXT NOT NULL DEFAULT ''`},
+		{"agent_delivery_effects.turn_id", `ALTER TABLE agent_delivery_effects ADD COLUMN turn_id TEXT NOT NULL DEFAULT ''`},
+		{"agent_delivery_effects.outcome", `ALTER TABLE agent_delivery_effects ADD COLUMN outcome TEXT NOT NULL DEFAULT ''`},
+	} {
+		if err := r.migrate.Apply(migration.name, migration.query); err != nil {
+			return fmt.Errorf("apply migration %q: %w", migration.name, err)
+		}
+	}
 	if err := r.migrateTaskPriorityToTextPostgres(); err != nil {
 		return err
 	}
@@ -100,6 +122,12 @@ func (r *Repository) runMigrations(ctx context.Context) error {
 	r.migrate.Apply("task_sessions.route_state", `ALTER TABLE task_sessions ADD COLUMN route_state TEXT NOT NULL DEFAULT ''`)
 	r.migrate.Apply("task_sessions.route_reason", `ALTER TABLE task_sessions ADD COLUMN route_reason TEXT NOT NULL DEFAULT ''`)
 	r.migrate.Apply("task_sessions.downstream_acp_session_id", `ALTER TABLE task_sessions ADD COLUMN downstream_acp_session_id TEXT NOT NULL DEFAULT ''`)
+	if err := r.migrate.Apply("session_continuation_snapshots.target_generation", `ALTER TABLE session_continuation_snapshots ADD COLUMN target_generation BIGINT NOT NULL DEFAULT 0`); err != nil {
+		return err
+	}
+	if err := r.migrate.Apply("session_continuation_snapshots.submission_id", `ALTER TABLE session_continuation_snapshots ADD COLUMN submission_id TEXT NOT NULL DEFAULT ''`); err != nil {
+		return err
+	}
 	r.migrate.Apply("dynamic_route_states.continuation_json", `ALTER TABLE dynamic_route_states ADD COLUMN continuation_json TEXT NOT NULL DEFAULT ''`)
 	r.migrate.Apply("dynamic_route_states.policy_state_json", `ALTER TABLE dynamic_route_states ADD COLUMN policy_state_json TEXT NOT NULL DEFAULT ''`)
 	if err := r.backfillLegacyActiveDynamicRoutes(); err != nil {
@@ -178,8 +206,12 @@ func (r *Repository) runMigrations(ctx context.Context) error {
 	r.migrate.Apply("task_environments.ownership_generation", `ALTER TABLE task_environments ADD COLUMN ownership_generation INTEGER NOT NULL DEFAULT 1`)
 	// Add task-owned runtime credential references before the table rebuild so
 	// legacy databases preserve them through the explicit copy below.
-	r.migrate.Apply("task_environments.agentctl_auth_secret_id", `ALTER TABLE task_environments ADD COLUMN agentctl_auth_secret_id TEXT DEFAULT ''`)
-	r.migrate.Apply("task_environments.agentctl_bootstrap_secret_id", `ALTER TABLE task_environments ADD COLUMN agentctl_bootstrap_secret_id TEXT DEFAULT ''`)
+	if err := r.migrate.Apply("task_environments.agentctl_auth_secret_id", `ALTER TABLE task_environments ADD COLUMN agentctl_auth_secret_id TEXT DEFAULT ''`); err != nil {
+		return err
+	}
+	if err := r.migrate.Apply("task_environments.agentctl_bootstrap_secret_id", `ALTER TABLE task_environments ADD COLUMN agentctl_bootstrap_secret_id TEXT DEFAULT ''`); err != nil {
+		return err
+	}
 	if err := r.migrateTaskEnvironmentsRemoveAgentExecutionID(); err != nil {
 		return err
 	}
@@ -304,6 +336,10 @@ func (r *Repository) runMigrations(ctx context.Context) error {
 	r.migrate.Apply("workspaces.task_prefix", `ALTER TABLE workspaces ADD COLUMN task_prefix TEXT DEFAULT 'KAN'`)
 	r.migrate.Apply("workspaces.task_sequence", `ALTER TABLE workspaces ADD COLUMN task_sequence INTEGER DEFAULT 0`)
 	r.migrate.Apply("workspaces.office_workflow_id", `ALTER TABLE workspaces ADD COLUMN office_workflow_id TEXT DEFAULT ''`)
+	_ = r.migrate.Apply("workspaces.acp_idle_suspension_enabled", `ALTER TABLE workspaces ADD COLUMN acp_idle_suspension_enabled BOOLEAN NOT NULL DEFAULT FALSE`)
+	_ = r.migrate.Apply("workspaces.acp_idle_timeout_minutes", `ALTER TABLE workspaces ADD COLUMN acp_idle_timeout_minutes INTEGER NOT NULL DEFAULT 120 CHECK (acp_idle_timeout_minutes > 0)`)
+	_ = r.migrate.Apply("executors_running.idle_suspension_state", `ALTER TABLE executors_running ADD COLUMN idle_suspension_state TEXT NOT NULL DEFAULT ''`)
+	_ = r.migrate.Apply("executors_running.idle_suspension_policy_updated_at", `ALTER TABLE executors_running ADD COLUMN idle_suspension_policy_updated_at TIMESTAMP`)
 
 	// Office session cost tracking extensions are declared in
 	// initSessionWorktreeSchema's CREATE TABLE (cost_subcents, tokens_in,
@@ -354,6 +390,15 @@ func (r *Repository) runMigrations(ctx context.Context) error {
 	if err := r.ensureRunnerProjectionTables(); err != nil {
 		return err
 	}
+	if err := r.migrate.Apply("workflow_steps.wip_limit", `ALTER TABLE workflow_steps ADD COLUMN wip_limit INTEGER NOT NULL DEFAULT 0`); err != nil {
+		return fmt.Errorf("migrate workflow_steps.wip_limit: %w", err)
+	}
+	if err := r.migrate.Apply("workflow_steps.pull_from_step_id", `ALTER TABLE workflow_steps ADD COLUMN pull_from_step_id TEXT NOT NULL DEFAULT ''`); err != nil {
+		return fmt.Errorf("migrate workflow_steps.pull_from_step_id: %w", err)
+	}
+	if err := r.migrate.Apply("workflow_step_participants.provenance", `ALTER TABLE workflow_step_participants ADD COLUMN provenance TEXT NOT NULL DEFAULT 'manual'`); err != nil {
+		return fmt.Errorf("migrate workflow_step_participants.provenance: %w", err)
+	}
 	// Keep the projection table compatible with existing task-only stores.
 	// The workflow repository owns this table in production, but task queries
 	// can run before that repository initializes its schema in isolated stores.
@@ -369,6 +414,7 @@ func (r *Repository) runMigrations(ctx context.Context) error {
 	_ = r.migrate.Apply("workflow_steps.complete_task_on_enter", `ALTER TABLE workflow_steps ADD COLUMN complete_task_on_enter INTEGER NOT NULL DEFAULT 0`)
 	r.migrate.Apply("workflow_steps.profile_session_start_policy", `ALTER TABLE workflow_steps ADD COLUMN profile_session_start_policy TEXT NOT NULL DEFAULT 'reuse'`)
 	_ = r.migrate.Apply("workflow_steps.profile_session_end_policy", `ALTER TABLE workflow_steps ADD COLUMN profile_session_end_policy TEXT NOT NULL DEFAULT 'park'`)
+	_ = r.migrate.Apply("workflow_steps.disable_unclassified_fallback", `ALTER TABLE workflow_steps ADD COLUMN disable_unclassified_fallback INTEGER NOT NULL DEFAULT 0`)
 	_ = r.migrate.Apply("workflow_steps.session_target", `ALTER TABLE workflow_steps ADD COLUMN session_target TEXT`)
 	// Kanban task reordering (REQ-TASKS-KANBAN-TASK-REORDERING-001.25). Kept
 	// compatible with databases whose workflow repository has not replayed its
@@ -403,16 +449,26 @@ func (r *Repository) runMigrations(ctx context.Context) error {
 		CREATE INDEX IF NOT EXISTS idx_task_status_summaries_workspace
 			ON task_status_summaries(workspace_id)`)
 
-	r.migrate.Apply("task_lsp_languages.table", taskLSPSchemaDDL)
-	r.migrate.Apply("task_lsp_languages.runtime_incarnation", `
-		ALTER TABLE task_lsp_languages ADD COLUMN runtime_incarnation TEXT NOT NULL DEFAULT ''`)
-	r.migrate.Apply("task_lsp_languages.runtime_started_at", `
-		ALTER TABLE task_lsp_languages ADD COLUMN runtime_started_at TIMESTAMP`)
-	r.migrate.Apply("task_lsp_languages.runtime_revision", `
-		ALTER TABLE task_lsp_languages ADD COLUMN runtime_revision BIGINT NOT NULL DEFAULT 0`)
-	r.migrate.Apply("task_lsp_languages.process_absent_generation", `
-		ALTER TABLE task_lsp_languages ADD COLUMN process_absent_generation BIGINT NOT NULL DEFAULT 0`)
-	r.migrate.Apply("task_lsp_languages.process_absent_generation.backfill", `
+	if err := r.migrate.Apply("task_lsp_languages.table", taskLSPSchemaDDL); err != nil {
+		return err
+	}
+	if err := r.migrate.Apply("task_lsp_languages.runtime_incarnation", `
+		ALTER TABLE task_lsp_languages ADD COLUMN runtime_incarnation TEXT NOT NULL DEFAULT ''`); err != nil {
+		return err
+	}
+	if err := r.migrate.Apply("task_lsp_languages.runtime_started_at", `
+		ALTER TABLE task_lsp_languages ADD COLUMN runtime_started_at TIMESTAMP`); err != nil {
+		return err
+	}
+	if err := r.migrate.Apply("task_lsp_languages.runtime_revision", `
+		ALTER TABLE task_lsp_languages ADD COLUMN runtime_revision BIGINT NOT NULL DEFAULT 0`); err != nil {
+		return err
+	}
+	if err := r.migrate.Apply("task_lsp_languages.process_absent_generation", `
+		ALTER TABLE task_lsp_languages ADD COLUMN process_absent_generation BIGINT NOT NULL DEFAULT 0`); err != nil {
+		return err
+	}
+	if err := r.migrate.Apply("task_lsp_languages.process_absent_generation.backfill", `
 		UPDATE task_lsp_languages
 		SET process_absent_generation = generation
 		WHERE generation > 0 AND process_absent_generation = 0 AND (
@@ -421,7 +477,9 @@ func (r *Repository) runMigrations(ctx context.Context) error {
 					'binary_unavailable', 'process_start_failed', 'start_canceled', 'process_exited'
 				)
 			)
-		)`)
+		)`); err != nil {
+		return err
+	}
 
 	if err := r.clearRecoveredAgentErrors(); err != nil {
 		return err

@@ -80,8 +80,7 @@ func (e *ACPInferenceExecutor) Execute(ctx context.Context, req *PromptRequest) 
 
 	e.logger.Info("starting ACP inference",
 		zap.String("agent_id", req.AgentID),
-		zap.String("model", model),
-		zap.Strings("command", args))
+		zap.String("model", model))
 
 	cmdArgs := args[1:]
 	if len(cfg.CommandPrefix) > 0 {
@@ -488,7 +487,7 @@ func (e *ACPInferenceExecutor) Probe(ctx context.Context, req *ProbeRequest) (*P
 	isOpenCode := isOpenCodeACPCommand(cfg.Command)
 	var refreshedOpenCodeModels []ProbeModel
 	if isOpenCode && req.Refresh {
-		refreshedOpenCodeModels = e.loadOpenCodeModels(ctx, resolvedCmd, workDir, true)
+		refreshedOpenCodeModels = e.loadOpenCodeModels(ctx, resolvedCmd, workDir, true, req.ProfileContext, cfg)
 	}
 
 	// Probes intentionally omit the model flag so session/new returns the agent's
@@ -497,16 +496,31 @@ func (e *ACPInferenceExecutor) Probe(ctx context.Context, req *ProbeRequest) (*P
 	if err := managedruntime.PrepareNPMProjectPrefix(args); err != nil {
 		return &ProbeResponse{Success: false, Error: "managed npm project prefix could not be prepared"}, nil
 	}
+	command := resolvedCmd
+	commandArgs := args[1:]
+	if len(cfg.CommandPrefix) > 0 {
+		wrappedArgs := append(append([]string(nil), cfg.CommandPrefix...), args...)
+		command = resolveACPCommandPrefix(wrappedArgs[0])
+		if command == "" {
+			return &ProbeResponse{
+				Success:     false,
+				Error:       "profile command prefix is unsupported",
+				FailureCode: ProbeFailureUnsupportedContext,
+			}, nil
+		}
+		commandArgs = wrappedArgs[1:]
+	}
+	commandArgs = append(commandArgs, cfg.CLIFlags...)
 
 	e.logger.Info("starting ACP probe",
 		zap.String("agent_id", req.AgentID),
-		zap.Strings("command", args))
+		zap.Bool("profile_context", req.ProfileContext))
 
 	// Use resolvedCmd (not args[0]) so the allow-list literal is what reaches
 	// exec.Command for every built-in agent, and the one exception is the
 	// operator-defined command resolveSpawnCommand documents.
 	//nolint:gosec // resolvedCmd is an allow-list literal or an operator-registered command
-	cmd := exec.CommandContext(ctx, resolvedCmd, args[1:]...)
+	cmd := exec.CommandContext(ctx, command, commandArgs...)
 	cmd.Dir = workDir
 	cmd.Env = sanitizeEnvForAgent(req.InferenceConfig)
 	configureACPCommand(cmd, e.logger)
@@ -546,28 +560,40 @@ func (e *ACPInferenceExecutor) Probe(ctx context.Context, req *ProbeRequest) (*P
 	)
 	if err != nil {
 		cleanup()
-		stderrTail := stderr.tail()
-		// The tail goes to the log rather than into the response: handlers
-		// deliberately keep subprocess diagnostics and tmp paths out of client
-		// payloads. An empty tail is itself a result — the child produced no
-		// diagnostics, rather than producing some we failed to record.
-		e.logger.Error("ACP probe failed",
-			zap.String("agent_id", req.AgentID),
-			zap.Error(err),
-			zap.String("stderr", stderrTail))
+		stderrTail, logTail := stderr.probeTails()
+		// Classification uses raw evidence; only the complete-line projection
+		// reaches the sanitized diagnostic log.
+		managedFailureCode := managedRuntimeProbeFailureCode(cfg.Command, stderrTail)
+		failureCode := managedFailureCode
+		failureMessage := sanitizeProbeDiagnostic(withUpstreamHint(err, cfg.ProviderGatewayAuth, stderrTail))
+		if req.ProfileContext {
+			failureMessage, failureCode = sanitizeProfileProbeFailure(err, stderrTail)
+		}
+		e.logProbeFailure(req, err, logTail, failureCode, managedFailureCode)
 		return &ProbeResponse{
 			Success:     false,
-			Error:       withUpstreamHint(err, cfg.ProviderGatewayAuth, stderrTail),
-			FailureCode: managedRuntimeProbeFailureCode(cfg.Command, stderrTail),
+			Error:       failureMessage,
+			FailureCode: failureCode,
 			DurationMs:  int(time.Since(startTime).Milliseconds()),
 		}, nil
 	}
 	if len(resp.Models) == 0 && isOpenCode {
 		if len(refreshedOpenCodeModels) == 0 {
-			refreshedOpenCodeModels = e.loadOpenCodeModels(ctx, resolvedCmd, workDir, false)
+			refreshedOpenCodeModels = e.loadOpenCodeModels(ctx, resolvedCmd, workDir, false, req.ProfileContext, cfg)
 		}
 		resp.Models = refreshedOpenCodeModels
 	}
+	resp.RuntimeInfo = e.collectRuntimeObservation(
+		ctx,
+		req.RuntimeObservation,
+		cfg.Command,
+		cfg.CommandPrefix,
+		args,
+		cmd.Env,
+		cmd.Path,
+		cmd.Dir,
+		resp.AgentVersion,
+	)
 
 	resp.Success = true
 	resp.DurationMs = int(time.Since(startTime).Milliseconds())
@@ -616,17 +642,23 @@ func (e *ACPInferenceExecutor) loadOpenCodeModels(
 	resolvedCmd string,
 	workDir string,
 	refresh bool,
+	profileContext bool,
+	configs ...*InferenceConfigDTO,
 ) []ProbeModel {
-	models, err := probeOpenCodeModels(ctx, resolvedCmd, workDir, refresh)
+	models, err := probeOpenCodeModels(ctx, resolvedCmd, workDir, refresh, configs...)
 	if err != nil {
-		e.logger.Warn("ACP probe: failed to list opencode models",
-			zap.String("command", resolvedCmd),
-			zap.Error(err))
+		message := "ACP probe: failed to list opencode models"
+		if profileContext {
+			message = "ACP profile probe: secondary model discovery failed"
+		}
+		safeError := sanitizeProbeDiagnostic(err.Error())
+		e.logger.Warn(message+": "+safeError,
+			zap.String("agent_id", "opencode-acp"), zap.String("error", safeError))
 		return nil
 	}
 	if len(models) == 0 {
 		e.logger.Warn("ACP probe: opencode models returned no valid model entries",
-			zap.String("command", resolvedCmd))
+			zap.String("agent_id", "opencode-acp"))
 	}
 	return models
 }
@@ -637,18 +669,37 @@ func probeOpenCodeModels(
 	resolvedCmd string,
 	workDir string,
 	refresh bool,
+	configs ...*InferenceConfigDTO,
 ) ([]ProbeModel, error) {
 	args := []string{"models"}
 	if refresh {
 		args = append(args, "--refresh")
 	}
 	//nolint:gosec // resolvedCmd is from the same hard-coded allow-list used to launch the ACP probe.
-	cmd := exec.CommandContext(ctx, resolvedCmd, args...)
+	command := resolvedCmd
+	commandArgs := args
+	if len(configs) > 0 && configs[0] != nil {
+		cfg := configs[0]
+		if len(cfg.CommandPrefix) > 0 {
+			wrappedArgs := append(append([]string(nil), cfg.CommandPrefix...), append([]string{resolvedCmd}, args...)...)
+			command = resolveACPCommandPrefix(wrappedArgs[0])
+			if command == "" {
+				return nil, errors.New("profile command prefix is unsupported")
+			}
+			commandArgs = wrappedArgs[1:]
+		}
+		commandArgs = append(append([]string(nil), commandArgs...), cfg.CLIFlags...)
+	}
+	cmd := exec.CommandContext(ctx, command, commandArgs...)
 	cmd.Dir = workDir
-	cmd.Env = environWithNoColor(os.Environ())
-	out, err := cmd.Output()
+	if len(configs) > 0 && configs[0] != nil {
+		cmd.Env = sanitizeEnvForAgent(configs[0])
+	} else {
+		cmd.Env = environWithNoColor(os.Environ())
+	}
+	out, err := runACPCommandWithOutput(ctx, cmd, zap.NewNop())
 	if err != nil {
-		return nil, commandErrorWithStderr(err)
+		return nil, err
 	}
 	return parseOpenCodeModelsOutput(string(out)), nil
 }
@@ -667,7 +718,10 @@ func environWithNoColor(environ []string) []string {
 
 // commandErrorWithStderr preserves stderr from failed commands when Go exposes
 // it through exec.ExitError.
-func commandErrorWithStderr(err error) error {
+func commandErrorWithStderr(err error, capturedStderr string) error {
+	if stderr := strings.TrimSpace(capturedStderr); stderr != "" {
+		return fmt.Errorf("%w: %s", err, stderr)
+	}
 	var exitErr *exec.ExitError
 	if errors.As(err, &exitErr) {
 		stderr := strings.TrimSpace(string(exitErr.Stderr))
@@ -1249,6 +1303,7 @@ var allowedProbeCommands = map[string]string{
 	"grok":               "grok",
 	"hermes":             "hermes",
 	"kimi":               "kimi",
+	"mcode":              "mcode",
 	"kiro-cli-chat":      "kiro-cli-chat",
 	"mock-agent":         "mock-agent",
 	"npx":                "npx",
@@ -1276,7 +1331,7 @@ func resolveProbeCommand(name string) string {
 	if resolved, ok := allowedProbeCommands[base]; ok {
 		return resolved
 	}
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == windowsGOOS {
 		if ext := filepath.Ext(base); strings.EqualFold(ext, ".exe") {
 			return allowedProbeCommands[strings.TrimSuffix(base, ext)]
 		}
@@ -1329,15 +1384,12 @@ const stderrTailLimit = 4 << 10
 
 // stderrBuffer collects a spawned agent's stderr.
 //
-// os/exec copies stderr on a goroutine of its own whenever the writer is not an
-// *os.File, and the tail is read while the child is still being torn down —
-// cleanup calls Wait from a defer, after the response has been built. Writer and
-// reader therefore overlap, and the mutex is what makes that legal: an
-// unsynchronised bytes.Buffer here trips the race detector in
-// TestProbeCleansUpDescendantProcessOnTimeout.
+// os/exec copies stderr on its own goroutine. The mutex protects both the
+// retained bytes and their first-line boundary while readers take snapshots.
 type stderrBuffer struct {
-	mu  sync.Mutex
-	buf bytes.Buffer
+	mu               sync.Mutex
+	buf              bytes.Buffer
+	partialFirstLine bool
 }
 
 // Write keeps only the trailing stderrTailLimit bytes, so an agent that chatters
@@ -1350,11 +1402,15 @@ func (b *stderrBuffer) Write(p []byte) (int, error) {
 	defer b.mu.Unlock()
 	written := len(p)
 	if len(p) > stderrTailLimit {
-		p = p[len(p)-stderrTailLimit:]
+		cut := len(p) - stderrTailLimit
+		b.partialFirstLine = p[cut-1] != '\n'
+		b.buf.Reset()
+		p = p[cut:]
 	}
 	b.buf.Write(p)
 	if excess := b.buf.Len() - stderrTailLimit; excess > 0 {
-		b.buf.Next(excess)
+		discarded := b.buf.Next(excess)
+		b.partialFirstLine = discarded[len(discarded)-1] != '\n'
 	}
 	return written, nil
 }
@@ -1367,6 +1423,20 @@ func (b *stderrBuffer) tail() string {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	return strings.TrimSpace(b.buf.String())
+}
+
+// probeTails keeps classification and complete-line log input on one snapshot.
+// A partial first line can contain a credential separated from its key by a cut.
+func (b *stderrBuffer) probeTails() (string, string) {
+	b.mu.Lock()
+	raw := b.buf.String()
+	partial := b.partialFirstLine
+	b.mu.Unlock()
+	logTail := raw
+	if partial {
+		_, logTail, _ = strings.Cut(logTail, "\n")
+	}
+	return strings.TrimSpace(raw), strings.TrimSpace(logTail)
 }
 
 // describeACPFailure names an expired or cancelled context as the cause instead
@@ -1437,6 +1507,16 @@ func withUpstreamHint(err error, gw *acpprovider.GatewayAuth, stderrTail string)
 		return msg
 	}
 	return fmt.Sprintf("%s (provider responded: %s)", msg, hint)
+}
+
+func sanitizeProfileProbeFailure(err error, stderr string) (string, ProbeFailureCode) {
+	combined := strings.ToLower(err.Error() + " " + stderr)
+	for _, marker := range []string{"unauthorized", "authentication", "login required", "api key", "credential"} {
+		if strings.Contains(combined, marker) {
+			return "agent authentication is required", ProbeFailureAuthenticationRequired
+		}
+	}
+	return "profile capability probe failed", ""
 }
 
 var tmpPathRE = regexp.MustCompile(`(?:/tmp|/var/folders|[A-Za-z]:\\[^\s"']*Temp)[^\s"']*`)

@@ -195,10 +195,14 @@ func TestWorkspaceDeleteSourceManifestIsCoordinatorReadableButScopedCallsFailClo
 	if err != nil {
 		t.Fatalf("GetTask: %v", err)
 	}
-	cleanup, err := taskSvc.prepareWorkspaceDeleteTaskCleanup(ctx, task)
+	cleanups, err := taskSvc.reserveWorkspaceDeleteTaskCleanups(ctx, []*models.Task{task})
+	if err == nil {
+		err = taskSvc.captureWorkspaceDeleteTaskCleanups(ctx, cleanups)
+	}
 	if err != nil {
 		t.Fatalf("prepareWorkspaceDeleteTaskCleanup: %v", err)
 	}
+	cleanup := cleanups[0]
 	if err := repo.DeleteWorkspace(ctx, workspaceID); err != nil {
 		t.Fatalf("DeleteWorkspace cascade: %v", err)
 	}
@@ -312,6 +316,7 @@ func newMissingWorktreeCleanupFixture(
 	ctx := context.Background()
 	sessionID := "session-" + taskID
 	environmentID := "env-" + taskID
+	tasksBase := t.TempDir()
 	seedCleanupTaskAndSession(t, repo, taskID, sessionID)
 
 	repositoryA := initSimpleGitRepo(t)
@@ -326,7 +331,7 @@ func newMissingWorktreeCleanupFixture(
 	}
 	if err := repo.CreateTaskEnvironment(ctx, &models.TaskEnvironment{
 		ID: environmentID, TaskID: taskID, ExecutorType: "worktree",
-		WorkspacePath: filepath.Join(t.TempDir(), "environment"), Status: models.TaskEnvironmentStatusReady,
+		WorkspacePath: filepath.Join(tasksBase, taskID), Status: models.TaskEnvironmentStatusReady,
 	}); err != nil {
 		t.Fatalf("CreateTaskEnvironment: %v", err)
 	}
@@ -339,7 +344,7 @@ func newMissingWorktreeCleanupFixture(
 		t.Fatalf("UpdateTaskSession: %v", err)
 	}
 
-	manager := newCleanupTestWorktreeManager(t, repo)
+	manager := newCleanupTestWorktreeManagerAt(t, repo, tasksBase)
 	worktreeA, err := manager.Create(ctx, worktree.CreateRequest{
 		TaskID: taskID, SessionID: sessionID, TaskEnvironmentID: environmentID,
 		TaskTitle: "Missing worktree cleanup", RepositoryID: "repo-a-" + taskID, RepositoryPath: repositoryA,

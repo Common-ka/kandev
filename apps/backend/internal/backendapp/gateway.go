@@ -121,7 +121,7 @@ func provideGateway(
 	referenceValidator entityrefs.SubmissionValidator,
 	authSvc *auth.Service,
 	dataDir string,
-
+	registerCleanup func(func() error),
 ) (*gateways.Gateway, *notificationservice.Service, *notificationcontroller.Controller, *terminalservice.Service, error) {
 	gateway, err := gateways.Provide(log)
 	if err != nil {
@@ -146,7 +146,9 @@ func provideGateway(
 	scriptSvc := &scriptServiceAdapter{taskSvc: taskSvc}
 	if lifecycleMgr != nil {
 		gateway.SetLifecycleManager(lifecycleMgr, userSvc, scriptSvc)
-
+		if terminalSvc != nil {
+			gateway.SetTerminalService(terminalSvc)
+		}
 		gateway.SetVscodeProxy(lifecycleMgr)
 		gateway.SetPortProxy(lifecycleMgr)
 		gateway.SetPortTunnel(lifecycleMgr)
@@ -185,7 +187,7 @@ func provideGateway(
 		agentHandlers := agenthandlers.NewHandlers(agentCtrl, log)
 		agentHandlers.RegisterHandlers(gateway.Dispatcher)
 
-		workspaceFileHandlers := agenthandlers.NewWorkspaceFileHandlers(lifecycleMgr, log)
+		workspaceFileHandlers := agenthandlers.NewWorkspaceFileHandlers(lifecycleMgr, log, taskRepo)
 		workspaceFileHandlers.RegisterHandlers(gateway.Dispatcher)
 
 		shellHandlers := agenthandlers.NewShellHandlers(lifecycleMgr, scriptSvc, log)

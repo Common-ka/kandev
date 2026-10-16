@@ -108,10 +108,6 @@ type workspaceAttachmentLister interface {
 	ListMessageAttachmentsByWorkspace(ctx context.Context, workspaceID string) ([]*models.TaskMessageAttachment, error)
 }
 
-type exactWorkspaceVersionUpdater interface {
-	UpdateWorkspaceIfUnchanged(context.Context, *models.Workspace, time.Time) error
-}
-
 type exactWorkflowCreator interface {
 	CreateWorkflowIfWorkspaceUnchanged(context.Context, *models.Workflow, time.Time) error
 }
@@ -158,7 +154,9 @@ func (s *Service) CreateWorkspace(ctx context.Context, req *CreateWorkspaceReque
 		// The tenant comes from the creating identity and from nowhere else.
 		// There is no org field on the request on purpose: a caller must not
 		// be able to place a workspace in another tenant.
-		OrgID: callerOrgID(ctx),
+		OrgID:                    callerOrgID(ctx),
+		ACPIdleSuspensionEnabled: false,
+		ACPIdleTimeoutMinutes:    120,
 	}
 	placement, placementErr := s.placementFor(ctx, ownerID, workspace.OrgID)
 	if placementErr != nil {
@@ -217,6 +215,9 @@ func (s *Service) GetWorkspace(ctx context.Context, id string) (*models.Workspac
 
 // UpdateWorkspace updates an existing workspace
 func (s *Service) UpdateWorkspace(ctx context.Context, id string, req *UpdateWorkspaceRequest) (*models.Workspace, error) {
+	if req.ACPIdleTimeoutMinutes != nil && *req.ACPIdleTimeoutMinutes <= 0 {
+		return nil, fmt.Errorf("%w: must be greater than zero", ErrWorkspaceIdleTimeoutInvalid)
+	}
 	workspace, err := s.workspaces.GetWorkspace(ctx, id)
 	if err != nil {
 		return nil, err
@@ -228,44 +229,20 @@ func (s *Service) UpdateWorkspace(ctx context.Context, id string, req *UpdateWor
 		return nil, repoerrors.ErrTaskVersionConflict
 	}
 
+	update := workspaceFieldUpdate(req)
 	if req.UnitID != nil {
+		previousUnitID := workspace.UnitID
 		if err := s.moveWorkspaceToUnit(ctx, workspace, *req.UnitID); err != nil {
 			return nil, err
 		}
-	}
-	if req.Name != nil {
-		workspace.Name = *req.Name
-	}
-	if req.Description != nil {
-		workspace.Description = *req.Description
-	}
-	if req.DefaultExecutorID != nil {
-		workspace.DefaultExecutorID = normalizeOptionalID(req.DefaultExecutorID)
-	}
-	if req.DefaultEnvironmentID != nil {
-		workspace.DefaultEnvironmentID = normalizeOptionalID(req.DefaultEnvironmentID)
-	}
-	if req.DefaultAgentProfileID != nil {
-		workspace.DefaultAgentProfileID = normalizeOptionalID(req.DefaultAgentProfileID)
-	}
-	if req.DefaultConfigAgentProfileID != nil {
-		workspace.DefaultConfigAgentProfileID = normalizeOptionalID(req.DefaultConfigAgentProfileID)
-	}
-	workspace.UpdatedAt = time.Now().UTC()
-
-	var updateErr error
-	if req.ExpectedUpdatedAt != nil {
-		updater, ok := s.workspaces.(exactWorkspaceVersionUpdater)
-		if !ok {
-			return nil, errors.New("workspace version fencing is unavailable")
+		if workspace.UnitID != previousUnitID {
+			update.UnitID = &workspace.UnitID
 		}
-		updateErr = updater.UpdateWorkspaceIfUnchanged(ctx, workspace, *req.ExpectedUpdatedAt)
-	} else {
-		updateErr = s.workspaces.UpdateWorkspace(ctx, workspace)
 	}
-	if updateErr != nil {
-		s.logger.Error("failed to update workspace", zap.String("workspace_id", id), zap.Error(updateErr))
-		return nil, updateErr
+	workspace, err = s.workspaces.UpdateWorkspaceFields(ctx, id, update, req.ExpectedUpdatedAt)
+	if err != nil {
+		s.logger.Error("failed to update workspace", zap.String("workspace_id", id), zap.Error(err))
+		return nil, err
 	}
 
 	s.publishWorkspaceEvent(ctx, events.WorkspaceUpdated, workspace)
@@ -410,34 +387,34 @@ func (s *Service) deleteWorkspace(ctx context.Context, workspace *models.Workspa
 	if err != nil {
 		return err
 	}
+	if workspaceAttachmentCleanup != nil {
+		cleanups = append(cleanups, workspaceDeleteTaskCleanup{cleanupJob: workspaceAttachmentCleanup})
+	}
+	releaseEnvironmentMutations, err := s.acquireTaskLSPEnvironmentMutations(ctx, taskIDs)
+	if err != nil {
+		return errors.Join(err, s.cancelWorkspaceDeleteTaskCleanupJobs(ctx, cleanups))
+	}
+	defer releaseEnvironmentMutations()
+	if err := s.captureWorkspaceDeleteTaskCleanups(ctx, cleanups); err != nil {
+		return errors.Join(err, s.cancelWorkspaceDeleteTaskCleanupJobs(ctx, cleanups))
+	}
+	if s.taskLSP != nil {
+		for _, taskID := range taskIDs {
+			if err := s.taskLSP.CleanupTask(ctx, taskID, "task_deleted"); err != nil {
+				return errors.Join(fmt.Errorf("stop task language servers before workspace delete: %w", err),
+					s.cancelWorkspaceDeleteTaskCleanupJobs(ctx, cleanups))
+			}
+		}
+	}
+
 	// Record canvas artifact cleanup before the workspace cascade removes its
 	// task and workspace rows. This keeps the release ownership boundary
 	// durable across a process stop between the two operations.
 	if s.canvasCleanup != nil {
 		if err := s.canvasCleanup.CleanupWorkspaceCanvases(ctx, workspace.ID); err != nil {
-			return fmt.Errorf("cleanup workspace canvases before workspace delete: %w", err)
+			return errors.Join(fmt.Errorf("cleanup workspace canvases before workspace delete: %w", err), s.cancelWorkspaceDeleteTaskCleanupJobs(ctx, cleanups))
 		}
 	}
-	if workspaceAttachmentCleanup != nil { cleanups = append(cleanups, workspaceDeleteTaskCleanup{cleanupJob:workspaceAttachmentCleanup}) }
-	releaseEnvironmentMutations, err := s.acquireTaskLSPEnvironmentMutations(ctx, taskIDs)
-	if err != nil {
-		s.cancelWorkspaceDeleteTaskCleanupJobs(ctx, cleanups)
-		return err
-	}
-	defer releaseEnvironmentMutations()
-	if err := s.captureWorkspaceDeleteTaskCleanups(ctx, cleanups); err != nil {
-		s.cancelWorkspaceDeleteTaskCleanupJobs(ctx, cleanups)
-		return err
-	}
-	if s.taskLSP != nil {
-		for _, taskID := range taskIDs {
-			if err := s.taskLSP.CleanupTask(ctx, taskID, "task_deleted"); err != nil {
-				s.cancelWorkspaceDeleteTaskCleanupJobs(ctx, cleanups)
-				return fmt.Errorf("stop task language servers before workspace delete: %w", err)
-			}
-		}
-	}
-
 	var deletedWorkspaceAttachments []*models.TaskMessageAttachment
 	var deletedTasks []*models.Task
 	var deletedWorkflows []*models.Workflow
@@ -526,6 +503,9 @@ func (s *Service) captureWorkspaceDeleteTaskCleanups(
 	cleanups []workspaceDeleteTaskCleanup,
 ) error {
 	for index := range cleanups {
+		if cleanups[index].task == nil {
+			continue
+		}
 		if err := s.captureWorkspaceDeleteTaskCleanup(ctx, &cleanups[index]); err != nil {
 			return err
 		}
@@ -576,7 +556,7 @@ func (s *Service) captureWorkspaceDeleteTaskCleanup(
 	}
 	err = s.updatePreparedTaskResourceCleanupSnapshot(
 		ctx, cleanup.cleanupJob, cleanup.sessions, cleanup.worktrees, cleanup.stopTargets,
-		taskEnvironmentCleanup{env: cleanup.taskEnv, deleteSecrets: true},
+		taskEnvironmentCleanup{env: cleanup.taskEnv, deleteSecrets: true}, cleanup.attachments,
 	)
 	return err
 }
@@ -873,7 +853,9 @@ func (s *Service) UpdateWorkflow(ctx context.Context, id string, req *UpdateWork
 		}
 		updateErr = updater.UpdateWorkflowIfUnchanged(ctx, workflow, *req.ExpectedUpdatedAt)
 	} else {
-		updateErr = s.workflows.UpdateWorkflow(ctx, workflow)
+		workflow, updateErr = s.workflows.UpdateWorkflowFields(ctx, id, models.WorkflowFieldUpdate{
+			Name: req.Name, Description: req.Description, Prompt: req.Prompt, AgentProfileID: normalizedWorkflowProfile(req.AgentProfileID),
+		})
 	}
 	if updateErr != nil {
 		s.logger.Error("failed to update workflow", zap.String("workflow_id", id), zap.Error(updateErr))
@@ -883,6 +865,14 @@ func (s *Service) UpdateWorkflow(ctx context.Context, id string, req *UpdateWork
 	s.publishWorkflowEvent(ctx, events.WorkflowUpdated, workflow)
 	s.logger.Info("workflow updated", zap.String("workflow_id", workflow.ID))
 	return workflow, nil
+}
+
+func normalizedWorkflowProfile(value *string) *string {
+	if value == nil {
+		return nil
+	}
+	trimmed := strings.TrimSpace(*value)
+	return &trimmed
 }
 
 // SetWorkflowHidden flips the hidden flag on a workflow. Used by system
@@ -896,9 +886,8 @@ func (s *Service) SetWorkflowHidden(ctx context.Context, id string, hidden bool)
 	if workflow.Hidden == hidden {
 		return nil
 	}
-	workflow.Hidden = hidden
-	workflow.UpdatedAt = time.Now().UTC()
-	if err := s.workflows.UpdateWorkflow(ctx, workflow); err != nil {
+	workflow, err = s.workflows.UpdateWorkflowFields(ctx, id, models.WorkflowFieldUpdate{Hidden: &hidden})
+	if err != nil {
 		s.logger.Error("failed to update workflow hidden flag", zap.String("workflow_id", id), zap.Error(err))
 		return err
 	}
@@ -917,10 +906,8 @@ func (s *Service) SetWorkflowSource(ctx context.Context, id, source, sourcePath 
 	if workflow.Source == source && workflow.SourcePath == sourcePath {
 		return nil
 	}
-	workflow.Source = source
-	workflow.SourcePath = sourcePath
-	workflow.UpdatedAt = time.Now().UTC()
-	if err := s.workflows.UpdateWorkflow(ctx, workflow); err != nil {
+	workflow, err = s.workflows.UpdateWorkflowFields(ctx, id, models.WorkflowFieldUpdate{Source: &source, SourcePath: &sourcePath})
+	if err != nil {
 		s.logger.Error("failed to update workflow source", zap.String("workflow_id", id), zap.Error(err))
 		return err
 	}
@@ -1321,10 +1308,7 @@ func (s *Service) FindOrCreateRepository(ctx context.Context, req *FindOrCreateR
 	req.ProviderName = strings.TrimSpace(req.ProviderName)
 	req.RemoteURL = strings.TrimSpace(req.RemoteURL)
 	req.ProviderHost = normalizeProviderHost(req.Provider, req.ProviderHost)
-	existing, err := s.repoEntities.GetRepositoryByProviderIdentity(ctx, models.ProviderRepositoryIdentity{
-		WorkspaceID: req.WorkspaceID, Provider: req.Provider, Scope: req.ProviderScope,
-		RepositoryID: req.ProviderRepoID, Host: req.ProviderHost, Owner: req.ProviderOwner, Name: req.ProviderName,
-	})
+	existing, err := s.findRepositoryForRemoteSelection(ctx, req)
 	if err != nil {
 		return nil, false, fmt.Errorf("lookup repository: %w", err)
 	}
@@ -1493,7 +1477,7 @@ func (s *Service) UpdateRepository(ctx context.Context, id string, req *UpdateRe
 			}
 			updateErr = exact.UpdateRepositoryWithSecretBindingsIfUnchanged(ctx, repository, replacement, *req.ExpectedUpdatedAt)
 		} else {
-			updateErr = mutator.UpdateRepositoryWithSecretBindings(ctx, repository, replacement)
+			updateErr = mutator.UpdateRepositoryWithSecretBindingsAndCheckoutIntent(ctx, repository, replacement, taskrepo.RepositoryCheckoutIntent{DefaultBranch: req.DefaultBranch, PullBeforeWorktree: req.PullBeforeWorktree})
 		}
 		if updateErr != nil {
 			s.logger.Error("failed to update repository", zap.String("repository_id", id), zap.Error(updateErr))
@@ -1508,7 +1492,7 @@ func (s *Service) UpdateRepository(ctx context.Context, id string, req *UpdateRe
 			s.logger.Error("failed to update repository", zap.String("repository_id", id), zap.Error(err))
 			return nil, err
 		}
-	} else if err := s.repoEntities.UpdateRepository(ctx, repository); err != nil {
+	} else if err := s.repoEntities.UpdateRepositoryWithCheckoutIntent(ctx, repository, taskrepo.RepositoryCheckoutIntent{DefaultBranch: req.DefaultBranch, PullBeforeWorktree: req.PullBeforeWorktree}); err != nil {
 		s.logger.Error("failed to update repository", zap.String("repository_id", id), zap.Error(err))
 		return nil, err
 	}
@@ -2362,7 +2346,10 @@ func (s *Service) UpdateExecutorProfile(ctx context.Context, id string, req *Upd
 	if req.ExpectedUpdatedAt != nil {
 		updateErr = s.executors.UpdateExecutorProfileIfUnmodified(ctx, profile, *req.ExpectedUpdatedAt)
 	} else {
-		updateErr = s.executors.UpdateExecutorProfile(ctx, profile)
+		updateErr = s.executors.UpdateExecutorProfileWithScriptIntent(ctx, profile, models.ExecutorProfileScriptIntent{
+			PrepareScript: req.PrepareScript,
+			CleanupScript: req.CleanupScript,
+		})
 	}
 	if updateErr != nil {
 		return nil, updateErr

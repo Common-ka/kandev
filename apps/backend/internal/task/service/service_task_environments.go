@@ -421,8 +421,8 @@ func (s *Service) ResetTaskEnvironment(ctx context.Context, taskID string, opts 
 	if err := s.AuthorizeTaskScope(ctx, taskID, authz.ScopeTaskWrite); err != nil {
 		return err
 	}
-	releaseReset := s.acquireTaskLSPMutation(taskID)
-	defer releaseReset()
+	releaseLSPMutation := s.acquireTaskLSPMutation(taskID)
+	defer releaseLSPMutation()
 	env, err := s.taskEnvironments.GetTaskEnvironmentByTaskID(ctx, taskID)
 	if err != nil {
 		return fmt.Errorf("lookup environment: %w", err)
@@ -515,7 +515,6 @@ func (s *Service) ResetTaskEnvironment(ctx context.Context, taskID string, opts 
 			return fmt.Errorf("stop task language servers before environment reset: %w", err)
 		}
 	}
-
 
 	cleanupCtx := ctx
 	if resetJobID != "" {

@@ -183,6 +183,8 @@ func (s *Server) handleTaskLSPWatch(c *gin.Context) {
 	if err != nil {
 		return
 	}
+	releaseFencing := closeOnCredentialInvalidation(c, conn)
+	defer releaseFencing()
 	conn.SetReadLimit(4 << 10)
 	updates, unsubscribe := s.lspManager.SubscribeForTask(taskID, language)
 	defer unsubscribe()
@@ -226,6 +228,8 @@ func (s *Server) handleTaskLSPAttach(c *gin.Context) {
 		attachment.Close()
 		return
 	}
+	releaseFencing := closeOnCredentialInvalidation(c, conn)
+	defer releaseFencing()
 	conn.SetReadLimit(protocol.MaxMessageBytes)
 	writerDone := make(chan struct{})
 	go writeTaskLSPAttachment(conn, attachment, writerDone)

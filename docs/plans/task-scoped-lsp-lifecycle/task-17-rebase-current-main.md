@@ -103,3 +103,39 @@ spec: "../../specs/platform/requirements/lsp-file-intelligence.md"
 - `docs/specs/platform/requirements/{lsp-file-intelligence.md,startup-configuration-parity.md}`
 - `docs/specs/platform/system-design/lsp-file-intelligence-*.md`
 - `docs/plans/task-scoped-lsp-lifecycle/**`
+
+## Current-main merge follow-up (2026-10-16)
+
+PR #2308 now integrates main at `76954ff53ea20b0263dd15c01c7149a531668341`
+with a merge commit. This follow-up preserves the feature branch history and resolves
+27 conflicted files, plus integration errors found by compilation and regression tests.
+
+- Keep task-owned LSP lifetime while using current runtime-client leases, guarded WebSocket
+  transports, credential invalidation, and durable execution delivery.
+- Keep runtime credentials in the internal secret store. Preserve Kubernetes credentials
+  while its runtime remains available, and retain task-host cleanup semantics.
+- Serialize task-environment launch and persistence without recursively taking the inventory
+  repair lock. Keep environment owner validation and roll back failed Docker reservations.
+- Preserve current cleanup snapshots, ownership generations, archive guards, and cancellation
+  retries. A prepared cleanup job can transfer its own borrowed environment; other jobs cannot.
+  Failed cascade preparation restores prior ownership transfers.
+- Integrate the task LSP control with current toolbar and state hydration. Ignore late diagnostics
+  after the last editor closes, and accept diagnostics again when the file reopens.
+- Update regressions for current hierarchy deletion guards and mobile navigation labels.
+
+Verification for this follow-up:
+
+- The complete executor package and all 339 affected task-service tests pass. The affected
+  lifecycle, orchestrator, backend startup, gateway, and agentctl API tests pass.
+- Go lint reports zero new issues in the affected packages.
+- Focused SQLite LSP schema, ownership transfer, and cleanup tests pass.
+- LSP controller, agentctl client, and language-server packages pass with the race detector.
+- The focused frontend suite passes all 342 tests in 32 files. TypeScript and changed-file
+  ESLint checks pass.
+- All 23 desktop and three phone/tablet LSP browser tests pass against the final production build.
+- Public documentation validation passes for all 48 published pages.
+
+Verification is scoped to the affected behavior. A complete backend test-suite pass is not
+claimed: an earlier broad run encountered host-specific process failures on Nix and was stopped.
+A broader 151-test database selection exceeded its four-minute timeout while still progressing.
+The user's next step is to pull the updated PR branch and resume testing on the other machine.

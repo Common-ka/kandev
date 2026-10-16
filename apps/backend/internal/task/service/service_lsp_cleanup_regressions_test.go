@@ -405,7 +405,7 @@ func TestTaskResourceCleanupSnapshotPersistsLegacyRuntimeSecretReferences(t *tes
 
 	job, err := taskSvc.persistTaskResourceCleanup(
 		context.Background(), "task-legacy-secrets", models.TaskResourceCleanupTriggerDelete, "",
-		nil, nil, nil, taskEnvironmentCleanup{env: env}, true,
+		nil, nil, nil, nil, taskEnvironmentCleanup{env: env}, true, false, "",
 	)
 	if err != nil {
 		t.Fatalf("persistTaskResourceCleanup: %v", err)

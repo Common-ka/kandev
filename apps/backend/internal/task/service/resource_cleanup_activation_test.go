@@ -26,24 +26,16 @@ type transientCancelCleanupRepository struct {
 	calls    int
 }
 
-func (r *transientCancelCleanupRepository) CompleteTaskResourceCleanupJob(
-	ctx context.Context,
-	id string,
-	state models.TaskResourceCleanupState,
-	lastError string,
-	nextAttemptAt *time.Time,
-) error {
+func (r *transientCancelCleanupRepository) CancelTaskResourceCleanupJobIfPending(ctx context.Context, id string) (bool, error) {
 	r.mu.Lock()
 	r.calls++
 	if r.failures > 0 {
 		r.failures--
 		r.mu.Unlock()
-		return errors.New("transient prepared cleanup cancellation failure")
+		return false, errors.New("transient prepared cleanup cancellation failure")
 	}
 	r.mu.Unlock()
-	return r.TaskResourceCleanupRepository.CompleteTaskResourceCleanupJob(
-		ctx, id, state, lastError, nextAttemptAt,
-	)
+	return r.TaskResourceCleanupRepository.CancelTaskResourceCleanupJobIfPending(ctx, id)
 }
 
 type failOnceResetCleanupRepository struct {
@@ -52,6 +44,41 @@ type failOnceResetCleanupRepository struct {
 	calls     int
 	dueListed chan struct{}
 	dueOnce   sync.Once
+}
+
+type preparedCleanupCancellationRecorder struct {
+	repository.TaskResourceCleanupRepository
+	cancelled chan struct{}
+	once      sync.Once
+}
+
+func (r *preparedCleanupCancellationRecorder) CompleteTaskResourceCleanupJob(
+	ctx context.Context,
+	id string,
+	state models.TaskResourceCleanupState,
+	lastError string,
+	nextAttemptAt *time.Time,
+) error {
+	if err := r.TaskResourceCleanupRepository.CompleteTaskResourceCleanupJob(
+		ctx, id, state, lastError, nextAttemptAt,
+	); err != nil {
+		return err
+	}
+	if state == models.TaskResourceCleanupStateCancelled {
+		r.once.Do(func() { close(r.cancelled) })
+	}
+	return nil
+}
+
+func (r *preparedCleanupCancellationRecorder) CancelTaskResourceCleanupJobIfPending(
+	ctx context.Context,
+	id string,
+) (bool, error) {
+	cancelled, err := r.TaskResourceCleanupRepository.CancelTaskResourceCleanupJobIfPending(ctx, id)
+	if err == nil && cancelled {
+		r.once.Do(func() { close(r.cancelled) })
+	}
+	return cancelled, err
 }
 
 func (r *failOnceResetCleanupRepository) ResetRunningTaskResourceCleanupJobs(ctx context.Context) error {
@@ -469,9 +496,11 @@ func TestRestartReconcilesCommittedPreparedCleanup(t *testing.T) {
 				t.Fatalf("commit lifecycle mutation: %v", err)
 			}
 
+			taskSvc.setCleanupDoneForTestHook(make(chan struct{}, 1))
 			if err := taskSvc.StartTaskResourceCleanupWorker(ctx); err != nil {
 				t.Fatalf("restart cleanup worker: %v", err)
 			}
+			waitForCleanupDone(t, taskSvc)
 			job, err := repo.GetTaskResourceCleanupJobByOperationID(ctx, operationID)
 			if err != nil {
 				t.Fatal(err)
@@ -503,8 +532,18 @@ func TestPreparedCleanupReconciliationFailsClosedBeforeMutationCommit(t *testing
 				t.Fatalf("PrepareTaskResourceCleanup: %v", err)
 			}
 
+			cancellations := &preparedCleanupCancellationRecorder{
+				TaskResourceCleanupRepository: taskSvc.resourceCleanups,
+				cancelled:                     make(chan struct{}),
+			}
+			taskSvc.resourceCleanups = cancellations
 			if err := taskSvc.StartTaskResourceCleanupWorker(ctx); err != nil {
 				t.Fatalf("restart cleanup worker: %v", err)
+			}
+			select {
+			case <-cancellations.cancelled:
+			case <-time.After(2 * time.Second):
+				t.Fatal("startup worker did not cancel uncommitted prepared cleanup")
 			}
 			job, err := repo.GetTaskResourceCleanupJobByOperationID(ctx, operationID)
 			if err != nil {
@@ -644,8 +683,8 @@ func TestStartupActivationFailureKeepsWorkerRunningForRecovery(t *testing.T) {
 		failures:                      1,
 	}
 	taskSvc.setCleanupDoneForTestHook(make(chan struct{}, 1))
-	if err := taskSvc.StartTaskResourceCleanupWorker(ctx); err == nil {
-		t.Fatal("worker startup unexpectedly hid initial activation failure")
+	if err := taskSvc.StartTaskResourceCleanupWorker(ctx); err != nil {
+		t.Fatalf("start cleanup worker before asynchronous recovery: %v", err)
 	}
 	taskSvc.startTaskResourceCleanup(&models.TaskResourceCleanupJob{ID: "wake-after-recovery"})
 	waitForCleanupDone(t, taskSvc)
@@ -685,8 +724,8 @@ func TestWorkerRetriesFullResumeAfterStartupResetFailure(t *testing.T) {
 	taskSvc.resourceCleanups = failOnce
 	taskSvc.setCleanupDoneForTestHook(make(chan struct{}, 2))
 
-	if err := taskSvc.StartTaskResourceCleanupWorker(ctx); err == nil {
-		t.Fatal("worker startup unexpectedly hid reset failure")
+	if err := taskSvc.StartTaskResourceCleanupWorker(ctx); err != nil {
+		t.Fatalf("start cleanup worker before asynchronous resume retry: %v", err)
 	}
 	taskSvc.startTaskResourceCleanup(&models.TaskResourceCleanupJob{ID: "retry-full-resume"})
 	waitForCleanupDone(t, taskSvc)
@@ -715,8 +754,8 @@ func TestWorkerResumeRetryPreservesPreparedCleanupCreatedAfterStartup(t *testing
 	}
 	taskSvc.resourceCleanups = failOnce
 
-	if err := taskSvc.StartTaskResourceCleanupWorker(ctx); err == nil {
-		t.Fatal("worker startup unexpectedly hid reset failure")
+	if err := taskSvc.StartTaskResourceCleanupWorker(ctx); err != nil {
+		t.Fatalf("start cleanup worker before asynchronous resume retry: %v", err)
 	}
 	if err := taskSvc.PrepareTaskResourceCleanup(
 		ctx, "task-live-mutation", models.TaskResourceCleanupTriggerDelete, operationID, true,

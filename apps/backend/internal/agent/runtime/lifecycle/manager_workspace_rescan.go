@@ -151,7 +151,8 @@ func (m *Manager) RescanWorkspaceForTaskHost(ctx context.Context, taskID, taskEn
 	if info.WorkspacePath == "" {
 		return fmt.Errorf("task environment %s has no workspace path", taskEnvironmentID)
 	}
-	client := execution.GetAgentCtlClient()
+	client, releaseClient := execution.AcquireAgentCtlClient()
+	defer releaseClient()
 	if client == nil {
 		return fmt.Errorf("task-host execution has no agentctl client")
 	}

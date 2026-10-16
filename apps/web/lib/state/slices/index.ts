@@ -17,6 +17,10 @@ export { createOfficeSlice, defaultOfficeState } from "./office/office-slice";
 export { createFeaturesSlice, defaultFeaturesState } from "./features/features-slice";
 export { createAuthSlice, defaultAuthState } from "./auth/auth-slice";
 export { createAutomationsSlice, defaultAutomationsState } from "./automations/automations-slice";
+export {
+  createCoordinatorsSlice,
+  defaultCoordinatorsState,
+} from "./coordinators/coordinators-slice";
 export { createSystemSlice, defaultSystemState } from "./system/system-slice";
 export { createPluginsSlice, defaultPluginsState } from "./plugins/plugins-slice";
 export { createReviewSlice, defaultReviewState } from "./review/review-slice";
@@ -89,10 +93,15 @@ export type {
   AutomationRunsState,
 } from "./automations/types";
 export type {
+  CoordinatorsSlice,
+  CoordinatorsSliceState,
+  CoordinatorsSliceActions,
+  CoordinatorsState,
+} from "./coordinators/types";
+export type {
   SystemSlice,
   SystemSliceState,
   SystemSliceActions,
-  SystemBackupsState,
   SystemJobsMap,
 } from "./system/types";
 export type {

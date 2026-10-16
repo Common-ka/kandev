@@ -71,10 +71,10 @@ func TestTaskLSPSchemaReplayCompositeKeyAndCascade(t *testing.T) {
 		t.Fatal("invalid task LSP policy was accepted")
 	}
 
-	if err := repo.runMigrations(); err != nil {
+	if err := repo.runMigrations(context.Background()); err != nil {
 		t.Fatalf("replay migrations: %v", err)
 	}
-	if err := repo.runMigrations(); err != nil {
+	if err := repo.runMigrations(context.Background()); err != nil {
 		t.Fatalf("replay migrations twice: %v", err)
 	}
 	if _, err := db.ExecContext(context.Background(), db.Rebind(`DELETE FROM tasks WHERE id = ?`), "task-lsp-schema"); err != nil {
@@ -256,7 +256,7 @@ func TestTaskLSPMigrationBackfillsProvenProcessAbsence(t *testing.T) {
 		"process_start_failed", now, now, now); err != nil {
 		t.Fatal(err)
 	}
-	if err := repo.runMigrations(); err != nil {
+	if err := repo.runMigrations(context.Background()); err != nil {
 		t.Fatal(err)
 	}
 	state, found, err := repo.GetTaskLSPLanguage(context.Background(), "task-lsp-absence", "go")

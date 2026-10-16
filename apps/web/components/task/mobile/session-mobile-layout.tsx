@@ -13,6 +13,8 @@ import { SessionMobileReviewDialog } from "./session-mobile-review-dialog";
 import { TaskFilesPanel } from "../task-files-panel";
 import { PassthroughToolbar } from "../passthrough-toolbar";
 import { MobileTerminalKeybar, KEYBAR_HEIGHT_PX } from "./mobile-terminal-keybar";
+import { sendActiveTerminalInput } from "@/lib/terminal/send-shell-input";
+import { isTerminalSessionState } from "@/lib/ws/handlers/agent-session";
 import { MobileTerminalPane } from "./mobile-terminal-pane";
 import { MobileSessionsPicker } from "./mobile-sessions-section";
 import { SessionPanelContent } from "@kandev/ui/pannel-session";
@@ -34,7 +36,6 @@ import type {
 import type { Canvas } from "@/lib/api/domains/canvas-api";
 import { reviewItemId, useReviewItemSelection } from "../review-selection";
 import { PluginTaskPanel } from "../plugin-task-panel";
-import { PromptHistoryPanelContent } from "../prompt-history-panel-content";
 import { parsePluginPanelId } from "@/lib/state/layout-manager/plugin-panels";
 import { useEffectiveMobilePanel, type MobileReviewSource } from "./mobile-plugin-panel-lifecycle";
 import { useTranslation } from "react-i18next";
@@ -170,6 +171,7 @@ function MobileChatPanelContent({
           onOpenFile={onOpenFile}
           pendingScrollTarget={scrollTarget}
           isVisible={isVisible}
+          detailActive={isVisible}
           onPendingScrollConsumed={onScrollTargetConsumed}
           hideLaunchQueueStatus
           hideWipQueueStatus
@@ -262,7 +264,7 @@ export function MobilePanelArea({
       className="flex flex-col"
       style={{
         paddingTop: topPadding,
-        paddingBottom: `calc(${bottomNavHeight} + env(safe-area-inset-bottom, 0px))`,
+        paddingBottom: `calc(${bottomNavHeight} + ${currentMobilePanel === "chat" && isPassthroughMode ? `${KEYBAR_HEIGHT_PX}px` : "0px"} + env(safe-area-inset-bottom, 0px))`,
         height: "100%",
       }}
     >
@@ -277,11 +279,6 @@ export function MobilePanelArea({
             onScrollTargetConsumed={onScrollTargetConsumed}
             isVisible
           />
-        </div>
-      )}
-      {currentMobilePanel === "prompt-history" && (
-        <div className="flex-1 min-h-0 flex flex-col p-2">
-          <PromptHistoryPanelContent onNavigateToPrompt={onNavigateToPrompt} />
         </div>
       )}
       {currentMobilePanel === "plan" && (
@@ -587,7 +584,6 @@ type SessionMobileFooterProps = {
   sessionKind: "managed" | "passthrough" | null;
   activePanel: MobileSessionPanel;
   onPanelChange: (panel: MobileSessionPanel) => void;
-  showPromptHistory: boolean;
   planBadge: boolean;
   changesBadge: number;
   hasReview: boolean;
@@ -604,7 +600,6 @@ function SessionMobileFooter({
   sessionKind,
   activePanel,
   onPanelChange,
-  showPromptHistory,
   planBadge,
   changesBadge,
   hasReview,
@@ -614,17 +609,29 @@ function SessionMobileFooter({
   taskCanvases,
   onOpenCanvas,
 }: SessionMobileFooterProps) {
+  const ended = useAppStore((state) =>
+    isTerminalSessionState(sessionId ? state.taskSessions.items[sessionId]?.state : undefined),
+  );
   return (
     <>
       <MobileTerminalKeybar
         sessionId={sessionId}
-        visible={activePanel === "terminal"}
+        visible={
+          activePanel === "terminal" ||
+          (activePanel === "chat" && sessionKind === "passthrough" && !ended)
+        }
+        onSend={
+          activePanel === "chat" && sessionKind === "passthrough"
+            ? (data) => {
+                if (sessionId) sendActiveTerminalInput(sessionId, data);
+              }
+            : undefined
+        }
         baseBottomOffset={BOTTOM_NAV_HEIGHT}
       />
       <SessionMobileBottomNav
         activePanel={activePanel}
         onPanelChange={onPanelChange}
-        showPromptHistory={showPromptHistory}
         planBadge={planBadge}
         changesBadge={changesBadge}
         hasReview={hasReview}
@@ -792,7 +799,6 @@ export const SessionMobileLayout = memo(function SessionMobileLayout(
         planBadge={hasUnseenPlanUpdate}
         changesBadge={totalChangesCount}
         hasReview={reviews.length > 0}
-        showPromptHistory={!isPassthroughMode && effectiveSessionId !== null}
         taskCanvases={props.taskCanvases}
         onOpenCanvas={props.onOpenCanvas}
       />

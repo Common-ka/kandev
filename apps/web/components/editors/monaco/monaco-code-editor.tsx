@@ -223,7 +223,6 @@ type MonacoEditorViewProps = {
   diffStats: { additions: number; deletions: number } | null;
   options: typeof EDITOR_OPTIONS & { wordWrap: "on" | "off" };
   resolvedTheme: string | undefined;
-  showLspStatus: boolean;
   walkthroughRange: ReturnType<typeof useMonacoWalkthroughRange>;
 };
 
@@ -237,7 +236,6 @@ function MonacoEditorView({
   diffStats,
   options,
   resolvedTheme,
-  showLspStatus,
   walkthroughRange,
 }: MonacoEditorViewProps) {
   const {
@@ -252,7 +250,6 @@ function MonacoEditorView({
     repo,
     enableComments = false,
   } = props;
-
 
   return (
     <div ref={wrapperRef} className="flex h-full flex-col rounded-lg">
@@ -326,7 +323,6 @@ export function MonacoCodeEditor(props: MonacoCodeEditorProps) {
   const { path, repo } = props;
   const { wrapperRef, language, state, lsp, diffStats, options } = useMonacoCodeEditorSetup(props);
   const { resolvedTheme } = useTheme();
-  const lspStatusPlacement = useLspStatusPlacement();
   const editorAreaRef = useRef<HTMLDivElement>(null);
   const walkthroughRange = useMonacoWalkthroughRange({
     editor: state.editorInstance,
@@ -346,7 +342,6 @@ export function MonacoCodeEditor(props: MonacoCodeEditorProps) {
       diffStats={diffStats}
       options={options}
       resolvedTheme={resolvedTheme}
-      showLspStatus={lspStatusPlacement === "toolbar"}
       walkthroughRange={walkthroughRange}
     />
   );

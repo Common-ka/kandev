@@ -374,11 +374,4 @@ func scanTaskLSPLanguage(scanner taskLSPScanner) (*lsp.TaskLanguageState, error)
 	return &state, nil
 }
 
-func nullTimePointer(value sql.NullTime) *time.Time {
-	if !value.Valid {
-		return nil
-	}
-	return &value.Time
-}
-
 var _ lsp.Store = (*Repository)(nil)

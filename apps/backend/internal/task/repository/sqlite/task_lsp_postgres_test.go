@@ -53,10 +53,10 @@ func TestPostgresTaskLSPSchemaReplay(t *testing.T) {
 			t.Fatalf("seed legacy postgres row %s: %v", row.language, err)
 		}
 	}
-	if err := repo.runMigrations(); err != nil {
+	if err := repo.runMigrations(context.Background()); err != nil {
 		t.Fatalf("replay postgres migrations: %v", err)
 	}
-	if err := repo.runMigrations(); err != nil {
+	if err := repo.runMigrations(context.Background()); err != nil {
 		t.Fatalf("replay postgres migrations twice: %v", err)
 	}
 

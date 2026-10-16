@@ -446,6 +446,7 @@ class LSPClientManager {
     }
 
     if (document.repo) this.addRepositorySubpath(conn, document.repo);
+    conn.closedDocuments.delete(documentUri);
     conn.openDocuments.set(documentUri, {
       version: 1,
       languageId: document.languageId,
@@ -561,6 +562,8 @@ class LSPClientManager {
     if (document.refCount > 0) return;
 
     conn.openDocuments.delete(documentUri);
+    conn.closedDocuments.add(documentUri);
+    this.editorState.clearDocumentDiagnostics(conn, documentUri);
     conn.rpc.sendNotification("textDocument/didClose", {
       textDocument: { uri: documentUri },
     });

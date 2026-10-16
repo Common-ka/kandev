@@ -1,3 +1,4 @@
+import { defaultLspState, mergeTaskLspState } from "./slices/lsp/lsp-slice";
 import { mapSidebarWorkspaces } from "./slices/ui/sidebar-workspace-state";
 import {
   defaultKanbanState,
@@ -15,13 +16,13 @@ import {
   defaultFeaturesState,
   defaultAuthState,
   defaultAutomationsState,
+  defaultCoordinatorsState,
   defaultSystemState,
   defaultReviewState,
   defaultNeedsYouInboxState,
   defaultFailedInboxState,
   defaultPreviewFeedbackState,
   defaultInboxHistoryState,
-  defaultLspState,
 } from "./slices";
 import { mergeHydratedQuickChatSessions } from "@/lib/state/slices/ui/quick-chat-sync";
 import type { AgentRuntimeAvailability } from "@/lib/types/agent-runtime";
@@ -31,6 +32,7 @@ import { migrateSidebarViewDraft, migrateView } from "./slices/ui/ui-slice";
 import { mergeAgentProfileRecentUseState } from "@/lib/agent-profile-recent-use";
 import { normalizeThreadViews } from "./slices/ui/thread-view-builtins";
 import { normalizeAgentProfiles } from "@/lib/api/domains/agent-profile-normalize";
+import { hydrateSelectorProfileOptions } from "@/lib/settings/agent-profile-selector-order";
 
 function mergeHydratedSettingsAgents(
   incoming: HydrationState["settingsAgents"],
@@ -40,6 +42,15 @@ function mergeHydratedSettingsAgents(
     ...defaultState.settingsAgents,
     ...incoming,
     items: incoming.items.map(normalizeAgentProfiles),
+  };
+}
+
+function mergeHydratedAgentProfiles(initialState: HydrationState): DefaultState["agentProfiles"] {
+  const incoming = { ...defaultState.agentProfiles, ...initialState.agentProfiles };
+  const agents = initialState.settingsAgents?.items ?? [];
+  return {
+    ...incoming,
+    items: hydrateSelectorProfileOptions(incoming.items, agents),
   };
 }
 
@@ -73,6 +84,7 @@ export const defaultState = {
   userSettings: defaultSettingsState.userSettings,
   agentProfileRecentUse: defaultSettingsState.agentProfileRecentUse,
   messages: defaultSessionState.messages,
+  messagePrompts: defaultSessionState.messagePrompts,
   turns: defaultSessionState.turns,
   taskSessions: defaultSessionState.taskSessions,
   taskSessionsByTask: defaultSessionState.taskSessionsByTask,
@@ -82,7 +94,6 @@ export const defaultState = {
   sessionWorktreesBySessionId: defaultSessionState.sessionWorktreesBySessionId,
   pendingModel: defaultSessionState.pendingModel,
   activeModel: defaultSessionState.activeModel,
-  messagePrompts: defaultSessionState.messagePrompts,
   taskPlans: defaultSessionState.taskPlans,
   walkthroughs: defaultSessionState.walkthroughs,
   taskReview: defaultReviewState.taskReview,
@@ -96,6 +107,7 @@ export const defaultState = {
   shell: defaultSessionRuntimeState.shell,
   processes: defaultSessionRuntimeState.processes,
   gitStatus: defaultSessionRuntimeState.gitStatus,
+  gitStatusDisplay: defaultSessionRuntimeState.gitStatusDisplay,
   environmentIdBySessionId: defaultSessionRuntimeState.environmentIdBySessionId,
   sessionCommits: defaultSessionRuntimeState.sessionCommits,
   gitCheckoutGeneration: defaultSessionRuntimeState.gitCheckoutGeneration,
@@ -146,6 +158,7 @@ export const defaultState = {
   sessionHostnamesEpoch: defaultAuthState.sessionHostnamesEpoch,
   automations: defaultAutomationsState.automations,
   automationRuns: defaultAutomationsState.automationRuns,
+  coordinators: defaultCoordinatorsState.coordinators,
   system: defaultSystemState.system,
   agentRuntime: null as AgentRuntimeAvailability | null,
   previewPanel: defaultUIState.previewPanel,
@@ -327,11 +340,13 @@ function mergeAgentReviewArtifacts(initialState: HydrationState) {
   };
 }
 
-/** Merges the independently hydrated Prompt History projection. */
+/** Merges the latest-prompt projection and resets its client-only authority. */
 function mergePromptHistoryState(initialState: HydrationState) {
   return {
     ...defaultState.messagePrompts,
-    ...initialState.messagePrompts,
+    bySession: initialState.messagePrompts?.bySession ?? defaultState.messagePrompts.bySession,
+    metaBySession:
+      initialState.messagePrompts?.metaBySession ?? defaultState.messagePrompts.metaBySession,
     generationBySession: {
       ...defaultState.messagePrompts.generationBySession,
       ...initialState.messagePrompts?.generationBySession,
@@ -340,9 +355,11 @@ function mergePromptHistoryState(initialState: HydrationState) {
       ...defaultState.messagePrompts.refreshGenerationBySession,
       ...initialState.messagePrompts?.refreshGenerationBySession,
     },
+    authoritativeBySession: {},
+    observedBySession: {},
+    deletedIdsBySession: {},
   };
 }
-
 /** Merges the GitHub slices for initial (SSR/boot) hydration. */
 /** Merges the GitHub slices for initial (SSR/boot) hydration. */
 function mergeGitHubState(initialState: HydrationState) {
@@ -372,26 +389,11 @@ function mergeTaskPRState(initialState: HydrationState) {
   };
 }
 
-function mergeTaskLspState(initialState: HydrationState): DefaultState["taskLsp"] {
-  return {
-    byTaskId: {
-      ...defaultState.taskLsp.byTaskId,
-      ...initialState.taskLsp?.byTaskId,
-    },
-    pendingByKey: {
-      ...defaultState.taskLsp.pendingByKey,
-      ...initialState.taskLsp?.pendingByKey,
-    },
-  };
-}
-
 /**
- * Merges the turns slice for initial (SSR/boot) hydration. The server-side
- * turn lists are complete per-session snapshots, so every session the payload
- * installs is marked `loadedBySession`; without the marker, turn-derived UI
- * would mistake WS-seeded live turns for the full history (the debug
- * metadata dialog's `turn_metadata` regression). Settled sessions also seed
- * their settled boundary from `updated_at` (monotonically) so an
+ * Merges the turns slice for initial (SSR/boot) hydration. Full per-session
+ * snapshots are marked loaded; bounded message-window snapshots keep their
+ * explicit coverage and do not claim complete history. Settled sessions also
+ * seed their settled boundary from `updated_at` (monotonically) so an
  * old/unknown delayed WS start arriving before any session-list refresh is
  * rejected.
  */
@@ -400,15 +402,23 @@ function mergeTurnsState(
   incoming: HydrationState["turns"],
   sessions: HydrationState["taskSessions"],
 ): DefaultState["turns"] {
-  const merged = { ...current, ...incoming };
+  const merged = {
+    ...current,
+    ...incoming,
+    loadedBySession: { ...current.loadedBySession, ...incoming?.loadedBySession },
+    windowCoverageBySession: {
+      ...current.windowCoverageBySession,
+      ...incoming?.windowCoverageBySession,
+    },
+  };
   const settledBoundaryBySession = { ...merged.settledBoundaryBySession };
   // One shared seeding invariant (turn-actions) with the production
   // StateHydrator path, so the SSR and hydration boundary rules cannot drift.
   seedSettledSessionBoundaries(settledBoundaryBySession, Object.values(sessions?.items ?? {}));
   if (!incoming?.bySession) return { ...merged, settledBoundaryBySession };
-  const loadedBySession: Record<string, boolean> = {};
+  const loadedBySession: Record<string, boolean> = { ...merged.loadedBySession };
   for (const sessionId of Object.keys(incoming.bySession)) {
-    loadedBySession[sessionId] = true;
+    if (!incoming.windowCoverageBySession?.[sessionId]) loadedBySession[sessionId] = true;
   }
   return { ...merged, loadedBySession, settledBoundaryBySession };
 }
@@ -462,6 +472,8 @@ export function mergeInitialState(initialState?: HydrationState): DefaultState {
     workflows: { ...defaultState.workflows, ...initialState.workflows },
     workspaceContextRead: {
       ...defaultState.workspaceContextRead,
+      workspaceId: initialState.workspaces?.activeId ?? null,
+      generation: mergeWorkspaceContextGeneration(initialState),
       ...initialState.workspaceContextRead,
       pending: {
         ...defaultState.workspaceContextRead.pending,
@@ -495,7 +507,7 @@ export function mergeInitialState(initialState?: HydrationState): DefaultState {
     settingsAgents: mergeHydratedSettingsAgents(initialState.settingsAgents),
     agentDiscovery: { ...defaultState.agentDiscovery, ...initialState.agentDiscovery },
     availableAgents: { ...defaultState.availableAgents, ...initialState.availableAgents },
-    agentProfiles: { ...defaultState.agentProfiles, ...initialState.agentProfiles },
+    agentProfiles: mergeHydratedAgentProfiles(initialState),
     editors: { ...defaultState.editors, ...initialState.editors },
     prompts: { ...defaultState.prompts, ...initialState.prompts },
     secrets: { ...defaultState.secrets, ...initialState.secrets },
@@ -520,7 +532,7 @@ export function mergeInitialState(initialState?: HydrationState): DefaultState {
     activeModel: { ...defaultState.activeModel, ...initialState.activeModel },
     taskPlans: { ...defaultState.taskPlans, ...initialState.taskPlans },
     ...mergeAgentReviewArtifacts(initialState),
-    taskLsp: mergeTaskLspState(initialState),
+    taskLsp: mergeTaskLspState(initialState.taskLsp),
     queue: { ...defaultState.queue, ...initialState.queue },
     terminal: { ...defaultState.terminal, ...initialState.terminal },
     shell: { ...defaultState.shell, ...initialState.shell },

@@ -38,6 +38,21 @@ const statusStore = vi.hoisted(() => {
     },
   };
 });
+const usageDisplay = vi.hoisted(() => ({ visible: true }));
+const viewport = vi.hoisted(() => ({ isMobile: false }));
+
+vi.mock("@/hooks/use-responsive-breakpoint", () => ({
+  useResponsiveBreakpoint: () => ({
+    breakpoint: viewport.isMobile ? "mobile" : "desktop",
+    isMobile: viewport.isMobile,
+    isTablet: false,
+    isDesktop: !viewport.isMobile,
+    isCompactDesktop: false,
+    isFullDesktop: !viewport.isMobile,
+    isFinePointer: true,
+    usesDesktopWorkbench: !viewport.isMobile,
+  }),
+}));
 
 vi.mock("@/components/state-provider", () => ({
   useAppStore: <T,>(selector: (state: typeof statusStore.state) => T) =>
@@ -50,7 +65,9 @@ vi.mock("@/components/state-provider", () => ({
 }));
 
 vi.mock("@/components/task/workflow-move-proceed-button", () => ({
-  WorkflowMoveProceedButton: () => null,
+  WorkflowMoveProceedButton: ({ className, testId }: { className?: string; testId?: string }) => (
+    <button className={className} data-testid={testId} />
+  ),
 }));
 
 vi.mock("@/components/github/pr-status-chip", () => ({ PRStatusChip: () => null }));
@@ -66,7 +83,20 @@ vi.mock("@/components/task/share/share-button", () => ({
   shareableSessionStateClient: () => false,
 }));
 vi.mock("@/components/task/chat/transcript-nav-group", () => ({
-  TranscriptNavGroup: () => null,
+  TranscriptNavGroup: ({ usageControl }: { usageControl?: React.ReactNode }) =>
+    usageControl ?? null,
+}));
+vi.mock("./conversation-usage-display", () => ({
+  ConversationUsageDisplay: ({ taskId, sessionId }: { taskId: string; sessionId: string }) =>
+    usageDisplay.visible ? (
+      <button
+        type="button"
+        aria-label="Usage"
+        data-testid="conversation-usage-trigger"
+        data-task-id={taskId}
+        data-session-id={sessionId}
+      />
+    ) : null,
 }));
 vi.mock("@/components/threads/open-in-threads-button", () => ({
   OpenInThreadsButton: () => null,
@@ -87,7 +117,11 @@ vi.mock("./agent-goal-chip", () => ({
     goal ? <span data-testid="agent-goal-chip">{goal.objective}</span> : null,
 }));
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  usageDisplay.visible = true;
+  viewport.isMobile = false;
+});
 
 function renderStatus(overrides: Partial<ComponentProps<typeof ChatStatusBar>> = {}) {
   return render(
@@ -138,5 +172,67 @@ describe("chat status bar goal visibility", () => {
         hasGoal: true,
       }),
     ).toBe(true);
+  });
+});
+
+describe("conversation usage status control", () => {
+  // @covers AC-UI-COMPOSER-ACTION-WRAP-001.2, .4, .5
+  it("preserves action and utility instances when responsive order changes", () => {
+    const props: ComponentProps<typeof ChatStatusBar> = {
+      todoItems: [],
+      taskId: "task-1",
+      sessionId: "session-1",
+      sessionState: "IDLE",
+      nextStepName: "Review",
+      onProceed: vi.fn(),
+      isAgentBusy: false,
+      hasPendingClarification: false,
+      isMoving: false,
+    };
+    const { rerender } = render(<ChatStatusBar {...props} />);
+    const proceed = screen.getByTestId("proceed-next-step");
+    const usage = screen.getByTestId("conversation-usage-trigger");
+    for (const isMobile of [true, false, true]) {
+      viewport.isMobile = isMobile;
+      rerender(<ChatStatusBar {...props} />);
+      expect(screen.getByTestId("proceed-next-step")).toBe(proceed);
+      expect(screen.getByTestId("conversation-usage-trigger")).toBe(usage);
+      const order = proceed.compareDocumentPosition(usage);
+      expect(Boolean(order & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(isMobile);
+    }
+  });
+
+  it("mounts Usage in the status row for the selected task session", () => {
+    renderStatus({ taskId: "task-1", sessionId: "session-1" });
+
+    const row = screen.getByTestId("chat-status-bar");
+    const trigger = screen.getByTestId("conversation-usage-trigger");
+    expect(row.contains(trigger)).toBe(true);
+    expect(trigger.getAttribute("data-task-id")).toBe("task-1");
+    expect(trigger.getAttribute("data-session-id")).toBe("session-1");
+  });
+
+  it("leaves no right-control spacer when Usage has no content", () => {
+    usageDisplay.visible = false;
+    renderStatus({ taskId: "task-1", sessionId: "session-1" });
+
+    const controls = screen.getByTestId("chat-status-bar-right-controls");
+    expect(controls.childElementCount).toBe(0);
+    expect(controls.className).toContain("empty:hidden");
+  });
+
+  it("keeps the proceed action right-aligned when Usage has no content", () => {
+    usageDisplay.visible = false;
+    renderStatus({
+      taskId: "task-1",
+      sessionId: "session-1",
+      nextStepName: "Review",
+    });
+
+    const actions = screen.getByTestId("chat-status-bar-actions");
+    const proceed = screen.getByTestId("proceed-next-step");
+    expect(actions.className).toContain("ml-auto");
+    expect(actions.contains(proceed)).toBe(true);
+    expect(proceed.className).toContain("h-6");
   });
 });

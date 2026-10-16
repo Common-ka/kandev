@@ -193,7 +193,7 @@ func (c *Client) WatchTaskLSP(
 	u.Path = "/api/v1/lsp/languages/" + url.PathEscape(language) + "/watch"
 	headers := c.wsAuthHeaders()
 	headers.Set(taskLSPTaskIDHeader, taskID)
-	conn, response, err := websocket.DefaultDialer.DialContext(ctx, u.String(), headers)
+	conn, response, err := c.dialWebSocket(ctx, u.RequestURI(), headers)
 	if err != nil {
 		status := 0
 		if response != nil {

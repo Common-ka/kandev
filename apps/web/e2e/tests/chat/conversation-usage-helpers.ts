@@ -127,13 +127,14 @@ export async function openConversationUsageTask(
   apiClient: ApiClient,
   seedData: SeedData,
   title: string,
+  description = "/e2e:simple-message",
 ) {
   const task = await apiClient.createTaskWithAgent(
     seedData.workspaceId,
     title,
     seedData.agentProfileId,
     {
-      description: "/e2e:simple-message",
+      description,
       workflow_id: seedData.workflowId,
       workflow_step_id: seedData.startStepId,
       repository_ids: [seedData.repositoryId],
@@ -146,5 +147,5 @@ export async function openConversationUsageTask(
   const session = new SessionPage(page);
   await session.waitForLoad();
   await session.waitForChatIdle({ timeout: 30_000 });
-  return { sessionId, session };
+  return { taskId: task.id, sessionId, session };
 }

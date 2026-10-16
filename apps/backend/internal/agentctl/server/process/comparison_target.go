@@ -71,6 +71,7 @@ func (r ComparisonResolution) Ready() bool {
 func (wt *WorkspaceTracker) SetComparisonTarget(target *models.ComparisonTarget) {
 	wt.mu.Lock()
 	defer wt.mu.Unlock()
+	wt.comparisonGeneration++
 	if target == nil {
 		wt.comparisonTarget = nil
 		wt.comparisonTargetRef = ""
@@ -92,6 +93,7 @@ func (wt *WorkspaceTracker) SetComparisonTarget(target *models.ComparisonTarget)
 func (wt *WorkspaceTracker) SetComparisonTargetReady(target *models.ComparisonTarget, ref string) {
 	wt.mu.Lock()
 	defer wt.mu.Unlock()
+	wt.comparisonGeneration++
 	if target == nil || target.Validate() != nil || ref != target.ComparisonRef() {
 		wt.setComparisonTargetUnavailableLocked(target, comparisonTargetErrorInvalid)
 		return
@@ -108,6 +110,7 @@ func (wt *WorkspaceTracker) SetComparisonTargetReady(target *models.ComparisonTa
 func (wt *WorkspaceTracker) SetComparisonTargetUnavailable(target *models.ComparisonTarget, code string) {
 	wt.mu.Lock()
 	defer wt.mu.Unlock()
+	wt.comparisonGeneration++
 	wt.setComparisonTargetUnavailableLocked(target, code)
 }
 

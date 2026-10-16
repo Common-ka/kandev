@@ -106,31 +106,6 @@ type recordingLegacyCleanup struct {
 	calls int
 }
 
-type failingCascadeMutationRepository struct {
-	repository.TaskRepository
-	workspaceEnvironmentRepository
-	failTaskID  string
-	failArchive bool
-	failDelete  bool
-}
-
-func (r *failingCascadeMutationRepository) ArchiveTaskIfActive(
-	ctx context.Context,
-	taskID, cascadeID string,
-) (bool, error) {
-	if r.failArchive && taskID == r.failTaskID {
-		return false, errors.New("injected archive failure")
-	}
-	return r.TaskRepository.ArchiveTaskIfActive(ctx, taskID, cascadeID)
-}
-
-func (r *failingCascadeMutationRepository) DeleteTask(ctx context.Context, taskID string) error {
-	if r.failDelete && taskID == r.failTaskID {
-		return errors.New("injected delete failure")
-	}
-	return r.TaskRepository.DeleteTask(ctx, taskID)
-}
-
 func (c *recordingLegacyCleanup) OnTaskDeleted(context.Context, string) error {
 	c.calls++
 	return nil
@@ -179,8 +154,14 @@ func (b *activityCleanupBarrier) CaptureArchiveSourceManifests(
 
 type blockingResumeCleanupRepository struct {
 	repository.TaskResourceCleanupRepository
-	entered chan struct{}
-	release chan struct{}
+	entered       chan struct{}
+	cancelled     chan struct{}
+	secondEntered chan struct{}
+	release       chan struct{}
+	enteredOnce   sync.Once
+	cancelledOnce sync.Once
+	releaseOnce   sync.Once
+	calls         int
 }
 
 type workspaceDeleteCancellationRecorder struct {
@@ -243,30 +224,6 @@ func TestWorkspaceDeleteCancellationFencesRunningCleanupContext(t *testing.T) {
 type commitThenErrorTaskRepository struct {
 	repository.TaskRepository
 	err error
-}
-
-type commitThenErrorCascadeRepository struct {
-	repository.TaskRepository
-	workspaceEnvironmentRepository
-	err error
-}
-
-func (r *commitThenErrorCascadeRepository) ArchiveTaskIfActive(
-	ctx context.Context,
-	taskID, cascadeID string,
-) (bool, error) {
-	ok, err := r.TaskRepository.ArchiveTaskIfActive(ctx, taskID, cascadeID)
-	if err != nil {
-		return false, err
-	}
-	return ok, r.err
-}
-
-func (r *commitThenErrorCascadeRepository) DeleteTask(ctx context.Context, taskID string) error {
-	if err := r.TaskRepository.DeleteTask(ctx, taskID); err != nil {
-		return err
-	}
-	return r.err
 }
 
 func (r *commitThenErrorTaskRepository) DeleteTask(ctx context.Context, id string) error {
@@ -366,7 +323,7 @@ func TestCascadeMutationCommitThenErrorKeepsCleanupRunnable(t *testing.T) {
 			seedCleanupTaskAndSession(t, repo, taskID, "session-cascade-commit-then-error-"+operation)
 			commitErr := errors.New("transport lost after cascade commit")
 			mutations := &commitThenErrorCascadeRepository{
-				TaskRepository: repo, workspaceEnvironmentRepository: repo, err: commitErr,
+				Repository: repo, err: commitErr,
 			}
 			handoff := NewHandoffService(mutations, repo, nil, nil, nil, nil)
 			handoff.SetTaskResourceCleaner(taskSvc)
@@ -397,10 +354,23 @@ func TestCascadeMutationCommitThenErrorKeepsCleanupRunnable(t *testing.T) {
 	}
 }
 
-func (r *blockingResumeCleanupRepository) ResetRunningTaskResourceCleanupJobs(context.Context) error {
-	close(r.entered)
-	<-r.release
-	return nil
+func (r *blockingResumeCleanupRepository) ResetRunningTaskResourceCleanupJobs(ctx context.Context) error {
+	r.calls++
+	if r.calls == 1 {
+		r.enteredOnce.Do(func() { close(r.entered) })
+		select {
+		case <-ctx.Done():
+			r.cancelledOnce.Do(func() { close(r.cancelled) })
+			<-r.release
+			return ctx.Err()
+		case <-r.release:
+			return r.TaskResourceCleanupRepository.ResetRunningTaskResourceCleanupJobs(ctx)
+		}
+	}
+	if r.calls == 2 && r.secondEntered != nil {
+		close(r.secondEntered)
+	}
+	return r.TaskResourceCleanupRepository.ResetRunningTaskResourceCleanupJobs(ctx)
 }
 
 func (b *activityCleanupBarrier) OnTaskDeleted(context.Context, string) error { return nil }
@@ -788,6 +758,7 @@ func TestCancelIfTaskUnarchivedCancelsPendingJobWithoutClaim(t *testing.T) {
 
 func TestResumeTaskResourceCleanupJobsReconstructsInterruptedJob(t *testing.T) {
 	svc, _, repo := createTestService(t)
+	svc.StopTaskResourceCleanupWorker()
 	ctx := context.Background()
 	job := &models.TaskResourceCleanupJob{
 		ID: "interrupted-job", OperationID: "delete:interrupted", TaskID: "deleted-task",
@@ -1069,7 +1040,7 @@ func TestPartialCascadeFailureRestoresOnlyUnmutatedEnvironmentOwners(t *testing.
 			}
 
 			failingRepo := &failingCascadeMutationRepository{
-				TaskRepository: repo, workspaceEnvironmentRepository: repo,
+				Repository: repo,
 				failTaskID: "root-task", failArchive: action.name == "archive", failDelete: action.name == "delete",
 			}
 			handoff := NewHandoffService(failingRepo, repo, nil, nil, nil, nil)
@@ -1771,17 +1742,31 @@ func TestCancelWorkspaceDeleteCleanupDoesNotOverwriteClaim(t *testing.T) {
 	}
 }
 
-func TestStopTaskResourceCleanupWorkerJoinsStartupResume(t *testing.T) {
+func TestStartTaskResourceCleanupWorkerReturnsBeforeRecovery(t *testing.T) {
 	taskSvc, _ := setupOfficeTest(t)
 	taskSvc.StopTaskResourceCleanupWorker()
+	t.Cleanup(taskSvc.StopTaskResourceCleanupWorker)
 	blocking := &blockingResumeCleanupRepository{
 		TaskResourceCleanupRepository: taskSvc.resourceCleanups,
-		entered:                       make(chan struct{}), release: make(chan struct{}),
+		entered:                       make(chan struct{}), cancelled: make(chan struct{}), release: make(chan struct{}),
 	}
+	t.Cleanup(func() { blocking.releaseOnce.Do(func() { close(blocking.release) }) })
 	taskSvc.resourceCleanups = blocking
 	startDone := make(chan error, 1)
 	go func() { startDone <- taskSvc.StartTaskResourceCleanupWorker(context.Background()) }()
-	<-blocking.entered
+	select {
+	case <-blocking.entered:
+	case <-time.After(time.Second):
+		t.Fatal("cleanup worker did not start recovery")
+	}
+	select {
+	case err := <-startDone:
+		if err != nil {
+			t.Fatalf("StartTaskResourceCleanupWorker: %v", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("StartTaskResourceCleanupWorker waited for recovery to drain")
+	}
 	stopDone := make(chan struct{})
 	go func() {
 		taskSvc.StopTaskResourceCleanupWorker()
@@ -1789,17 +1774,113 @@ func TestStopTaskResourceCleanupWorkerJoinsStartupResume(t *testing.T) {
 	}()
 	select {
 	case <-stopDone:
-		t.Fatal("StopTaskResourceCleanupWorker returned before startup resume drained")
-	case <-time.After(100 * time.Millisecond):
+		t.Fatal("StopTaskResourceCleanupWorker returned before startup recovery was released")
+	case <-blocking.cancelled:
 	}
-	close(blocking.release)
+	blocking.releaseOnce.Do(func() { close(blocking.release) })
 	select {
 	case <-stopDone:
 	case <-time.After(time.Second):
-		t.Fatal("StopTaskResourceCleanupWorker did not return after startup resume drained")
+		t.Fatal("StopTaskResourceCleanupWorker did not join startup recovery")
 	}
-	if err := <-startDone; err == nil {
-		t.Fatal("StartTaskResourceCleanupWorker succeeded after concurrent stop")
+}
+
+func TestStartTaskResourceCleanupWorkerWaitsForStopDrainage(t *testing.T) {
+	taskSvc, _ := setupOfficeTest(t)
+	taskSvc.StopTaskResourceCleanupWorker()
+	t.Cleanup(taskSvc.StopTaskResourceCleanupWorker)
+	blocking := &blockingResumeCleanupRepository{
+		TaskResourceCleanupRepository: taskSvc.resourceCleanups,
+		entered:                       make(chan struct{}), cancelled: make(chan struct{}),
+		secondEntered: make(chan struct{}), release: make(chan struct{}),
+	}
+	t.Cleanup(func() { blocking.releaseOnce.Do(func() { close(blocking.release) }) })
+	taskSvc.resourceCleanups = blocking
+	if err := taskSvc.StartTaskResourceCleanupWorker(context.Background()); err != nil {
+		t.Fatalf("start first worker: %v", err)
+	}
+	select {
+	case <-blocking.entered:
+	case <-time.After(time.Second):
+		t.Fatal("first worker did not start recovery")
+	}
+	stopDone := make(chan struct{})
+	go func() {
+		taskSvc.StopTaskResourceCleanupWorker()
+		close(stopDone)
+	}()
+	select {
+	case <-blocking.cancelled:
+	case <-time.After(time.Second):
+		t.Fatal("StopTaskResourceCleanupWorker did not cancel recovery")
+	}
+	if taskSvc.cleanupWorkerLifecycleMu.TryLock() {
+		taskSvc.cleanupWorkerLifecycleMu.Unlock()
+		t.Fatal("worker lifecycle lock was released before recovery drained")
+	}
+	startAttempted := make(chan struct{})
+	startDone := make(chan error, 1)
+	go func() {
+		close(startAttempted)
+		startDone <- taskSvc.StartTaskResourceCleanupWorker(context.Background())
+	}()
+	<-startAttempted
+	select {
+	case <-blocking.secondEntered:
+		t.Fatal("successor worker started during stop drainage")
+	case <-time.After(100 * time.Millisecond):
+	}
+	blocking.releaseOnce.Do(func() { close(blocking.release) })
+	select {
+	case <-stopDone:
+	case <-time.After(time.Second):
+		t.Fatal("StopTaskResourceCleanupWorker did not finish drainage")
+	}
+	select {
+	case err := <-startDone:
+		if err != nil {
+			t.Fatalf("start successor worker: %v", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("successor worker did not start after drainage")
+	}
+	select {
+	case <-blocking.secondEntered:
+	case <-time.After(time.Second):
+		t.Fatal("successor worker did not begin recovery")
+	}
+	taskSvc.StopTaskResourceCleanupWorker()
+}
+
+func TestTaskResourceCleanupWorkerRepeatedStartStopIsSafe(t *testing.T) {
+	taskSvc, _ := setupOfficeTest(t)
+	taskSvc.StopTaskResourceCleanupWorker()
+	const concurrentCalls = 12
+	var calls sync.WaitGroup
+	for range concurrentCalls {
+		calls.Add(1)
+		go func() {
+			defer calls.Done()
+			if err := taskSvc.StartTaskResourceCleanupWorker(context.Background()); err != nil {
+				t.Errorf("StartTaskResourceCleanupWorker: %v", err)
+			}
+			taskSvc.StopTaskResourceCleanupWorker()
+		}()
+	}
+	calls.Wait()
+	taskSvc.StopTaskResourceCleanupWorker()
+}
+
+func TestStartTaskResourceCleanupWorkerRejectsCanceledContext(t *testing.T) {
+	taskSvc, _ := setupOfficeTest(t)
+	taskSvc.StopTaskResourceCleanupWorker()
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if err := taskSvc.StartTaskResourceCleanupWorker(ctx); !errors.Is(err, context.Canceled) {
+		t.Fatalf("StartTaskResourceCleanupWorker error = %v, want cancellation", err)
+	}
+	if taskSvc.cleanupWorkerCancel != nil {
+		t.Fatal("canceled startup registered a cleanup worker")
 	}
 }
 

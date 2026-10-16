@@ -159,7 +159,7 @@ func workspaceRepositorySpecsFromLaunch(req *LaunchRequest) []WorkspaceRepositor
 	for _, spec := range specs {
 		result = append(result, WorkspaceRepositorySpec{
 			RepositoryID: spec.RepositoryID, RepositoryPath: spec.RepositoryPath, RepoName: spec.RepoName,
-			Position: spec.Position,
+			Position:       spec.Position,
 			IntegrationRef: spec.IntegrationRef,
 			BaseBranch:     spec.BaseBranch, DefaultBranch: spec.DefaultBranch, CheckoutBranch: spec.CheckoutBranch,
 			PRNumber: spec.PRNumber, QualifiedPRBase: spec.QualifiedPRBase,

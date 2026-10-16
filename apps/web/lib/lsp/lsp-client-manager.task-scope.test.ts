@@ -118,9 +118,10 @@ describe("task-scoped LSP attachment", () => {
     expect(provider.getDocumentUri(models.get(firstModelUri))).toBe(documentUri);
     expect(provider.getDocumentUri(models.get(secondModelUri))).toBe(documentUri);
 
-    publishDiagnostic(socket, documentUri, "shared issue");
-    expect(markerMessages(markersByUri, firstModelUri)).toContain("shared issue");
-    expect(markerMessages(markersByUri, secondModelUri)).toContain("shared issue");
+    const sharedIssue = "shared issue";
+    publishDiagnostic(socket, documentUri, sharedIssue);
+    expect(markerMessages(markersByUri, firstModelUri)).toContain(sharedIssue);
+    expect(markerMessages(markersByUri, secondModelUri)).toContain(sharedIssue);
 
     const document = { uri: documentUri, languageId: LANGUAGE, text: "export {};" };
     lspClientManager.openDocument("session-a", LANGUAGE, document);
@@ -130,8 +131,16 @@ describe("task-scoped LSP attachment", () => {
     expect(count("textDocument/didOpen")).toBe(1);
     lspClientManager.closeDocument("session-a", LANGUAGE, documentUri);
     expect(count("textDocument/didClose")).toBe(0);
+    expect(markerMessages(markersByUri, secondModelUri)).toContain(sharedIssue);
     lspClientManager.closeDocument("session-b", LANGUAGE, documentUri);
     expect(count("textDocument/didClose")).toBe(1);
+    expect(markerMessages(markersByUri, firstModelUri)).toEqual([]);
+    expect(markerMessages(markersByUri, secondModelUri)).toEqual([]);
+    publishDiagnostic(socket, documentUri, "late closed-document issue");
+    expect(markerMessages(markersByUri, secondModelUri)).toEqual([]);
+    lspClientManager.openDocument("session-b", LANGUAGE, document);
+    publishDiagnostic(socket, documentUri, "reopened issue");
+    expect(markerMessages(markersByUri, secondModelUri)).toContain("reopened issue");
   });
 });
 

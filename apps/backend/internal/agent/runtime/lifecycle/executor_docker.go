@@ -40,14 +40,6 @@ func getMetadataString(metadata map[string]interface{}, key string) string {
 	return ""
 }
 
-func getMetadataBool(metadata map[string]interface{}, key string) bool {
-	if metadata == nil {
-		return false
-	}
-	value, _ := metadata[key].(bool)
-	return value
-}
-
 // getMetadataStringMap extracts a map[string]string at key from metadata. The
 // value may have been deserialized as map[string]interface{} (e.g. when the
 // metadata round-tripped through JSON for a remote executor) or kept as a
@@ -92,7 +84,7 @@ type DockerExecutor struct {
 	// newClientFunc creates the Docker client. Defaults to docker.NewClient.
 	// Override in tests to simulate failures.
 	newClientFunc   func(config.DockerConfig, *logger.Logger) (*docker.Client, error)
-	brokerPreflight func(context.Context, brokerAgentctlProcessClient, string, map[string]string) error
+	brokerPreflight func(context.Context, agentctlProcessClient, string, map[string]string) error
 
 	// endpoints resolves container ports for the reconnect path. Nil means
 	// the daemon shares the backend's network, so a published port is
@@ -587,7 +579,9 @@ func (r *DockerExecutor) bringupAgentctl(ctx context.Context, dockerClient *dock
 		instanceHost, resolvedInstancePort, err := r.resolveEndpoint(
 			ctx, dockerClient, containerID, instancePort, containerIP,
 		)
-		if err != nil { return reconnectAgentctlConn{}, err }
+		if err != nil {
+			return reconnectAgentctlConn{}, err
+		}
 		return reconnectAgentctlConn{
 			instanceHost: instanceHost, instancePort: resolvedInstancePort,
 			authToken: authToken, reusingProcess: reusingProcess,
@@ -754,6 +748,7 @@ func isAgentctlAuthError(err error) bool {
 	}
 	msg := strings.ToLower(err.Error())
 	return strings.Contains(msg, "status 401") ||
+		strings.Contains(msg, "health check failed: 401") ||
 		strings.Contains(msg, "unauthorized") ||
 		strings.Contains(msg, "auth token")
 }
@@ -857,7 +852,7 @@ func buildReconnectCreateInstanceRequest(req *ExecutorCreateRequest, instanceID 
 			stripEnv = rt.StripEnv
 		}
 	}
-	return &agentctl.CreateInstanceRequest{
+	createReq := &agentctl.CreateInstanceRequest{
 		ID:                    instanceID,
 		WorkspacePath:         dockerWorkspacePath,
 		Protocol:              req.Protocol,
@@ -886,7 +881,16 @@ func buildReconnectCreateInstanceRequest(req *ExecutorCreateRequest, instanceID 
 		RemoteContributions:        req.RemoteContributions,
 		ContributionDestinations:   req.ContributionDestinations,
 		ComparisonTargets:          req.ComparisonTargets,
+		DeliveryStreamID:           req.DeliveryStreamID,
+		DeliveryIncarnationID:      req.DeliveryIncarnationID,
+		DeliveryHarnessGeneration:  req.DeliveryHarnessGeneration,
 	}
+	if req.DurableJournalHostRoot != "" && req.DurableJournalOwnerID != "" {
+		if path, err := durableJournalContainerPath(req); err == nil {
+			createReq.DurableJournalPath = path
+		}
+	}
+	return createReq
 }
 
 // healthChecker is the narrow interface waitForAgentctlHealth needs from the

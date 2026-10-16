@@ -126,3 +126,12 @@ export const createLspSlice: StateCreator<AppState, [["zustand/immer", never]], 
       }
     }),
 });
+
+export function mergeTaskLspState(
+  state?: Partial<LspSliceState["taskLsp"]>,
+): LspSliceState["taskLsp"] {
+  return {
+    byTaskId: { ...defaultLspState.taskLsp.byTaskId, ...state?.byTaskId },
+    pendingByKey: { ...defaultLspState.taskLsp.pendingByKey, ...state?.pendingByKey },
+  };
+}

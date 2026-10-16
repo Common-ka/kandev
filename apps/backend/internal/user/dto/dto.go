@@ -48,7 +48,7 @@ type UserSettingsDTO struct {
 	ReleaseNotesLastSeenVersion       string                                  `json:"release_notes_last_seen_version"`
 	LspAutoStartLanguages             []string                                `json:"lsp_auto_start_languages"`
 	LspAutoInstallLanguages           []string                                `json:"lsp_auto_install_languages"`
-	LspStatusHiddenLanguages          []string                            `json:"lsp_status_hidden_languages"`
+	LspStatusHiddenLanguages          []string                                `json:"lsp_status_hidden_languages"`
 	LspServerConfigs                  map[string]map[string]interface{}       `json:"lsp_server_configs,omitempty"`
 	LspStatusLocation                 string                                  `json:"lsp_status_location"`
 	SavedLayouts                      []models.SavedLayout                    `json:"saved_layouts"`
@@ -78,8 +78,12 @@ type UserSettingsDTO struct {
 	TerminalFontSize                  int                                     `json:"terminal_font_size"`
 	ChangesPanelLayout                string                                  `json:"changes_panel_layout"`
 	LastSeenDisplay                   string                                  `json:"last_seen_display"`
+	MessageTimeDisplay                string                                  `json:"message_time_display"`
+	AgentTabCloseBehavior             string                                  `json:"agent_tab_close_behavior"`
 	SystemMetricsDisplay              models.SystemMetricsDisplaySettings     `json:"system_metrics_display"`
 	AppStatusBarEnabled               bool                                    `json:"app_status_bar_enabled"`
+	SidebarFastActionsEnabled         bool                                    `json:"sidebar_fast_actions_enabled"`
+	SidebarNewTaskStyle               string                                  `json:"sidebar_new_task_style"`
 	SidebarHoverEnabled               bool                                    `json:"sidebar_hover_enabled"`
 	SidebarHoverDelayMs               int                                     `json:"sidebar_hover_delay_ms"`
 	ResolveSessionHostnames           bool                                    `json:"resolve_session_hostnames"`
@@ -196,8 +200,12 @@ type UpdateUserSettingsRequest struct {
 	TerminalFontSize                  *int                               `json:"terminal_font_size,omitempty"`
 	ChangesPanelLayout                *string                            `json:"changes_panel_layout,omitempty"`
 	LastSeenDisplay                   *string                            `json:"last_seen_display,omitempty"`
+	MessageTimeDisplay                *string                            `json:"message_time_display,omitempty"`
+	AgentTabCloseBehavior             *string                            `json:"agent_tab_close_behavior,omitempty"`
 	SystemMetricsDisplay              *SystemMetricsDisplaySettingsPatch `json:"system_metrics_display,omitempty"`
 	AppStatusBarEnabled               *bool                              `json:"app_status_bar_enabled,omitempty"`
+	SidebarFastActionsEnabled         *bool                              `json:"sidebar_fast_actions_enabled,omitempty"`
+	SidebarNewTaskStyle               *string                            `json:"sidebar_new_task_style,omitempty"`
 	SidebarHoverEnabled               *bool                              `json:"sidebar_hover_enabled,omitempty"`
 	SidebarHoverDelayMs               *int                               `json:"sidebar_hover_delay_ms,omitempty"`
 	ResolveSessionHostnames           *bool                              `json:"resolve_session_hostnames,omitempty"`
@@ -398,8 +406,12 @@ func FromUserSettings(settings *models.UserSettings) UserSettingsDTO {
 		TerminalFontSize:                  settings.TerminalFontSize,
 		ChangesPanelLayout:                settings.ChangesPanelLayout,
 		LastSeenDisplay:                   models.NormalizeLastSeenDisplay(settings.LastSeenDisplay),
+		MessageTimeDisplay:                models.NormalizeMessageTimeDisplay(settings.MessageTimeDisplay),
+		AgentTabCloseBehavior:             models.NormalizeAgentTabCloseBehavior(settings.AgentTabCloseBehavior),
 		SystemMetricsDisplay:              settings.SystemMetricsDisplay,
 		AppStatusBarEnabled:               settings.AppStatusBarEnabled,
+		SidebarFastActionsEnabled:         settings.SidebarFastActionsEnabled,
+		SidebarNewTaskStyle:               settings.SidebarNewTaskStyle,
 		SidebarHoverEnabled:               settings.SidebarHoverEnabled,
 		SidebarHoverDelayMs:               settings.SidebarHoverDelayMs,
 		ResolveSessionHostnames:           settings.ResolveSessionHostnames,

@@ -48,7 +48,7 @@ test.describe("Mobile LSP boundaries", () => {
         title: "Mobile Kotlin LSP Boundary",
       });
 
-      await testPage.getByRole("button", { name: "Files" }).tap();
+      await testPage.getByTestId("session-mobile-bottom-nav").getByRole("button", { name: "Files", exact: true }).tap();
       const fileNode = testPage.locator(
         `[data-testid="file-tree-node"][data-path="${task.filePaths[0]}"]`,
       );

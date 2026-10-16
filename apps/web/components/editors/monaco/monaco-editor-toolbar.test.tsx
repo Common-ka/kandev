@@ -119,6 +119,7 @@ describe("MonacoEditorToolbar preview action", () => {
     enableComments: false,
     sessionId: "session-1",
     commentCount: 0,
+    lspTaskId: "task-a",
     lspStatus: { state: "disabled" } as const,
     lspProgress: {
       initializingSince: null,
@@ -157,6 +158,7 @@ describe("MonacoEditorToolbar download action", () => {
     enableComments: false,
     sessionId: "session-1",
     commentCount: 0,
+    lspTaskId: "task-a",
     lspStatus: { state: "disabled" } as const,
     lspProgress: {
       initializingSince: null,
@@ -200,12 +202,7 @@ describe("MonacoEditorToolbar narrow action overflow", () => {
     const originalResizeObserver = globalThis.ResizeObserver;
     const originalRect = HTMLElement.prototype.getBoundingClientRect;
     class ResizeObserverStub {
-      private readonly callback: ResizeObserverCallback;
-
-      constructor(callback: ResizeObserverCallback) {
-        this.callback = callback;
-      }
-
+      constructor(private readonly callback: ResizeObserverCallback) {}
       observe(target: Element) {
         this.callback([{ target } as ResizeObserverEntry], this as unknown as ResizeObserver);
       }
@@ -248,6 +245,7 @@ describe("MonacoEditorToolbar narrow action overflow", () => {
             enableComments={false}
             sessionId="session-1"
             commentCount={0}
+            lspTaskId="task-a"
             lspStatus={{ state: "disabled" }}
             lspProgress={{
               initializingSince: null,

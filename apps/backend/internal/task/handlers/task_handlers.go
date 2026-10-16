@@ -31,8 +31,11 @@ type handlerRepo interface {
 }
 
 type TaskHandlers struct {
+	workspaceAdoptionCallerGuard  func(*gin.Context) bool
 	service                       *service.Service
 	orchestrator                  OrchestratorStarter
+	configChatRetirer             ConfigChatSessionRetirer
+	configChatAdmission           configChatAdmission
 	movePreviewer                 WorkflowMovePreviewer
 	foregroundActivity            dto.ForegroundActivityProvider
 	cancellationPending           dto.CancellationPendingProvider
@@ -176,6 +179,9 @@ func NewTaskHandlers(svc *service.Service, orchestrator OrchestratorStarter, rep
 	if previewer, ok := orchestrator.(WorkflowMovePreviewer); ok {
 		h.movePreviewer = previewer
 	}
+	if retirer, ok := orchestrator.(ConfigChatSessionRetirer); ok {
+		h.configChatRetirer = retirer
+	}
 	// The orchestrator also surfaces the in-memory fine-grained busy substate
 	// (ADR-0049). Derive the narrow provider from it so the
 	// session-fetch handlers can stamp foreground_activity onto sessions without
@@ -205,6 +211,7 @@ func RegisterTaskRoutes(router *gin.Engine, dispatcher *ws.Dispatcher, svc *serv
 }
 
 func (h *TaskHandlers) registerHTTP(router *gin.Engine) {
+	h.registerWorkspaceAdoptionHTTP(router)
 	api := router.Group("/api/v1")
 	api.GET("/workflows/:id/tasks", h.httpListTasks)
 	api.GET("/workspaces/:id/tasks", h.httpListTasksByWorkspace)
@@ -286,6 +293,7 @@ func (h *TaskHandlers) registerHTTP(router *gin.Engine) {
 
 	// Config chat endpoint - creates ephemeral task with config-mode MCP tools
 	api.POST("/workspaces/:id/config-chat", h.httpStartConfigChat)
+	api.POST("/workspaces/:id/config-chat/restart", h.httpRestartConfigChat)
 }
 
 func (h *TaskHandlers) registerWS(dispatcher *ws.Dispatcher) {
@@ -357,13 +365,8 @@ func convertToServiceRepos(repos []dto.TaskRepositoryInput) []service.TaskReposi
 	return result
 }
 
-// convertUpdateRepositories maps an update request's repositories field to the
-// service's replace semantics: an absent field (provided=false) must stay nil
-// so UpdateTask leaves task repositories untouched; a provided list — including
-// an explicitly empty one — replaces them. convertToServiceRepos alone returns
-// a non-nil empty slice for nil input, which wiped repositories on title-only
-// renames.
-func convertUpdateRepositories(provided bool, repos []dto.TaskRepositoryInput) []service.TaskRepositoryInput {
+// convertTaskRepositories preserves whether the repositories field was provided.
+func convertTaskRepositories(provided bool, repos []dto.TaskRepositoryInput) []service.TaskRepositoryInput {
 	if !provided {
 		return nil
 	}

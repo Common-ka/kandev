@@ -234,6 +234,12 @@ func TestService_TerminalMutationBlocksBorrowerAdmissionOnPhysicalEnvironment(t 
 		t.Run(action.name, func(t *testing.T) {
 			svc, _, repo := createTestService(t)
 			seedParentChildWorkspace(t, repo, "ws-physical", "wf-physical", "parent-task", "child-task")
+			if action.name == "delete" {
+				// The hierarchy service promotes surviving children before deleting their parent.
+				if err := repo.ReparentDirectChildrenInWorkspace(context.Background(), "parent-task", "", "ws-physical"); err != nil {
+					t.Fatal(err)
+				}
+			}
 			if err := repo.CreateTaskEnvironment(context.Background(), &models.TaskEnvironment{
 				ID: "env-physical", TaskID: "parent-task", ExecutorType: string(models.ExecutorTypeLocal),
 				Status: models.TaskEnvironmentStatusReady,

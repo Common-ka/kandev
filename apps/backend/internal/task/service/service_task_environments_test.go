@@ -9,8 +9,8 @@ import (
 	"github.com/kandev/kandev/internal/common/logger"
 	"github.com/kandev/kandev/internal/task/models"
 	"github.com/kandev/kandev/internal/task/recoveryclaim"
-	"github.com/kandev/kandev/internal/worktree"
 	"github.com/kandev/kandev/internal/task/repository"
+	"github.com/kandev/kandev/internal/worktree"
 )
 
 type stubEnvRepo struct {
@@ -82,8 +82,8 @@ type stubDestroyer struct {
 	pluginCalls              []string
 	pluginErr                error
 	pluginCleanupJob         recoveryclaim.TaskCleanupJob
-	containerEntered chan struct{}
-	containerRelease chan struct{}
+	containerEntered         chan struct{}
+	containerRelease         chan struct{}
 }
 
 func (s *stubDestroyer) DestroyContainer(_ context.Context, env *models.TaskEnvironment) error {

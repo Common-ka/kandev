@@ -12,9 +12,9 @@ const (
 	internalGitHubSecretPrefix            = "github:"
 	internalRuntimeSecretPrefix           = "kandev-runtime:"
 	internalAutomationWebhookSecretPrefix = "automation-webhook:"
-	internalTaskRuntimeSecretPrefix = "runtime:"
-	legacyAgentctlAuthPrefix    = "agentctl-auth-"
-	legacyAgentctlNoncePrefix   = "agentctl-bootstrap-"
+	internalTaskRuntimeSecretPrefix       = "runtime:"
+	legacyAgentctlAuthPrefix              = "agentctl-auth-"
+	legacyAgentctlNoncePrefix             = "agentctl-bootstrap-"
 )
 
 // IsInternalID reports whether a secret is owned by backend infrastructure
