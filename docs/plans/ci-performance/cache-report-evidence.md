@@ -248,3 +248,46 @@ than being treated as a cache-performance result.
 The mobile cancellation check and both mobile goal checks also passed (three
 tests, one worker, zero retries). All conflicted observations remain identical
 to main. Fresh hosted verification is the remaining correctness check.
+
+## Reconfirmation and upstream E2E repair (2026-10-16)
+
+Merge head `aa1bdb6e2` passed backend run `38822187664` attempts 1 and 2.
+Three baseline observations on backend-equivalent main sources had six-job
+totals of 2999s, 2900s and 2812s, median 2900s (48m20s). They are main runs
+`38787499876`, `38819913060` and pinned-main run `38830996467`. The middle
+workflow was cancelled after all six compared jobs passed; its whole-workflow
+duration is excluded. The other two workflows passed.
+
+The cold candidate totaled 4551s (75m51s), 56.9% slower. Its first reuse
+attempt totaled 2765s (46m05s), 4.7% below the baseline median, but was not
+fully warm: static compilation and lint snapshots disappeared before restore.
+All four ordinary shards hit their daily compilation keys; ambient restored
+the previous day and saved the new generation. Full backend elapsed times
+were 1h45m27s cold and 1h07m49s on reuse, versus 1h02m14s for pinned main.
+These results do not establish lower end-to-end latency. Attempt 3 subsequently
+restored static's exact caches and passed that job in 202s, versus main's 542s
+median; its remaining results were pending at this snapshot.
+
+Ordinary-shard console logs filter individual Go output. Their lack of cached
+markers is inconclusive. Earlier-attempt raw artifacts became unavailable on
+rerun; later artifacts are retained before another attempt. Raw pinned-main
+artifacts confirm that the existing commands already reuse some test results.
+Treat these as total job measurements, not compiler-only savings.
+
+E2E run `38822187643` failed the same integration-shortcuts test as main
+`595df36ed`: six destination lifecycles exhausted one 60-second test budget.
+The unchanged local test reproduced this with one worker and zero retries.
+The complete report recorded 3916 first-attempt passes, two passes after retry,
+one timeout and 40 skips. All 118 blob reports parsed successfully.
+
+Main `11dc49e2` subsequently supplied the repair: six separate lifecycle cases,
+zero retries, in-app home navigation and the workspace-scoped Sentry URL.
+It merges cleanly, and the PR retains the same 11-file delta against that base.
+After a fresh backend/web build, all six cases passed locally with one worker
+and zero retries (49.3s). Cache identity, both workflow contract suites,
+Actionlint, the focused orphan-reap race check and full specification validation
+also passed. Hosted verification
+is still required for this updated source. Main backend run `38834703334`
+passed with a six-job total of 2892s (48m12s).
+Earlier timing samples remain historical and must not be pooled with a new
+source revision without an explicit comparability check.
