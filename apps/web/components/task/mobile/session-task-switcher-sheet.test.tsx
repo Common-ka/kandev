@@ -20,6 +20,12 @@ import type { TaskSwitcherItem } from "@/components/task/task-switcher";
 import type { TaskSession } from "@/lib/types/http";
 import { useState } from "react";
 import { DrawerTitle } from "@kandev/ui/drawer";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@kandev/ui/dropdown-menu";
 import { MobileActionConfirmation } from "@/components/confirmation/mobile-action-confirmation";
 import { TaskSwitcherDrawer } from "./task-switcher-drawer";
 import { TaskPickerSurface } from "./task-picker-surface";
@@ -216,20 +222,18 @@ it.each(["", "auto"])(
 );
 
 it.each(["", "auto"])(
-  "keeps standalone workspace menus modal and restores pointer style '%s'",
+  "keeps standalone dropdown menus modal and restores pointer style '%s'",
   async (pointerStyle) => {
     const originalPointerEvents = document.body.style.pointerEvents;
     document.body.style.pointerEvents = pointerStyle;
     const onSelect = vi.fn();
     const view = render(
-      <WorkspaceSwitcher
-        workspaces={[
-          { id: "a", name: WORKSPACE_A },
-          { id: "b", name: WORKSPACE_B },
-        ]}
-        activeWorkspaceId="a"
-        onSelect={onSelect}
-      />,
+      <DropdownMenu>
+        <DropdownMenuTrigger>{WORKSPACE_A}</DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem onSelect={() => onSelect("b")}>{WORKSPACE_B}</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>,
     );
     try {
       fireEvent.keyDown(screen.getByRole("button", { name: WORKSPACE_A }), { key: "Enter" });
