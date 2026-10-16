@@ -15,6 +15,8 @@ legacy_specs: []
 
 Start with the [complete proposal walkthrough](proposal-walkthrough.md) for
 the five implementation steps and their relationship to issue #4358.
+The dated [plugin author inventory](author-notification-inventory.md) identifies
+existing consumers and notification candidates for work order 05.
 
 ## Reassessment checkpoint
 

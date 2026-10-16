@@ -113,6 +113,15 @@ remains a separate repository operation and must not be implied complete.
 
 `sequential`
 
+## Author outreach preparation
+
+Use the dated [plugin and author inventory](author-notification-inventory.md)
+to prepare migration guidance for existing consumers. Refresh contacts before
+outreach. Include both general and coordinator templates in the separate-repo
+handoffs. Inspect backend-owned packaging tools before claiming checkout removal.
+Notification delivery requires explicit authorization and is not part of this
+work order. The inventory records candidates, not completed migrations.
+
 ## Inputs
 
 - [Design: Author guidance](../../specs/plugins/system-design/sdk-distribution.md#author-guidance).
