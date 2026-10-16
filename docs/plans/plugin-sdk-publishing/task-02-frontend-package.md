@@ -36,6 +36,24 @@ copy, and prove the packed artifact's types resolve without the application.
 - Use temporary resolved records for consumer tests; do not assert that a draft
   source record is valid published compatibility evidence.
 
+## Exact candidate contract
+
+Add `scripts/pluginsdk/pack-config.json` with exact Node/npm versions and the
+published-file allowlist. Select versions compatible with the planned OIDC
+publish and dist-tag operations. Add `pack-candidate.mjs` and its tests. Emit
+one archive path, file inventory, and SHA-512 integrity. Accept that path in the
+packed-consumer test and verify its bytes before and after installation.
+
+Include package metadata, source exports, release record, README, and license.
+Reject application sources, tests, workspace files, and unexpected imports.
+Do not repack inside the consumer test or publication command. Temporary
+resolved records belong only to disposable test copies. WO04 adds the signed
+source identity and retained release receipt around this packaging result.
+
+For the combined local checker flow, serve this archive through a disposable
+npm registry fixture. Preserve normal registry lock evidence and the strict
+WO03 rejection of `file:` dependencies.
+
 ## Out of scope
 
 New frontend contracts, runtime JavaScript, React dependencies, UI changes,
@@ -44,7 +62,8 @@ compatibility enforcement, or npm uploads.
 ## Acceptance
 
 1. A packed artifact installs and typechecks outside the checkout without
-   application tsconfig inheritance or private dependencies.
+   application tsconfig inheritance or private dependencies. Both resolution
+   modes consume the same archive, whose integrity and allowlist are checked.
 2. Go/npm release-record copies are consistent; package version equals the
    canonical shared SDK version and published files include the record/license.
 3. The web host still resolves the workspace SDK types and the existing
@@ -55,7 +74,8 @@ compatibility enforcement, or npm uploads.
 ```bash
 (cd apps && pnpm install --frozen-lockfile)
 node scripts/pluginsdk/sync-record.mjs --check
-node --test scripts/pluginsdk/sync-record.test.mjs
+node --test scripts/pluginsdk/sync-record.test.mjs scripts/pluginsdk/pack-candidate.test.mjs
+node --test scripts/pluginsdk/consumer-smoke.test.mjs
 (cd apps && pnpm --filter @kandev/plugin-sdk test && pnpm --filter @kandev/plugin-sdk typecheck)
 (cd apps/web && pnpm run typecheck)
 node scripts/pluginsdk/consumer-smoke.mjs --mode local --skip-compatibility-check
@@ -70,7 +90,8 @@ test paths are new outputs of this work order; tarballs live in temporary paths.
 - `pluginsdk/sdk-release.json` (new).
 - `apps/packages/plugin-sdk/{package.json,sdk-release.json,README.md,LICENSE}`.
 - `apps/packages/plugin-sdk/test/packed-consumer.node.mjs` (new).
-- `scripts/pluginsdk/{sync-record.mjs,sync-record.test.mjs,consumer-smoke.mjs}`.
+- `scripts/pluginsdk/{sync-record.mjs,sync-record.test.mjs,consumer-smoke.mjs,consumer-smoke.test.mjs}`.
+- `scripts/pluginsdk/{pack-config.json,pack-candidate.mjs,pack-candidate.test.mjs}` (new).
 - `apps/pnpm-lock.yaml` if package metadata/dependency resolution requires it.
 
 ## Dependencies

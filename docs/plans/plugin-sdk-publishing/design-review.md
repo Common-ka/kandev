@@ -4,6 +4,25 @@ Reviewed: 2026-10-15. Evidence: local source at `d7a44e96e` and the uncommitted
 design package. This review does not establish the state of upstream `main` or
 registry ownership. No implementation or release has run.
 
+## Reconciliation status
+
+On 2026-10-16, R1–R5 were incorporated into the canonical
+[system design](../../specs/plugins/system-design/sdk-distribution.md), its
+requirements, and work orders 01–05. The sections below preserve the original
+findings and their rationale. Their proposed corrections now describe the
+reconciled draft. They remain unimplemented and are not production failures.
+
+Source was rechecked at PR head `8548962279d8d0700ac44d7a4013ce1a71353329` and
+upstream `main` `76954ff53ea20b0263dd15c01c7149a531668341`. Upstream still omits
+root SDK paths from backend/E2E selection and excludes backfill from prepare
+signing. Its newer cache and test-only selection helpers are now explicit WO01
+inspection targets. Official npm/Go guidance was rechecked on that date.
+Registry ownership/setup remains unverified.
+
+The optional lockfile-policy simplification remains unaccepted. WO03 retains
+strict lockfile evidence. Host release numbers remain unresolved until release.
+External template adoption remains outstanding.
+
 ## Recommendation
 
 Keep the module split, shared SDK versions starting at `0.1.0`, and the
@@ -12,9 +31,8 @@ verification boundaries before implementation.
 
 The five findings below identify missing design details, not observed production
 failures. The existing specification checks prove structure and links; they do
-not prove the release design works. This document proposes amendments to the
-[system design](../../specs/plugins/system-design/sdk-distribution.md) and work
-orders. It does not silently replace their draft contracts.
+not prove the release design works. The canonical design and work orders now
+contain the required amendments. Use those files as implementation authority.
 
 ## Findings
 
@@ -24,8 +42,9 @@ orders. It does not silently replace their draft contracts.
 `pluginsdk/v<S>`. The design assigns both tags to preparation and directs recovery
 to `backfill_tag`.
 
-**Evidence:** The [draft release flow](../../specs/plugins/system-design/sdk-distribution.md#stable-release-integration)
-signs the SDK tag in prepare. Current `release.yml` puts backfill preparation
+**Evidence at the original review:** The draft assigned SDK signing to prepare.
+The [reconciled release flow](../../specs/plugins/system-design/sdk-distribution.md#stable-release-integration)
+now corrects that assignment. At the reviewed source, `release.yml` puts backfill preparation
 in `release-validation` and excludes backfill from key import and tag creation
 (lines 103, 550-603). Existing recovery therefore cannot create the missing SDK
 tag through that path. The SDK work order only says to reuse the signed tag.
@@ -239,7 +258,7 @@ lands, the canonical template still teaches the old sibling-checkout workflow.
 | --- | --- |
 | [01](task-01-go-module.md) | Exact backend/E2E trigger paths and tests; local proxy isolation and checksum policy |
 | [02](task-02-frontend-package.md) | Test the exact packed archive; define published files and receipt inputs |
-| [03](task-03-compatibility-check.md) | Keep strict host/API checks; consider the separately identified lockfile-policy simplification |
+| [03](task-03-compatibility-check.md) | Preserve strict host/API and npm/pnpm lock checks; optional simplification remains unaccepted |
 | [04](task-04-stable-publication.md) | Recoverable SDK signing job, bootstrap state, original-artifact reuse, and the complete state table |
 | [05](task-05-author-migration.md) | Document bootstrap/recovery and keep external template adoption visibly outstanding |
 
@@ -250,4 +269,4 @@ specification lint, whitespace checks, and 22 local links across seven plan
 documents. On 2026-10-16 the task walkthrough was replaced with the complete
 proposal walkthrough linked above, following user feedback about its scope.
 Product code and release paths have not been executed. The original five work
-orders remain pending; apply the required amendments before implementation.
+orders remain pending. Required amendments are reconciled, with validation recorded in the plan.

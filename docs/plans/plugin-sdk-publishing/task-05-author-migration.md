@@ -34,7 +34,11 @@ new module, while distinguishing implemented tooling from verified publication.
   version/API/host mapping, and checker commands. Keep it a how-to/reference
   entry point and avoid adding another long duplicate contract.
 - Update `docs/public/release-process.md` with npm ownership/bootstrap/OIDC,
-  signing, SDK completion, and partial-publication recovery.
+  signing, SDK completion, and partial-publication recovery. Document retained
+  asset/receipt locations, `bootstrap_required`, exact-archive manual upload,
+  publisher setup, provenance limits, and retry verification. Explain recovery
+  with an existing host tag but missing SDK tag, and unchanged-SDK reuse from
+  its original release. Include dist-tag permissions and no-downgrade rules.
 - Update root/backend guide references, the release/plugin-authoring skills,
   SDK README, and live specs/source links affected by the move. Inspect root
   README and screenshot catalog for stale SDK references. Preserve historical
@@ -45,6 +49,8 @@ new module, while distinguishing implemented tooling from verified publication.
   README, source imports, and SDK-checkout workflow logic. Remove sibling
   requirements in that later repository change and run its Go tests/vet plus
   `npm run typecheck:recipes`, `npm run test:recipes`, and `npm run test:ui`.
+  Mark that handoff as outstanding until the separate repository change and
+  validation exist. Record its dependency on verified public package availability.
 - Keep first host release/public install status pending until release evidence
   exists. Update this package's lifecycle/status only for verified implementation.
 

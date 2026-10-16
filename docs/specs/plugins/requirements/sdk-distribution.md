@@ -81,10 +81,14 @@ SDKs available with verifiable provenance and recoverable publication.
 - **AC-PLUGINS-SDK-DISTRIBUTION-003.1:** Each Stable release that changes the
   plugin contract shall publish the matching versioned Go and npm SDKs. A
   release with an unchanged contract may reuse the existing SDK release and
-  shall identify that SDK in its release compatibility information.
+  shall identify that SDK in its release compatibility information. Reuse shall
+  verify the original SDK artifacts. Changed package bytes shall require a new
+  SDK version.
 - **AC-PLUGINS-SDK-DISTRIBUTION-003.2:** Public SDK versions shall be immutable.
   Retrying partial publication shall verify existing artifacts, resume missing
   publication, and reject a conflicting tag or package rather than overwrite it.
+  A retry after host publication shall recover a missing SDK tag at its original
+  signed source. It shall reject an invalid signature or unreadable identity.
 - **AC-PLUGINS-SDK-DISTRIBUTION-003.3:** A Stable release requiring a new SDK
   shall not be reported complete until both public SDKs can be installed and
   the compatibility check succeeds in a clean consumer. Dry-run, desktop-only
@@ -94,7 +98,11 @@ SDKs available with verifiable provenance and recoverable publication.
   the repository's trusted publishing workflow and provenance. Registry
   ownership and first-publish setup shall be documented as explicit maintainer
   prerequisites, with any bootstrap publication distinguished from automated
-  provenance-bearing releases.
+  provenance-bearing releases. If initial publisher setup requires an existing
+  package, the release shall retain the exact tested candidate and report the
+  required maintainer action. SDK publication shall remain incomplete until
+  that candidate passes public verification. A registry read or authentication
+  failure shall not count as package absence.
 
 ### REQ-PLUGINS-SDK-DISTRIBUTION-004: Host continuity and author migration
 

@@ -39,6 +39,14 @@ dependency evidence rather than reporting the verifier's own version.
 - Add manifest-API consistency tests against current legacy/current constants;
   extend isolated consumers to run positive and negative checker cases.
 
+## Preserved lockfile policy
+
+The review's optional lockfile simplification is not accepted. Keep npm/pnpm
+registry-origin checks and explicit failures for missing or unsupported lock
+formats. Preserve normal pnpm store symlinks. Local consumer fixtures use a
+registry response serving the tested archive, not a `file:` exception in the
+checker. Use the shared local/public environment contract from WO01 and WO04.
+
 ## Out of scope
 
 Full manifest validation, runtime installation-policy changes, per-feature

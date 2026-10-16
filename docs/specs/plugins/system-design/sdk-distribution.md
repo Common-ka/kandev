@@ -31,6 +31,13 @@ The version policy is recorded in the
 
 ## Current evidence
 
+Rechecked on 2026-10-16 against PR head `8548962279d8d0700ac44d7a4013ce1a71353329`
+and upstream `main` at `76954ff53ea20b0263dd15c01c7149a531668341`.
+Upstream changed CI allocation, caching, and E2E selection since the original
+review. Its backend/E2E filters still omit `pluginsdk/**`. Release preparation
+still excludes backfill from signing-key import. These observations support
+the corrections below. They do not establish registry ownership or publication.
+
 At planning time, `apps/backend/go.mod` declares `github.com/kandev/kandev`.
 The Go SDK's production imports outside the standard library are go-plugin,
 gRPC, protobuf, and the generated plugin protocol. Tests also use testify.
@@ -87,6 +94,22 @@ inside the backend no longer includes SDK tests. Add an explicit SDK CI step.
 Preserve deprecation history when updating the moved SDK source path in
 `config/architecture-lint/deprecation_ledger.json`.
 
+Update the change-selection patterns in `.github/workflows/backend-tests.yml`
+and `.github/workflows/e2e-tests.yml` for `pluginsdk/**` and
+`scripts/pluginsdk/**`. Preserve each workflow's existing Markdown exclusions
+and required-check reporting. An SDK-only source, proto, module, or tooling
+change must schedule separate SDK race/vet tests, host compile/runtime checks,
+and the E2E build/fixture path. A README-only SDK change follows the existing
+documentation skip policy. Do not prove this with an extraction diff that also
+changes backend files.
+
+Add `.github/scripts/plugin-sdk-ci-contract_test.py` to exercise actual workflow
+patterns through `changed-paths.py` and assert the selected jobs and commands.
+Include both modules' `go.mod`/`go.sum` in dependency/cache identities. On an
+updated base, also inspect `.github/actions/cache-go/`, `go-cache-identity.*`,
+and `ci-test-only-changes.py`. Test that SDK production changes cannot select
+an E2E test-only shortcut or reuse a stale host/fixture build.
+
 A legacy binary fixture, built from the pre-extraction public SDK without new
 imports, proves handshake and a Host state round trip against the new host.
 Keep its legacy SDK snapshot bounded and test-only; it is not another
@@ -107,6 +130,15 @@ with a consistency check; do not maintain two editable policies. Add an isolated
 tarball consumer test using an independent tsconfig and the packed artifact.
 Retain the no-dependencies/no-bare-import tests, and verify both NodeNext and
 bundler TypeScript resolution. No runtime code is promised by the type exports.
+
+Define the publish file allowlist and exact Node/npm packaging versions in
+`scripts/pluginsdk/pack-config.json`. Check the actual installed versions before
+packing. The allowlist includes `package.json`, `src/**`, `sdk-release.json`,
+README, and license. Exclude tests, workspace files, and application sources.
+Add `pack-candidate.mjs` to pack once and return the archive path, file inventory,
+and SHA-512 integrity. Packed-consumer tests accept that archive path and verify
+its hash before and after installation. Release publication consumes those same
+bytes. Selecting a floating Node major or npm range does not satisfy this pin.
 
 ## Release record
 
@@ -184,77 +216,166 @@ the author runtime package still only imports its current transport dependencies
 Do not create a second full manifest validator. Runtime install validation and
 capability/version gates remain authoritative in Kandev.
 
+## SDK artifact identity
+
+The SDK tag identifies the original SDK source, even when a later host reuses
+its version. The canonical record identifies that source's originating host
+release. Never pack a later host checkout under an existing SDK version.
+
+For a new SDK, build one candidate from the verified signed host commit with
+the exact packaging versions in `pack-config.json`. Test that archive. Retain
+`plugin-sdk-<S>.tgz` and `plugin-sdk-<S>.receipt.json` as assets on the originating
+host's GitHub Release before creating the SDK tag or uploading to npm. CI
+artifacts alone are insufficient because their retention can expire.
+
+The receipt records schema version, SDK version/tag, full source commit,
+originating host tag, canonical record digest, archive SHA-512 integrity, file
+inventory, exact Node/npm versions, and workflow/run identity. Sign the receipt
+with the approved release signing identity and retain its detached signature.
+Consumers of the receipt verify that signature, its source, and the archive
+hash before reuse. A receipt records candidate identity, not publication success.
+
+Reuse downloads the original archive and receipt from their originating host
+release. It verifies the SDK tag, canonical record, and npm `dist.integrity`
+against that identity. A README or tooling change in a later host tree may
+remain unpublished while the original SDK is reused. To publish changed package
+bytes, declare a new shared SDK version, even for a packaging-only fix.
+
+Recovery uses the retained candidate. If the archive is lost, rebuild only from
+its original signed source with the receipt's exact tools. Accept the rebuild
+only when its integrity equals the authenticated receipt. Missing or conflicting
+receipt evidence after any SDK publication stops recovery. Before any SDK
+publication, an interrupted first candidate creation may restart from the
+verified host source. Never overwrite a conflicting retained asset.
+
 ## Stable release integration
 
-Extend the existing `.github/workflows/release.yml` and its protected release
-environment. Do not add the SDK to the runtime package array, which also feeds
-Nightly. Use dedicated SDK scripts sharing existing registry lookup helpers
-where their semantics fit.
+Extend `.github/workflows/release.yml` under its existing non-cancelling release
+concurrency group. Keep the SDK separate from the runtime package array and
+Nightly state machine. Normal Stable and latest-tag `backfill_tag` use the same
+SDK preparation and publication operations.
 
-1. Prepare validates the shared version, compatibility record, contract change
-   inventory, registry status, and registry ownership/bootstrap prerequisites.
-   It stamps pending host values into the existing release PR and stages both
-   SDK records and package version/lock changes alongside current release files.
-2. After the PR merge, prepare signs the root host tag and, when publishing a
-   new SDK, `pluginsdk/v<S>` at that same exact merge commit. Reuse the validated
-   signing identity. Existence checks compare the remote peeled tag target;
-   never move a tag. An unchanged SDK uses its original verified tag.
-3. After `publish-release`, a dedicated `publish-plugin-sdk` job verifies Go
-   module retrieval and publishes the exact packed npm artifact with public
-   access, OIDC, and provenance. Use a GitHub-hosted runner, `id-token: write`,
-   the exact configured workflow/environment identity, and a supported npm CLI.
-4. The job runs clean public-registry consumer checks, emits the host/SDK/API
-   mapping, and reports the artifact identities. Stable completion and
-   contributor notices require its success as well as the existing publication
-   channels. Reuse an unchanged SDK through verification, so downstream jobs
-   do not mistake an intentional publish skip for a missing completion gate.
+1. Host `prepare` checks versions, contract inputs, registry reads, and confirmed
+   scope ownership. It stamps pending SDK records in the release PR. Package
+   absence does not require OIDC setup before a candidate can exist.
+2. Host preparation signs only the root Stable tag. After `publish-release`, a
+   protected `prepare-plugin-sdk` job verifies the root tag signature, approved
+   fingerprint, and exact commit. Backfill reads that commit without restamping.
+3. For a new SDK, `prepare-plugin-sdk` tests and retains the candidate and signed
+   receipt. It checks all existing SDK identities before any SDK mutation.
+   Then it creates the missing signed `pluginsdk/v<S>` at the verified host
+   commit, or verifies and reuses a matching signed tag. Reused SDKs instead
+   resolve their original host/tag/receipt and never retarget to the current host.
+4. `publish-plugin-sdk` requires successful SDK preparation. It verifies the
+   retained receipt and publishes that exact archive with public access and
+   OIDC provenance, or verifies an existing npm version. Package absence with
+   unavailable first-publication setup produces `bootstrap_required`, as below.
+5. Public consumer checks verify both SDKs, their compatibility records, and
+   artifact identities. Completion and contributor notices require this job's
+   success plus the existing channels. Unchanged SDKs also run verification.
 
-Dry-run runs metadata/version and mocked/public-read preflight checks only.
-Desktop validation and Nightly skip all Stable SDK mutation paths. Use explicit
-status functions and result conditions for downstream jobs. The existing
-release-wide non-cancelling concurrency group also serializes SDK publication.
+Keep signing keys and Git write permission in `prepare-plugin-sdk`, in the
+protected `release` environment. The npm job uses the configured protected
+environment with `contents: read` and
+`id-token: write`, uses GitHub-hosted capacity, and receives no signing key.
+Both jobs record workflow identity separately from checked-out source identity.
+Use the approved public key/fingerprint, not a key supplied by an SDK artifact.
+PR and dry-run validation receive neither signing nor publishing capabilities.
 
-The first npm publication needs confirmed ownership of `@kandev` and package
-setup. If an existing package is required to configure its publisher, maintainers
-bootstrap the exact final signed-release tarball using their authenticated npm
-account, then configure OIDC. Never consume `0.1.0` with a placeholder artifact.
-Document that bootstrap separately, including its provenance limitation. Normal
-CI must not fall back to an added long-lived npm token. Trusted publisher setup
-must allow direct publication and any dist-tag repair used by the workflow.
-Verify the current setup instructions during implementation against
-[official npm documentation](https://docs.npmjs.com/trusted-publishers/).
+Dry-run performs metadata and read-only registry preflight. Desktop validation
+and Nightly skip both SDK mutation jobs. Conditions must include status
+functions and explicit successful dependency results, including backfill.
+SDK failures leave sibling publication channels independent but block Stable
+completion and contributor notices. Root-tag recovery remains unchanged.
+
+### First npm publication
+
+Confirmed `@kandev` ownership remains a maintainer prerequisite. Do not treat a
+404 as proof of ownership. Distinguish a confirmed absent package from an absent
+version of an existing package. Authentication errors, malformed responses,
+timeouts, and other registry failures stop the job with a read/setup error.
+
+If the package is absent and first-publication OIDC is unavailable, return
+`bootstrap_required` only after the exact candidate and signed receipt are
+retained. Report the asset links, SDK version, integrity, and required maintainer
+action. This is an incomplete SDK result, not a successful or skipped release.
+The maintainer publishes that exact archive with an authenticated account,
+configures the trusted publisher, then reruns the SDK verification path.
+The retry accepts the upload only if its bytes and metadata match the receipt.
+Never publish a placeholder, rebuild a different local archive, or add a CI
+token fallback. An existing package with a broken publisher configuration is a
+setup failure, not a first-publication exception.
+
+Document bootstrap provenance separately. A manual upload does not acquire
+workflow provenance merely because a later job verifies it. Subsequent automated
+uploads require OIDC provenance. Verified bootstrap artifacts can satisfy the
+initial availability gate with their bootstrap origin explicitly recorded.
+
+[Official npm guidance](https://docs.npmjs.com/trusted-publishers/) describes
+setup in package settings and separate permissions for direct publication and
+dist-tag operations. WO02/04 must select exact compatible Node/npm versions and
+verify both required capabilities. Do not use `npm whoami` as OIDC proof. Verify
+current CLI requirements during implementation and before the first release.
 
 ## Failure and recovery
 
-There is no atomic transaction across Git tags, the Go proxy, and npm. A failed
-SDK job leaves the Stable release partial. Keep the signed revision and rerun
-the failed job or the existing latest-tag `backfill_tag` flow.
+There is no atomic transaction across Git tags, the Go proxy, and npm. Read both
+SDK states and verify any existing identities before creating a missing one.
+Before SDK mutation, require a verified host source and authenticated candidate receipt.
+An absent SDK tag can be restored only at its original host commit.
 
-An existing Go tag must match its original signed source. An existing npm
-version must match the expected packed artifact integrity and compatibility
-record; HTTP/auth errors are not evidence of absence. On a publication timeout,
-re-query before attempting another upload. Reject identity mismatches. Never
-delete tags, unpublish SDKs, or reuse a version for changed bytes.
+| SDK tag | npm version | Recovery action |
+| --- | --- | --- |
+| Absent | Absent | Retain candidate, create signed tag, publish or report `bootstrap_required`, verify consumers |
+| Matching | Absent | Keep tag, publish retained candidate or report `bootstrap_required`, verify consumers |
+| Absent | Matching | Verify npm bytes/record first, create missing signed tag, verify consumers |
+| Matching | Matching | Verify original artifacts and public consumers without republishing |
+| Conflicting or unreadable | Any | Stop before SDK mutations and report the conflict/read failure |
+| Any | Conflicting or unreadable | Stop before SDK mutations and report the conflict/read failure |
 
-Use bounded retries for proxy/registry visibility. Regenerate the tarball using
-the same locked tools and signed source, then compare registry integrity before
-reuse. If a version exists but `latest` is missing, repair only after identity
-verification and only if it does not downgrade a newer valid tag. A backfill
-must not promote an older SDK over a newer one.
+A matching tag has the expected peeled commit and approved signature. A matching
+npm version has the receipt's integrity and canonical record. Recheck remote
+identity after an uncertain write response before retrying. Never delete or
+move tags, unpublish versions, or replace mismatched assets. Use bounded retries
+for public proxy/registry visibility and report exhaustion as incomplete.
+
+Repair missing/stale `latest` only after identity verification and only when it
+does not downgrade a newer valid SDK. Require the configured OIDC dist-tag
+permission. Failure to repair remains explicit. Backfill retains the existing
+latest-host-tag restriction and never restamps compatibility records.
 
 ## Clean consumers
 
-PR tests construct a Go module archive/local test proxy and npm tarball, then
-install into temporary directories outside the checkout with fresh caches and
-no replacements/workspaces. This proves package contents before public tags
-exist. Label that result as local packaging evidence, not public availability.
+Both modes use `GOWORK=off`, `GOENV=off`, disposable module/build/npm caches,
+and temporary projects outside the checkout. Do not alter global Go or npm
+configuration. Reject conflicting trust inputs in public mode before network
+access. Tests assert the effective child-process environment.
 
-The Stable job repeats the flow using only the public Go proxy and npm registry.
-The consumer imports `pluginsdk`, embeds `UnimplementedPlugin`, builds a binary,
-runs vet/tests, typechecks representative frontend Host types, and executes the
-compatibility command. Tests include a too-low minimum and unsupported API to
-prove meaningful failures. No browser test is needed: the author installation
-workflow is the changed end-to-end boundary.
+In local mode, serve the SDK archive through one test Go proxy with no client
+fallback. The proxy serves SDK requests only from the fixture and forwards
+non-SDK dependencies to the public proxy. Set
+`GONOSUMDB=github.com/kdlbs/kandev/pluginsdk`, clear private/proxy exemptions,
+and keep checksum verification for other modules. A missing SDK archive fails,
+even if a public copy exists. This narrow exception follows
+[Go's checksum and proxy rules](https://go.dev/ref/mod#authenticating).
+
+Install the exact packed npm archive for typechecks. For the combined checker
+flow, serve those same bytes through a disposable registry fixture so npm/pnpm
+produce ordinary registry lock evidence. Do not add a checker bypass for `file:`
+dependencies. Local mode proves package contents and compatibility only.
+
+Public mode uses `GOPROXY=https://proxy.golang.org` and `GOSUMDB=sum.golang.org`.
+Clear `GOPRIVATE`, `GONOPROXY`, `GONOSUMDB`, and `GOINSECURE`. Require the public
+npm registry and reject inherited local registry or checksum-bypass settings.
+Check effective configuration, including npm configuration files. Public mode
+never consumes a local archive or workspace replacement.
+
+Both modes build/vet/test a plugin using `UnimplementedPlugin`, typecheck Host
+types, and run the same compatibility assertions. Include too-low host minima,
+unsupported API versions, missing local archives, and public trust contamination.
+Release verification additionally compares installed records and npm integrity
+with the original signed receipt. Record local packaging and public availability
+as separate results. No browser scenario is added.
 
 ## Author guidance
 

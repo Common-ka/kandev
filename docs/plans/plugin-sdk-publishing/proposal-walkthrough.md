@@ -20,8 +20,9 @@ release process, and migration concrete.
 
 The shared SDK version and SDK-wide host minimum are the choices made during
 our planning discussion. The issue leaves those policy details open. The later
-[design review](design-review.md) proposes corrections to release and test
-details; it does not propose a different module architecture.
+[design review](design-review.md) identified release and test corrections.
+Those required corrections now appear in the canonical design and work orders.
+The module architecture remains unchanged.
 
 ## Step 1: Extract the Go SDK and keep Kandev working
 
@@ -121,7 +122,8 @@ The revised release proposal is:
 3. A protected SDK job creates or verifies `pluginsdk/v<S>` at the correct
    source commit and publishes the matching npm version.
 4. If first-publication setup is needed, retain the candidate and report the
-   precise maintainer action. A retry verifies any existing artifacts and
+   precise maintainer action as `bootstrap_required`. Publication stays incomplete.
+   A retry verifies any existing artifacts and
    creates only the missing ones. Conflicting artifacts fail verification.
 5. Install both SDKs from public infrastructure in clean projects. Count the
    release as complete only when these checks and the existing channels pass.
@@ -132,8 +134,9 @@ dry-run flows do not publish Stable SDK versions.
 
 The issue requires tagged and published SDK releases. The retained archive,
 bootstrap state, and recovery rules make that requirement operational. These
-are the corrections from the design review, which still need to be reconciled
-into the canonical draft and WO04 before implementation.
+are the corrections from the design review, now reconciled into the canonical
+draft and WO04. Signing and npm publication use separate protected jobs.
+Implementation and public availability remain pending.
 
 **Work order:** [04: Stable publication](task-04-stable-publication.md).
 

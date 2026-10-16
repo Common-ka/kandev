@@ -50,6 +50,10 @@ the dependency on the full backend for authors using it.
 SDK publication is part of Stable release completion when a new SDK is needed.
 Immutable artifact verification precedes reuse; partial publication resumes at
 the same version and signed source revision. Nightly does not publish the SDK.
+The reconciled design retains the original tested npm archive and an authenticated
+receipt. SDK tagging runs after host publication on both normal and recovery
+paths. An initial bootstrap state retains the candidate without claiming success.
+These recovery details preserve the accepted version and host-baseline choices.
 
 ## Consequences
 
