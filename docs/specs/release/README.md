@@ -24,6 +24,8 @@ notifications tied to published releases.
 
 - Desktop runtime lifecycle belongs to the [desktop system](../desktop/README.md).
 - Agent runtime update behavior belongs to the [agent system](../agents/README.md).
+- Plugin SDK source compatibility and host baselines belong to the
+  [plugin system](../plugins/README.md); this system supplies publication.
 
 ## Migration record
 
@@ -34,3 +36,4 @@ canonical requirement and system-design documents. Use the catalog command to fi
 
 - [Desktop](../desktop/README.md): consumes published desktop artifacts.
 - [Platform](../platform/README.md): exposes release update notifications.
+- [Plugins](../plugins/README.md): owns SDK contracts consumed by plugin authors.
