@@ -1,6 +1,6 @@
 # Plugin SDK publishing: the complete proposal
 
-Read time: about four minutes. This explains the proposed implementation in
+Read time: about seven minutes. This explains the proposed implementation in
 order. No SDK has been published by this task.
 
 ## How this relates to issue #4358
@@ -163,3 +163,100 @@ authorized release must establish actual public availability. Keep those two
 completion claims separate.
 
 **Work order:** [05: Author migration](task-05-author-migration.md).
+
+
+## Existing installations: runtime support
+
+**The intended outcome is that supported, already-built plugins keep working
+after extraction.** Operators should not need to reinstall or rebuild a plugin
+solely because its Go source package moved.
+
+A compiled Go plugin does not resolve its source imports when Kandev launches
+it. The proposal preserves the gRPC service names, message fields, handshake,
+and Host contracts. Existing manifest, capability, platform, and installation
+checks still apply. Publication adds no requirement for an installed plugin to
+carry the new SDK release record or run the author checker.
+
+The frontend package continues to provide types, and publication changes no
+frontend Host API by itself. Existing UI bundles are therefore intended to
+remain usable. The SDK move does not establish new support for private Host
+APIs or previously unsupported plugin behavior.
+
+These are design commitments, not completed compatibility results. The planned
+[host continuity requirement](../../specs/plugins/requirements/sdk-distribution.md#req-plugins-sdk-distribution-004-host-continuity-and-author-migration)
+still needs implementation evidence. This PR changes documentation only.
+
+## Existing source builds: migration boundary
+
+**Yes, the extraction can break an existing source build that follows the new
+Kandev source while retaining the old Go import.** The old
+`github.com/kandev/kandev/pkg/pluginsdk` package will move. The accepted design
+does not retain a source alias at that path.
+
+A plugin that updates its sibling checkout to a post-extraction revision must
+migrate its Go imports and module dependency. Builds pinned to a pre-extraction
+revision retain that source layout. Extraction does not rewrite their pin or
+automatically upgrade their dependencies. This is not a guarantee about future
+toolchain availability or unrelated dependency failures.
+
+After public SDK verification, authors can replace the sibling dependency with
+an exact published Go version. Authors using the frontend SDK also replace
+its local `file:` dependency with an exact npm version. Its npm name and source
+location remain unchanged, so the Go move alone does not remove that local npm
+path. The new checker intentionally rejects local replacements and unsupported
+lock evidence when an author adopts it in CI. It does not disable installed
+plugins or add itself to existing plugin CI automatically.
+
+The [author inventory](author-notification-inventory.md#packaging-tool-follow-through)
+also identifies backend-owned `plugin-pack` dependencies. Migration must inspect
+packaging commands and CI before claiming the entire build needs no checkout.
+Those tools are not automatically published by extracting the SDK.
+
+There is a transition window between merging extraction and verifying the first
+public SDK release. Authors tracking `main` need advance notice before the move.
+During that window, a pre-extraction pin retains the old build inputs. Do not
+instruct authors to install a public SDK version before it is available.
+
+## Older hosts and newer plugin releases
+
+**The SDK-wide host minimum applies when an author adopts a new SDK release.**
+It does not retroactively raise the minimum in an already-published plugin's
+manifest. Existing plugin releases keep their declared host/API requirements.
+
+A plugin rebuilt with the published SDK must declare a minimum host that meets
+that SDK's baseline. This can exclude older hosts even if the plugin only uses
+older APIs. That conservative behavior follows the accepted SDK-wide policy.
+The first SDK's host baseline remains unresolved until the actual host release.
+
+For example, an existing plugin release can remain usable on host A. If a new
+plugin release adopts an SDK requiring newer host B, its manifest must require B.
+Users staying on A need a compatible plugin release. This proposal does not add
+marketplace version selection, automatic downgrade, or an old-host support period.
+Maintaining an older compatible plugin release remains an author decision.
+
+SDK publication does not change manifest API or transport protocol versions by
+itself. Supported API sets and runtime permissions remain separate checks.
+
+## Support evidence and rollout
+
+The plan defines the checks below. Advance author notice is a rollout
+recommendation, and delivery still needs explicit authorization.
+
+1. Build a legacy plugin from the pre-extraction `v0.97.0` source. Run it as a
+   real subprocess against the extracted host. Prove its handshake and Host
+   state call in [work order 01](task-01-go-module.md).
+2. Run host/fixture checks and isolated Go/npm consumer tests. Preserve the
+   frontend contract and verify SDK-only CI selection. New-source typechecks
+   alone do not prove every previously shipped UI bundle works.
+3. Prepare an advance notice for affected authors before removing the old source
+   path. Provide the
+   public migration guide and verified version mapping when publication succeeds.
+   The [notification inventory](author-notification-inventory.md) identifies
+   candidates. No notifications were sent by this planning task.
+4. Separate test results from support claims. A legacy fixture proves the tested
+   handshake and Host call, not all behavior in every community plugin. Broader
+   ecosystem claims need representative plugin smoke tests and author feedback.
+
+The 29-repository dependency inventory is not a compatibility certification.
+All implementation work orders remain pending. A supported legacy fixture that
+fails after extraction blocks the host-continuity acceptance criterion.
