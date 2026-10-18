@@ -27,6 +27,7 @@ import {
 import {
   parseTasksListGroup,
   parseTasksListSort,
+  isTaskListFacetOption,
   sortTasksForList,
 } from "@/lib/tasks/tasks-list-options";
 import { useAppStore, useAppStoreApi } from "@/components/state-provider";
@@ -548,7 +549,9 @@ function resolveTasksDataRouteInitialData(
   return {
     initialWorkspaceId: tasksPage?.activeWorkspaceId ?? bootstrapped.activeWorkspaceId ?? undefined,
     initialRepositories: tasksPage?.repositories ?? bootstrapped.repositories,
-    initialTasks: sortTasksForList(tasksPage?.tasks ?? [], initialSort),
+    initialTasks: isTaskListFacetOption(initialSort)
+      ? [...(tasksPage?.tasks ?? [])]
+      : sortTasksForList(tasksPage?.tasks ?? [], initialSort),
     initialTotal: tasksPage?.total ?? 0,
     initialDataLoaded: Boolean(tasksPage),
   };
