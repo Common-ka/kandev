@@ -1523,6 +1523,8 @@ export class ApiClient {
         on_heartbeat?: Array<{ type: string; config?: Record<string, unknown> }>;
         on_budget_alert?: Array<{ type: string; config?: Record<string, unknown> }>;
         on_agent_error?: Array<{ type: string; config?: Record<string, unknown> }>;
+        on_pr_merged?: Array<{ type: string; config?: Record<string, unknown> }>;
+        on_pr_closed?: Array<{ type: string; config?: Record<string, unknown> }>;
       };
       auto_advance_requires_signal?: boolean;
       wip_limit?: number;
@@ -2314,6 +2316,10 @@ export class ApiClient {
     base_branch: string;
     author_login: string;
     state?: string;
+    /** RFC 3339; GitHub reports it for merged PRs. */
+    merged_at?: string;
+    /** RFC 3339; GitHub reports it for merged and closed PRs. */
+    closed_at?: string;
     head_sha?: string;
     head_repo_owner?: string;
     head_repo_name?: string;
