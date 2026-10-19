@@ -3647,7 +3647,7 @@ func (h *Handlers) dispatchTaskMessage(ctx context.Context, taskID string, sessi
 		if err != nil {
 			return taskMessageDispatchResult{}, err
 		}
-		return h.dispatchPreparedTaskMessage(ctx, taskID, resumed, prompt, metadata)
+		return h.dispatchPreparedTaskMessage(ctx, taskID, resumed, prompt, metadata, interruptIfBusy)
 
 	case models.TaskSessionStateRunning, models.TaskSessionStateStarting:
 		if interruptIfBusy {
@@ -3894,8 +3894,8 @@ func (h *Handlers) resumeCompletedTaskMessageSession(ctx context.Context, taskID
 	return resumed, nil
 }
 
-func (h *Handlers) dispatchPreparedTaskMessage(ctx context.Context, taskID string, session *models.TaskSession, prompt string, metadata map[string]interface{}) (taskMessageDispatchResult, error) {
-	return h.dispatchPreparedTaskMessageWithAdmission(ctx, taskID, session, prompt, metadata, nil)
+func (h *Handlers) dispatchPreparedTaskMessage(ctx context.Context, taskID string, session *models.TaskSession, prompt string, metadata map[string]interface{}, interruptIfBusy bool) (taskMessageDispatchResult, error) {
+	return h.dispatchPreparedTaskMessageWithAdmission(ctx, taskID, session, prompt, metadata, nil, interruptIfBusy)
 }
 
 func (h *Handlers) dispatchPreparedTaskMessageWithAdmission(
@@ -3905,8 +3905,9 @@ func (h *Handlers) dispatchPreparedTaskMessageWithAdmission(
 	prompt string,
 	metadata map[string]interface{},
 	admission orchestrator.PeerMessageStartAdmission,
+	interruptIfBusy bool,
 ) (taskMessageDispatchResult, error) {
-	return h.dispatchPreparedTaskMessageWithAdmissionAndInterrupt(ctx, taskID, session, prompt, metadata, admission, false)
+	return h.dispatchPreparedTaskMessageWithAdmissionAndInterrupt(ctx, taskID, session, prompt, metadata, admission, interruptIfBusy)
 }
 
 func (h *Handlers) dispatchPreparedTaskMessageWithAdmissionAndInterrupt(
