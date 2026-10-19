@@ -35,6 +35,7 @@ func TestHandleMessageTask_LiveClarification_QueuesInsteadOfPrompting(t *testing
 	assert.Equal(t, "queued", payload["status"])
 	assert.Empty(t, orch.promptCalls, "a session waiting on a live question must not be prompted")
 	assert.Zero(t, orch.resumeCalls)
+	assert.Empty(t, orch.turnStartCalls, "the live question must not run on_turn_start")
 
 	status := orch.queue.GetStatus(ctx, sess.ID)
 	require.Equal(t, 1, status.Count)
@@ -118,6 +119,10 @@ func TestHandleMessageTask_LiveClarification_OnSelectedSessionQueues(t *testing.
 		State: models.TaskSessionStateWaitingForInput,
 	}
 	require.NoError(t, repo.CreateTaskSession(ctx, selected))
+	require.NoError(t, repo.UpsertExecutorRunning(ctx, &models.ExecutorRunning{
+		ID: "selected-execution", SessionID: selected.ID, TaskID: target.ID,
+		Status: "running", Resumable: true, AgentExecutionID: "selected-execution",
+	}))
 	h, orch := newMessageTaskHandler(t, svc, repo)
 	orch.liveClarifications = map[string]bool{selected.ID: true}
 	orch.onTurnStart = func(ctx context.Context, _, _ string) error {
