@@ -49,6 +49,11 @@ class SDKSelectionTests(unittest.TestCase):
         self.assertIn("SDK_BUILDER_RESULT: ${{ needs.sdk_builder.result }}", gate)
         self.assertIn('"sdk_builder:${SDK_BUILDER_RESULT}"', gate)
 
+    def test_docker_build_preserves_the_backend_replacement_layout(self):
+        stage = (ROOT / "e2e.Dockerfile").read_text().split("FROM node:", 1)[0]
+        self.assertIn("WORKDIR /build/apps/backend", stage)
+        self.assertLess(stage.index("COPY pluginsdk/ /build/pluginsdk/"), stage.index("RUN go mod download"))
+
     def test_caches_include_both_module_identities(self):
         for name in ("backend-tests.yml", "e2e-tests.yml"):
             text = (ROOT / ".github/workflows" / name).read_text()
