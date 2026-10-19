@@ -1,7 +1,7 @@
 ---
 id: "01-go-module"
 title: "Extract Go SDK and preserve host execution"
-status: pending
+status: in_progress
 wave: 1
 depends_on: []
 plan: "plan.md"
@@ -81,8 +81,9 @@ Do not leave old production SDK/proto copies or aliases.
 
 ## Verification
 
-Run from repo root. The Docker command is a targeted builder check; ensure a
-Docker daemon is available when executing this work order.
+Run from repo root. The Docker command is a targeted builder check. Run it locally when Docker
+is available; otherwise require the `Plugin SDK Docker builder` CI job on the
+exact implementation commit before completing this work order.
 
 ```bash
 node scripts/pluginsdk/check-proto-generation.mjs
@@ -137,4 +138,35 @@ source must stay pinned and test-only.
 
 ## Results
 
-Pending.
+Implementation started on 2026-10-19 at PR head `ede49b4467`.
+The SDK and canonical protocol now live in root `pluginsdk/`; host imports,
+module replacement, generation targets, Docker layout, and CI selection changed
+atomically in the working tree. No registry publication occurred.
+
+Validation completed locally:
+
+- SDK `go test -trimpath -race ./...` and `go vet ./...`: passed.
+- Protocol regeneration and byte comparison: passed, including untracked outputs.
+- Legacy binary subprocess: passed. The source is pinned to the peeled `v0.97.0`
+  commit `e43881c7555372897b57ec51c705f1e05da43c40`. The fixture completed its
+  handshake and called Host state through gRPC.
+- Host plugin/automation tests: passed with `umask 022`. The first run inherited
+  `0077` and failed the existing package-install mode test (0700 versus 0755).
+  No production permission behavior was changed to accommodate this environment.
+- Full backend compile-only test and `make -C apps/backend build-kandev`: passed.
+- Consumer/protocol helper tests: nine passed, including missing-archive rejection
+  with a fresh Go cache, no SDK proxy fallback, trust isolation, and replacement rejection.
+- Local isolated consumer build/vet/test passed. A cleanup failure from read-only
+  Go cache directories was corrected with explicit `-modcacherw`; the final end-to-end
+  rerun, including cleanup and the replacement-parser adjustment, passed.
+- CI contract tests: five passed. Existing changed-path tests: 23 passed.
+  Architecture-linter tests: 99 passed. The upstream cache action and test-only
+  selection helpers are absent from this PR base; this implementation updates
+  its actual workflow caches and unconditional E2E build path. Recheck these
+  boundaries when integrating a newer base.
+- Documentation catalog and specification lint: passed.
+
+Remaining gate: Docker is not installed and no local Docker/Podman socket was
+found. The required `docker build --target go-builder ...` check moves to the
+`Plugin SDK Docker builder` CI job, included in the required backend gate.
+This work order remains `in_progress` until that job passes on the exact commit.

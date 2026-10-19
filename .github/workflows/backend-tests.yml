@@ -91,11 +91,17 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Check SDK CI selection
+        run: python3 .github/scripts/plugin-sdk-ci-contract_test.py
+
       - name: Detect relevant changes
         id: detect
         env:
           PATTERNS: |
             apps/backend/**
+            pluginsdk/**
+            scripts/pluginsdk/**
+            .github/scripts/plugin-sdk-ci-contract_test.py
             apps/web/lib/settings-discovery/contract.generated.json
             apps/web/lib/settings-discovery/profile-contract.generated.json
             scripts/settings-contract-ci.test.mjs
@@ -158,6 +164,22 @@ jobs:
             echo "sidebar_resources=false" >> "$GITHUB_OUTPUT"
           fi
 
+  sdk_builder:
+    name: Plugin SDK Docker builder
+    needs: changes
+    if: needs.changes.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+      - name: Build the host with the standalone SDK layout
+        run: docker build --target go-builder -f e2e.Dockerfile -t kandev-sdk-go-builder-check .
+
   static_checks:
     name: Backend Static Checks
     needs: changes
@@ -199,7 +221,7 @@ jobs:
             ~/go/pkg/mod
             ~/.cache/go-build
             ~/.cache/golangci-lint
-          key: go-static-${{ runner.os }}-${{ hashFiles('apps/backend/go.mod', 'apps/backend/go.sum') }}
+          key: go-static-${{ runner.os }}-${{ hashFiles('apps/backend/go.mod', 'apps/backend/go.sum', 'pluginsdk/go.mod', 'pluginsdk/go.sum') }}
           restore-keys: |
             go-static-${{ runner.os }}-
             go-${{ runner.os }}-
@@ -264,6 +286,19 @@ jobs:
 
           echo "BASE_SHA=${BASE_SHA}" >> "$GITHUB_ENV"
           echo "Base SHA: ${BASE_SHA}"
+
+      - name: Check SDK artifacts and clean consumers
+        working-directory: ${{ github.workspace }}
+        run: |
+          node --test scripts/pluginsdk/consumer-smoke.test.mjs scripts/pluginsdk/check-proto-generation.test.mjs
+          node scripts/pluginsdk/check-proto-generation.mjs
+          node scripts/pluginsdk/consumer-smoke.mjs --mode local --backend-only --skip-compatibility-check
+
+      - name: Test standalone plugin SDK
+        working-directory: pluginsdk
+        run: |
+          go test -trimpath -race ./...
+          go vet ./...
 
       - name: Check gofmt
         shell: bash
@@ -336,7 +371,7 @@ jobs:
           path: |
             ~/go/pkg/mod
             ~/.cache/go-build
-          key: go-test-${{ matrix.shard }}-${{ runner.os }}-${{ hashFiles('apps/backend/go.mod', 'apps/backend/go.sum') }}
+          key: go-test-${{ matrix.shard }}-${{ runner.os }}-${{ hashFiles('apps/backend/go.mod', 'apps/backend/go.sum', 'pluginsdk/go.mod', 'pluginsdk/go.sum') }}
           restore-keys: |
             go-test-${{ matrix.shard }}-${{ runner.os }}-
             go-${{ runner.os }}-
@@ -483,7 +518,7 @@ jobs:
           path: |
             ~/go/pkg/mod
             ~/.cache/go-build
-          key: go-ambient-env-${{ runner.os }}-${{ hashFiles('apps/backend/go.mod', 'apps/backend/go.sum') }}
+          key: go-ambient-env-${{ runner.os }}-${{ hashFiles('apps/backend/go.mod', 'apps/backend/go.sum', 'pluginsdk/go.mod', 'pluginsdk/go.sum') }}
           restore-keys: |
             go-ambient-env-${{ runner.os }}-
             go-${{ runner.os }}-
@@ -517,6 +552,7 @@ jobs:
       - changes
       - runner_plan
       - static_checks
+      - sdk_builder
       - test_shards
       - test_ambient_env
       - postgres-boot
@@ -529,6 +565,7 @@ jobs:
         env:
           RUNNER_PLAN_RESULT: ${{ needs.runner_plan.result }}
           CHANGES_RESULT: ${{ needs.changes.result }}
+          SDK_BUILDER_RESULT: ${{ needs.sdk_builder.result }}
           STATIC_CHECKS_RESULT: ${{ needs.static_checks.result }}
           TEST_SHARDS_RESULT: ${{ needs.test_shards.result }}
           TEST_AMBIENT_ENV_RESULT: ${{ needs.test_ambient_env.result }}
@@ -572,6 +609,7 @@ jobs:
           # name the job that failed here rather than making them correlate the
           # list above by eye.
           for entry in \
+            "sdk_builder:${SDK_BUILDER_RESULT}" \
             "static_checks:${STATIC_CHECKS_RESULT}" \
             "test_shards:${TEST_SHARDS_RESULT}" \
             "test_ambient_env:${TEST_AMBIENT_ENV_RESULT}" \
@@ -834,7 +872,9 @@ jobs:
         uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
         with:
           go-version-file: apps/backend/go.mod
-          cache-dependency-path: apps/backend/go.sum
+          cache-dependency-path: |
+            apps/backend/go.sum
+            pluginsdk/go.sum
 
       - name: Test Windows copy-file glob tokenization
         if: matrix.suite == 'native'

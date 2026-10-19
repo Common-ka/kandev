@@ -34,8 +34,8 @@ The optional npm lockfile-policy simplification is not accepted. WO03 retains
 strict npm/pnpm lock evidence. Shared version `0.1.0` and the SDK-wide host floor
 remain accepted. The first host numbers and registry ownership/setup remain
 release-time dependencies. External template adoption remains a separate handoff.
-All implementation work orders remain pending. No production code or permanent
-tests changed during this reconciliation.
+The design reconciliation changed documentation only. Implementation was
+authorized on 2026-10-19. Work order 01 is in progress; work orders 02–05 remain pending.
 
 ## Overview
 
@@ -48,8 +48,7 @@ fourth, and finish author/release migration guidance fifth.
 
 The user selected a shared independent SDK version, initially `0.1.0`, and an
 SDK-wide minimum Kandev version. Requirements and design remain draft for this
-design-package handoff. Work orders are pending; execution is sequential in the
-primary conversation after a later explicit implementation request.
+design-package handoff. Execution is sequential in the primary conversation, authorized on 2026-10-19.
 
 ## Scope
 
@@ -197,7 +196,7 @@ new Playwright suite is applicable.
 
 ## Work orders
 
-- [ ] [Task 01: Extract Go SDK and preserve host execution](task-01-go-module.md)
+- [ ] [Task 01: Extract Go SDK and preserve host execution](task-01-go-module.md) (in progress; Docker validation pending)
 - [ ] [Task 02: Package standalone frontend SDK](task-02-frontend-package.md)
 - [ ] [Task 03: Enforce consumer compatibility](task-03-compatibility-check.md)
 - [ ] [Task 04: Publish SDKs through Stable releases](task-04-stable-publication.md)

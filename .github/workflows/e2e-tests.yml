@@ -96,6 +96,9 @@ jobs:
         env:
           PATTERNS: |
             apps/backend/**
+            pluginsdk/**
+            scripts/pluginsdk/**
+            .github/scripts/plugin-sdk-ci-contract_test.py
             apps/desktop/**
             apps/web/**
             apps/packages/**
@@ -190,7 +193,7 @@ jobs:
           path: |
             ~/go/pkg/mod
             ~/.cache/go-build
-          key: go-e2e-build-${{ runner.os }}-${{ hashFiles('apps/backend/go.mod', 'apps/backend/go.sum') }}
+          key: go-e2e-build-${{ runner.os }}-${{ hashFiles('apps/backend/go.mod', 'apps/backend/go.sum', 'pluginsdk/go.mod', 'pluginsdk/go.sum') }}
           restore-keys: |
             go-e2e-build-${{ runner.os }}-
             go-${{ runner.os }}-
@@ -1136,7 +1139,9 @@ jobs:
         uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
         with:
           go-version-file: apps/backend/go.mod
-          cache-dependency-path: apps/backend/go.sum
+          cache-dependency-path: |
+            apps/backend/go.sum
+            pluginsdk/go.sum
 
       - name: Mark workspace safe for git
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
