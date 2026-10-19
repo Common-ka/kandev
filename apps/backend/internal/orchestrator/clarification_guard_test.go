@@ -131,6 +131,17 @@ func TestSessionHasLiveClarificationExportedReportsCurrentTurnWait(t *testing.T)
 	}
 }
 
+func TestSessionHasLiveClarificationExportedFailsClosedOnRepositoryError(t *testing.T) {
+	repo := setupTestRepo(t)
+	seedSession(t, repo, "task-live-error", "session-live-error", "step1")
+	svc := createTestService(repo, newMockStepGetter(), newMockTaskRepo())
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if !svc.SessionHasLiveClarification(ctx, "session-live-error") {
+		t.Fatal("repository error must retain the live-clarification queue barrier")
+	}
+}
+
 // TestSessionHasPendingClarificationSurvivesLifecycleShadowViaRealWritePath
 // covers the guard-level consumer named in the spec's Verification Notes as
 // "the most severe consumer": sessionHasPendingClarification must still see
