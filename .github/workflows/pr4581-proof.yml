@@ -24,10 +24,35 @@ jobs:
       - name: Bind source and check formatting
         run: |
           mkdir -p proof-results
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git rev-parse HEAD HEAD^{tree} > proof-results/source.txt
           git ls-tree -r HEAD > proof-results/source-tree.txt
           go version > proof-results/go-version.txt
-          test -z "$(gofmt -l apps/backend/internal/orchestrator/peer_message_clarification_delivery_test.go)"
+          gofmt -w apps/backend/internal/orchestrator/peer_message_clarification_delivery_test.go apps/backend/internal/mcp/handlers/message_task_live_clarification_test.go
+          cp apps/backend/internal/orchestrator/peer_message_clarification_delivery_test.go proof-results/peer_message_clarification_delivery_test.go
+          cp apps/backend/internal/mcp/handlers/message_task_live_clarification_test.go proof-results/message_task_live_clarification_test.go
+          git diff > proof-results/formatting.patch
+          sha256sum apps/backend/internal/orchestrator/peer_message_clarification_delivery_test.go apps/backend/internal/mcp/handlers/message_task_live_clarification_test.go > proof-results/actual-test-sources.sha256
+      - name: Shared selected-session control
+        working-directory: apps/backend
+        run: go test -race -p=2 -count=1 -json -timeout=10m ./internal/mcp/handlers -run '^TestHandleMessageTask_WaitingForInput_UsesPrimarySwitchWithoutCompletion$' > ../../proof-results/control.jsonl
+      - name: Actual selected-session defect RED
+        run: |
+          set -euo pipefail
+          cd apps/backend
+          set +e
+          go test -race -p=2 -count=1 -json -timeout=10m ./internal/mcp/handlers -run '^TestHandleMessageTask_LiveClarification_OnSelectedSessionQueues$' > ../../proof-results/selected-red.jsonl
+          status=$?
+          set -e
+          echo "$status" > ../../proof-results/selected-red.exit
+          test "$status" -eq 1
+          python3 - <<'ASSERT'
+          import json
+          a=[json.loads(s) for s in open('../../proof-results/selected-red.jsonl')]
+          assert any(x.get('Action')=='fail' and x.get('Test')=='TestHandleMessageTask_LiveClarification_OnSelectedSessionQueues' for x in a)
+          text=''.join(x.get('Output','') for x in a)
+          assert 'queued' in text and 'started' in text and "the selected session owns its live question" in text
+          ASSERT
       - name: Admission RED with direct-path control
         run: |
           set -euo pipefail
@@ -85,7 +110,8 @@ jobs:
       - name: Restored GREEN and shared lifecycle controls
         run: |
           set -euo pipefail
-          git diff --exit-code
+          git diff > proof-results/restored.patch
+          cmp proof-results/formatting.patch proof-results/restored.patch
           cd apps/backend
           go test -race -p=2 -count=1 -json -timeout=10m ./internal/mcp/handlers ./internal/orchestrator -run '^(TestPeerMessageClarificationAnswerDrainsExactlyOnce|TestHandleMessageTask_(LiveClarification_QueuesInsteadOfPrompting|NoLiveClarification_PromptsWaitingSession|WaitingForInput_PromptsAgent|ParentToChildRunningSession_Interrupts|RunningSession_Queues|FailedSession_Rejects|CancelledSession_Rejects)|TestCheckQueueAdmissionReadiness.*|TestSessionHasLiveClarification.*|TestSessionHasPendingClarification.*)$' > ../../proof-results/restored-green.jsonl
       - name: Upload raw proof evidence

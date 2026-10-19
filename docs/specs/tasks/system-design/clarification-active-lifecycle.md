@@ -114,7 +114,9 @@ delivers the message after the answer, or after the bundle detaches. Without
 this check the peer prompt would become the newer turn that moves the bundle to
 `superseded_history` before the user answers. Interrupt-mode messages from a
 parent are unchanged. Launchers that do not implement the check keep the direct
-prompt.
+prompt. A repository error during the live-clarification lookup fails closed:
+the peer message is queued instead of risking a superseding prompt while the
+question's ownership cannot be read.
 
 ## State machine
 
