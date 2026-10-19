@@ -495,19 +495,18 @@ func (m *Manager) removeWorktreeWithReceipt(
 		return receipt, fmt.Errorf("audit worktree cleanup %s: %w", wt.ID, err)
 	}
 	defer func() {
+		if audit.adoption != nil {
+			audit.adoption.Close()
+		}
 		if audit.pathHandle != nil {
 			_ = audit.pathHandle.Close()
 		}
 	}()
 
-	// Run the repository script only after the path, Git registration, checkout
-	// contents, and branch identity pass the audit. A script such as `git clean`
-	// must never erase changes before the audit can reject the cleanup.
-	m.runWorktreeCleanupScript(ctx, wt)
-	if options.RequireCleanCheckout && audit.pathPresent {
-		if err := m.verifyCheckoutClean(ctx, wt); err != nil {
-			return receipt, fmt.Errorf("verify worktree cleanliness after cleanup script %s: %w", wt.ID, err)
-		}
+	// Run repository scripts only after the cleanup authority, path,
+	// Git registration, and branch identity pass the audit.
+	if !audit.adoptionAbsent {
+		m.runWorktreeCleanupScript(ctx, wt)
 	}
 
 	if err := m.completeAuditedWorktreeCleanup(ctx, wt, audit, removeBranch); err != nil {
@@ -516,7 +515,7 @@ func (m *Manager) removeWorktreeWithReceipt(
 	if err := m.finalizeRemovedWorktree(ctx, wt); err != nil {
 		return receipt, err
 	}
-	if !removeBranch {
+	if !removeBranch && !audit.hasAdoption() {
 		receipt = m.compactManagedBranch(ctx, wt)
 	}
 
@@ -744,9 +743,7 @@ func (m *Manager) CleanupWorktreesWithOptions(
 // only managed branches proven fully integrated. The historical name remains
 // for caller compatibility; unpublished and ambiguous branches are retained.
 func (m *Manager) CleanupWorktreesPreservingBranches(ctx context.Context, worktrees []*Worktree) error {
-	receipt, err := m.cleanupWorktreesWithReceipt(ctx, worktrees, false, WorktreeCleanupOptions{
-		RequireCleanCheckout: true,
-	})
+	receipt, err := m.cleanupWorktreesWithReceipt(ctx, worktrees, false, WorktreeCleanupOptions{})
 	m.logger.Info("managed branch cleanup receipt", receipt.reasonFields()...)
 	return err
 }
@@ -762,7 +759,6 @@ func (m *Manager) CleanupArchivedWorktree(
 		return errors.New("archived worktree cleanup requires a worktree")
 	}
 	receipt, err := m.cleanupWorktreesWithReceipt(ctx, []*Worktree{wt}, false, WorktreeCleanupOptions{
-		RequireCleanCheckout:   true,
 		ExpectedTaskID:         taskID,
 		ExpectedWorktreePath:   worktreePath,
 		ExpectedRepositoryPath: repositoryPath,

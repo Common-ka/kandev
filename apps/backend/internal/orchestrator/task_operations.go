@@ -269,6 +269,15 @@ func isManualRecoveryPromptError(err error) bool {
 		strings.Contains(message, "you've hit your usage limit")
 }
 
+// isEnsureSessionRunningTimeout requires expiry recorded by a runtime wait
+// and the ensure-session classifier boundary. Provider deadlines retain their
+// existing disposition even when they pass through that classifier.
+func isEnsureSessionRunningTimeout(err error) bool {
+	var expiry *sessionRuntimeWaitExpiry
+	return errors.As(err, &expiry) && errors.Is(err, context.DeadlineExceeded) &&
+		strings.Contains(err.Error(), "failed to ensure session is running:")
+}
+
 func isAgentAlreadyRunningError(err error) bool {
 	return err != nil && errors.Is(err, lifecycle.ErrAgentAlreadyRunning)
 }
@@ -1662,7 +1671,7 @@ func (s *Service) startTask(ctx context.Context, taskID string, agentProfileID s
 			if opts.WorkflowEntryID > 0 {
 				bindingPayload["workflow_entry_id"] = opts.WorkflowEntryID
 			}
-			if binding, bound := s.deriveCeilingEntryBinding(ctx, bindingTask, bindingPayload, ""); bound {
+			if binding, bound, _ := s.deriveCeilingEntryBinding(ctx, bindingTask, bindingPayload, ""); bound {
 				opts.ceilingEntryBinding = &binding
 			}
 		}
@@ -1845,6 +1854,7 @@ func (s *Service) startTask(ctx context.Context, taskID string, agentProfileID s
 	var sessionID string
 	var sessionCreated bool
 	failPreparedLaunch := func(err error) error {
+		s.releaseStartEnvironmentClaim(ctx, task.ID, sessionID, sessionCreated, err)
 		return s.handleQuickChatStartFailure(ctx, task, sessionID, sessionCreated, err)
 	}
 	if selectedExplicitSession != nil {
@@ -2046,6 +2056,17 @@ func (s *Service) startTask(ctx context.Context, taskID string, agentProfileID s
 	// re-drive this first turn — initial launches bypass PromptTask.
 	s.rememberTurnPrompt(sessionID, prompt, "", planMode, attachments)
 
+	// Bind runtime credentials to this session before dispatch; a failed refresh
+	// settles the owned turn and session without launching the captured token.
+	remintedEnv, remintErr := s.remintLaunchCredentials(ctx, taskID, sessionID, env)
+	if remintErr != nil {
+		if initialTurnCreated {
+			s.completeTurnIfCurrent(ctx, sessionID, initialTurnID)
+		}
+		return nil, s.handleSessionLaunchFailure(ctx, taskID, sessionID, failPreparedLaunch(remintErr))
+	}
+	env = remintedEnv
+
 	launchOptions := executor.LaunchOptions{
 		AgentProfileID:       agentProfileID,
 		OfficeAgentProfileID: officeAgentProfileID,
@@ -2067,6 +2088,9 @@ func (s *Service) startTask(ctx context.Context, taskID string, agentProfileID s
 	if err != nil {
 		if initialTurnCreated {
 			s.completeTurnIfCurrent(ctx, sessionID, initialTurnID)
+		}
+		if errors.Is(err, executor.ErrExecutionAlreadyRunning) {
+			return nil, err
 		}
 		return nil, s.handleSessionLaunchFailure(ctx, taskID, sessionID, failPreparedLaunch(err))
 	}
@@ -2294,6 +2318,9 @@ func (s *Service) prepareSessionForStartWithWorkflowRoute(
 	agentProfileID, officeAgentProfileID, executorID, executorProfileID, workflowStepID string,
 	workflowRoute *models.WorkflowSessionRoute,
 ) (string, bool, error) {
+	if err := s.admitInheritedEnvironment(ctx, task, executorID, executorProfileID); err != nil {
+		return "", false, err
+	}
 	sessionID, created, err := s.createStartSessionWithWorkflowRoute(ctx, task, agentProfileID, officeAgentProfileID, executorID, executorProfileID, workflowStepID, workflowRoute)
 	if err != nil {
 		return "", false, err
@@ -3617,6 +3644,9 @@ func (s *Service) resumeTaskSessionWithContinuationAndReservation(
 	execution.SessionState = v1.TaskSessionState(readySession.State)
 	seam4Res.consume()
 	persistBranchRecovery()
+	if err := s.activateResumedDynamicRoute(resumeCtx, readySession); err != nil {
+		return nil, decorateResumeFailure(fmt.Errorf("resumed dynamic route activation failed: %w", err))
+	}
 
 	// Owned initial submissions are written after provider acceptance so the
 	// transcript row can use the accepted turn identity. Ordinary resumes keep
@@ -3828,7 +3858,13 @@ func (s *Service) loadResumeSessionCandidate(
 	if session.TaskID != taskID {
 		return nil, fmt.Errorf("task session does not belong to task")
 	}
-	if session.RouteState != "" && session.RouteState != dynamicRouteStatusActive {
+	// A claim still "starting" behind a live, prompt-ready runtime is an
+	// unfinished activation write, so this admission attempt retries the durable
+	// completion for the current generation before the pending-route guard can
+	// reject it.
+	if session.RouteState != "" && session.RouteState != dynamicRouteStatusActive &&
+		!s.explicitRecoveryOwnsStrandedStartingRoute(ctx, session, options) &&
+		!s.completeReadyStrandedStartingRoute(ctx, session) {
 		return nil, &sessionOpenRecoveryBlockedError{reason: autoResumeBlockedDynamicRoute}
 	}
 	if err := s.validateClaimedCeilingBinding(ctx, taskID, entryBinding); err != nil {
@@ -4314,7 +4350,7 @@ func (s *Service) waitForSharedResumeAttempt(
 	startupAttempt *resumeAttempt,
 ) (*resumeAttempt, error) {
 	waitCtx, cancelWait := context.WithTimeout(context.WithoutCancel(ctx), cancellationOperationTTL)
-	waitErr := startupAttempt.wait(waitCtx)
+	waitErr := markSessionRuntimeWaitExpiry(waitCtx, startupAttempt.wait(waitCtx))
 	cancelWait()
 	if waitErr != nil {
 		return nil, waitErr
@@ -4675,13 +4711,14 @@ func (s *Service) reapPromptUnreadyExecution(ctx context.Context, sessionID stri
 	return nil
 }
 
-func (s *Service) waitForAgentPromptReady(ctx context.Context, sessionID string) error {
+func (s *Service) waitForAgentPromptReady(ctx context.Context, sessionID string) (waitErr error) {
 	if s.agentManager == nil {
 		return nil
 	}
 
 	readyCtx, cancel := context.WithTimeout(ctx, agentPromptReadyTimeout)
 	defer cancel()
+	defer func() { waitErr = markSessionRuntimeWaitExpiry(readyCtx, waitErr) }()
 
 	ticker := time.NewTicker(agentPromptReadyInterval)
 	defer ticker.Stop()
@@ -4781,7 +4818,7 @@ func (s *Service) startAgentOnPreparedWorkspace(
 }
 
 // waitForSessionReady polls the session state until the agent is ready for prompts.
-func (s *Service) waitForSessionReady(ctx context.Context, sessionID string) error {
+func (s *Service) waitForSessionReady(ctx context.Context, sessionID string) (waitErr error) {
 	const pollInterval = 500 * time.Millisecond
 	maxWait := constants.AgentLaunchTimeout
 	// Derive a bounded context so the overall wait AND each GetTaskSession query
@@ -4792,6 +4829,7 @@ func (s *Service) waitForSessionReady(ctx context.Context, sessionID string) err
 	// wall clock between iterations). Mirrors waitForAgentPromptReady.
 	readyCtx, cancel := context.WithTimeout(ctx, maxWait)
 	defer cancel()
+	defer func() { waitErr = markSessionRuntimeWaitExpiry(readyCtx, waitErr) }()
 	// Ticker rather than time.After(pollInterval) in the loop: time.After
 	// allocates a fresh timer each iteration that lives until it fires, so a
 	// long wait would pile up ~maxWait/pollInterval live timers. Mirrors
@@ -5645,6 +5683,7 @@ func (s *Service) StopSession(ctx context.Context, sessionID string, reason stri
 		return err
 	}
 	s.clearDynamicUnclassifiedStreakForStop(ctx, sessionID)
+	s.settleOpenBackgroundWork(ctx, sessionID)
 	return nil
 }
 
@@ -5656,10 +5695,18 @@ func (s *Service) StopSessionSynchronously(ctx context.Context, sessionID string
 	if s.lspLeases != nil {
 		s.lspLeases.StopLSPLeasesForSession(sessionID)
 	}
+	stoppedExecutionID := ""
+	if s.agentManager != nil {
+		executionID, err := s.agentManager.GetExecutionIDForSession(ctx, sessionID)
+		if err == nil {
+			stoppedExecutionID = executionID
+		}
+	}
 	if err := s.executor.StopSessionSynchronously(ctx, sessionID, reason, force); err != nil {
 		return err
 	}
 	s.clearDynamicUnclassifiedStreakForStop(ctx, sessionID)
+	s.settleBackgroundWork(ctx, sessionID, stoppedExecutionID)
 	return nil
 }
 
@@ -6014,28 +6061,14 @@ func (s *Service) quiesceSessionExecutionBeforeDeletion(
 }
 
 // promoteNextPrimaryAfterRemoval picks the best remaining session as primary
-// after a session is deleted. Prefers RUNNING > active > any remaining.
+// after a session is deleted. Any nonterminal session is eligible; the shared
+// selector prefers the current step's profile and ranks a parked session last.
 func (s *Service) promoteNextPrimaryAfterRemoval(ctx context.Context, taskID, deletedSessionID string) {
 	sessions, err := s.repo.ListTaskSessions(ctx, taskID)
 	if err != nil || len(sessions) == 0 {
 		return
 	}
-	var candidate string
-	for _, sess := range sessions {
-		if sess.ID == deletedSessionID {
-			continue
-		}
-		if sess.State == models.TaskSessionStateRunning {
-			candidate = sess.ID
-			break
-		}
-		if candidate == "" {
-			candidate = sess.ID
-		} else if isActiveSessionState(sess.State) {
-			// Prefer active over terminal
-			candidate = sess.ID
-		}
-	}
+	candidate := s.bestPrimarySessionCandidate(ctx, taskID, sessions, deletedSessionID, false)
 	if candidate != "" {
 		if err := s.SetPrimarySession(ctx, candidate); err != nil {
 			s.logger.Warn("failed to auto-promote primary after delete",

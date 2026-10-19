@@ -27,7 +27,7 @@ const (
 	recoveryActionRepairWorkspaceInventory = "repair_workspace_inventory"
 	recoveryActionResume                   = "resume"
 	recoveryActionResumeNewBranch          = models.RecoveryActionResumeNewBranch
-	recoveryActionFreshStart               = "fresh_start"
+	recoveryActionFreshStart               = executor.RecoveryActionFreshStart
 	recoveryActionRuntimeRetry             = "runtime_retry"
 	recoveryActionContinueHistory          = "continue_from_history"
 )
@@ -1063,6 +1063,12 @@ func (s *Service) launchResume(ctx context.Context, req *LaunchSessionRequest) (
 		}
 		var blocked *sessionOpenRecoveryBlockedError
 		if errors.As(err, &blocked) {
+			if req.RecoveryAction != "" {
+				// An explicit recovery must not report success when no runtime
+				// was launched: its caller would acknowledge delivery or commit
+				// a continuation against an execution that does not exist.
+				return nil, err
+			}
 			return s.sessionOpenRecoveryWaitingResponse(ctx, req, blocked.reason), nil
 		}
 		if req.ActivationSource == LaunchActivationSourceSessionOpen && errors.Is(err, ErrCeilingLaunchConflict) {
