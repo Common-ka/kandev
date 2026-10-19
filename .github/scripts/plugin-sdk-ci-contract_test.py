@@ -39,7 +39,7 @@ class SDKSelectionTests(unittest.TestCase):
         self.assertIn("scripts/pluginsdk/consumer-smoke.test.mjs", backend)
         self.assertIn("--backend-only --skip-compatibility-check", backend)
         self.assertIn("make -C apps/backend e2e-plugin-ui e2e-plugin-package", e2e)
-        self.assertIn("make build-backend", e2e)
+        self.assertIn("make -C apps/backend build-kandev build-agentctl", e2e)
 
     def test_docker_builder_is_part_of_required_backend_gate(self):
         text = (ROOT / ".github/workflows/backend-tests.yml").read_text()
@@ -53,6 +53,13 @@ class SDKSelectionTests(unittest.TestCase):
         stage = (ROOT / "e2e.Dockerfile").read_text().split("FROM node:", 1)[0]
         self.assertIn("WORKDIR /build/apps/backend", stage)
         self.assertLess(stage.index("COPY pluginsdk/ /build/pluginsdk/"), stage.index("RUN go mod download"))
+
+    def test_sdk_changes_cannot_take_the_e2e_test_only_shortcut(self):
+        classifier = import_module("ci-test-only-changes")
+        for path in ("pluginsdk/serve.go", "pluginsdk/go.mod", "pluginsdk/go.sum",
+                     "pluginsdk/proto/kandev/plugin/v1/plugin.proto", "scripts/pluginsdk/consumer-smoke.mjs"):
+            diff = (":100644 100644 " + "a" * 40 + " " + "b" * 40 + " M\0" + path + "\0").encode()
+            self.assertFalse(classifier.classify(diff, "pull_request")[0], path)
 
     def test_caches_include_both_module_identities(self):
         for name in ("backend-tests.yml", "e2e-tests.yml"):

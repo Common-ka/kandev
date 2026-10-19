@@ -159,11 +159,13 @@ Validation completed locally:
 - Local isolated consumer build/vet/test passed. A cleanup failure from read-only
   Go cache directories was corrected with explicit `-modcacherw`; the final end-to-end
   rerun, including cleanup and the replacement-parser adjustment, passed.
-- CI contract tests: six passed. Existing changed-path tests: 23 passed.
-  Architecture-linter tests: 99 passed. The upstream cache action and test-only
-  selection helpers are absent from this PR base; this implementation updates
-  its actual workflow caches and unconditional E2E build path. Recheck these
-  boundaries when integrating a newer base.
+- After merging main `76954ff53e`, CI contract tests: seven passed. Existing
+  changed-path tests: 23 passed. Architecture-linter tests: 99 passed.
+  Shared cache identity tests: seven passed, including SDK module/sum changes
+  through the actual CLI. Test-only selection tests: eight passed. Backend
+  workflow contracts: 25 passed. External-runner contracts: five passed.
+  Both the shared cache action and direct workflow caches include the SDK.
+  SDK production changes cannot select the test-only shortcut.
 - Documentation catalog and specification lint: passed.
 
 Remaining gate: Docker is not installed and no local Docker/Podman socket was
