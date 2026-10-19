@@ -1291,6 +1291,7 @@ func (r *Repository) initStepTransitionsSchema() error {
 		trigger TEXT NOT NULL,
 		actor_kind TEXT NOT NULL,
 		actor_id TEXT,
+		causing_run_id TEXT,
 		contract_version INTEGER NOT NULL,
 		occurred_at TIMESTAMP NOT NULL
 	);

@@ -344,6 +344,11 @@ func buildLaunchMetadata(req *LaunchRequest, mainRepoGitDir, worktreeID, worktre
 	for k, v := range req.Metadata {
 		metadata[k] = v
 	}
+	if req.CausingRunID != "" {
+		metadata[MetadataKeyCausingRunID] = req.CausingRunID
+	} else {
+		delete(metadata, MetadataKeyCausingRunID)
+	}
 	delete(metadata, mcpprofile.ManagedToolPolicyMetadataKey)
 	if req.McpProfile != nil && req.McpProfile.ManagedToolPolicy != nil {
 		encoded, err := mcpprofile.MarshalManagedToolPolicy(*req.McpProfile.ManagedToolPolicy)
@@ -1439,6 +1444,7 @@ func (m *Manager) launchBuildExecutorRequest(ctx context.Context, executionID st
 	execReq := &ExecutorCreateRequest{
 		InstanceID:                     executionID,
 		IsPassthrough:                  reqWithWorktree.IsPassthrough,
+		CausingRunID:                   reqWithWorktree.CausingRunID,
 		ExecutorType:                   reqWithWorktree.ExecutorType,
 		TaskID:                         reqWithWorktree.TaskID,
 		TaskTitle:                      reqWithWorktree.TaskTitle,

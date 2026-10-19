@@ -82,6 +82,9 @@ func (r *Repository) runMigrations(ctx context.Context) error {
 	if err := r.ensureExecutorOwnershipSchema(); err != nil {
 		return err
 	}
+	// Existing transition rows have no run identity; new writes capture it
+	// from the trusted execution owner when it is available.
+	_ = r.migrate.Apply("task_step_transitions.causing_run_id", `ALTER TABLE task_step_transitions ADD COLUMN causing_run_id TEXT`)
 	for _, migration := range []struct{ name, query string }{
 		{"control_server_records.process_id", `ALTER TABLE control_server_records ADD COLUMN process_id INTEGER NOT NULL DEFAULT 0`},
 		{"control_server_records.process_group_id", `ALTER TABLE control_server_records ADD COLUMN process_group_id INTEGER NOT NULL DEFAULT 0`},
