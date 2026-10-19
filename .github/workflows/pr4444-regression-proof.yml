@@ -1,5 +1,7 @@
 name: PR4444 drawer regression proof
 on:
+  push:
+    branches: ["review-proof/4444-child-regression-b43d31d78824"]
   workflow_dispatch:
 permissions:
   contents: read
