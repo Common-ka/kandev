@@ -1,7 +1,7 @@
 ---
 id: "02-frontend-package"
 title: "Package standalone frontend SDK"
-status: pending
+status: in_progress
 wave: 2
 depends_on:
   - 01-go-module
@@ -115,4 +115,18 @@ misrepresented as public release metadata.
 
 ## Results
 
-Pending.
+Implemented locally on 2026-10-19. The canonical draft record retains null host
+values. The npm copy, license, repository metadata, exact tool pins, archive
+allowlist, integrity checks, and independent registry consumer are implemented.
+NodeNext and bundler consumers install the same archive. Helper tests reject
+record drift, tool mismatch, unexpected files, application imports, runtime
+dependencies, and modified archive bytes. The local Go/npm smoke passed.
+Package contract tests, package typecheck, and web typecheck passed. The web
+check required `NODE_OPTIONS=--max-old-space-size=8192` after the default heap
+limit was exceeded. Exact-head CI remains pending. WO01 Docker validation remains pending in CI.
+
+Packaging uses Node 24.19.0 and npm 11.21.0. The npm pin supports OIDC publication
+and OIDC dist-tag operations under the current
+[trusted-publisher requirements](https://docs.npmjs.com/trusted-publishers/).
+The package remains unpublished. Resolved host metadata and compatibility
+checks are added by WO03; these tests do not certify a draft record for release.

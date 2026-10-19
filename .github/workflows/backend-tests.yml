@@ -88,6 +88,7 @@ jobs:
         env:
           PATTERNS: |
             apps/backend/**
+            apps/packages/plugin-sdk/**
             pluginsdk/**
             scripts/pluginsdk/**
             .github/scripts/plugin-sdk-ci-contract_test.py
@@ -175,6 +176,36 @@ jobs:
           persist-credentials: false
       - name: Build the host with the standalone SDK layout
         run: docker build --target go-builder -f e2e.Dockerfile -t kandev-sdk-go-builder-check .
+
+  sdk_package:
+    name: Plugin SDK packed consumer
+    needs: changes
+    if: needs.changes.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+      - name: Read packaging tool versions
+        id: tools
+        run: node -e 'const c=require("./scripts/pluginsdk/pack-config.json"); console.log("node="+c.node); console.log("npm="+c.npm)' >> "$GITHUB_OUTPUT"
+      - name: Set up Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: ${{ steps.tools.outputs.node }}
+          package-manager-cache: false
+      - name: Install pinned npm
+        env:
+          NPM_VERSION: ${{ steps.tools.outputs.npm }}
+        run: npm install --global --ignore-scripts "npm@${NPM_VERSION}"
+      - name: Check the standalone npm artifact
+        run: |
+          node scripts/pluginsdk/sync-record.mjs --check
+          node --test scripts/pluginsdk/sync-record.test.mjs scripts/pluginsdk/pack-candidate.test.mjs
 
   static_checks:
     name: Backend Static Checks
@@ -619,6 +650,7 @@ jobs:
       - changes
       - static_checks
       - sdk_builder
+      - sdk_package
       - test_shards
       - repository_tests
       - test_ambient_env
@@ -635,6 +667,7 @@ jobs:
           RUNNER_PLAN: ${{ needs.changes.outputs.plan }}
           RUN_REQUIRED: ${{ needs.changes.outputs.run }}
           SIDEBAR_REQUIRED: ${{ needs.changes.outputs.sidebar_resources }}
+          SDK_PACKAGE_RESULT: ${{ needs.sdk_package.result }}
           SDK_BUILDER_RESULT: ${{ needs.sdk_builder.result }}
           STATIC_CHECKS_RESULT: ${{ needs.static_checks.result }}
           TEST_SHARDS_RESULT: ${{ needs.test_shards.result }}
@@ -657,6 +690,7 @@ jobs:
           expected=skipped
           if [[ "${RUN_REQUIRED}" == "true" ]]; then expected=success; fi
           for entry in \
+            "sdk_package:${SDK_PACKAGE_RESULT}" \
             "sdk_builder:${SDK_BUILDER_RESULT}" \
             "static_checks:${STATIC_CHECKS_RESULT}" \
             "test_shards:${TEST_SHARDS_RESULT}" \

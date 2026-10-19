@@ -111,3 +111,8 @@ test("module archives reject local replacements", async (t) => {
     /without replacements/,
   );
 });
+
+test("public smoke never substitutes an unpublished local npm candidate", async () => {
+  const { smokeFrontend } = await import("./consumer-smoke.mjs");
+  await assert.rejects(smokeFrontend("public"), /public npm verification/);
+});

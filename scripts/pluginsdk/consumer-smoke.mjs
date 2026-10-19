@@ -46,6 +46,26 @@ with zipfile.ZipFile(output, 'w', zipfile.ZIP_DEFLATED) as archive:
   ]);
 }
 
+export async function smokeFrontend(mode = "local") {
+  if (mode !== "local")
+    throw new Error(
+      "public npm verification is not available until work order 04",
+    );
+  const { packCandidate } = await import("./pack-candidate.mjs");
+  const { checkPackedConsumer } =
+    await import("../../apps/packages/plugin-sdk/test/packed-consumer.node.mjs");
+  const output = await mkdtemp(join(tmpdir(), "sdk-frontend-candidate-"));
+  try {
+    const candidate = await packCandidate({
+      directory: join(repository, "apps/packages/plugin-sdk"),
+      output,
+    });
+    console.log(JSON.stringify(await checkPackedConsumer(candidate)));
+  } finally {
+    await rm(output, { recursive: true, force: true });
+  }
+}
+
 export async function smokeGo({
   mode = "local",
   version = "v0.1.0",
@@ -136,10 +156,7 @@ if (
       "skip-compatibility-check": { type: "boolean" },
     },
   });
-  if (!values["backend-only"])
-    throw new Error(
-      "frontend consumer is not available until work order 02; pass --backend-only",
-    );
+  if (!values["backend-only"]) await smokeFrontend(values.mode);
   await smokeGo({
     mode: values.mode,
     version: values.version,

@@ -49,6 +49,15 @@ class SDKSelectionTests(unittest.TestCase):
         self.assertIn("SDK_BUILDER_RESULT: ${{ needs.sdk_builder.result }}", gate)
         self.assertIn('"sdk_builder:${SDK_BUILDER_RESULT}"', gate)
 
+    def test_packed_sdk_has_a_required_independent_consumer_job(self):
+        text = (ROOT / ".github/workflows/backend-tests.yml").read_text()
+        self.assertIn("  sdk_package:\n", text)
+        gate = text.split("  test:\n", 1)[1]
+        self.assertIn("      - sdk_package", gate)
+        self.assertIn('"sdk_package:${SDK_PACKAGE_RESULT}"', gate)
+        self.assertIn("node --test scripts/pluginsdk/sync-record.test.mjs scripts/pluginsdk/pack-candidate.test.mjs", text)
+        self.assertIn("pack-config.json", text)
+
     def test_docker_build_preserves_the_backend_replacement_layout(self):
         stage = (ROOT / "e2e.Dockerfile").read_text().split("FROM node:", 1)[0]
         self.assertIn("WORKDIR /build/apps/backend", stage)
