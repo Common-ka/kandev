@@ -219,6 +219,15 @@ type SessionLauncher interface {
 	RenameSession(ctx context.Context, sessionID, name string) error
 }
 
+// liveClarificationReader reports whether a session's agent turn is still
+// blocked on a live clarification. The orchestrator implements it; launchers
+// without it keep the direct-prompt behavior.
+type liveClarificationReader interface {
+	SessionHasLiveClarification(ctx context.Context, sessionID string) bool
+}
+
+var _ liveClarificationReader = (*orchestrator.Service)(nil)
+
 type peerMessageStartAdmissionProvider interface {
 	BeginPeerMessageStart(
 		context.Context,
@@ -2859,7 +2868,8 @@ func (h *Handlers) publishStepCompletionEvent(
 // one of three paths depending on the target session state:
 //
 //   - RUNNING/STARTING : message is queued and drained at turn end
-//   - WAITING/COMPLETED: message is recorded and the agent is prompted (auto-resuming if needed)
+//   - WAITING          : a live clarification holds queued-mode messages in the queue
+//   - WAITING/COMPLETED: otherwise record and prompt the agent (auto-resuming if needed)
 //   - CREATED          : message is recorded then the agent is started with it as initial prompt
 //
 // Strict validation: missing sender_task_id, same-session targets, and unknown
@@ -3646,8 +3656,19 @@ func (h *Handlers) dispatchTaskMessage(ctx context.Context, taskID string, sessi
 		return h.queueTaskMessage(ctx, taskID, session, prompt, metadata)
 
 	default:
+		if !interruptIfBusy && h.sessionHasLiveClarification(ctx, session.ID) {
+			return h.queueTaskMessage(ctx, taskID, session, prompt, metadata)
+		}
 		return h.dispatchUnpreparedTaskMessage(ctx, taskID, session, prompt, metadata, pinnedTarget, interruptIfBusy)
 	}
+}
+
+// sessionHasLiveClarification keeps a peer message from becoming a newer turn
+// while the target agent waits on its own question; the queue drain delivers
+// it once the question no longer owns the turn.
+func (h *Handlers) sessionHasLiveClarification(ctx context.Context, sessionID string) bool {
+	reader, ok := h.sessionLauncher.(liveClarificationReader)
+	return ok && reader.SessionHasLiveClarification(ctx, sessionID)
 }
 
 func (h *Handlers) dispatchUnpreparedTaskMessage(
@@ -3905,6 +3926,11 @@ func (h *Handlers) dispatchPreparedTaskMessageWithAdmissionAndInterrupt(
 		releasePeerMessageStartAdmission(admission)
 		return h.queueTaskMessage(ctx, taskID, session, prompt, metadata)
 	default:
+		// Workflow preparation can select a different primary session.
+		if !interruptIfBusy && h.sessionHasLiveClarification(ctx, session.ID) {
+			releasePeerMessageStartAdmission(admission)
+			return h.queueTaskMessage(ctx, taskID, session, prompt, metadata)
+		}
 		if h.shouldStartTaskMessageSession(ctx, session) {
 			return h.startPreparedPeerTaskMessage(ctx, taskID, session, prompt, metadata, admission, interruptIfBusy)
 		}
