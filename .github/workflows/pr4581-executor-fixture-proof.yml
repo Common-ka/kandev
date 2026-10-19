@@ -1,0 +1,114 @@
+name: PR 4581 executor fixture proof
+on:
+  push:
+    branches: [review-proof/4581-executor-fixture-d64ebce0]
+permissions:
+  contents: read
+  packages: read
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    container: ghcr.io/kdlbs/kandev-ci:build-latest
+    env:
+      GOFLAGS: -trimpath
+      GOMAXPROCS: '2'
+      GOMEMLIMIT: 3GiB
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
+      - name: Bind and format actual test sources
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          mkdir -p proof-results/formatted
+          git rev-parse HEAD HEAD^{tree} > proof-results/checkout-source.txt
+          git ls-tree -r HEAD > proof-results/checkout-tree.txt
+          go version > proof-results/go-version.txt
+          files=(apps/backend/internal/mcp/handlers/handlers.go apps/backend/internal/mcp/handlers/message_task_live_clarification_test.go apps/backend/internal/orchestrator/clarification_guard_test.go apps/backend/internal/orchestrator/peer_message_clarification_delivery_test.go)
+          gofmt -w "${files[@]}"
+          for file in "${files[@]}"; do
+            mkdir -p "proof-results/formatted/$(dirname "$file")"
+            cp "$file" "proof-results/formatted/$file"
+          done
+          git diff --binary > proof-results/formatting.patch
+          git -c core.hooksPath=/dev/null -c core.fsmonitor=false add -- "${files[@]}"
+          git write-tree > proof-results/actual-build-tree.txt
+          git diff --check HEAD
+          sha256sum "${files[@]}" > proof-results/actual-test-sources.sha256
+      - name: Admission RED with direct-path control
+        run: |
+          set -euo pipefail
+          cp apps/backend/internal/mcp/handlers/handlers.go proof-results/handlers.green.go
+          python3 - <<'MUTATE'
+          from pathlib import Path
+          p=Path('apps/backend/internal/mcp/handlers/handlers.go')
+          s=p.read_text()
+          old='\t\tif !interruptIfBusy && h.sessionHasLiveClarification(ctx, session.ID) {\n\t\t\treturn h.queueTaskMessage(ctx, taskID, session, prompt, metadata)\n\t\t}\n'
+          assert s.count(old)==1
+          p.write_text(s.replace(old,''))
+          MUTATE
+          cd apps/backend
+          go test -race -p=2 -count=1 -json -timeout=10m ./internal/mcp/handlers -run '^TestHandleMessageTask_NoLiveClarification_PromptsWaitingSession$' > ../../proof-results/admission-control.jsonl
+          set +e
+          go test -race -p=2 -count=1 -json -timeout=10m ./internal/mcp/handlers -run '^TestHandleMessageTask_LiveClarification_QueuesInsteadOfPrompting$' > ../../proof-results/admission-red.jsonl
+          status=$?
+          set -e
+          echo "$status" > ../../proof-results/admission-red.exit
+          test "$status" -eq 1
+          python3 - <<'ASSERT'
+          import json
+          a=[json.loads(s) for s in open('../../proof-results/admission-red.jsonl')]
+          assert any(x.get('Action')=='fail' and x.get('Test')=='TestHandleMessageTask_LiveClarification_QueuesInsteadOfPrompting' for x in a)
+          assert any('the live question must not run on_turn_start' in x.get('Output','') for x in a)
+          ASSERT
+          cp ../../proof-results/handlers.green.go internal/mcp/handlers/handlers.go
+      - name: Prepared-session RED with direct-path control
+        run: |
+          set -euo pipefail
+          cp apps/backend/internal/mcp/handlers/handlers.go proof-results/handlers.green.go
+          python3 - <<'MUTATE'
+          from pathlib import Path
+          p=Path('apps/backend/internal/mcp/handlers/handlers.go')
+          s=p.read_text()
+          old='\t\tif !interruptIfBusy && h.sessionHasLiveClarification(ctx, session.ID) {\n\t\t\treleasePeerMessageStartAdmission(admission)\n\t\t\treturn h.queueTaskMessage(ctx, taskID, session, prompt, metadata)\n\t\t}\n'
+          assert s.count(old)==1
+          p.write_text(s.replace(old,''))
+          MUTATE
+          cd apps/backend
+          go test -race -p=2 -count=1 -json -timeout=10m ./internal/mcp/handlers -run '^TestHandleMessageTask_NoLiveClarification_PromptsWaitingSession$' > ../../proof-results/prepared-control.jsonl
+          set +e
+          go test -race -p=2 -count=1 -json -timeout=10m ./internal/mcp/handlers -run '^TestHandleMessageTask_LiveClarification_OnSelectedSessionQueues$' > ../../proof-results/prepared-red.jsonl
+          status=$?
+          set -e
+          echo "$status" > ../../proof-results/prepared-red.exit
+          test "$status" -eq 1
+          python3 - <<'ASSERT'
+          import json
+          a=[json.loads(s) for s in open('../../proof-results/prepared-red.jsonl')]
+          assert any(x.get('Action')=='fail' and x.get('Test')=='TestHandleMessageTask_LiveClarification_OnSelectedSessionQueues' for x in a)
+          text=''.join(x.get('Output','') for x in a)
+          assert 'queued' in text and 'sent' in text and 'the selected session owns its live question' in text
+          ASSERT
+          cp ../../proof-results/handlers.green.go internal/mcp/handlers/handlers.go
+      - name: Verify restored production bytes
+        run: |
+          set -euo pipefail
+          sha256sum --check proof-results/actual-test-sources.sha256
+          git diff --exit-code
+      - name: Registered dispatch and lifecycle regressions
+        working-directory: apps/backend
+        run: |
+          set -euo pipefail
+          go test -race -p=2 -count=1 -json -timeout=10m ./internal/mcp/handlers ./internal/orchestrator -run '^(TestPeerMessageClarificationAnswerDrainsExactlyOnce|TestHandleMessageTask_.*|TestSessionHasLiveClarification.*|TestSessionHasPendingClarification.*|TestCheckQueueAdmissionReadiness.*|TestResumePromptQueueServiceProvidesAdmissionReadinessCheck|TestPauseForClarificationInput_DrainsPeerQueueAfterPause|TestPauseForClarificationInput_NewTurnAfterDrainAdvancesWorkflow)$' > ../../proof-results/regressions-green.jsonl
+      - name: Upload raw proof evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: pr4581-executor-fixture
+          path: proof-results
+          retention-days: 30
