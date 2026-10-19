@@ -1,0 +1,84 @@
+name: PR4444 drawer regression proof
+on:
+  push:
+    branches: ["review-proof/4444-child-regression-b43d31d78824"]
+  workflow_dispatch:
+permissions:
+  contents: read
+  packages: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container: ghcr.io/kdlbs/kandev-ci:build-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
+      - name: Record exact source
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          mkdir -p proof
+          git rev-parse HEAD HEAD^{tree} > proof/source.txt
+          git show --format=fuller --stat HEAD > proof/commit.txt
+          sha256sum apps/packages/ui/src/{drawer,dropdown-menu,modal-drawer-context}.tsx apps/web/components/task/mobile/{drawer-dropdown-modality,session-task-switcher-sheet}.test.tsx > proof/source-sha256.txt
+      - name: Install locked dependencies
+        working-directory: apps
+        run: pnpm install --frozen-lockfile
+      - name: GREEN real primitives and current-main consumer controls
+        working-directory: apps/web
+        run: |
+          pnpm exec vitest run components/task/mobile/drawer-dropdown-modality.test.tsx components/task/mobile/session-task-switcher-sheet.test.tsx --reporter=json --outputFile=../../proof/green.json
+      - name: RED remove only the shared default handoff
+        working-directory: apps/web
+        run: |
+          python3 - <<'PYTHON'
+          from pathlib import Path
+          file = Path("../packages/ui/src/dropdown-menu.tsx")
+          source = file.read_text()
+          assert source.count("modal={modal ?? !insideModalDrawer}") == 1
+          Path("../../proof/dropdown-original.tsx").write_text(source)
+          file.write_text(source.replace("modal={modal ?? !insideModalDrawer}", "modal={modal ?? true}"))
+          PYTHON
+          set +e
+          pnpm exec vitest run components/task/mobile/drawer-dropdown-modality.test.tsx components/task/mobile/session-task-switcher-sheet.test.tsx --reporter=json --outputFile=../../proof/red.json
+          result=$?
+          set -e
+          cp ../../proof/dropdown-original.tsx ../packages/ui/src/dropdown-menu.tsx
+          test "$result" -eq 1
+      - name: Verify assertion RED and shared controls
+        run: |
+          python3 - <<'PYTHON'
+          import json
+          from pathlib import Path
+          green = json.loads(Path("proof/green.json").read_text())
+          red = json.loads(Path("proof/red.json").read_text())
+          assert green["success"] and green["numFailedTests"] == 0
+          failed = [test for suite in red["testResults"] for test in suite["assertionResults"] if test["status"] == "failed"]
+          assert len(failed) == 4, failed
+          assert sum("disposing a drawer" in test["fullName"] for test in failed) == 2
+          assert sum("drawer=true, menu=undefined" in test["fullName"] for test in failed) == 2
+          assert all("AssertionError" in "\n".join(test["failureMessages"]) for test in failed)
+          controls = [suite for suite in red["testResults"] if suite["name"].endswith("session-task-switcher-sheet.test.tsx")]
+          assert len(controls) == 1 and len(controls[0]["assertionResults"]) > 0
+          assert all(test["status"] == "passed" for test in controls[0]["assertionResults"])
+          print("Verified four genuine assertion failures, existing current-main consumer controls pass.")
+          PYTHON
+      - name: Final restored GREEN
+        working-directory: apps/web
+        run: pnpm exec vitest run components/task/mobile/drawer-dropdown-modality.test.tsx components/task/mobile/session-task-switcher-sheet.test.tsx --reporter=json --outputFile=../../proof/restored-green.json
+      - name: Check regression formatting and lint
+        working-directory: apps/web
+        run: |
+          pnpm exec prettier --check components/task/mobile/drawer-dropdown-modality.test.tsx
+          pnpm exec eslint components/task/mobile/drawer-dropdown-modality.test.tsx
+      - name: Upload complete proof
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: pr4444-drawer-regression-proof
+          path: proof/
+          retention-days: 30
