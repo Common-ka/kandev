@@ -48,7 +48,9 @@ test("nested workspace menu releases the Tasks drawer lock on both navigation di
     await menu.getByRole("menuitem", { name: destination.name, exact: true }).tap();
     await expect(testPage).toHaveURL(new RegExp(`/t/${destination.task.id}$`));
     await expect(rows).toBeHidden();
-    await expect(session.activeChat()).toContainText(`Destination conversation ${destination.task.id}`);
+    await expect(session.activeChat()).toContainText(
+      `Destination conversation ${destination.task.id}`,
+    );
     await expect
       .poll(() => testPage.evaluate(() => document.body.style.pointerEvents))
       .toBe(originalPointerEvents);
