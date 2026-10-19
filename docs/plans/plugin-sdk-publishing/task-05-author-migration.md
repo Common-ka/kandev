@@ -1,7 +1,7 @@
 ---
 id: "05-author-migration"
 title: "Document author and maintainer migration"
-status: pending
+status: in_progress
 wave: 5
 depends_on:
   - 04-stable-publication
@@ -130,4 +130,22 @@ work order. The inventory records candidates, not completed migrations.
 
 ## Results
 
-Pending.
+Implemented on 2026-10-19. Public author guidance covers exact dependencies,
+installed-version checks, SDK-wide host floors, and the existing-binary versus
+source-build boundary. Release guidance covers protected setup, retained
+artifacts, bootstrap provenance, public verification, and immutable recovery.
+Root/backend guidance, release/plugin skills, live source authority links, and
+both SDK READMEs use the extracted module. Historical completed records remain
+snapshots; the pending agent-tool fixture note identifies the relocated SDK.
+
+The [template handoff](template-migration.md) records current commits in both
+external templates and preserves their backend-owned packaging dependency.
+Their migration and author outreach remain outstanding. The coordinator
+package has no `test:ui` script at the inspected commit; the handoff records
+that difference rather than claiming that command passed.
+
+Validation: 63 public-doc validator tests passed; 48 public pages validate.
+Harness and specification validator tests passed. All 204 harness files,
+386 decisions, and 1626 specifications validate. README and screenshot catalog
+inspection found no additional stale SDK import requiring edits.
+Final exact-head CI and delivery status remain separate from these local checks.

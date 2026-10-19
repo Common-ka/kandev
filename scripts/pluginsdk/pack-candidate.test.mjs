@@ -7,6 +7,7 @@ import test from "node:test";
 import { checkPackedConsumer } from "../../apps/packages/plugin-sdk/test/packed-consumer.node.mjs";
 import {
   packCandidate,
+  inspectArchive,
   verifyTools,
   validateInventory,
 } from "./pack-candidate.mjs";
@@ -52,6 +53,24 @@ test("packs one standalone artifact with a verified byte integrity and complete 
     assert.match(candidate.integrity, /^sha512-[A-Za-z0-9+/]+={0,2}$/);
     assert.equal(candidate.node, config.node);
     assert.equal(candidate.npm, config.npm);
+    const { createHash } = await import("node:crypto");
+    const recordBytes = await readFile(
+      new URL("../../pluginsdk/sdk-release.json", import.meta.url),
+    );
+    assert.equal(
+      (await inspectArchive(candidate.archive)).recordDigest,
+      createHash("sha256").update(recordBytes).digest("hex"),
+    );
+    await assert.rejects(
+      packCandidate({
+        directory: fileURLToPath(
+          new URL("../../apps/packages/plugin-sdk", import.meta.url),
+        ),
+        output,
+        config: { ...config, npm: "0.0.0" },
+      }),
+      /npm 0.0.0/,
+    );
     const result = await checkPackedConsumer(candidate);
     assert.deepEqual(result.modes, ["NodeNext", "Bundler"]);
   } finally {

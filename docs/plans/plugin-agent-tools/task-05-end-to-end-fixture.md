@@ -69,6 +69,6 @@ notification counts, exact commands/results, and task/plan status updates.
 - Built `.build/kandev-plugin-e2e-1.0.0.tar.gz`, sideloaded it into a running
   backend, and verified the installed record is active with `test_echo`.
 - Verification: `go test ./cmd/plugin-fixture` and `make e2e-plugin-package`
-  passed. The SDK gRPC round-trip test also passes in `pkg/pluginsdk`.
+  passed. The SDK gRPC round-trip test also passes in the then-current `pkg/pluginsdk` (now root `pluginsdk/`).
 - Full MCP JSON-RPC subprocess integration and lifecycle hot-removal coverage
   remain future work.

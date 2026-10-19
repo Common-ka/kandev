@@ -313,7 +313,8 @@ initial availability gate with their bootstrap origin explicitly recorded.
 
 [Official npm guidance](https://docs.npmjs.com/trusted-publishers/) describes
 setup in package settings and separate permissions for direct publication and
-dist-tag operations. WO02/04 must select exact compatible Node/npm versions and
+dist-tag operations. `scripts/pluginsdk/pack-config.json` pins Node 24.19.0
+and npm 11.21.0. Release jobs load and enforce the original SDK's pins and
 verify both required capabilities. Do not use `npm whoami` as OIDC proof. Verify
 current CLI requirements during implementation and before the first release.
 
@@ -368,11 +369,14 @@ Public mode uses `GOPROXY=https://proxy.golang.org` and `GOSUMDB=sum.golang.org`
 Clear `GOPRIVATE`, `GONOPROXY`, `GONOSUMDB`, and `GOINSECURE`. Require the public
 npm registry and reject inherited local registry or checksum-bypass settings.
 Check effective configuration, including npm configuration files. Public mode
-never consumes a local archive or workspace replacement.
+installs from public registries, never from a local archive or workspace
+replacement. The retained archive supplies the authenticated comparison hash.
 
 Both modes build/vet/test a plugin using `UnimplementedPlugin`, typecheck Host
 types, and run the same compatibility assertions. Include too-low host minima,
 unsupported API versions, missing local archives, and public trust contamination.
+The public CLI uses `--mode public --host-tag vH`; it resolves the signed
+source and receipt rather than trusting caller-provided metadata.
 Release verification additionally compares installed records and npm integrity
 with the original signed receipt. Record local packaging and public availability
 as separate results. No browser scenario is added.

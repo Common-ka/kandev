@@ -46,26 +46,6 @@ with zipfile.ZipFile(output, 'w', zipfile.ZIP_DEFLATED) as archive:
   ]);
 }
 
-export async function smokeFrontend(mode = "local") {
-  if (mode !== "local")
-    throw new Error(
-      "public npm verification is not available until work order 04",
-    );
-  const { packCandidate } = await import("./pack-candidate.mjs");
-  const { checkPackedConsumer } =
-    await import("../../apps/packages/plugin-sdk/test/packed-consumer.node.mjs");
-  const output = await mkdtemp(join(tmpdir(), "sdk-frontend-candidate-"));
-  try {
-    const candidate = await packCandidate({
-      directory: join(repository, "apps/packages/plugin-sdk"),
-      output,
-    });
-    console.log(JSON.stringify(await checkPackedConsumer(candidate)));
-  } finally {
-    await rm(output, { recursive: true, force: true });
-  }
-}
-
 async function exerciseGo(cwd, env, version) {
   await writeFile(
     join(cwd, "go.mod"),
@@ -108,13 +88,13 @@ async function exerciseGo(cwd, env, version) {
   return { go, graph, module };
 }
 
-async function localSources(root, version, resolved) {
+async function localSources(root, version, resolved, sourceRoot) {
   const sdk = join(root, "source", "pluginsdk");
   const frontend = join(root, "source", "frontend");
   const filter = (path) =>
     !path.split("/").some((part) => ["node_modules", ".tools"].includes(part));
-  await cp(join(repository, "pluginsdk"), sdk, { recursive: true, filter });
-  await cp(join(repository, "apps/packages/plugin-sdk"), frontend, {
+  await cp(join(sourceRoot, "pluginsdk"), sdk, { recursive: true, filter });
+  await cp(join(sourceRoot, "apps/packages/plugin-sdk"), frontend, {
     recursive: true,
     filter,
   });
@@ -123,7 +103,10 @@ async function localSources(root, version, resolved) {
   );
   if (record.sdk_version !== version.replace(/^v/, ""))
     throw new Error("local archive version differs from source record");
-  if (resolved) {
+  if (
+    resolved &&
+    (record.host_release === null || record.min_kandev_version === null)
+  ) {
     record.host_release ??= "0.100.0";
     record.min_kandev_version ??= record.host_release;
     for (const directory of [sdk, frontend])
@@ -163,23 +146,51 @@ export async function smokeGo({
   version = "v0.1.0",
   skipCompatibilityCheck = false,
   frontend = false,
+  sourceRoot = repository,
+  candidate: suppliedCandidate,
+  expectedRecordDigest,
+  packConfig,
 } = {}) {
-  if (frontend && mode !== "local")
-    throw new Error(
-      "public npm verification is not available until work order 04",
-    );
+  if (mode === "public") {
+    if (!suppliedCandidate || !expectedRecordDigest || skipCompatibilityCheck)
+      throw new Error(
+        "public verification requires an authenticated candidate and record",
+      );
+    const { validatePublicTrust } = await import("./public-trust.mjs");
+    await validatePublicTrust();
+  }
   const root = await mkdtemp(join(tmpdir(), "kandev-sdk-consumer-"));
   let proxy;
   try {
     let source;
     if (mode === "local") {
-      source = await localSources(root, version, !skipCompatibilityCheck);
+      source = await localSources(
+        root,
+        version,
+        !skipCompatibilityCheck,
+        sourceRoot,
+      );
       await archiveModule(source.sdk, join(root, "proxy"), version);
       proxy = await startProxy(join(root, "proxy"));
     }
-    const env = goEnvironment(mode, root, proxy?.url);
+    const env = goEnvironment(
+      mode,
+      root,
+      proxy?.url,
+      mode === "public"
+        ? { ...process.env, GOPROXY: "https://proxy.golang.org" }
+        : process.env,
+    );
     const exercise = async (cwd) => {
       const { go, graph, module } = await exerciseGo(cwd, env, version);
+      if (expectedRecordDigest) {
+        const { digest } = await import("../release/sdk-artifact.mjs");
+        if (
+          digest(await readFile(join(module.Dir, "sdk-release.json"))) !==
+          expectedRecordDigest
+        )
+          throw new Error("public Go record differs from authenticated source");
+      }
       if (!skipCompatibilityCheck) {
         const record = JSON.parse(
           await readFile(join(module.Dir, "sdk-release.json"), "utf8"),
@@ -202,13 +213,19 @@ export async function smokeGo({
       const { packCandidate } = await import("./pack-candidate.mjs");
       const { checkPackedConsumer } =
         await import("../../apps/packages/plugin-sdk/test/packed-consumer.node.mjs");
-      const candidate = await packCandidate({
-        directory: source.frontend,
-        output: join(root, "candidate"),
-      });
+      const candidate =
+        suppliedCandidate ??
+        (await packCandidate({
+          directory: source.frontend,
+          output: join(root, "candidate"),
+          config: packConfig,
+        }));
       console.log(
         JSON.stringify(
-          await checkPackedConsumer(candidate, ({ cwd }) => exercise(cwd)),
+          await checkPackedConsumer(candidate, ({ cwd }) => exercise(cwd), {
+            mode,
+            config: packConfig,
+          }),
         ),
       );
     } else {
@@ -230,14 +247,19 @@ if (
     options: {
       mode: { type: "string", default: "local" },
       version: { type: "string", default: "v0.1.0" },
+      "host-tag": { type: "string" },
       "backend-only": { type: "boolean" },
       "skip-compatibility-check": { type: "boolean" },
     },
   });
-  await smokeGo({
-    frontend: !values["backend-only"],
-    mode: values.mode,
-    version: values.version,
-    skipCompatibilityCheck: values["skip-compatibility-check"],
-  });
+  if (values.mode === "public") {
+    const { runRelease } = await import("../release/publish-plugin-sdk.mjs");
+    await runRelease({ mode: "verify", hostTag: values["host-tag"] });
+  } else
+    await smokeGo({
+      frontend: !values["backend-only"],
+      mode: values.mode,
+      version: values.version,
+      skipCompatibilityCheck: values["skip-compatibility-check"],
+    });
 }

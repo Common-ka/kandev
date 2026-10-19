@@ -91,6 +91,8 @@ jobs:
             apps/packages/plugin-sdk/**
             pluginsdk/**
             scripts/pluginsdk/**
+            scripts/release/*plugin-sdk*
+            scripts/release/sdk-*
             .github/scripts/plugin-sdk-ci-contract_test.py
             apps/web/lib/settings-discovery/contract.generated.json
             apps/web/lib/settings-discovery/profile-contract.generated.json
@@ -190,6 +192,7 @@ jobs:
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           persist-credentials: false
+          fetch-depth: 0
       - name: Read packaging tool versions
         id: tools
         run: node -e 'const c=require("./scripts/pluginsdk/pack-config.json"); console.log("node="+c.node); console.log("npm="+c.npm)' >> "$GITHUB_OUTPUT"
@@ -210,7 +213,8 @@ jobs:
       - name: Check the standalone npm artifact
         run: |
           node scripts/pluginsdk/sync-record.mjs --check
-          node --test scripts/pluginsdk/sync-record.test.mjs scripts/pluginsdk/pack-candidate.test.mjs
+          node scripts/release/plugin-sdk.mjs --check
+          node --test scripts/pluginsdk/sync-record.test.mjs scripts/pluginsdk/pack-candidate.test.mjs scripts/pluginsdk/public-trust.test.mjs scripts/release/plugin-sdk.test.mjs scripts/release/publish-plugin-sdk.test.mjs scripts/release/sdk-*.test.mjs
           node scripts/pluginsdk/consumer-smoke.mjs --mode local
 
   static_checks:

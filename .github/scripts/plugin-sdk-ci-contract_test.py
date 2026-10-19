@@ -25,6 +25,13 @@ class SDKSelectionTests(unittest.TestCase):
                     self.assertTrue(paths.includes(path), path)
             self.assertFalse(paths.includes("pluginsdk/README.md"))
 
+    def test_release_sdk_changes_select_the_required_artifact_job(self):
+        text = (ROOT / ".github/workflows/backend-tests.yml").read_text()
+        block = re.search(r"PATTERNS: \|\n((?:            .*\n)+)", text)
+        paths = matcher.Filter(block[1].splitlines())
+        for path in ("scripts/release/plugin-sdk.mjs", "scripts/release/sdk-assets.mjs", "scripts/release/publish-plugin-sdk.sh", "scripts/release/plugin-sdk-contract-inputs.json"):
+            self.assertTrue(paths.includes(path), path)
+
     def test_sdk_has_explicit_race_vet_and_contract_checks(self):
         text = (ROOT / ".github/workflows/backend-tests.yml").read_text()
         self.assertIn("working-directory: pluginsdk", text)

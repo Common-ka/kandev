@@ -1,7 +1,7 @@
 ---
 id: "04-stable-publication"
 title: "Publish SDKs through Stable releases"
-status: pending
+status: in_progress
 wave: 4
 depends_on:
   - 03-compatibility-check
@@ -143,11 +143,11 @@ Future public release verification, run by the authorized Stable SDK job after
 tagging/publication (not by this work order's local test block):
 
 ```bash
-node scripts/pluginsdk/consumer-smoke.mjs --mode public --sdk-version "$SDK_VERSION" --host-version "$HOST_VERSION" --receipt "$SDK_RECEIPT"
+RELEASE_GPG_FINGERPRINT="$APPROVED_FINGERPRINT" node scripts/pluginsdk/consumer-smoke.mjs --mode public --host-tag "$HOST_TAG"
 ```
 
-The job obtains versions from validated metadata and `SDK_RECEIPT` from the
-verified original receipt. It supplies the design's public trust environment,
+The job resolves versions and the original receipt from the signed host/SDK
+tags and retained host-release assets. It supplies the design's public trust environment,
 fresh caches, and public npm registry. Unverified caller claims are not evidence.
 Record public success separately from mocked/local
 tests. An unavailable workflow tool is a reported verification gap, not a pass.
@@ -186,4 +186,28 @@ latest-tag restriction and must not restamp metadata.
 
 ## Results
 
-Pending. Public registry verification awaits a later authorized release.
+Implemented on 2026-10-19. The external adapter verifies real signed tags and
+receipt signatures, retains immutable GitHub assets before SDK tagging, packs
+from the original signed source with original tools, publishes exact bytes via
+OIDC, checks all four tag/npm states, and verifies public consumers. Stable and
+backfill use separate signing and OIDC jobs. Current workflow helpers control
+recovery; archived SDK source and packaging pins remain tied to the original
+release. Dry-run is read-only; Nightly and desktop validation skip SDK mutation.
+
+Local evidence:
+
+- 49 SDK release/consumer tests passed, including real disposable GPG keys,
+  lost upload responses, partial retention, exact rebuild hashes, inherited
+  config rejection, bounded visibility retries, and no-downgrade checks.
+- 68 release workflow contracts passed. SDK CI selection: nine tests passed.
+  Existing runtime/Nightly publication tests: 30 passed. Action pinning: nine
+  tests passed. Notification workflow contracts: four passed.
+- Shell syntax, Node syntax, documentation/specification/harness validation,
+  and whitespace checks passed.
+- `zizmor .github/workflows` remains nonzero on existing repository findings
+  (18 informational, 3 low, 8 medium, 11 high; 228 suppressed and 2 ignored).
+  No finding points to the new SDK release jobs or changed SDK consumer steps.
+
+Exact-head CI is pending. No release was dispatched, no SDK tag was pushed,
+and no registry package was published. Public availability and protected npm
+ownership/publisher setup remain release-time prerequisites.

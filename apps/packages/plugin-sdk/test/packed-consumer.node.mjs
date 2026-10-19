@@ -8,14 +8,23 @@ import { integrityOf, inspectArchive } from "../../../../scripts/pluginsdk/pack-
 import { startRegistry, npmEnvironment } from "../../../../scripts/pluginsdk/npm-consumer.mjs";
 
 const run = promisify(execFile);
-export async function checkPackedConsumer(candidate, inspectConsumer) {
+export async function checkPackedConsumer(
+  candidate,
+  inspectConsumer,
+  { mode = "local", config } = {},
+) {
   if ((await integrityOf(candidate.archive)) !== candidate.integrity)
     throw new Error("candidate integrity mismatch before installation");
-  await inspectArchive(candidate.archive);
+  await inspectArchive(candidate.archive, config);
   const root = await mkdtemp(join(tmpdir(), "sdk-packed-consumer-"));
   let registry;
   try {
-    registry = await startRegistry(candidate);
+    if (mode === "public") {
+      const { validatePublicTrust } =
+        await import("../../../../scripts/pluginsdk/public-trust.mjs");
+      await validatePublicTrust();
+    } else registry = await startRegistry(candidate);
+    const registryURL = registry?.url ?? "https://registry.npmjs.org";
     const cwd = join(root, "consumer");
     await mkdir(cwd);
     await writeFile(
@@ -29,14 +38,14 @@ export async function checkPackedConsumer(candidate, inspectConsumer) {
       }),
     );
     const env = npmEnvironment(root);
-    await run("npm", ["install", "--registry", registry.url], { cwd, env, timeout: 180_000 });
+    await run("npm", ["install", "--registry", registryURL], { cwd, env, timeout: 180_000 });
     const lock = JSON.parse(await readFile(join(cwd, "package-lock.json"), "utf8"));
     const installed = lock.packages["node_modules/@kandev/plugin-sdk"];
     if (
       installed.integrity !== candidate.integrity ||
-      !installed.resolved.startsWith(registry.url + "/")
+      !installed.resolved.startsWith(registryURL + "/")
     )
-      throw new Error("consumer did not install the candidate from the fixture registry");
+      throw new Error("consumer did not install the candidate from the selected registry");
     await writeFile(
       join(cwd, "consumer.ts"),
       `import type { PluginHostApi, PluginRegistry, PluginComposerSlotProps } from '@kandev/plugin-sdk';\nimport record from '@kandev/plugin-sdk/sdk-release.json' with { type: 'json' };\ndeclare const host: PluginHostApi;\ndeclare const registry: PluginRegistry;\ndeclare const slot: PluginComposerSlotProps;\nvoid host.React; void registry; void slot; const version: string = record.sdk_version; void version;\n`,
@@ -64,6 +73,12 @@ export async function checkPackedConsumer(candidate, inspectConsumer) {
         { cwd, env },
       );
     }
+    if (mode === "public")
+      await run("npm", ["audit", "signatures", "--registry", registryURL], {
+        cwd,
+        env,
+        timeout: 180_000,
+      });
     await inspectConsumer?.({ cwd, env, root });
     if ((await integrityOf(candidate.archive)) !== candidate.integrity)
       throw new Error("candidate integrity mismatch after installation");

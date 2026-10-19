@@ -35,9 +35,10 @@ strict npm/pnpm lock evidence. Shared version `0.1.0` and the SDK-wide host floo
 remain accepted. The first host numbers and registry ownership/setup remain
 release-time dependencies. External template adoption remains a separate handoff.
 The design reconciliation changed documentation only. Implementation was
-authorized on 2026-10-19. Work orders 01–03 are implemented locally. Docker CI passed on the Go extraction
-head. Preview layout remediation and the newer package/checker CI checks await
-the next push. Work orders 04–05 remain pending.
+authorized on 2026-10-19. All five work orders now have implementation and
+documentation changes. Local acceptance and final delivery validation are in
+progress; exact-head CI remains a separate gate. Docker CI passed on the Go
+extraction head. Public publication and external template migration have not run.
 
 ## Overview
 
@@ -165,7 +166,7 @@ cases; import-only migration relies on compile/runtime evidence.
 | `001.1`, `001.3` | WO01: `scripts/pluginsdk/consumer-smoke.test.mjs`, fresh Go archive/proxy consumer; narrow checksum exception; missing archive cannot fall back; graph excludes backend |
 | `001.2`, `001.3` | WO02: `apps/packages/plugin-sdk/test/packed-consumer.node.mjs`, install the same hashed archive outside checkout, validate file allowlist/tool pins, typecheck both resolution modes |
 | `002.1`, `002.3`, `002.4` | WO03/04: `pluginsdk/internal/compatibility/release_test.go` and `scripts/release/plugin-sdk.test.mjs`, version/floor/API consistency and prepare stamping |
-| `002.2` | WO03: `pluginsdk/internal/compatibility/check_test.go` and `pluginsdk/cmd/kandev-sdk-check/main_test.go`, resolved versions, missing/low minima, unsupported API, malformed/null metadata, local replacements/links, mixed SDK floors |
+| `002.2` | WO03: `pluginsdk/internal/compatibility/release_test.go` and `pluginsdk/cmd/kandev-sdk-check/main_test.go`, resolved versions, missing/low minima, unsupported API, malformed/null metadata, local replacements/links, mixed SDK floors |
 | `003.1`, `003.2` | WO04: `scripts/release/publish-plugin-sdk.test.mjs`, original-artifact reuse, signed receipt/tag identities, missing-tag backfill, bootstrap, unreadable states, retry after uncertain response and partial completion |
 | `003.3`, `003.4` | WO04: `.github/scripts/release-workflow-contract_test.py`, mode guards, downstream completion, contributor notices, provenance/OIDC/bootstrap boundaries |
 | `004.1` | WO01: moved `serve_test.go`/`protocol_test.go`, existing runtime tests, new `sdk_binary_compatibility_test.go` with an actual legacy subprocess |

@@ -33,7 +33,7 @@ export async function integrityOf(archive) {
       .digest("base64")
   );
 }
-export async function inspectArchive(archive) {
+export async function inspectArchive(archive, config = packConfig) {
   const { stdout } = await run(
     "python3",
     [
@@ -54,7 +54,7 @@ with tarfile.open(sys.argv[1], 'r:gz') as archive:
     { maxBuffer: 8 * 1024 * 1024 },
   );
   const files = JSON.parse(stdout);
-  validateInventory(Object.keys(files));
+  validateInventory(Object.keys(files), config);
   const manifest = JSON.parse(files["package.json"]);
   const record = JSON.parse(files["sdk-release.json"]);
   if (
@@ -72,11 +72,21 @@ with tarfile.open(sys.argv[1], 'r:gz') as archive:
   }
   if (/(?:from\s+|import\s*(?:\(\s*)?)["'](?![./])/.test(files["src/index.ts"]))
     throw new Error("SDK source contains an external import");
-  return { files: Object.keys(files).sort(), record };
+  return {
+    files: Object.keys(files).sort(),
+    record,
+    recordDigest: createHash("sha256")
+      .update(files["sdk-release.json"])
+      .digest("hex"),
+  };
 }
-export async function packCandidate({ directory, output }) {
+export async function packCandidate({
+  directory,
+  output,
+  config = packConfig,
+}) {
   const npm = (await run("npm", ["--version"])).stdout.trim();
-  verifyTools(packConfig, process.version, npm);
+  verifyTools(config, process.version, npm);
   await mkdir(output, { recursive: true });
   const { stdout } = await run(
     "npm",
@@ -91,7 +101,7 @@ export async function packCandidate({ directory, output }) {
   );
   const [packed] = JSON.parse(stdout);
   const archive = join(resolve(output), packed.filename);
-  const { files, record } = await inspectArchive(archive);
+  const { files, record } = await inspectArchive(archive, config);
   const integrity = await integrityOf(archive);
   if (integrity !== packed.integrity)
     throw new Error("npm pack integrity differs from artifact bytes");
@@ -99,7 +109,7 @@ export async function packCandidate({ directory, output }) {
     archive,
     files,
     integrity,
-    node: packConfig.node,
+    node: config.node,
     npm,
     sdk_version: record.sdk_version,
   };

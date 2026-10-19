@@ -136,7 +136,8 @@ The issue requires tagged and published SDK releases. The retained archive,
 bootstrap state, and recovery rules make that requirement operational. These
 are the corrections from the design review, now reconciled into the canonical
 draft and WO04. Signing and npm publication use separate protected jobs.
-Implementation and public availability remain pending.
+The release workflow is implemented; public availability still requires an
+authorized Stable release and its public consumer checks.
 
 **Work order:** [04: Stable publication](task-04-stable-publication.md).
 
@@ -252,11 +253,13 @@ recommendation, and delivery still needs explicit authorization.
    path. Provide the
    public migration guide and verified version mapping when publication succeeds.
    The [notification inventory](author-notification-inventory.md) identifies
-   candidates. No notifications were sent by this planning task.
+   candidates. No notifications were sent by this task.
 4. Separate test results from support claims. A legacy fixture proves the tested
    handshake and Host call, not all behavior in every community plugin. Broader
    ecosystem claims need representative plugin smoke tests and author feedback.
 
 The 29-repository dependency inventory is not a compatibility certification.
-Work order 01 awaits CI; work orders 02–05 are pending. A legacy fixture that
-fails after extraction blocks the host-continuity acceptance criterion.
+All five work orders have implementation and documentation changes. Local
+checks pass; final delivery and exact-head CI remain in progress. The legacy
+subprocess test passed, and extraction Docker CI passed. The
+[template handoff](template-migration.md) remains separate, as does public publication.
