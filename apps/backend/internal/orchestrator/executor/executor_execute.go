@@ -3036,6 +3036,11 @@ func (e *Executor) applyRepositoryConfig(req *LaunchAgentRequest, task *v1.Task,
 				}
 			}
 		}
+		// Creation and environment persistence must use the same inventory key,
+		// even when the primary worktree keeps an unsuffixed directory path.
+		if req.UseWorktree {
+			req.BranchIdentitySlug = topLevelBranchIdentitySlug(req)
+		}
 		// Task directory mode: place worktree inside per-task directory
 		if req.UseWorktree && repoInfo.Repository != nil && repoInfo.Repository.Name != "" {
 			req.TaskDirName = worktree.SemanticWorktreeName(task.Title, worktree.TaskDirSuffix(task.ID))
