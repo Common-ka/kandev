@@ -1,0 +1,97 @@
+name: PR 4581 focused clarification proof
+on:
+  push:
+    branches: [review-proof/4581-clarification-d64ebce0]
+permissions:
+  contents: read
+  packages: read
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    container: ghcr.io/kdlbs/kandev-ci:build-latest
+    env:
+      GOFLAGS: -trimpath
+      GOMAXPROCS: '2'
+      GOMEMLIMIT: 3GiB
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
+      - name: Bind source and check formatting
+        run: |
+          mkdir -p proof-results
+          git rev-parse HEAD HEAD^{tree} > proof-results/source.txt
+          git ls-tree -r HEAD > proof-results/source-tree.txt
+          go version > proof-results/go-version.txt
+          test -z "$(gofmt -l apps/backend/internal/orchestrator/peer_message_clarification_delivery_test.go)"
+      - name: Admission RED with direct-path control
+        run: |
+          set -euo pipefail
+          cp apps/backend/internal/mcp/handlers/handlers.go proof-results/handlers.green.go
+          python3 - <<'MUTATE'
+          from pathlib import Path
+          p=Path('apps/backend/internal/mcp/handlers/handlers.go')
+          s=p.read_text()
+          old='\t\tif !interruptIfBusy && h.sessionHasLiveClarification(ctx, session.ID) {\n\t\t\treturn h.queueTaskMessage(ctx, taskID, session, prompt, metadata)\n\t\t}\n'
+          assert s.count(old)==1
+          p.write_text(s.replace(old,''))
+          MUTATE
+          cd apps/backend
+          go test -race -p=2 -count=1 -json -timeout=10m ./internal/mcp/handlers -run '^TestHandleMessageTask_NoLiveClarification_PromptsWaitingSession$' > ../../proof-results/admission-control.jsonl
+          set +e
+          go test -race -p=2 -count=1 -json -timeout=10m ./internal/mcp/handlers -run '^TestHandleMessageTask_LiveClarification_QueuesInsteadOfPrompting$' > ../../proof-results/admission-red.jsonl
+          status=$?
+          set -e
+          echo "$status" > ../../proof-results/admission-red.exit
+          test "$status" -eq 1
+          python3 - <<'ASSERT'
+          import json
+          a=[json.loads(s) for s in open('../../proof-results/admission-red.jsonl')]
+          assert any(x.get('Action')=='fail' and x.get('Test')=='TestHandleMessageTask_LiveClarification_QueuesInsteadOfPrompting' for x in a)
+          assert any('queued' in x.get('Output','') for x in a)
+          ASSERT
+          cp ../../proof-results/handlers.green.go internal/mcp/handlers/handlers.go
+      - name: Ready drain RED with shared control
+        run: |
+          set -euo pipefail
+          cp apps/backend/internal/orchestrator/event_handlers_agent.go proof-results/agent.green.go
+          python3 - <<'MUTATE'
+          from pathlib import Path
+          p=Path('apps/backend/internal/orchestrator/event_handlers_agent.go')
+          s=p.read_text()
+          old='if s.drainQueuedBeforeWorkflowTransition(completionCtx, data.TaskID, data.SessionID, session) {'
+          assert s.count(old)==1
+          p.write_text(s.replace(old,'if true {'))
+          MUTATE
+          cd apps/backend
+          go test -race -p=2 -count=1 -json -timeout=10m ./internal/mcp/handlers -run '^TestHandleMessageTask_NoLiveClarification_PromptsWaitingSession$' > ../../proof-results/drain-control.jsonl
+          set +e
+          go test -race -p=2 -count=1 -json -timeout=10m ./internal/orchestrator -run '^TestPeerMessageClarificationAnswerDrainsExactlyOnce$' > ../../proof-results/drain-red.jsonl
+          status=$?
+          set -e
+          echo "$status" > ../../proof-results/drain-red.exit
+          test "$status" -eq 1
+          python3 - <<'ASSERT'
+          import json
+          a=[json.loads(s) for s in open('../../proof-results/drain-red.jsonl')]
+          assert any(x.get('Action')=='fail' and x.get('Test')=='TestPeerMessageClarificationAnswerDrainsExactlyOnce' for x in a)
+          assert any('answer ready event did not deliver the queued peer message' in x.get('Output','') for x in a)
+          ASSERT
+          cp ../../proof-results/agent.green.go internal/orchestrator/event_handlers_agent.go
+      - name: Restored GREEN and shared lifecycle controls
+        run: |
+          set -euo pipefail
+          git diff --exit-code
+          cd apps/backend
+          go test -race -p=2 -count=1 -json -timeout=10m ./internal/mcp/handlers ./internal/orchestrator -run '^(TestPeerMessageClarificationAnswerDrainsExactlyOnce|TestHandleMessageTask_(LiveClarification_QueuesInsteadOfPrompting|NoLiveClarification_PromptsWaitingSession|WaitingForInput_PromptsAgent|ParentToChildRunningSession_Interrupts|RunningSession_Queues|FailedSession_Rejects|CancelledSession_Rejects)|TestCheckQueueAdmissionReadiness.*|TestSessionHasLiveClarification.*|TestSessionHasPendingClarification.*)$' > ../../proof-results/restored-green.jsonl
+      - name: Upload raw proof evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: pr4581-focused-proof
+          path: proof-results
+          retention-days: 30
