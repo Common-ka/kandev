@@ -1,0 +1,61 @@
+name: PR 4581 remediation GREEN
+on:
+  push:
+    branches: [review-proof/4581-remediation-green-d64ebce0]
+permissions:
+  contents: read
+  packages: read
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    container: ghcr.io/kdlbs/kandev-ci:build-latest
+    env:
+      GOFLAGS: -trimpath
+      GOMAXPROCS: '2'
+      GOMEMLIMIT: 3GiB
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
+      - name: Bind and format actual test sources
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          mkdir -p proof-results/formatted
+          git rev-parse HEAD HEAD^{tree} > proof-results/checkout-source.txt
+          git ls-tree -r HEAD > proof-results/checkout-tree.txt
+          go version > proof-results/go-version.txt
+          files=(apps/backend/internal/mcp/handlers/handlers.go apps/backend/internal/mcp/handlers/message_task_live_clarification_test.go apps/backend/internal/orchestrator/clarification_guard_test.go apps/backend/internal/orchestrator/peer_message_clarification_delivery_test.go)
+          gofmt -w "${files[@]}"
+          for file in "${files[@]}"; do
+            mkdir -p "proof-results/formatted/$(dirname "$file")"
+            cp "$file" "proof-results/formatted/$file"
+          done
+          git diff --binary > proof-results/formatting.patch
+          git -c core.hooksPath=/dev/null -c core.fsmonitor=false add -- "${files[@]}"
+          git write-tree > proof-results/actual-build-tree.txt
+          git diff --check HEAD
+          sha256sum "${files[@]}" > proof-results/actual-test-sources.sha256
+      - name: Registered dispatch and lifecycle regressions
+        working-directory: apps/backend
+        run: |
+          set -euo pipefail
+          go test -race -p=2 -count=1 -json -timeout=10m ./internal/mcp/handlers ./internal/orchestrator -run '^(TestPeerMessageClarificationAnswerDrainsExactlyOnce|TestHandleMessageTask_.*|TestSessionHasLiveClarification.*|TestSessionHasPendingClarification.*|TestCheckQueueAdmissionReadiness.*|TestResumePromptQueueServiceProvidesAdmissionReadinessCheck|TestPauseForClarificationInput_DrainsPeerQueueAfterPause|TestPauseForClarificationInput_NewTurnAfterDrainAdvancesWorkflow)$' > ../../proof-results/regressions-green.jsonl
+      - name: Specifications and public documentation
+        run: |
+          set -euo pipefail
+          python3 scripts/list-docs.py validate > proof-results/spec-inventory.txt
+          python3 scripts/lint-spec-files.py --all > proof-results/spec-lint.txt
+          node --test scripts/validate-public-docs.test.mjs > proof-results/public-doc-tests.tap
+          node scripts/validate-public-docs.mjs > proof-results/public-doc-validation.txt
+      - name: Upload raw proof evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: pr4581-remediation-green
+          path: proof-results
+          retention-days: 30

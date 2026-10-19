@@ -15,7 +15,7 @@ legacy_specs: []
 A queued-mode `message_task_kandev` to a session that waits on its own
 `ask_user_question` was prompted directly and superseded the question. Queue it
 instead, as the queue drain already does. One work order covers the handler
-check, the orchestrator accessor, tests, and specs.
+checks, the orchestrator accessor, tests, public messaging guidance, and specs.
 
 ## Scope
 
@@ -23,7 +23,9 @@ check, the orchestrator accessor, tests, and specs.
 
 - [REQ-TASKS-CLARIFICATION-LIFECYCLE-001](../../specs/tasks/requirements/clarification-active-lifecycle.md),
   AC `.10`.
-- `dispatchTaskMessage` in `apps/backend/internal/mcp/handlers/handlers.go`.
+- `dispatchTaskMessage` and the selected-session recheck in
+  `dispatchPreparedTaskMessageWithAdmissionAndInterrupt`, both in
+  `apps/backend/internal/mcp/handlers/handlers.go`.
 - `Service.SessionHasLiveClarification` in
   `apps/backend/internal/orchestrator/clarification_guard.go`.
 
