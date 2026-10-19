@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"path"
 	"sort"
 	"time"
@@ -112,7 +113,8 @@ func taskHostWorkspaceProjection(runtimeName agentruntime.Runtime, info *Workspa
 		return "", nil, fmt.Errorf("workspace info is required")
 	}
 	if runtimeName != agentruntime.RuntimeDocker {
-		return info.WorkspacePath, workspaceSourceRoots(info.WorkspaceFolders, info.WorkspaceRepositories), nil
+		roots, err := localTaskHostSourceRoots(info)
+		return info.WorkspacePath, roots, err
 	}
 	if len(info.WorkspaceFolders) > 0 {
 		return "", nil, fmt.Errorf("docker task hosts do not support host workspace folders")
@@ -150,6 +152,26 @@ func taskHostWorkspaceProjection(runtimeName agentruntime.Runtime, info *Workspa
 		roots = append(roots, root)
 	}
 	return dockerWorkspacePath, roots, nil
+}
+
+func localTaskHostSourceRoots(info *WorkspaceInfo) ([]string, error) {
+	// RepositoryPath is the Git source clone. LSP must analyze the selected
+	// checkout, without changing the source inventory used by Git recovery.
+	repositories := append([]WorkspaceRepositorySpec(nil), info.WorkspaceRepositories...)
+	for i, repository := range repositories {
+		if repository.WorktreePath == "" && repository.WorktreeID == "" {
+			continue
+		}
+		checkout, err := os.Stat(repository.WorktreePath)
+		if err != nil {
+			return nil, fmt.Errorf("task-host repository %q worktree is unavailable: %w", repository.RepositoryID, err)
+		}
+		if !checkout.IsDir() {
+			return nil, fmt.Errorf("task-host repository %q worktree is not a directory", repository.RepositoryID)
+		}
+		repositories[i].RepositoryPath = repository.WorktreePath
+	}
+	return workspaceSourceRoots(info.WorkspaceFolders, repositories), nil
 }
 
 func remoteWorkspaceRepositoryDirectory(spec RepoLaunchSpec) string {

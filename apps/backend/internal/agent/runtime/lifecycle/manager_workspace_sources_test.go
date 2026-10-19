@@ -95,6 +95,8 @@ func TestRescanWorkspaceForTaskHostUsesCurrentEnvironmentWorkspace(t *testing.T)
 	newRoot := filepath.Dir(oldRoot)
 	sourceB := t.TempDir()
 	sourceA := t.TempDir()
+	checkoutB := t.TempDir()
+	checkoutA := t.TempDir()
 	execution := &AgentExecution{
 		ID: "task-host", SessionID: taskHostRuntimeSessionPrefix + "env-1",
 		TaskEnvironmentID: "env-1", IsTaskHost: true, WorkspacePath: oldRoot,
@@ -113,8 +115,8 @@ func TestRescanWorkspaceForTaskHostUsesCurrentEnvironmentWorkspace(t *testing.T)
 			"env-1": {
 				TaskID: "task-1", TaskEnvironmentID: "env-1", WorkspacePath: newRoot,
 				WorkspaceRepositories: []WorkspaceRepositorySpec{
-					{RepositoryPath: sourceB, Position: 1},
-					{RepositoryPath: sourceA, Position: 2},
+					{RepositoryPath: sourceB, WorktreePath: checkoutB, Position: 1},
+					{RepositoryPath: sourceA, WorktreePath: checkoutA, Position: 2},
 				},
 			},
 		}},
@@ -122,7 +124,7 @@ func TestRescanWorkspaceForTaskHostUsesCurrentEnvironmentWorkspace(t *testing.T)
 	if err := manager.RescanWorkspaceForTaskHost(context.Background(), "task-1", "env-1"); err != nil {
 		t.Fatalf("RescanWorkspaceForTaskHost: %v", err)
 	}
-	if gotPath != newRoot || !sameStrings(gotRoots, []string{sourceB, sourceA}) {
+	if gotPath != newRoot || !sameStrings(gotRoots, []string{checkoutB, checkoutA}) {
 		t.Fatalf("task-host rescan path=%q roots=%v", gotPath, gotRoots)
 	}
 	if execution.WorkspacePath != newRoot || !sameStrings(execution.WorkspaceSourceRoots, gotRoots) {
@@ -224,7 +226,7 @@ func TestTaskLSPWorkspaceProjectionDoesNotRebindSharedTaskHost(t *testing.T) {
 			taskInfos: map[string]*WorkspaceInfo{
 				"task-child": {
 					TaskID: "task-child", TaskEnvironmentID: "env-1", WorkspacePath: childRoot,
-					WorkspaceRepositories: []WorkspaceRepositorySpec{{RepositoryPath: childRoot}},
+					WorkspaceRepositories: []WorkspaceRepositorySpec{{RepositoryPath: t.TempDir(), WorktreePath: childRoot}},
 				},
 			},
 		},

@@ -603,3 +603,11 @@ Wave 9 — current-main integration audit:
 After all task checks pass, follow the repository commit, push, PR, and PR-fixup workflows. The PR
 must use the repository template, include docs impact and production E2E evidence, and remain in
 the primary conversation through CI/review remediation.
+
+## Local worktree root correction (2026-10-19)
+
+Read-only macOS logs revealed that task-host initialization supplied the source
+clone in `workspaceFolders` while `rootUri` named the task worktree. The
+[worktree-root repair](../lsp-worktree-roots/plan.md) records the failing regression,
+correction, and targeted checks. Implementation is complete; verification of
+Kotlin navigation on the user's updated Mac remains pending.
