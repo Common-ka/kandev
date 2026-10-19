@@ -1,12 +1,6 @@
-import { createPortal } from "react-dom";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerNested,
-  DrawerTitle,
-} from "@kandev/ui/drawer";
+import { Drawer, DrawerContent, DrawerNested, DrawerTitle } from "@kandev/ui/drawer";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,7 +36,7 @@ it.each(["", "auto"])(
       <Drawer open>
         <DrawerContent aria-describedby={undefined}>
           <DrawerTitle>Navigation</DrawerTitle>
-          {createPortal(<Menu />, document.body)}
+          <Menu />
         </DrawerContent>
       </Drawer>,
     );
