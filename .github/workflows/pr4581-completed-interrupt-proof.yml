@@ -1,0 +1,107 @@
+name: PR 4581 completed interrupt proof
+on:
+  push:
+    branches: [review-proof/4581-completed-interrupt-d64ebce0]
+permissions:
+  contents: read
+  packages: read
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    container: ghcr.io/kdlbs/kandev-ci:build-latest
+    env:
+      GOFLAGS: -trimpath
+      GOMAXPROCS: '2'
+      GOMEMLIMIT: 3GiB
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
+      - name: Bind and format actual test sources
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          mkdir -p proof-results/formatted
+          git rev-parse HEAD HEAD^{tree} > proof-results/checkout-source.txt
+          git ls-tree -r HEAD > proof-results/checkout-tree.txt
+          go version > proof-results/go-version.txt
+          files=(apps/backend/internal/coordinator/ledger/calls_test.go apps/backend/internal/mcp/handlers/message_task_live_clarification_test.go)
+          gofmt -w "${files[@]}"
+          for file in "${files[@]}"; do
+            mkdir -p "proof-results/formatted/$(dirname "$file")"
+            cp "$file" "proof-results/formatted/$file"
+          done
+          git diff --binary > proof-results/formatting.patch
+          git -c core.hooksPath=/dev/null -c core.fsmonitor=false add -- "${files[@]}"
+          git write-tree > proof-results/actual-red-build-tree.txt
+          git diff --check HEAD
+          sha256sum "${files[@]}" > proof-results/actual-test-sources.sha256
+      - name: Completed interrupt genuine RED with queued-mode control
+        run: |
+          set -euo pipefail
+          cd apps/backend
+          set +e
+          go test -race -p=2 -count=1 -json -timeout=10m ./internal/mcp/handlers -run '^TestHandleMessageTask_LiveClarification_CompletedTargetPreservesDeliveryMode$' > ../../proof-results/completed-interrupt-red.jsonl
+          status=$?
+          set -e
+          echo "$status" > ../../proof-results/completed-interrupt-red.exit
+          test "$status" -eq 1
+          python3 - <<'ASSERT'
+          import json
+          a=[json.loads(s) for s in open('../../proof-results/completed-interrupt-red.jsonl')]
+          name='TestHandleMessageTask_LiveClarification_CompletedTargetPreservesDeliveryMode'
+          assert any(x.get('Action')=='pass' and x.get('Test')==name+'/queued' for x in a)
+          assert any(x.get('Action')=='fail' and x.get('Test')==name+'/interrupt' for x in a)
+          text=''.join(x.get('Output','') for x in a)
+          assert 'completed resume must preserve delivery mode' in text and 'sent' in text and 'queued' in text
+          ASSERT
+      - name: Apply minimal flag propagation after observed RED
+        run: |
+          set -euo pipefail
+          python3 - <<'FIX'
+          from pathlib import Path
+          import re
+          p=Path('apps/backend/internal/mcp/handlers/handlers.go');s=p.read_text()
+          old='return h.dispatchPreparedTaskMessage(ctx, taskID, resumed, prompt, metadata)';assert s.count(old)==1;s=s.replace(old,old[:-1]+', interruptIfBusy)')
+          old='func (h *Handlers) dispatchPreparedTaskMessage(ctx context.Context, taskID string, session *models.TaskSession, prompt string, metadata map[string]interface{}) (taskMessageDispatchResult, error) {';assert s.count(old)==1;s=s.replace(old,old.replace('metadata map[string]interface{})','metadata map[string]interface{}, interruptIfBusy bool)'))
+          old='return h.dispatchPreparedTaskMessageWithAdmission(ctx, taskID, session, prompt, metadata, nil)';assert s.count(old)==1;s=s.replace(old,old[:-1]+', interruptIfBusy)')
+          a=s.index('func (h *Handlers) dispatchPreparedTaskMessageWithAdmission(\n');b=s.index('func (h *Handlers) dispatchPreparedTaskMessageWithAdmissionAndInterrupt(',a);part=s[a:b];assert part.count('admission orchestrator.PeerMessageStartAdmission,\n')==1;part=part.replace('admission orchestrator.PeerMessageStartAdmission,\n','admission orchestrator.PeerMessageStartAdmission,\n\tinterruptIfBusy bool,\n');assert part.count('metadata, admission, false)')==1;part=part.replace('metadata, admission, false)','metadata, admission, interruptIfBusy)');p.write_text(s[:a]+part+s[b:])
+          for file,expected in [('apps/backend/internal/mcp/handlers/message_task_initial_launch_test.go',2),('apps/backend/internal/mcp/handlers/message_task_readiness_test.go',1)]:
+           p=Path(file);s=p.read_text();pattern=r'(h\.dispatchPreparedTaskMessage\([\s\S]*?)(\n\t\))';assert len(re.findall(pattern,s))==expected
+           def add_default(m):
+            assert m[1].rstrip().endswith(',')
+            return m[1]+'\n\t\tfalse,'+m[2]
+           p.write_text(re.sub(pattern,add_default,s))
+          FIX
+          files=(apps/backend/internal/coordinator/ledger/calls_test.go apps/backend/internal/mcp/handlers/handlers.go apps/backend/internal/mcp/handlers/message_task_live_clarification_test.go apps/backend/internal/mcp/handlers/message_task_initial_launch_test.go apps/backend/internal/mcp/handlers/message_task_readiness_test.go)
+          gofmt -w "${files[@]}"
+          for file in "${files[@]}"; do
+            mkdir -p "proof-results/formatted/$(dirname "$file")"
+            cp "$file" "proof-results/formatted/$file"
+          done
+          git diff --binary HEAD > proof-results/complete-remediation.patch
+          git -c core.hooksPath=/dev/null -c core.fsmonitor=false add -- "${files[@]}"
+          git write-tree > proof-results/actual-green-build-tree.txt
+          git diff --check HEAD
+          sha256sum "${files[@]}" > proof-results/actual-green-sources.sha256
+      - name: Registered peer dispatch and direct prepared callers GREEN
+        working-directory: apps/backend
+        run: |
+          set -euo pipefail
+          go test -race -p=2 -count=1 -json -timeout=10m ./internal/mcp/handlers ./internal/orchestrator -run '^(TestPeerMessageClarificationAnswerDrainsExactlyOnce|TestHandleMessageTask_.*|TestSessionHasLiveClarification.*|TestSessionHasPendingClarification.*|TestCheckQueueAdmissionReadiness.*|TestResumePromptQueueServiceProvidesAdmissionReadinessCheck|TestPauseForClarificationInput_DrainsPeerQueueAfterPause|TestPauseForClarificationInput_NewTurnAfterDrainAdvancesWorkflow|TestPeerMessageInitialLaunch_Delivery|TestPeerMessageInitialLaunch_PreservesOlderFIFOEntry|TestMessageTaskReadiness_PreparedBusySession)$' > ../../proof-results/regressions-green.jsonl
+      - name: Complete ledger package GREEN
+        working-directory: apps/backend
+        run: |
+          set -euo pipefail
+          go test -race -p=2 -count=1 -json -timeout=10m ./internal/coordinator/ledger > ../../proof-results/ledger-green.jsonl
+      - name: Upload raw proof evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: pr4581-completed-interrupt
+          path: proof-results
+          retention-days: 30
