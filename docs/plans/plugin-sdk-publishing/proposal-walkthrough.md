@@ -182,9 +182,9 @@ frontend Host API by itself. Existing UI bundles are therefore intended to
 remain usable. The SDK move does not establish new support for private Host
 APIs or previously unsupported plugin behavior.
 
-These are design commitments, not completed compatibility results. The planned
+Local tests prove the v0.97.0 fixture handshake and Host state call. The
 [host continuity requirement](../../specs/plugins/requirements/sdk-distribution.md#req-plugins-sdk-distribution-004-host-continuity-and-author-migration)
-still needs implementation evidence. This PR changes documentation only.
+still awaits Docker validation. This does not certify every community plugin.
 
 ## Existing source builds: migration boundary
 
@@ -258,5 +258,5 @@ recommendation, and delivery still needs explicit authorization.
    ecosystem claims need representative plugin smoke tests and author feedback.
 
 The 29-repository dependency inventory is not a compatibility certification.
-All implementation work orders remain pending. A supported legacy fixture that
+Work order 01 awaits CI; work orders 02–05 are pending. A legacy fixture that
 fails after extraction blocks the host-continuity acceptance criterion.

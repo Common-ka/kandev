@@ -159,7 +159,7 @@ Validation completed locally:
 - Local isolated consumer build/vet/test passed. A cleanup failure from read-only
   Go cache directories was corrected with explicit `-modcacherw`; the final end-to-end
   rerun, including cleanup and the replacement-parser adjustment, passed.
-- CI contract tests: five passed. Existing changed-path tests: 23 passed.
+- CI contract tests: six passed. Existing changed-path tests: 23 passed.
   Architecture-linter tests: 99 passed. The upstream cache action and test-only
   selection helpers are absent from this PR base; this implementation updates
   its actual workflow caches and unconditional E2E build path. Recheck these
