@@ -37,7 +37,8 @@ class SDKSelectionTests(unittest.TestCase):
         e2e = (ROOT / ".github/workflows/e2e-tests.yml").read_text()
         self.assertIn("scripts/pluginsdk/check-proto-generation.mjs", backend)
         self.assertIn("scripts/pluginsdk/consumer-smoke.test.mjs", backend)
-        self.assertIn("--backend-only --skip-compatibility-check", backend)
+        self.assertIn("consumer-smoke.mjs --mode local --backend-only", backend)
+        self.assertNotIn("--skip-compatibility-check", backend)
         self.assertIn("make -C apps/backend e2e-plugin-ui e2e-plugin-package", e2e)
         self.assertIn("make -C apps/backend build-kandev build-agentctl", e2e)
 
@@ -57,6 +58,8 @@ class SDKSelectionTests(unittest.TestCase):
         self.assertIn('"sdk_package:${SDK_PACKAGE_RESULT}"', gate)
         self.assertIn("node --test scripts/pluginsdk/sync-record.test.mjs scripts/pluginsdk/pack-candidate.test.mjs", text)
         self.assertIn("pack-config.json", text)
+        job = text.split("  sdk_package:\n", 1)[1].split("  static_checks:\n", 1)[0]
+        self.assertIn("consumer-smoke.mjs --mode local\n", job)
 
     def test_docker_build_preserves_the_backend_replacement_layout(self):
         stage = (ROOT / "e2e.Dockerfile").read_text().split("FROM node:", 1)[0]

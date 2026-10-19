@@ -168,7 +168,19 @@ Validation completed locally:
   SDK production changes cannot select the test-only shortcut.
 - Documentation catalog and specification lint: passed.
 
-Remaining gate: Docker is not installed and no local Docker/Podman socket was
-found. The required `docker build --target go-builder ...` check moves to the
-`Plugin SDK Docker builder` CI job, included in the required backend gate.
-This work order remains `in_progress` until that job passes on the exact commit.
+Docker is unavailable locally. The required build-stage check runs in the
+`Plugin SDK Docker builder` CI job, included in the backend gate. This work
+order remains `in_progress` until CI validates the preview remediation below.
+
+CI follow-up: the shrink-only deprecation baseline cannot accept a renamed path.
+The existing `Task.Labels` deprecation now has an explicit compatibility-ledger
+entry at its new path. The field and wire mapping remain unchanged. The 1.0.0
+host checkpoint requires review, not automatic removal.
+
+The exact-head `Plugin SDK Docker builder` CI job passed for
+`f2eeaf6c93393d696a84b09e6090e332a6f98447` (run 39245035281, job 118035509627).
+Preview CI exposed a second source mount at `cmd/preview/build.go`. Its Docker
+mount now preserves `apps/backend` and read-only `pluginsdk` siblings. Fork
+preview artifacts include both paths and retain the repository-relative layout.
+A fake-Docker command regression test covers the mounts; actual preview CI
+verification awaits the next push.

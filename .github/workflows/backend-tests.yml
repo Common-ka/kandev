@@ -202,10 +202,16 @@ jobs:
         env:
           NPM_VERSION: ${{ steps.tools.outputs.npm }}
         run: npm install --global --ignore-scripts "npm@${NPM_VERSION}"
+      - name: Set up Go for the combined consumer
+        uses: actions/setup-go@5064d95ba18d4a9dda7c4cc67adeb03aea1a2a14 # v7.0.0 + upstream dependency refresh
+        with:
+          go-version-file: pluginsdk/go.mod
+          cache: false
       - name: Check the standalone npm artifact
         run: |
           node scripts/pluginsdk/sync-record.mjs --check
           node --test scripts/pluginsdk/sync-record.test.mjs scripts/pluginsdk/pack-candidate.test.mjs
+          node scripts/pluginsdk/consumer-smoke.mjs --mode local
 
   static_checks:
     name: Backend Static Checks
@@ -324,13 +330,14 @@ jobs:
         run: |
           node --test scripts/pluginsdk/consumer-smoke.test.mjs scripts/pluginsdk/check-proto-generation.test.mjs
           node scripts/pluginsdk/check-proto-generation.mjs
-          node scripts/pluginsdk/consumer-smoke.mjs --mode local --backend-only --skip-compatibility-check
+          node scripts/pluginsdk/consumer-smoke.mjs --mode local --backend-only
 
       - name: Test standalone plugin SDK
         working-directory: pluginsdk
         run: |
           go test -trimpath -race ./...
           go vet ./...
+          golangci-lint run --config ../apps/backend/.golangci.yml ./...
 
       - name: Check gofmt
         shell: bash

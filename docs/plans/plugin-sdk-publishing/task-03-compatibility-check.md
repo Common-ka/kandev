@@ -1,7 +1,7 @@
 ---
 id: "03-compatibility-check"
 title: "Enforce consumer compatibility"
-status: pending
+status: in_progress
 wave: 3
 depends_on:
   - 02-frontend-package
@@ -103,4 +103,17 @@ be treated as supported. Comparison must handle SemVer prereleases correctly.
 
 ## Results
 
-Pending.
+Implemented locally on 2026-10-19. The command resolves the selected Go module
+with workspace mode disabled. It verifies installed npm metadata and npm
+lockfile versions 2/3 or pnpm lockfile version 9. Normal pnpm store symlinks are
+accepted. Missing, unsupported, local, draft, and conflicting evidence fails.
+
+SDK race tests and vet passed. Manifest consistency tests passed. The full
+isolated Go/npm consumer passed Go-only, frontend-only, combined, and low-floor
+negative checks. A real Go minimum-version-selection fixture proves the checker
+reads version 0.2.0 selected through a dependency instead of the direct 0.1.0
+request. Checker runs leave the consumer go.mod unchanged.
+
+Canonical host values remain null. Only disposable local archive copies resolve
+them for these tests. CI now requires the checker in backend and combined
+consumers. Exact-head CI and final delivery remain pending.

@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { mkdtemp, mkdir, writeFile, readFile, rm } from "node:fs/promises";
+import { mkdtemp, mkdir, writeFile, readFile, rm, cp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -66,78 +66,156 @@ export async function smokeFrontend(mode = "local") {
   }
 }
 
+async function exerciseGo(cwd, env, version) {
+  await writeFile(
+    join(cwd, "go.mod"),
+    `module example.com/sdk-consumer\n\ngo 1.26.0\n\nrequire ${sdkModule} ${version}\n`,
+  );
+  await writeFile(
+    join(cwd, "main.go"),
+    `package main\nimport "${sdkModule}"\nfunc main() { pluginsdk.Serve(&pluginsdk.UnimplementedPlugin{}) }\n`,
+  );
+  await writeFile(
+    join(cwd, "main_test.go"),
+    `package main\nimport ("testing"; "${sdkModule}")\nfunc TestPluginContract(t *testing.T) { var plugin pluginsdk.Plugin = &pluginsdk.UnimplementedPlugin{}; if plugin == nil { t.Fatal("missing plugin") } }\n`,
+  );
+  const go = (args) =>
+    run("go", args, {
+      cwd,
+      env,
+      maxBuffer: 8 * 1024 * 1024,
+      timeout: 300_000,
+    });
+  await go(["mod", "tidy"]);
+  const { stdout: graph } = await go(["list", "-m", "all"]);
+  if (
+    graph
+      .split("\n")
+      .some((line) => line.startsWith("github.com/kandev/kandev "))
+  ) {
+    throw new Error("consumer graph includes backend module");
+  }
+  const { stdout: selected } = await go(["list", "-m", "-json", sdkModule]);
+  const module = JSON.parse(selected);
+  if (module.Replace || module.Version !== version)
+    throw new Error("consumer selected an unexpected SDK");
+  for (const args of [
+    ["build", "-trimpath", "./..."],
+    ["vet", "./..."],
+    ["test", "-trimpath", "./..."],
+  ])
+    await go(args);
+  return { go, graph, module };
+}
+
+async function localSources(root, version, resolved) {
+  const sdk = join(root, "source", "pluginsdk");
+  const frontend = join(root, "source", "frontend");
+  const filter = (path) =>
+    !path.split("/").some((part) => ["node_modules", ".tools"].includes(part));
+  await cp(join(repository, "pluginsdk"), sdk, { recursive: true, filter });
+  await cp(join(repository, "apps/packages/plugin-sdk"), frontend, {
+    recursive: true,
+    filter,
+  });
+  const record = JSON.parse(
+    await readFile(join(sdk, "sdk-release.json"), "utf8"),
+  );
+  if (record.sdk_version !== version.replace(/^v/, ""))
+    throw new Error("local archive version differs from source record");
+  if (resolved) {
+    record.host_release ??= "0.100.0";
+    record.min_kandev_version ??= record.host_release;
+    for (const directory of [sdk, frontend])
+      await writeFile(
+        join(directory, "sdk-release.json"),
+        JSON.stringify(record, null, 2) + "\n",
+      );
+  }
+  return { sdk, frontend, record };
+}
+
+async function checkConsumers(go, cwd, version, record, frontend) {
+  const command = ["run", `${sdkModule}/cmd/kandev-sdk-check@${version}`];
+  const args = frontend
+    ? ["--frontend-sdk", "node_modules/@kandev/plugin-sdk"]
+    : [];
+  const manifest = join(cwd, "manifest.yaml");
+  const valid = `api_version: ${record.api_versions.at(-1)}\nmin_kandev_version: ${record.min_kandev_version}\n`;
+  await writeFile(manifest, valid);
+  const paths = [[], ...(frontend ? [args, [...args, "--frontend-only"]] : [])];
+  for (const flags of paths) await go([...command, ...flags]);
+  const before = await readFile(join(cwd, "go.mod"), "utf8");
+  await writeFile(manifest, "api_version: 2\nmin_kandev_version: 0.0.0\n");
+  try {
+    await go([...command, ...args]);
+    throw new Error("checker accepted an insufficient host minimum");
+  } catch (error) {
+    if (!error.stderr?.includes("requires min_kandev_version")) throw error;
+  }
+  await writeFile(manifest, valid);
+  if ((await readFile(join(cwd, "go.mod"), "utf8")) !== before)
+    throw new Error("checker modified the consumer go.mod");
+}
+
 export async function smokeGo({
   mode = "local",
   version = "v0.1.0",
   skipCompatibilityCheck = false,
+  frontend = false,
 } = {}) {
+  if (frontend && mode !== "local")
+    throw new Error(
+      "public npm verification is not available until work order 04",
+    );
   const root = await mkdtemp(join(tmpdir(), "kandev-sdk-consumer-"));
   let proxy;
   try {
+    let source;
     if (mode === "local") {
-      await archiveModule(
-        join(repository, "pluginsdk"),
-        join(root, "proxy"),
-        version,
-      );
+      source = await localSources(root, version, !skipCompatibilityCheck);
+      await archiveModule(source.sdk, join(root, "proxy"), version);
       proxy = await startProxy(join(root, "proxy"));
     }
     const env = goEnvironment(mode, root, proxy?.url);
-    const cwd = join(root, "consumer");
-    await mkdir(cwd);
-    await writeFile(
-      join(cwd, "go.mod"),
-      `module example.com/sdk-consumer\n\ngo 1.26.0\n\nrequire ${sdkModule} ${version}\n`,
-    );
-    await writeFile(
-      join(cwd, "main.go"),
-      `package main\nimport "${sdkModule}"\nfunc main() { pluginsdk.Serve(&pluginsdk.UnimplementedPlugin{}) }\n`,
-    );
-    await writeFile(
-      join(cwd, "main_test.go"),
-      `package main\nimport ("testing"; "${sdkModule}")\nfunc TestPluginContract(t *testing.T) { var plugin pluginsdk.Plugin = &pluginsdk.UnimplementedPlugin{}; if plugin == nil { t.Fatal("missing plugin") } }\n`,
-    );
-    const go = (args) =>
-      run("go", args, {
-        cwd,
-        env,
-        maxBuffer: 8 * 1024 * 1024,
-        timeout: 300_000,
-      });
-    await go(["mod", "tidy"]);
-    const { stdout: graph } = await go(["list", "-m", "all"]);
-    if (
-      graph
-        .split("\n")
-        .some((line) => line.startsWith("github.com/kandev/kandev "))
-    ) {
-      throw new Error("consumer graph includes backend module");
-    }
-    const { stdout: selected } = await go(["list", "-m", "-json", sdkModule]);
-    const module = JSON.parse(selected);
-    if (module.Replace || module.Version !== version)
-      throw new Error("consumer selected an unexpected SDK");
-    for (const args of [
-      ["build", "-trimpath", "./..."],
-      ["vet", "./..."],
-      ["test", "-trimpath", "./..."],
-    ])
-      await go(args);
-    if (!skipCompatibilityCheck) {
-      throw new Error(
-        "compatibility check is not available until work order 03; pass --skip-compatibility-check explicitly",
+    const exercise = async (cwd) => {
+      const { go, graph, module } = await exerciseGo(cwd, env, version);
+      if (!skipCompatibilityCheck) {
+        const record = JSON.parse(
+          await readFile(join(module.Dir, "sdk-release.json"), "utf8"),
+        );
+        await checkConsumers(go, cwd, version, record, frontend);
+      }
+      console.log(
+        JSON.stringify({
+          mode,
+          version,
+          module: sdkModule,
+          cache: root,
+          graph,
+          compatibility: skipCompatibilityCheck ? "skipped" : "passed",
+          status: "passed",
+        }),
       );
+    };
+    if (frontend) {
+      const { packCandidate } = await import("./pack-candidate.mjs");
+      const { checkPackedConsumer } =
+        await import("../../apps/packages/plugin-sdk/test/packed-consumer.node.mjs");
+      const candidate = await packCandidate({
+        directory: source.frontend,
+        output: join(root, "candidate"),
+      });
+      console.log(
+        JSON.stringify(
+          await checkPackedConsumer(candidate, ({ cwd }) => exercise(cwd)),
+        ),
+      );
+    } else {
+      const cwd = join(root, "consumer");
+      await mkdir(cwd);
+      await exercise(cwd);
     }
-    console.log(
-      JSON.stringify({
-        mode,
-        version,
-        module: sdkModule,
-        cache: root,
-        graph,
-        status: "passed",
-      }),
-    );
   } finally {
     await proxy?.close();
     await rm(root, { recursive: true, force: true });
@@ -156,8 +234,8 @@ if (
       "skip-compatibility-check": { type: "boolean" },
     },
   });
-  if (!values["backend-only"]) await smokeFrontend(values.mode);
   await smokeGo({
+    frontend: !values["backend-only"],
     mode: values.mode,
     version: values.version,
     skipCompatibilityCheck: values["skip-compatibility-check"],

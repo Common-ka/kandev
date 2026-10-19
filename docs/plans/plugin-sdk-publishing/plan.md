@@ -35,8 +35,9 @@ strict npm/pnpm lock evidence. Shared version `0.1.0` and the SDK-wide host floo
 remain accepted. The first host numbers and registry ownership/setup remain
 release-time dependencies. External template adoption remains a separate handoff.
 The design reconciliation changed documentation only. Implementation was
-authorized on 2026-10-19. Work orders 01–02 are implemented locally and await CI gates. Work orders
-03–05 remain pending.
+authorized on 2026-10-19. Work orders 01–03 are implemented locally. Docker CI passed on the Go extraction
+head. Preview layout remediation and the newer package/checker CI checks await
+the next push. Work orders 04–05 remain pending.
 
 ## Overview
 
@@ -197,9 +198,9 @@ new Playwright suite is applicable.
 
 ## Work orders
 
-- [ ] [Task 01: Extract Go SDK and preserve host execution](task-01-go-module.md) (in progress; Docker validation pending)
+- [ ] [Task 01: Extract Go SDK and preserve host execution](task-01-go-module.md) (Docker passed; preview remediation pending)
 - [ ] [Task 02: Package standalone frontend SDK](task-02-frontend-package.md) (local checks passed; CI pending)
-- [ ] [Task 03: Enforce consumer compatibility](task-03-compatibility-check.md)
+- [ ] [Task 03: Enforce consumer compatibility](task-03-compatibility-check.md) (local checks passed; CI pending)
 - [ ] [Task 04: Publish SDKs through Stable releases](task-04-stable-publication.md)
 - [ ] [Task 05: Document author and maintainer migration](task-05-author-migration.md)
 
