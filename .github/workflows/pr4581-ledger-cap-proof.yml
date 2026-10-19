@@ -1,0 +1,93 @@
+name: PR 4581 ledger cap assertion proof
+on:
+  push:
+    branches: [review-proof/4581-ledger-cap-d64ebce0]
+permissions:
+  contents: read
+  packages: read
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    container: ghcr.io/kdlbs/kandev-ci:build-latest
+    env:
+      GOFLAGS: -trimpath
+      GOMAXPROCS: '2'
+      GOMEMLIMIT: 3GiB
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
+      - name: Bind and format actual test sources
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          mkdir -p proof-results/formatted
+          git rev-parse HEAD HEAD^{tree} > proof-results/checkout-source.txt
+          git ls-tree -r HEAD > proof-results/checkout-tree.txt
+          go version > proof-results/go-version.txt
+          files=(apps/backend/internal/coordinator/ledger/calls_test.go)
+          gofmt -w "${files[@]}"
+          for file in "${files[@]}"; do
+            mkdir -p "proof-results/formatted/$(dirname "$file")"
+            cp "$file" "proof-results/formatted/$file"
+          done
+          git diff --binary > proof-results/formatting.patch
+          git -c core.hooksPath=/dev/null -c core.fsmonitor=false add -- "${files[@]}"
+          git write-tree > proof-results/actual-build-tree.txt
+          git diff --check HEAD
+          sha256sum "${files[@]}" > proof-results/actual-test-sources.sha256
+      - name: Cap threshold mutation with unaffected controls
+        run: |
+          set -euo pipefail
+          cp apps/backend/internal/coordinator/ledger/calls.go proof-results/calls.green.go
+          trap 'cp proof-results/calls.green.go apps/backend/internal/coordinator/ledger/calls.go' EXIT
+          python3 - <<'MUTATE'
+          from pathlib import Path
+          p=Path('apps/backend/internal/coordinator/ledger/calls.go')
+          s=p.read_text()
+          old='\tcallCap        = 100\n'
+          assert s.count(old)==1
+          p.write_text(s.replace(old,'\tcallCap        = 101\n'))
+          MUTATE
+          (
+            cd apps/backend
+            go test -race -p=2 -count=1 -json -timeout=10m ./internal/coordinator/ledger -run '^(TestCalls_RecordedInOrderWithoutArguments|TestCalls_NoCallsIsNotBlocked)$' > ../../proof-results/cap-control.jsonl
+            set +e
+            go test -race -p=2 -count=1 -json -timeout=10m ./internal/coordinator/ledger -run '^TestCalls_HundredCapDropsTheHundredAndFirst$' > ../../proof-results/cap-red.jsonl
+            status=$?
+            set -e
+            echo "$status" > ../../proof-results/cap-red.exit
+            test "$status" -eq 1
+            python3 - <<'ASSERT'
+          import json
+          a=[json.loads(s) for s in open('../../proof-results/cap-red.jsonl')]
+          assert any(x.get('Action')=='fail' and x.get('Test')=='TestCalls_HundredCapDropsTheHundredAndFirst' for x in a)
+          assert 'call rows = 101, want 100' in ''.join(x.get('Output','') for x in a)
+          ASSERT
+          )
+          cp proof-results/calls.green.go apps/backend/internal/coordinator/ledger/calls.go
+          cmp proof-results/calls.green.go apps/backend/internal/coordinator/ledger/calls.go
+          trap - EXIT
+          sha256sum --check proof-results/actual-test-sources.sha256
+          git diff --exit-code
+      - name: Restored complete ledger package GREEN
+        working-directory: apps/backend
+        run: |
+          set -euo pipefail
+          go test -race -p=2 -count=1 -json -timeout=10m ./internal/coordinator/ledger > ../../proof-results/ledger-green.jsonl
+      - name: Registered dispatch and lifecycle regressions
+        working-directory: apps/backend
+        run: |
+          set -euo pipefail
+          go test -race -p=2 -count=1 -json -timeout=10m ./internal/mcp/handlers ./internal/orchestrator -run '^(TestPeerMessageClarificationAnswerDrainsExactlyOnce|TestHandleMessageTask_.*|TestSessionHasLiveClarification.*|TestSessionHasPendingClarification.*|TestCheckQueueAdmissionReadiness.*|TestResumePromptQueueServiceProvidesAdmissionReadinessCheck|TestPauseForClarificationInput_DrainsPeerQueueAfterPause|TestPauseForClarificationInput_NewTurnAfterDrainAdvancesWorkflow)$' > ../../proof-results/regressions-green.jsonl
+      - name: Upload raw proof evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: pr4581-ledger-cap-proof
+          path: proof-results
+          retention-days: 30
