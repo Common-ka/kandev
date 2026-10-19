@@ -1,0 +1,55 @@
+name: PR 4581 selected-session RED
+on:
+  push:
+    branches: [review-proof/4581-selection-red-d64ebce0]
+permissions:
+  contents: read
+  packages: read
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    container: ghcr.io/kdlbs/kandev-ci:build-latest
+    env:
+      GOFLAGS: -trimpath
+      GOMAXPROCS: '2'
+      GOMEMLIMIT: 3GiB
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
+      - name: Bind source
+        run: |
+          mkdir -p proof-results
+          git rev-parse HEAD HEAD^{tree} > proof-results/source.txt
+          git ls-tree -r HEAD > proof-results/source-tree.txt
+      - name: Shared selected-session control
+        working-directory: apps/backend
+        run: go test -race -p=2 -count=1 -json -timeout=10m ./internal/mcp/handlers -run '^TestHandleMessageTask_WaitingForInput_UsesPrimarySwitchWithoutCompletion$' > ../../proof-results/control.jsonl
+      - name: Actual selected-session defect RED
+        run: |
+          set -euo pipefail
+          cd apps/backend
+          set +e
+          go test -race -p=2 -count=1 -json -timeout=10m ./internal/mcp/handlers -run '^TestHandleMessageTask_LiveClarification_OnSelectedSessionQueues$' > ../../proof-results/selected-red.jsonl
+          status=$?
+          set -e
+          echo "$status" > ../../proof-results/selected-red.exit
+          test "$status" -eq 1
+          python3 - <<'ASSERT'
+          import json
+          a=[json.loads(s) for s in open('../../proof-results/selected-red.jsonl')]
+          assert any(x.get('Action')=='fail' and x.get('Test')=='TestHandleMessageTask_LiveClarification_OnSelectedSessionQueues' for x in a)
+          text=''.join(x.get('Output','') for x in a)
+          assert 'queued' in text and 'started' in text and "the selected session owns its live question" in text
+          ASSERT
+      - name: Upload raw proof evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: pr4581-selected-session-red
+          path: proof-results
+          retention-days: 30
