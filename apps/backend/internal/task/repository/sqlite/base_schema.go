@@ -34,6 +34,7 @@ func (r *Repository) initSchemaContext(ctx context.Context) error {
 		r.initMessageShellOutputSchema,
 		r.initSessionContinuitySchema,
 		r.initAgentDeliverySchema,
+		r.initTurnChangesSchema,
 		r.initDynamicRoutingSchema,
 		r.initStepTransitionsSchema,
 		r.initStepEntriesSchema,

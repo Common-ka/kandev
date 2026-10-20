@@ -348,6 +348,9 @@ func (m *Manager) claimPromptCompletion(
 		current.deleteMetadataValues(MetadataKeyCausingRunID)
 	})
 	if err == nil && claimed {
+		if m.turnChangeCaptureHandler != nil && eligibleTurnChangeExecution(execution) && event.TurnID != "" {
+			beginTurnChangeCaptureLocked(execution, event.PromptGeneration)
+		}
 		return claim, true
 	}
 
@@ -384,6 +387,7 @@ func (m *Manager) finishPromptCompletion(
 	if claim.locked && event.PromptGeneration != 0 && isError {
 		setProviderError(execution, event.ProviderError)
 		if payload, retained := m.retainPromptFailureRuntime(execution, event, failureEvidence); retained {
+			finishTurnChangeCaptureLocked(execution, event.PromptGeneration)
 			// Keep the prompt generation fenced through durable owner settlement,
 			// but do not hold the lifecycle lock across publication: explicit
 			// cancellation reads this generation while it owns the session guard.
@@ -430,6 +434,7 @@ func (m *Manager) finishPromptCompletion(
 			}
 			return
 		}
+		m.finishTurnChangeCapture(execution, event, isError, toolStatusError)
 		publication, err := m.preparePromptErrorCompletion(execution, event, failureEvidence)
 		if err != nil {
 			m.logger.Error("failed to mark execution as failed after error completion",
@@ -449,6 +454,7 @@ func (m *Manager) finishPromptCompletion(
 		return
 	}
 
+	m.startTurnChangeCapture(execution, event, isError, completeEventStopReason(event))
 	handleCompleteEventSignalLeased(execution, event, isError)
 	if claim.locked && event.PromptGeneration != 0 {
 		// Finalization and signal delivery are complete, so a later prompt can
@@ -472,6 +478,14 @@ func (m *Manager) finishPromptCompletion(
 		m.eventPublisher.publishAgentEventPayload(context.Background(), events.AgentRunning, claim.runningPayload)
 	}
 	m.eventPublisher.publishAgentEventPayload(context.Background(), events.AgentReady, claim.readyPayload)
+}
+
+func completeEventStopReason(event *agentctl.AgentEvent) string {
+	if event == nil {
+		return "end_turn"
+	}
+	_, reason := completeEventResult(event)
+	return reason
 }
 
 const claudeACPAgentID = "claude-acp"
@@ -1049,6 +1063,17 @@ func (m *Manager) handleStreamDisconnectWithAttempt(
 			execution.promptLifecycleMu.Unlock()
 			m.publishStreamDisconnectErrorWithAttempt(execution, errors.Join(ErrUncertainPromptDelivery, err), attemptID)
 			return
+		}
+		var terminal *agentctl.AgentEvent
+		turnID := execution.promptTurnIDs[promptGeneration]
+		if turnID != "" && execution.promptCompletionGeneration != promptGeneration &&
+			m.turnChangeCaptureHandler != nil && eligibleTurnChangeExecution(execution) {
+			execution.promptCompletionGeneration = promptGeneration
+			beginTurnChangeCaptureLocked(execution, promptGeneration)
+			terminal = &agentctl.AgentEvent{PromptGeneration: promptGeneration, TurnID: turnID}
+		}
+		if terminal != nil {
+			m.finishTurnChangeCapture(execution, terminal, true, "stream_disconnected")
 		}
 		execution.promptLifecycleMu.Unlock()
 		if completionErr := m.markCompletedWithTurnIDAndAttempt(
