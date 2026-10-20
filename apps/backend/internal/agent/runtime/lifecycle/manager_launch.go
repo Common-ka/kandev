@@ -179,6 +179,7 @@ func applyRouteOverrideToProfile(profile *AgentProfileInfo, req *LaunchRequest) 
 // task override them would allow pivoting an SSH launch to a different host
 // or bypassing the pinned host-key.
 var trustedExecutorConfigKeys = map[string]bool{
+	MetadataKeySSHConnectionID:                 true,
 	MetadataKeySSHHost:                         true,
 	MetadataKeySSHHostAlias:                    true,
 	MetadataKeySSHPort:                         true,

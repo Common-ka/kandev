@@ -58,6 +58,7 @@ type AgentLister interface {
 
 // Handler exposes /api/v1/ssh routes used by the settings UI.
 type Handler struct {
+	managedConnections ManagedConnections
 	repo               ExecutorRunningLister
 	executorFetcher    ExecutorFetcher
 	agents             AgentLister
@@ -99,12 +100,16 @@ func RegisterRoutes(
 	log *logger.Logger,
 	reachabilityRepo ReachabilityLister,
 	reachabilityPoller ReachabilityProber,
+	managed ...ManagedConnections,
 ) {
 	var agentLister AgentLister
 	if registry != nil {
 		agentLister = registry
 	}
 	h := NewHandler(repo, executorFetcher, agentLister, resolver, log, reachabilityRepo, reachabilityPoller)
+	if len(managed) > 0 {
+		h.managedConnections = managed[0]
+	}
 	h.registerHTTP(router)
 	h.registerWS(dispatcher)
 }
@@ -132,6 +137,8 @@ func (h *Handler) registerWS(dispatcher *ws.Dispatcher) {
 
 // TestRequest is the body of POST /api/v1/ssh/test.
 type TestRequest struct {
+	Stamp        string `json:"expected_stamp,omitempty"`
+	ConnectionID string `json:"ssh_connection_id,omitempty"`
 	Name         string `json:"name"`
 	HostAlias    string `json:"host_alias,omitempty"`
 	Host         string `json:"host,omitempty"`
@@ -277,15 +284,11 @@ func (h *Handler) httpProbeAgents(c *gin.Context) {
 // probeAgents is the testable core of httpProbeAgents.
 func (h *Handler) probeAgents(ctx context.Context, executorID, shell string) (*AgentReadinessResponse, int, error) {
 	started := time.Now()
-	target, status, err := h.resolveSSHTarget(ctx, executorID)
+	client, target, cleanup, status, err := h.openExecutor(ctx, executorID)
 	if err != nil {
 		return nil, status, err
 	}
-	client, err := lifecycle.DialSSH(ctx, target)
-	if err != nil {
-		return nil, http.StatusBadGateway, fmt.Errorf("ssh: dial %s: %w", target.Host, err)
-	}
-	defer func() { _ = client.Close() }()
+	defer cleanup()
 
 	platform := h.probeRemotePlatform(ctx, client, "probe-agents")
 	effectiveShell := readinessShellForRequest(shell, platform)
@@ -372,15 +375,11 @@ func (h *Handler) httpProbeShells(c *gin.Context) {
 
 func (h *Handler) probeShells(ctx context.Context, executorID string) (*ProbeShellsResponse, int, error) {
 	started := time.Now()
-	target, status, err := h.resolveSSHTarget(ctx, executorID)
+	client, target, cleanup, status, err := h.openExecutor(ctx, executorID)
 	if err != nil {
 		return nil, status, err
 	}
-	client, err := lifecycle.DialSSH(ctx, target)
-	if err != nil {
-		return nil, http.StatusBadGateway, fmt.Errorf("ssh: dial %s: %w", target.Host, err)
-	}
-	defer func() { _ = client.Close() }()
+	defer cleanup()
 
 	platform := h.probeRemotePlatform(ctx, client, "probe-shells")
 	available := make([]string, 0, len(candidateShells))
@@ -496,16 +495,11 @@ func (h *Handler) runTest(ctx context.Context, req TestRequest) *TestResult {
 		return result
 	}
 
-	target, err := h.testResolveTarget(req, result)
+	client, cleanup, err := h.testOpen(ctx, req, result)
 	if err != nil {
 		return finalize()
 	}
-
-	client, err := h.testHandshake(ctx, target, result)
-	if err != nil {
-		return finalize()
-	}
-	defer func() { _ = client.Close() }()
+	defer cleanup()
 
 	infoCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
@@ -521,6 +515,10 @@ func (h *Handler) runTest(ctx context.Context, req TestRequest) *TestResult {
 }
 
 func (h *Handler) testResolveTarget(req TestRequest, result *TestResult) (*lifecycle.SSHTarget, error) {
+	if req.ConnectionID != "" {
+		result.Error = "managed connection requires the connection manager"
+		return nil, errors.New(result.Error)
+	}
 	target, err := lifecycle.ResolveSSHTarget(lifecycle.SSHConnConfig{
 		HostAlias:      req.HostAlias,
 		Host:           req.Host,

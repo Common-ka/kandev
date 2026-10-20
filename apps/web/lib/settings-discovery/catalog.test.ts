@@ -371,3 +371,23 @@ describe("resolveSettingsDiscovery visibility", () => {
     expect(connection?.breadcrumb[1]).toBe("Main");
   });
 });
+
+it("shows managed SSH settings only when management is enabled for the caller", () => {
+  const context = {
+    t: (key: string) => key,
+    showAccount: false,
+    showUsers: false,
+    showOrganizations: false,
+    workspaces: [],
+    agents: [],
+    executors: [],
+    showSSHConnections: false,
+  };
+  expect(resolveSettingsDiscovery(context).some((item) => item.id === "ssh-connections")).toBe(
+    false,
+  );
+  context.showSSHConnections = true;
+  expect(resolveSettingsDiscovery(context).some((item) => item.id === "ssh-connections")).toBe(
+    true,
+  );
+});

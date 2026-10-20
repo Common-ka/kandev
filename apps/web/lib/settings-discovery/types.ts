@@ -11,7 +11,7 @@ export type SettingsDiscoveryDefinition = {
   href: string;
   targetId?: string;
   order: number;
-  requires?: "account" | "users" | "workspace" | "organizations";
+  requires?: "account" | "users" | "workspace" | "organizations" | "sshConnections";
 };
 
 export type SettingsDiscoveryGroupDefinition = {
@@ -40,6 +40,7 @@ export type SettingsDiscoveryContext = {
   showOrganizations: boolean;
   /** Gates the per-workspace Coordinators entry. Defaults to false (flag off). */
   coordinatorEnabled?: boolean;
+  showSSHConnections?: boolean;
   workspaces: Array<{ id: string; name: string }>;
   agents: Array<{
     name: string;

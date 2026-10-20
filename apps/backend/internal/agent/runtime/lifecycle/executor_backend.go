@@ -348,9 +348,13 @@ const (
 // (e.g., task_description, session_id) are treated as launch-time-only and
 // are NOT copied on resume.
 var persistentMetadataKeys = map[string]bool{
-	idleActivityMetadataKey:              true,
-	metadataKeySSHPassthroughState:       true,
-	deliveryPromptTurnBindingMetadataKey: true,
+	idleActivityMetadataKey:                 true,
+	metadataKeySSHPassthroughState:          true,
+	deliveryPromptTurnBindingMetadataKey:    true,
+	MetadataKeySSHConnectionID:              true,
+	MetadataKeySSHRouteStamp:                true,
+	MetadataKeySSHIdentityGeneration:        true,
+	MetadataKeySSHBastionIdentityGeneration: true,
 	// Sprites runtime
 	MetadataKeySpriteName:      true,
 	MetadataKeySpriteState:     true,
@@ -547,6 +551,7 @@ func IsSessionScopedMetadataKey(key string) bool {
 // login shell). Notably it includes ssh_host_alias so alias-only executors
 // (host read from ~/.ssh/config) survive restore.
 var sshWorkspaceFallbackKeys = map[string]bool{
+	MetadataKeySSHConnectionID:    true,
 	MetadataKeySSHHost:            true,
 	MetadataKeySSHHostAlias:       true,
 	MetadataKeySSHPort:            true,

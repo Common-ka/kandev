@@ -18,5 +18,8 @@ var reachabilityProber = agentruntime.NewSSHReachabilityProber()
 // agentruntime.SSHReachabilityReasonConfig directly, the same reason a
 // target with no pinned fingerprint uses.
 func defaultProbe(ctx context.Context, executor *models.Executor) agentruntime.SSHProbeOutcome {
+	if executor.Config["ssh_connection_id"] != "" {
+		return agentruntime.SSHProbeOutcome{Reason: agentruntime.SSHReachabilityReasonConfig, Message: "managed SSH connections unavailable"}
+	}
 	return reachabilityProber.Probe(ctx, executor.Config, probeTimeout)
 }

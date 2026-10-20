@@ -45,6 +45,7 @@ func provideLifecycleManager(
 	passthroughSessionProvider lifecycle.PassthroughSessionProvider,
 	runningWriter lifecycle.ExecutorRunningWriter,
 	startupRecoveryGuard *lifecycle.RecoveryGuard,
+	managedSSH lifecycle.ManagedSSHConnections,
 ) (*lifecycle.Manager, error) {
 	log.Info("Initializing Agent Manager...")
 	secretStores := newLifecycleSecretStores(rawSecretStore)
@@ -96,6 +97,7 @@ func provideLifecycleManager(
 
 	// Register SSH runtime (run an agent on any Linux box reachable over SSH).
 	sshExec := lifecycle.NewSSHExecutor(secretStores.credentials, agentRegistry, agentctlResolver, log)
+	sshExec.SetManagedConnections(managedSSH)
 	executorRegistry.Register(sshExec)
 	log.Info("SSH runtime registered")
 	registerKubernetesBackend(executorRegistry, agentctlResolver, log)
@@ -166,7 +168,13 @@ func provideLifecycleManager(
 	preparerRegistry.Register(models.ExecutorTypeMockRemote, localPreparer)
 	preparerRegistry.Register(models.ExecutorTypeLocalDocker, lifecycle.NewDockerPreparer(log))
 	preparerRegistry.Register(models.ExecutorTypeSprites, lifecycle.NewSpritesPreparer(log))
-	preparerRegistry.Register(models.ExecutorTypeSSH, lifecycle.NewSSHPreparer(log))
+	sshPreparer := lifecycle.NewSSHPreparer(log)
+	if validator, ok := managedSSH.(interface {
+		ValidateSession(context.Context, string) error
+	}); ok {
+		sshPreparer.SetManagedValidation(validator.ValidateSession)
+	}
+	preparerRegistry.Register(models.ExecutorTypeSSH, sshPreparer)
 	registerKubernetesPreparer(preparerRegistry, log)
 	lifecycleMgr.SetPreparerRegistry(preparerRegistry)
 	lifecycleMgr.SetSecretStore(secretStores.runtime)

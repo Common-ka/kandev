@@ -533,7 +533,7 @@ Plain Stop preserves the sandbox and workspace for resume. Archive/delete termin
 
 ## SSH
 
-> **Trust boundary:** Verify the target host fingerprint before saving. Kandev pins the target key, but unknown ProxyJump bastion keys may be accepted on first use; remote credential transfers write sensitive material under the remote user's home.
+> **Trust boundary:** Verify host fingerprints independently. Managed connections pin both destination and bastion keys. Existing inline SSH settings may accept unknown bastion keys on first use. Remote credential transfers write sensitive material under the remote user's home.
 
 <details>
 <summary>SSH details</summary>
@@ -551,7 +551,32 @@ SSH is implemented as a separate remote connection per session. Kandev uploads a
 
 Released Kandev bundles include helpers for all four platform combinations. The full automated SSH task E2E target currently exercises a Linux/amd64 container; other platform gates and helper selection are unit-tested.
 
-### Create the connection
+### Managed SSH connections (experimental)
+
+An administrator can enable **SSH Connection Manager** in **Settings > System > Feature Toggles** and restart Kandev. The environment override is `KANDEV_FEATURES_SSH_CONNECTION_MANAGER=true`. This feature is off by default in every runtime profile.
+
+1. Open **Settings > SSH connections > Identities**. Generate an Ed25519 key or import an existing private key, entering its passphrase when needed. Managed keys are encrypted with Kandev's master key and work after restart without a shell's `ssh-agent`. Existing backend key-file and agent-socket references remain available.
+2. Create a connection with its host, port, remote account, and identity. Save it, select **Inspect host key**, and compare the fingerprint with the host console or administrator before trusting it. Inspection does not authenticate to the destination.
+3. Authorize the public key on the remote account. Copy it to `authorized_keys`, or use **Enroll key** with a one-time password or an identity that already has access. Assisted enrollment appends the public key without replacing existing keys or restrictions, does not use `sudo`, and verifies access with the selected key afterward. The password is not stored.
+4. Run **Test SSH access**. In the SSH executor editor, select **Managed connection**, choose the ready connection, and run **Test executor** before saving. Multiple executor profiles can reuse the same connection. SSH authentication and executor tool readiness are separate checks.
+
+For a bastion, first create, trust, and test its own direct connection. Then select it under **Connect through a bastion** on the destination. Each hop has its own account, identity, and trusted fingerprint. Only one direct bastion hop is supported; credentials are not forwarded and a failed bastion connection never falls back to a direct destination connection. **Save draft and create a bastion** preserves the destination form while you configure the bastion.
+
+To convert an existing inline executor, select **Move to a shared connection**. Review the resolved destination and optional bastion, create drafts, explicitly trust the bastion if present, and test the destination. **Use this connection** finishes the switch only if the original executor settings are unchanged. Existing legacy sessions keep their original connection metadata.
+
+#### Recovery and credential custody
+
+Back up the database and its matching `master.key` together. A database restored without its matching key cannot decrypt managed identities. Kandev does not export managed private keys or automatically revoke public keys from remote hosts. Deleting an identity or connection does not modify remote `authorized_keys`.
+
+**Outcome unknown** means enrollment was interrupted and the key may already be installed. Inspect the remote account and test SSH access before explicitly starting another attempt. **Installed, unverified** likewise requires checking access rather than assuming installation failed. Enrollment refuses unsafe file permissions, symlinked SSH files, and an existing enrollment lock. Verify ownership and permissions on the remote account; remove a stale lock only after confirming no enrollment is active. Changing credentials does not bypass a filesystem or lock failure.
+
+Enrollment failures identify the destination or bastion when that information is available. An authentication rejection does not prove that the public key is missing. Cancelling the confirmation clears the one-time password. Changing the approved route also clears the password and removes the old enrollment result from the setup view.
+
+Connections and identities cannot be deleted while referenced. Transport changes are blocked while live or recoverable sessions depend on either hop; display-name edits remain available. Changing a host key requires independent verification and a new explicit trust action.
+
+Disabling the feature preserves saved identities and connections but blocks their management and managed runtime connections, including recovery. Re-enable it and restart to use those bindings again. Existing inline SSH executors continue to work.
+
+### Create an inline connection
 
 Choose **Settings > Executors > SSH**. Enter a name plus either a Host or a host alias from your OpenSSH client configuration. The backend resolver can inherit `HostName`, `Port`, `User`, `IdentityAgent`, `IdentityFile`, and one `ProxyJump`; explicit form values win. The current create form defaults and persists Port `22` and identity source `ssh-agent`, so enter a non-22 alias port and desired identity source explicitly instead of assuming those two values inherit. `IdentitiesOnly` and arbitrary OpenSSH directives are not consumed by Kandev.
 

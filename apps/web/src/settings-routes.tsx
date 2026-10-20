@@ -38,6 +38,7 @@ import { renderWorkspaceCoordinatorRoute } from "./settings-routes.coordinators"
 import { NotificationsSettings } from "@/components/settings/notifications-settings";
 import { LayoutSettings } from "@/components/settings/layouts/layout-settings";
 import { PromptsSettings } from "@/components/settings/prompts-settings";
+import { SSHConnectionsSettings } from "@/components/settings/ssh-connections/settings";
 import { SecretsSettings } from "@/components/settings/secrets-settings";
 import { SettingsLayoutClient } from "@/components/settings/settings-layout-client";
 import { PluginShortcutsCard } from "@/components/settings/plugins/plugin-shortcuts-card";
@@ -138,6 +139,7 @@ const SETTINGS_ROUTES: Record<string, RouteRenderer> = {
   "/settings/workspaces": () => <WorkspacesPage />,
   "/settings/workspace": () => <SettingsRedirect to={WORKSPACES_SETTINGS_HREF} />,
   "/settings/secrets": () => <SecretsSettings />,
+  "/settings/ssh-connections": () => <SSHConnectionsSettings />,
   "/settings/agents": () => <AgentsSettingsPage />,
   "/settings/agents/browse": () => <AgentsBrowsePage />,
   "/settings/automations": () => <ActiveWorkspaceSectionRedirect section="automations" />,

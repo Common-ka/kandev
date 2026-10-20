@@ -4632,6 +4632,9 @@ func (r *Repository) purgeTaskSessionStateTx(
 		return nil, err
 	}
 
+	if err := r.releaseRuntimeReferenceIn(ctx, tx, session.ID); err != nil {
+		return nil, err
+	}
 	identity := messagequeue.QueueSessionIdentity{
 		TaskID:               session.TaskID,
 		SessionID:            session.ID,

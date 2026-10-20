@@ -694,6 +694,7 @@ func startAgentInfrastructure(
 		services.Task,
 		repos.Task,
 		startupRecoveryGuard,
+		managedSSHRuntime(services),
 	)
 	if err != nil {
 		log.Error("Failed to initialize agent manager", zap.Error(err))
@@ -1001,6 +1002,7 @@ func startAgentInfrastructure(
 		log,
 		reachabilitypkg.NewPublisher(eventBus, log),
 		addRuntimeCleanup,
+		managedSSHProbe(services),
 	)
 	services.Task.SetExecutorSaveObserver(reachabilitypkg.NewSaveObserver(sshReachabilityPoller))
 

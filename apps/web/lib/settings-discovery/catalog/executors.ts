@@ -5,6 +5,15 @@ export const EXECUTORS_SETTINGS_HREF = "/settings/executors";
 
 export const EXECUTOR_DISCOVERY_DEFINITIONS: SettingsDiscoveryDefinition[] = [
   {
+    id: "ssh-connections",
+    kind: "page",
+    labelKey: "settings:sshManager.title",
+    groupId: "agents",
+    href: "/settings/ssh-connections",
+    order: 401,
+    requires: "sshConnections",
+  },
+  {
     id: "executors",
     kind: "page",
     labelKey: "common:executors",

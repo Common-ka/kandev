@@ -11,7 +11,7 @@ import { IconTerminal2 } from "@tabler/icons-react";
 import { ExecutorOwnerChoice } from "@/components/settings/executor-ownership";
 import { useAppStoreApi } from "@/components/state-provider";
 import { createExecutor, createExecutorProfile } from "@/lib/api/domains/settings-api";
-import { SSHConnectionCard } from "@/components/settings/ssh-connection-card";
+import { SSHConnectionEditor } from "@/components/settings/ssh-connections/executor-editor";
 import type { SSHExecutorConfig } from "@/components/settings/ssh-connection-card";
 import { getExecutorLabel } from "@/lib/executor-icons";
 import { settingsActionClassName } from "@/components/settings/settings-control";
@@ -82,7 +82,7 @@ export function SSHCreatePage() {
     <div className="space-y-8">
       <SSHCreateHeader />
       <ExecutorOwnerChoice value={owner} onChange={setOwner} creating baseline="" />
-      <SSHConnectionCard onSave={handleSave} />
+      <SSHConnectionEditor onSave={handleSave} />
     </div>
   );
 }

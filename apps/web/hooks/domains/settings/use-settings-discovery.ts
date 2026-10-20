@@ -1,5 +1,6 @@
 "use client";
 
+import { useIsAdmin } from "@/hooks/domains/auth/use-is-admin";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppStore } from "@/components/state-provider";
@@ -11,6 +12,9 @@ export function useSettingsDiscovery() {
   const authEnabled = useFeature("auth");
   const multiTenancyEnabled = useFeature("multiTenancy");
   const coordinatorEnabled = useFeature("coordinator");
+  const sshEnabled = useFeature("sshConnectionManager");
+  const isAdmin = useIsAdmin();
+  const showSSHConnections = sshEnabled && isAdmin;
   const authMode = useAppStore((state) => state.auth.mode);
   const role = useAppStore((state) => state.auth.user?.role);
   const workspaces = useAppStore((state) => state.workspaces.items);
@@ -31,6 +35,7 @@ export function useSettingsDiscovery() {
         showUsers,
         showOrganizations,
         coordinatorEnabled,
+        showSSHConnections,
         workspaces,
         agents,
         executors,
@@ -41,6 +46,7 @@ export function useSettingsDiscovery() {
       executors,
       showAccount,
       showOrganizations,
+      showSSHConnections,
       showUsers,
       t,
       workspaces,

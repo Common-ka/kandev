@@ -84,6 +84,7 @@ func adapterFor(descriptor requiredstores.Descriptor) testconformance.Adapter {
 }
 
 var schemaInitializers = map[string]testconformance.Scenario{
+	"ssh-connections":       sshConnectionSchema,
 	"schema-meta":           schemaMeta,
 	"task":                  taskSchema,
 	"workflow":              workflowSchema,

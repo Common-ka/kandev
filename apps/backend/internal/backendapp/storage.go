@@ -3,6 +3,7 @@ package backendapp
 import (
 	"context"
 	"fmt"
+	"github.com/kandev/kandev/internal/sshconnections"
 
 	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
@@ -176,6 +177,10 @@ func provideRepositories(ctx context.Context, cfg *config.Config, log *logger.Lo
 	}
 	cleanups = append(cleanups, cleanup)
 
+	sshConnectionStore, err := sshconnections.NewStore(writer)
+	if err := recordRequiredStore(ctx, tracker, "ssh-connections", err); err != nil {
+		return nil, nil, nil, fmt.Errorf("SSH connection store: %w", err)
+	}
 	if err := checkStartupContext(ctx, "system settings and hostname repositories"); err != nil {
 		return nil, nil, nil, err
 	}
@@ -201,25 +206,27 @@ func provideRepositories(ctx context.Context, cfg *config.Config, log *logger.Lo
 	activateTelemetryContracts(ctx, telemetryStore, log)
 
 	repos := &Repositories{
-		RequiredStores: tracker,
-		Task:           taskRepoImpl,
-		Analytics:      analyticsRepo,
-		AgentSettings:  agentSettingsRepo,
-		User:           supportRepos.user,
-		UserAccounts:   supportRepos.userAccounts,
-		Notification:   supportRepos.notification,
-		Editor:         supportRepos.editor,
-		Prompts:        supportRepos.prompts,
-		Utility:        supportRepos.utility,
-		Workflow:       workflowRepo,
-		Secrets:        secretStore,
-		Office:         officeRepo,
-		Terminal:       terminalRepoImpl,
-		QuickTerminal:  quickTerminalRepoImpl,
-		RuntimeFlags:   runtimeFlagsStore,
-		Auth:           authRepo,
-		HostnameCache:  hostnameCache,
-		SystemSettings: systemSettings,
+		RequiredStores:   tracker,
+		Task:             taskRepoImpl,
+		Analytics:        analyticsRepo,
+		AgentSettings:    agentSettingsRepo,
+		User:             supportRepos.user,
+		UserAccounts:     supportRepos.userAccounts,
+		Notification:     supportRepos.notification,
+		Editor:           supportRepos.editor,
+		Prompts:          supportRepos.prompts,
+		Utility:          supportRepos.utility,
+		Workflow:         workflowRepo,
+		Secrets:          secretStore,
+		SSHConnections:   sshConnectionStore,
+		SSHIdentityVault: secrets.NewSSHIdentityVault(masterKeyProvider),
+		Office:           officeRepo,
+		Terminal:         terminalRepoImpl,
+		QuickTerminal:    quickTerminalRepoImpl,
+		RuntimeFlags:     runtimeFlagsStore,
+		Auth:             authRepo,
+		HostnameCache:    hostnameCache,
+		SystemSettings:   systemSettings,
 	}
 	if err := ctx.Err(); err != nil {
 		return nil, nil, nil, err

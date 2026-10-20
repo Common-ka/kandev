@@ -72,7 +72,7 @@ export type SettingsMenuItem = {
    * the page that owns them.
    */
   activePrefixes?: string[];
-  requires?: "account" | "users" | "organizations";
+  requires?: "account" | "users" | "organizations" | "sshConnections";
   /** Rows whose page owns a list show its size as a trailing badge. */
   countKey?: MenuCountKey;
 };
@@ -153,6 +153,12 @@ export const SETTINGS_MENU_SECTIONS: SettingsMenuSection[] = [
         icon: IconRobot,
         activePrefixes: ["/settings/agents/", "/settings/agent/"],
         countKey: "agents",
+      },
+      {
+        href: "/settings/ssh-connections",
+        labelKey: "settings:sshManager.title",
+        icon: IconKey,
+        requires: "sshConnections",
       },
       {
         href: EXECUTORS_SETTINGS_HREF,

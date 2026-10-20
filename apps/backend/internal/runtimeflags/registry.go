@@ -94,6 +94,18 @@ var registrations = []runtimeFlagRegistration{
 	},
 	{
 		definition: RuntimeFlagDefinition{
+			Key: "features.sshConnectionManager", EnvVar: "KANDEV_FEATURES_SSH_CONNECTION_MANAGER",
+			Kind: KindFeature, Label: "SSH connection manager",
+			Description: "Enables managed SSH identities, trusted connections, and host enrollment.",
+			Stability:   StabilityExperimental, RiskLevel: RiskHigh,
+			RiskDescription: "Stores encrypted SSH credentials and authorizes remote access. Back up the database and matching master key together.",
+			RestartRequired: true, Mutable: true,
+		},
+		read:  func(cfg *config.Config) bool { return cfg.Features.SSHConnectionManager },
+		apply: func(cfg *config.Config, value bool) { cfg.Features.SSHConnectionManager = value },
+	},
+	{
+		definition: RuntimeFlagDefinition{
 			Key:         "features.office",
 			EnvVar:      "KANDEV_FEATURES_OFFICE",
 			Kind:        KindFeature,

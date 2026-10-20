@@ -10,7 +10,7 @@ import { Separator } from "@kandev/ui/separator";
 import { IconTerminal2 } from "@tabler/icons-react";
 import { fetchExecutor } from "@/lib/api/domains/settings-api";
 import { useSaveExecutorConnection } from "@/hooks/domains/settings/use-save-executor-connection";
-import { SSHConnectionCard } from "@/components/settings/ssh-connection-card";
+import { SSHConnectionEditor } from "@/components/settings/ssh-connections/executor-editor";
 import { SSHSessionsCard } from "@/components/settings/ssh-sessions-card";
 import { SSHReachabilityCard } from "@/components/settings/ssh-reachability-card";
 import { listSSHSessions } from "@/lib/api/domains/ssh-api";
@@ -125,7 +125,8 @@ function SSHExecutorView({
   return (
     <div className="space-y-8">
       <SSHExecutorHeader executorName={executor.name} />
-      <SSHConnectionCard
+      <SSHConnectionEditor
+        executorId={executor.id}
         // The `key` forces a fresh form state when the executor reloads with
         // updated config so the user sees the new pinned fingerprint.
         key={`${executor.id}:${executor.config?.ssh_host_fingerprint ?? "none"}`}

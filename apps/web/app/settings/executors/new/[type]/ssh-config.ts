@@ -6,6 +6,15 @@ import type { SSHExecutorConfig } from "@/components/settings/ssh-connection-car
  * dropped so the JSON we POST is minimal.
  */
 export function buildSSHExecutorConfig(cfg: SSHExecutorConfig): Record<string, string> {
+  if (cfg.connection_id)
+    return {
+      ssh_connection_id: cfg.connection_id,
+      ssh_connection_stamp: cfg.connection_stamp ?? "",
+    };
+  return buildInlineSSHExecutorConfig(cfg);
+}
+
+function buildInlineSSHExecutorConfig(cfg: SSHExecutorConfig): Record<string, string> {
   const out: Record<string, string> = {
     ssh_identity_source: cfg.identity_source,
   };
@@ -36,6 +45,8 @@ export function parseSSHExecutorConfig(
   const port = portRaw ? Number.parseInt(portRaw, 10) : undefined;
   return {
     name,
+    connection_id: c.ssh_connection_id,
+    connection_stamp: c.ssh_connection_stamp,
     host_alias: c.ssh_host_alias ?? "",
     host: c.ssh_host ?? "",
     port: port != null && Number.isFinite(port) ? port : undefined,

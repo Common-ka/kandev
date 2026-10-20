@@ -308,3 +308,10 @@ task and session state.
 ## Open questions
 
 (All v1 design decisions resolved during planning. None outstanding at spec-approval time.)
+
+## Proposed managed-connection extension
+
+The draft [SSH connection manager](ssh-connection-manager.md) defines an additive managed-key
+and shared-connection path. The agent/file authentication and inline-profile
+behavior above remain the legacy contract; password bootstrap in that proposal
+is an explicit enrollment operation, not persistent executor authentication.

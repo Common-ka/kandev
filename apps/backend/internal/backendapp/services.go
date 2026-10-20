@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/kandev/kandev/internal/sshconnections"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -130,6 +131,13 @@ func provideServices(ctx context.Context, cfg *config.Config, log *logger.Logger
 		services.Plugins.SetSourceIssueController(pluginSourceIssueController{
 			tasks: services.Task, jira: services.Jira, linear: services.Linear,
 		})
+	}
+	services.SSHConnections = newSSHConnections(cfg, repos)
+	repos.Task.SetExecutorBindingGuard(sshconnections.NewService(cfg.Features.SSHConnectionManager, repos.SSHConnections, repos.SSHIdentityVault))
+	if services.SSHConnections != nil {
+		if err := services.SSHConnections.RecoverEnrollments(ctx); err != nil {
+			return nil, nil, fmt.Errorf("recover SSH enrollment: %w", err)
+		}
 	}
 	mentionProviders := builtinMentionProviders(services, repos.Task)
 	reserveBuiltinMentionIdentities(pluginsSvc, mentionProviders)

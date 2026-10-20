@@ -1,6 +1,8 @@
 export type SSHIdentitySource = "agent" | "file";
 
 export interface SSHTestRequest {
+  ssh_connection_id?: string;
+  expected_stamp?: string;
   name: string;
   host_alias?: string;
   host?: string;

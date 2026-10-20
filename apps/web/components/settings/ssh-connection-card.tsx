@@ -38,6 +38,8 @@ import type {
 // The host_fingerprint is set only after a successful Test Connection has
 // completed and the user has ticked "Trust this host".
 export interface SSHExecutorConfig {
+  connection_id?: string;
+  connection_stamp?: string;
   name: string;
   host_alias?: string;
   host?: string;

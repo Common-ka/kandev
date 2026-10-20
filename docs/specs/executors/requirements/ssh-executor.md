@@ -40,3 +40,10 @@ Today the only ways to run an agent are: (1) locally on the user's own machine (
 ## System design
 
 The migrated technical source is split into [part 1](../system-design/ssh-executor.md).
+
+## Proposed managed-connection extension
+
+The draft [SSH connection manager](ssh-connection-manager.md) defines an additive managed-key
+and shared-connection path. The agent/file authentication and inline-profile
+behavior above remain the legacy contract; password bootstrap in that proposal
+is an explicit enrollment operation, not persistent executor authentication.

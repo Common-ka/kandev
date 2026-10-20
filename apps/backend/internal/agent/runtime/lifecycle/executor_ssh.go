@@ -99,6 +99,7 @@ type sshSessionState struct {
 // the client — at the cost of an extra TCP+handshake per session on the same
 // host. See docs/specs/executors/requirements/ssh-executor.md for the full design.
 type SSHExecutor struct {
+	managedConnections   ManagedSSHConnections
 	agentctlResolver     *AgentctlResolver
 	secretStore          secrets.SecretStore
 	agentList            RemoteAuthAgentLister
@@ -253,17 +254,13 @@ func (r *SSHExecutor) CreateInstance(ctx context.Context, req *ExecutorCreateReq
 		return nil, fmt.Errorf("ssh: validate contribution destinations: %w", err)
 	}
 
-	target, err := r.targetFromMetadata(req.Metadata)
-	if err != nil {
-		return nil, err
-	}
-	client, err := dialSSH(baseCtx, target)
+	target, client, err := r.dialSession(baseCtx, req.SessionID, req.Metadata, true)
 	if err != nil {
 		// Classified from this launch's own attempt, never from a stored
 		// reachability record — that record can predate this dial by a full
 		// probe interval and would misattribute a stale cause to a fresh
 		// failure (see task-05-launch-non-gating.md).
-		return nil, fmt.Errorf("ssh: connect to %s@%s: %s: %w", target.User, target.Host, ClassifyDialError(err), err)
+		return nil, fmt.Errorf("ssh: connect: %s: %w", ClassifyDialError(err), err)
 	}
 	var runtimeAPITunnel *sshRuntimeAPITunnel
 	released := false
@@ -409,6 +406,7 @@ func (r *SSHExecutor) buildInstanceForLostRace(req *ExecutorCreateRequest, exist
 	// ran for the winner), so it carries the winner's still-open tunnel's keys —
 	// never this caller's own, since this caller's tunnel was just closed above.
 	copySSHRuntimeAPIMetadata(metadata, existing.metadata)
+	copyManagedSSHMetadata(metadata, existing.metadata)
 	return &ExecutorInstance{
 		InstanceID:    req.InstanceID,
 		TaskID:        req.TaskID,
@@ -689,6 +687,7 @@ func (r *SSHExecutor) buildInstance(
 		metadata[MetadataKeySSHRemoteControlPort] = strconv.Itoa(controlPort)
 	}
 	copySSHRuntimeAPIMetadata(metadata, req.Metadata)
+	copyManagedSSHMetadata(metadata, req.Metadata)
 	return &ExecutorInstance{
 		InstanceID:  req.InstanceID,
 		TaskID:      req.TaskID,
@@ -741,6 +740,7 @@ func (r *SSHExecutor) buildResumedInstance(req *ExecutorCreateRequest, state *ss
 		metadata[MetadataKeySSHRemoteControlPort] = strconv.Itoa(controlPort)
 	}
 	copySSHRuntimeAPIMetadata(metadata, req.Metadata)
+	copyManagedSSHMetadata(metadata, req.Metadata)
 	return &ExecutorInstance{
 		InstanceID:    req.InstanceID,
 		TaskID:        req.TaskID,
@@ -873,13 +873,9 @@ func (r *SSHExecutor) stopPersistedRemoteAgentctl(ctx context.Context, instance 
 	if taskDir == "" {
 		return fmt.Errorf("ssh: no persisted remote task dir for instance %q: agentctl identity is unprovable", instance.InstanceID)
 	}
-	target, err := r.targetFromMetadata(instance.Metadata)
-	if err != nil {
-		return fmt.Errorf("ssh: resolve persisted target for instance %q: %w", instance.InstanceID, err)
-	}
 	cleanupCtx, cancel := sshRemoteCleanupContext(ctx)
 	defer cancel()
-	client, err := dialSSH(cleanupCtx, target)
+	_, client, err := r.dialSession(cleanupCtx, instance.SessionID, instance.Metadata, false)
 	if err != nil {
 		return fmt.Errorf("ssh: dial persisted target for instance %q: %w", instance.InstanceID, err)
 	}
@@ -980,11 +976,7 @@ func (r *SSHExecutor) ResumeRemoteInstance(ctx context.Context, req *ExecutorCre
 	}
 	r.mu.Unlock()
 
-	target, err := r.targetFromMetadata(req.Metadata)
-	if err != nil {
-		return err
-	}
-	client, err := dialSSH(ctx, target)
+	target, client, err := r.dialSession(ctx, req.SessionID, req.Metadata, false)
 	if err != nil {
 		return fmt.Errorf("ssh resume: connect: %w", err)
 	}
@@ -1156,11 +1148,7 @@ func (r *SSHExecutor) resetManagedBrokerResume(
 		return r.resetTrackedManagedBrokerResume(ctx, req, state, brokerPreflight, stopRemote)
 	}
 
-	target, err := r.targetFromMetadata(req.Metadata)
-	if err != nil {
-		return err
-	}
-	client, err := dialSSH(ctx, target)
+	_, client, err := r.dialSession(ctx, req.SessionID, req.Metadata, false)
 	if err != nil {
 		return fmt.Errorf("ssh resume: connect for broker refresh: %w", err)
 	}
