@@ -943,6 +943,10 @@ func (g *GitOperator) Commit(ctx context.Context, message string, stageAll bool,
 
 	// Stage all changes if requested
 	if stageAll {
+		if err := g.checkAttachedRepositoryStaging(ctx); err != nil {
+			result.Error = fmt.Sprintf("failed to protect attached repositories: %s", err.Error())
+			return result, nil
+		}
 		stageOutput, err := g.runGitCommand(ctx, "add", "-A")
 		if err != nil {
 			result.Error = fmt.Sprintf("failed to stage changes: %s", err.Error())
@@ -950,6 +954,10 @@ func (g *GitOperator) Commit(ctx context.Context, message string, stageAll bool,
 			return result, nil
 		}
 		result.Output = stageOutput
+		if err := g.finishAttachedRepositoryStaging(ctx); err != nil {
+			result.Error = err.Error()
+			return result, nil
+		}
 	}
 
 	// Create the commit (with --amend if requested)
@@ -1022,6 +1030,10 @@ func (g *GitOperator) Stage(ctx context.Context, paths []string) (*GitOperationR
 	result := &GitOperationResult{
 		Operation: "stage",
 	}
+	if err := g.checkAttachedRepositoryStaging(ctx); err != nil {
+		result.Error = err.Error()
+		return result, nil
+	}
 
 	var args []string
 	var environmentOverrides map[string]string
@@ -1041,6 +1053,10 @@ func (g *GitOperator) Stage(ctx context.Context, paths []string) (*GitOperationR
 	result.Output = output
 
 	if err != nil {
+		result.Error = err.Error()
+		return result, nil
+	}
+	if err := g.finishAttachedRepositoryStaging(ctx); err != nil {
 		result.Error = err.Error()
 		return result, nil
 	}

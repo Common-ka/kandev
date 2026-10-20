@@ -197,6 +197,7 @@ type McpServerConfig = agentctl.McpServerConfig
 const (
 	MetadataKeyMainRepoGitDir = "main_repo_git_dir"
 	MetadataKeyWorktreeID     = "worktree_id"
+	MetadataKeyWorktreePath   = "worktree_path"
 	MetadataKeyWorktreeBranch = "worktree_branch"
 
 	// Remote executor metadata keys

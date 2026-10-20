@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 	"strings"
@@ -1640,6 +1641,8 @@ func buildEnvPrepareRequest(req *LaunchRequest, workspacePath string, execName e
 		TaskTitle:                  req.TaskTitle,
 		ExecutorType:               execName,
 		WorkspacePath:              workspacePath,
+		WorkspaceLayout:            req.WorkspaceLayout,
+		WorkspaceRelativePath:      req.WorkspaceRelativePath,
 		RepositoryPath:             req.RepositoryPath,
 		RepositoryID:               req.RepositoryID,
 		TaskRepositoryID:           req.TaskRepositoryID,
@@ -1710,6 +1713,7 @@ func buildEnvPrepareRequest(req *LaunchRequest, workspacePath string, execName e
 				RepoSetupScript:            setup,
 				BranchSlug:                 r.BranchSlug,
 				BranchIdentitySlug:         r.BranchIdentitySlug,
+				WorkspaceRelativePath:      r.WorkspaceRelativePath,
 				ContributionDestination:    r.ContributionDestination,
 			})
 		}
@@ -2125,11 +2129,11 @@ func (m *Manager) launchInternal(ctx context.Context, req *LaunchRequest) (*Agen
 		return nil, err
 	}
 	owner := ownedDirectoryLinkOwner(req.TaskID, req.TaskDirName)
-	if err := reconcileWorkspaceSources(ctx, workspacePath, req.WorkspaceFolders, owner); err != nil {
+	if err := reconcileWorkspaceSourcesAtLayout(ctx, workspacePath, req.WorkspaceLayout, req.WorkspaceFolders, owner); err != nil {
 		return nil, err
 	}
 	if req.ExecutorType == string(models.ExecutorTypeLocal) || req.ExecutorType == legacyExecutorTypeLocalPC {
-		if err := reconcileWorkspaceRepositories(workspacePath, workspaceRepositorySpecsFromLaunch(req), m.logger, owner); err != nil {
+		if err := reconcileWorkspaceRepositoriesAtLayout(workspacePath, req.WorkspaceLayout, workspaceRepositorySpecsFromLaunch(req), m.logger, owner); err != nil {
 			return nil, err
 		}
 	}
@@ -2179,6 +2183,12 @@ func (m *Manager) launchInternal(ctx context.Context, req *LaunchRequest) (*Agen
 		// state; otherwise standalone receives the repository path (or an empty
 		// path) that was present before preparation completed.
 		reqWithWorktree.WorkspacePath = workspacePath
+		if prepResult.WorktreePath != "" {
+			metadata := make(map[string]interface{}, len(reqWithWorktree.Metadata)+1)
+			maps.Copy(metadata, reqWithWorktree.Metadata)
+			metadata[MetadataKeyWorktreePath] = prepResult.WorktreePath
+			reqWithWorktree.Metadata = metadata
+		}
 	}
 
 	// 6b. Deploy per-profile skills + custom prompt (ADR 0005 Wave A).
@@ -2331,35 +2341,33 @@ func validateLaunchWorkspaceAdmissionWithAdoption(ctx context.Context, req *Laun
 		return nil
 	}
 	for index, repository := range repositories {
-		if err := validateLaunchRepositoryWorkspace(ctx, manager, req, repository, workspacePath, index, len(repositories)); err != nil {
+		if err := validateLaunchRepositoryWorkspace(ctx, manager, req, repository, workspacePath, repositories, index); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func validateLaunchRepositoryWorkspace(ctx context.Context, manager *worktree.Manager, req *LaunchRequest, repository WorkspaceRepositorySpec, workspacePath string, index, count int) error {
-	candidate := workspacePath
-	entry := workspaceRepositoryEntryName(repository.RepoName)
-	if index > 0 {
-		candidate = filepath.Join(workspacePath, entry)
-	} else if count > 1 && validateLocalRepositoryWorkspace(ctx, candidate, repository.RepositoryPath) != nil {
-		candidate = filepath.Join(workspacePath, entry)
-	}
-	// Missing resume checkouts reach the preparer's typed branch-recovery checks.
-	if shouldDeferMissingWorktreeResumeValidation(req, candidate) {
-		return nil
-	}
-	if manager != nil && req.ExecutorType == string(models.ExecutorTypeWorktree) {
-		adopted, err := validateAdoptedLaunchWorkspace(ctx, manager, req, repository, workspacePath)
-		if err != nil || adopted {
-			return err
+func validateLaunchRepositoryWorkspace(ctx context.Context, manager *worktree.Manager, req *LaunchRequest, repository WorkspaceRepositorySpec, workspacePath string, repositories []WorkspaceRepositorySpec, index int) error {
+	candidates := workspaceRepositoryValidationCandidates(workspacePath, req.WorkspaceLayout, repositories, index)
+	var validationErr error
+	for _, candidate := range candidates {
+		// Missing resume checkouts reach the preparer's typed branch-recovery checks.
+		if shouldDeferMissingWorktreeResumeValidation(req, candidate) {
+			return nil
+		}
+		if manager != nil && req.ExecutorType == string(models.ExecutorTypeWorktree) {
+			adopted, err := validateAdoptedLaunchWorkspace(ctx, manager, req, repository, workspacePath)
+			if err != nil || adopted {
+				return err
+			}
+		}
+		validationErr = validateLocalRepositoryWorkspace(ctx, candidate, repository.RepositoryPath)
+		if validationErr == nil {
+			return nil
 		}
 	}
-	if err := validateLocalRepositoryWorkspace(ctx, candidate, repository.RepositoryPath); err != nil {
-		return fmt.Errorf("validate launch workspace repository %q: %w", repository.RepositoryID, err)
-	}
-	return nil
+	return fmt.Errorf("validate launch workspace repository %q: %w", repository.RepositoryID, validationErr)
 }
 
 func validateAdoptedLaunchWorkspace(ctx context.Context, manager *worktree.Manager, req *LaunchRequest, repository WorkspaceRepositorySpec, workspacePath string) (bool, error) {
