@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { FileDraftSessionContext } from "@/components/task/file-draft-session-context";
 import { useDockviewStore, type FileEditorState } from "@/lib/state/dockview-store";
 import { useAppStore } from "@/components/state-provider";
 import { getWebSocketClient } from "@/lib/ws/connection";
@@ -10,6 +11,7 @@ import {
   setOpenFileTabs as saveOpenFileTabs,
   getActiveTabForSession,
   setActiveTabForSession,
+  type StoredFileTab,
 } from "@/lib/local-storage";
 import { calculateHash } from "@/lib/utils/file-diff";
 import { getFilePreviewKind } from "@/lib/utils/file-types";
@@ -32,7 +34,6 @@ import { scrollEditorIfMounted, setPendingCursorPosition } from "./file-editor-c
 import {
   defaultMarkdownFileMode,
   resolveStoredMarkdownFileMode,
-  type StoredMarkdownFileMode,
 } from "@/components/task/markdown-file-mode";
 export {
   consumePendingCursorPosition,
@@ -94,21 +95,14 @@ function applyFileChange(
     }
   }
   updateFileState(fileKey, { content: newContent, isDirty: nextIsDirty });
+  useDockviewStore.getState().selectFileDraft(fileKey);
 }
 
 type RestoreTabsParams = {
   activeSessionId: string;
   activeSessionIdRef: React.MutableRefObject<string | null>;
-  savedTabs: Array<
-    {
-      path: string;
-      name: string;
-      repo?: string;
-      pinned?: boolean;
-    } & StoredMarkdownFileMode
-  >;
+  savedTabs: StoredFileTab[];
   savedActiveTab: string;
-  setFileState: (path: string, state: FileEditorState) => void;
   addFileEditorPanel: (
     path: string,
     name: string,
@@ -116,15 +110,62 @@ type RestoreTabsParams = {
   ) => void;
 };
 
+async function restoreFileTabContent(
+  savedTab: RestoreTabsParams["savedTabs"][number],
+  client: NonNullable<ReturnType<typeof getWebSocketClient>>,
+  { activeSessionId, activeSessionIdRef }: RestoreTabsParams,
+): Promise<boolean> {
+  try {
+    const itemId = buildRepoScopedItemId(savedTab.path, savedTab.repo);
+    const before = useDockviewStore.getState();
+    const placeholder = before.openFiles.get(itemId);
+    if (!placeholder || placeholder.originalHash || placeholder.isDirty) return true;
+    const epoch = before.fileSessionEpoch;
+    const response = await requestFileContent(
+      client,
+      activeSessionId,
+      savedTab.path,
+      savedTab.repo,
+    );
+    const hash = await calculateHash(response.content);
+    if (!isRestoreWriteCurrent(_restoredSessionId, activeSessionId, activeSessionIdRef)) {
+      if (_restoredSessionId === activeSessionId) _restorationInProgress = false;
+      return false;
+    }
+    const current = useDockviewStore.getState();
+    const live = current.openFiles.get(itemId);
+    if (
+      current.fileSessionEpoch !== epoch ||
+      !live ||
+      live.instanceId !== placeholder.instanceId ||
+      live.isDirty ||
+      live.originalHash
+    )
+      return true;
+    current.updateFileState(itemId, {
+      path: savedTab.path,
+      repo: savedTab.repo,
+      name: savedTab.name,
+      content: response.content,
+      originalContent: response.content,
+      originalHash: hash,
+      isDirty: false,
+      isBinary: response.is_binary,
+      resolvedPath: response.resolved_path,
+      renderedPreview:
+        getFilePreviewKind(savedTab.path, response.is_binary) === "markdown"
+          ? savedTab.renderedPreview
+          : undefined,
+      markdownMode: live.markdownMode ?? resolveStoredMarkdownFileMode(savedTab),
+    });
+  } catch {
+    /* useFileLoader will retry when executor is ready */
+  }
+  return true;
+}
+
 async function loadAndRestoreTabs(params: RestoreTabsParams, retryCount = 0): Promise<void> {
-  const {
-    activeSessionId,
-    activeSessionIdRef,
-    savedTabs,
-    savedActiveTab,
-    setFileState,
-    addFileEditorPanel,
-  } = params;
+  const { activeSessionId, savedTabs, savedActiveTab, addFileEditorPanel } = params;
   const client = getWebSocketClient();
   if (!client) {
     if (retryCount < 5) {
@@ -150,14 +191,8 @@ async function loadAndRestoreTabs(params: RestoreTabsParams, retryCount = 0): Pr
       pin: savedTab.pinned,
       repo: savedTab.repo,
     });
-    // Seed a placeholder file state synchronously, carrying the restored
-    // `markdownMode` value. This makes `openFiles.has(path)` true the moment
-    // FileEditorPanel mounts, which suppresses its own `useFileLoader` fetch.
-    // Without this seed, useFileLoader races the per-tab fetch below: both call
-    // setFileState (a wholesale replace), and useFileLoader's state has no
-    // markdownMode — so when it wins the race (common under CPU load) the
-    // restored mode is clobbered and the tab reopens in the wrong view.
-    setFileState(itemId, {
+    // Seed the stored mode before panels mount, while retaining live draft records.
+    useDockviewStore.getState().ensureFileState(itemId, {
       path: savedTab.path,
       repo: savedTab.repo,
       name: savedTab.name,
@@ -171,38 +206,7 @@ async function loadAndRestoreTabs(params: RestoreTabsParams, retryCount = 0): Pr
     });
   }
   for (const savedTab of savedTabs) {
-    try {
-      const itemId = buildRepoScopedItemId(savedTab.path, savedTab.repo);
-      const response = await requestFileContent(
-        client,
-        activeSessionId,
-        savedTab.path,
-        savedTab.repo,
-      );
-      const hash = await calculateHash(response.content);
-      if (!isRestoreWriteCurrent(_restoredSessionId, activeSessionId, activeSessionIdRef)) {
-        if (_restoredSessionId === activeSessionId) _restorationInProgress = false;
-        return;
-      }
-      setFileState(itemId, {
-        path: savedTab.path,
-        repo: savedTab.repo,
-        name: savedTab.name,
-        content: response.content,
-        originalContent: response.content,
-        originalHash: hash,
-        isDirty: false,
-        isBinary: response.is_binary,
-        resolvedPath: response.resolved_path,
-        renderedPreview:
-          getFilePreviewKind(savedTab.path, response.is_binary) === "markdown"
-            ? savedTab.renderedPreview
-            : undefined,
-        markdownMode: resolveStoredMarkdownFileMode(savedTab),
-      });
-    } catch {
-      /* useFileLoader will retry when executor is ready */
-    }
+    if (!(await restoreFileTabContent(savedTab, client, params))) return;
   }
   const targetPanel = dockApi?.getPanel(savedActiveTab);
   if (targetPanel) targetPanel.api.setActive();
@@ -212,13 +216,11 @@ async function loadAndRestoreTabs(params: RestoreTabsParams, retryCount = 0): Pr
 type FileEditorEffectsParams = {
   activeSessionId: string | null;
   activeSessionIdRef: React.MutableRefObject<string | null>;
-  setFileState: (path: string, state: FileEditorState) => void;
   addFileEditorPanel: (
     path: string,
     name: string,
     opts?: { quiet?: boolean; pin?: boolean; repo?: string },
   ) => void;
-  clearFileStates: () => void;
   removeFileState: (path: string) => void;
   api: ReturnType<typeof useDockviewStore.getState>["api"];
 };
@@ -226,19 +228,16 @@ type FileEditorEffectsParams = {
 function useFileEditorEffects({
   activeSessionId,
   activeSessionIdRef,
-  setFileState,
   addFileEditorPanel,
-  clearFileStates,
   removeFileState,
   api,
 }: FileEditorEffectsParams) {
   useEffect(() => {
     if (!activeSessionId || _restoredSessionId === activeSessionId) return;
     _restoredSessionId = activeSessionId;
-    // Set the flag BEFORE clearing so the openFiles subscription doesn't
-    // overwrite saved tabs with an empty list during the clear.
+    // Projection activation must not persist a partial restoration.
     _restorationInProgress = true;
-    clearFileStates();
+    useDockviewStore.getState().activateFileSession(activeSessionId);
     const savedTabs = getOpenFileTabs(activeSessionId);
     const savedActiveTab = getActiveTabForSession(activeSessionId, "chat");
     if (savedTabs.length === 0) {
@@ -250,7 +249,6 @@ function useFileEditorEffects({
       activeSessionIdRef,
       savedTabs,
       savedActiveTab,
-      setFileState,
       addFileEditorPanel,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -260,7 +258,13 @@ function useFileEditorEffects({
     const unsub = useDockviewStore.subscribe((state, prevState) => {
       if (state.openFiles === prevState.openFiles) return;
       const sessionId = activeSessionIdRef.current;
-      if (!sessionId || _restorationInProgress || state.isRestoringLayout) return;
+      if (
+        !sessionId ||
+        state.activeFileSessionId !== sessionId ||
+        _restorationInProgress ||
+        state.isRestoringLayout
+      )
+        return;
       saveOpenFileTabs(sessionId, buildPersistedTabs(state.api, state.openFiles));
     });
     return unsub;
@@ -299,6 +303,9 @@ function useFileEditorEffects({
 }
 
 type FileEditorActionsParams = {
+  retainedOwner?:
+    | import("@/components/task/file-draft-session-context").FileDraftSessionOwner
+    | null;
   activeSessionIdRef: React.MutableRefObject<string | null>;
   activeEditorVisitRef: React.MutableRefObject<symbol | null>;
   setFileState: (path: string, state: FileEditorState) => void;
@@ -364,6 +371,7 @@ function useOpenFileAction({
       if (!client || !currentSessionId) return;
       const fileKey = buildRepoScopedItemId(filePath, repo);
       const files = getOpenFiles();
+      useDockviewStore.getState().selectFileDraft(fileKey);
       if (files.has(fileKey)) {
         const existing = files.get(fileKey);
         const tabName = filePath.split("/").pop() || filePath;
@@ -377,6 +385,7 @@ function useOpenFileAction({
         return;
       }
       const requestToken = markActiveFileRequest(activeFileRequestRef, fileKey);
+      const epoch = useDockviewStore.getState().fileSessionEpoch;
       try {
         const state = await fetchFileEditorState({
           client,
@@ -387,7 +396,7 @@ function useOpenFileAction({
           activeRequestRef: activeFileRequestRef,
           requestToken,
         });
-        if (!state) return;
+        if (!state || useDockviewStore.getState().fileSessionEpoch !== epoch) return;
         // Create the panel BEFORE setting file state. The openFiles subscription
         // triggers tab persistence — it needs the dockview panel to already exist
         // so buildPersistedTabs can detect whether the file is preview or pinned.
@@ -447,6 +456,7 @@ function useMarkdownPreviewAction({
       if (!client || !currentSessionId) return;
       const fileKey = buildRepoScopedItemId(filePath, repo);
       const files = getOpenFiles();
+      useDockviewStore.getState().selectFileDraft(fileKey);
       if (files.has(fileKey)) {
         updateFileState(fileKey, { markdownMode: "preview" });
         const name = filePath.split("/").pop() || filePath;
@@ -460,6 +470,7 @@ function useMarkdownPreviewAction({
         return;
       }
       const requestToken = markActiveFileRequest(activeFileRequestRef, fileKey);
+      const epoch = useDockviewStore.getState().fileSessionEpoch;
       try {
         const state = await fetchFileEditorState({
           client,
@@ -470,7 +481,7 @@ function useMarkdownPreviewAction({
           activeRequestRef: activeFileRequestRef,
           requestToken,
         });
-        if (!state) return;
+        if (!state || useDockviewStore.getState().fileSessionEpoch !== epoch) return;
         addFileEditorPanelWithPreviewCleanup(
           filePath,
           state.name,
@@ -492,6 +503,7 @@ function useMarkdownPreviewAction({
 }
 
 function useFileEditorActions({
+  retainedOwner,
   activeSessionIdRef,
   activeEditorVisitRef,
   setFileState,
@@ -528,6 +540,7 @@ function useFileEditorActions({
   );
 
   const { saveFile, deleteFileAction, applyRemoteUpdate } = useSaveDeleteActions({
+    retainedOwner,
     activeSessionIdRef,
     activeEditorVisitRef,
     updateFileState,
@@ -546,6 +559,7 @@ function useFileEditorActions({
 }
 
 export function useFileEditors() {
+  const retainedOwner = useContext(FileDraftSessionContext);
   const activeSessionId = useAppStore((state) => state.tasks.activeSessionId);
   const gitStatus = useSessionGitStatus(activeSessionId);
   const { toast } = useToast();
@@ -554,7 +568,6 @@ export function useFileEditors() {
   const setFileState = useDockviewStore((s) => s.setFileState);
   const updateFileState = useDockviewStore((s) => s.updateFileState);
   const removeFileState = useDockviewStore((s) => s.removeFileState);
-  const clearFileStates = useDockviewStore((s) => s.clearFileStates);
   const addFileEditorPanel = useDockviewStore((s) => s.addFileEditorPanel);
   const promotePreviewToPinned = useDockviewStore((s) => s.promotePreviewToPinned);
   const openFiles = useDockviewStore((s) => s.openFiles);
@@ -566,6 +579,10 @@ export function useFileEditors() {
   useLayoutEffect(() => {
     const visit = Symbol();
     activeSessionIdRef.current = activeSessionId;
+    if (activeSessionId) {
+      if (_restoredSessionId !== activeSessionId) _restorationInProgress = true;
+      useDockviewStore.getState().activateFileSession(activeSessionId);
+    }
     activeEditorVisitRef.current = visit;
     setSavingFiles(new Map());
     return () => {
@@ -576,9 +593,7 @@ export function useFileEditors() {
   useFileEditorEffects({
     activeSessionId,
     activeSessionIdRef,
-    setFileState,
     addFileEditorPanel,
-    clearFileStates,
     removeFileState,
     api,
   });
@@ -598,6 +613,7 @@ export function useFileEditors() {
     deleteFileAction,
     applyRemoteUpdate,
   } = useFileEditorActions({
+    retainedOwner,
     activeSessionIdRef,
     activeEditorVisitRef,
     setFileState,

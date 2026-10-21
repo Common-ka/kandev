@@ -15,6 +15,7 @@ import { MarkdownPreviewContent } from "../markdown-preview-content";
 import type { MarkdownFileMode } from "../markdown-file-mode";
 import type { FilePreviewKind } from "@/lib/utils/file-types";
 import type { HtmlPreviewPublishState } from "@/hooks/use-html-preview-publisher";
+import type { MarkdownSourcePositionPorts } from "../use-markdown-source-position";
 
 export type MobileViewerKind = "image" | "binary" | "text";
 
@@ -41,6 +42,7 @@ export function MobileViewerBody({
   htmlPreview,
   onOpenFile,
   onOpenLink,
+  sourcePositionHandles,
 }: {
   file: OpenFileTab;
   viewerKind: MobileViewerKind;
@@ -65,6 +67,7 @@ export function MobileViewerBody({
   };
   onOpenFile?: (path: string) => void;
   onOpenLink?: (url: string) => boolean | void;
+  sourcePositionHandles?: MarkdownSourcePositionPorts;
 }) {
   const markdownFile = isMarkdownFile(file.path);
   return (
@@ -90,6 +93,7 @@ export function MobileViewerBody({
           onSourceFallback={onSourceFallback}
           onOpenFile={onOpenFile}
           onOpenLink={onOpenLink}
+          sourcePositionHandles={sourcePositionHandles}
         />
       )}
       {viewerKind === "text" && !markdownFile && renderedPreview && previewKind === "html" && (
@@ -137,6 +141,7 @@ function MobileMarkdownSurface({
   onSourceFallback,
   onOpenFile,
   onOpenLink,
+  sourcePositionHandles,
 }: {
   file: OpenFileTab;
   markdownMode?: MarkdownFileMode;
@@ -153,6 +158,7 @@ function MobileMarkdownSurface({
   onSourceFallback?: () => void;
   onOpenFile?: (path: string) => void;
   onOpenLink?: (url: string) => boolean | void;
+  sourcePositionHandles?: MarkdownSourcePositionPorts;
 }) {
   return (
     <>
@@ -175,6 +181,8 @@ function MobileMarkdownSurface({
             onTogglePreview={undefined}
             onOpenFile={onOpenFile}
             onOpenLink={onOpenLink}
+            isActive={markdownMode === "preview"}
+            onSourcePositionHandle={sourcePositionHandles?.preview}
           />
         </div>
       )}
@@ -192,6 +200,8 @@ function MobileMarkdownSurface({
             onOpenLink={onOpenLink}
             onComment={onComment}
             onSourceFallback={onSourceFallback}
+            isActive={markdownMode === "edit"}
+            onSourcePositionHandle={sourcePositionHandles?.edit}
           />
         </div>
       )}
@@ -203,6 +213,7 @@ function MobileMarkdownSurface({
           sessionId={sessionId ?? undefined}
           editable
           onChange={onChange}
+          onSourcePositionHandle={sourcePositionHandles?.source}
         />
       )}
     </>

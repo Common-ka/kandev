@@ -1,5 +1,5 @@
 ---
-status: draft
+status: current
 system: ui
 requirements:
   - REQ-UI-MARKDOWN-FILE-EDITING-001
@@ -114,6 +114,43 @@ route upgrades `MobileFileViewerPanel` from a read-only viewer to a focused
 file editor for text files. Both surfaces use the same mode type, file buffer,
 save contract, and hybrid adapter.
 
+### Responsive draft ownership
+
+`TaskLayout` retains the draft/session controller above `ResponsiveTaskLayout`.
+The proposed registry uses existing `FileEditorState` records, keyed by
+session, repository name, and path, with an opaque instance identifier.
+`dockview-file-state.ts` remains the mutation boundary. Its actions update the
+canonical registry and the active-session `openFiles` projection atomically.
+The projection references the same records. It is not a second editable copy.
+
+Mobile retains a selected draft key and reads that record. The coarse-pointer
+tablet `TaskCenterPanel` also reads canonical records through its existing tab
+controller. Its tab list owns presentation metadata only. Desktop keeps its
+existing projection consumers. `useFileEditorEffects` activates the session
+projection and reuses retained records before restoring persisted tab metadata
+or fetching file content. Restoration can clear a projection but cannot retire
+a dirty draft. Explicit discard, close, or confirmed task departure retires
+the relevant records. A responsive unmount does not.
+
+Each asynchronous read, notification, and save captures session identity,
+owner epoch, draft instance, and operation generation. Retire or replace
+invalidates those tokens. A save acknowledgement can update its live canonical
+record after the viewport changes. Existing Dockview visit and API guards still
+protect panel effects and toasts. Those presentation guards cannot discard a
+valid acknowledgement merely because the editor component unmounted.
+
+A successful save advances the baseline to the saved snapshot while preserving
+newer typing as dirty. An accepted external write publishes content, baseline,
+hash, and cleanliness together, even when content bytes are unchanged.
+Remove the phone's independently authoritative baseline and draft copies.
+
+The retained controller registers the existing routing navigation blocker and
+native `beforeunload` warning while a draft is dirty. Existing mobile switcher
+actions use the same discard decision. Cancel superseded navigation intents.
+Do not automatically save on navigation or overwrite a draft from restoration.
+This extends the existing canonical-buffer contract without introducing draft
+disk persistence or a second workspace save API.
+
 ## Mode model
 
 ```text
@@ -122,16 +159,27 @@ Preview <-> Edit <-> Source
 ```
 
 All modes read the same canonical source. Only Edit and Source can update it.
-Preview is always read-only. `.md` supports all three modes. `.mdx` supports
+Preview is always read-only. `.md` supports all three modes when the browser
+provides the hybrid engine's required capabilities. `.mdx` supports
 Preview and Source because embedded JSX cannot round-trip through the hybrid
 parser safely.
 
 New `.md` tabs initialize with `markdownMode: "preview"`. New `.mdx` tabs also
 start in Preview. A mode switch never triggers a save.
 
-The mode toolbar uses visible labels on desktop and tablet. Phone uses the same
-names in a compact selector or actions menu. Source remains a first-class
-fallback, not a hidden recovery path.
+Desktop and tablet retain the existing toolbar and its overflow menu for narrow
+Source panels. Mode controls use visible labels. Phone uses the same names in
+a compact selector. Source remains available for normal editing and recovery.
+
+Capability detection belongs at the adapter boundary. The pinned engine
+requires a constructible `EditContext`. Check that capability before allocating
+the engine, without browser-name detection or a new polyfill. Constructor
+failure still follows the normal failure path.
+
+An unavailable Edit control keeps its accessible explanation. A restored Edit
+preference uses Source as its effective mode on an unsupported browser.
+Deriving that fallback must not overwrite the saved preference. Initialization
+and runtime failures use the recovery contract below.
 
 ## Data and contracts
 
@@ -213,6 +261,23 @@ inserted column the default width.
 4. The target restores the source selection or nearest rendered source line.
 5. Preview or Edit restores the nearest useful scroll position.
 
+Use a transient source-position value with optional anchor and active offsets
+plus a one-based nearest source line. Preserve selection direction. The new
+editor-local `SourcePositionHandle` capture/restore port connects Monaco,
+CodeMirror, the hybrid adapter, and Preview through the same coordinator hook.
+These are proposed local interfaces, not a plugin API or persisted file format.
+
+Capture synchronously before the explicit transition. Restore once the target
+is ready and visible, scoped to the current draft instance and transition.
+Clamp offsets after authoritative replacement. Preview uses existing
+source-line attributes and scrolls only its own container. The hybrid adapter
+uses its model selection and public range-reveal API. Cancel pending reveal
+work on exit or failure. Source providers use their native selection APIs.
+
+Do not restore on each keystroke, reveal a hidden editor, or route selection
+through the global pending-cursor registry. That registry handles point
+navigation rather than cross-mode selection and reading position.
+
 ### Receive an outside update
 
 For a clean buffer, the existing update path replaces canonical source. The
@@ -257,6 +322,31 @@ Comment ranges remain source-line ranges. Preview source-line attributes and
 Edit source offsets map to those same ranges. Creating or selecting a comment
 does not change Markdown bytes.
 
+`MarkdownFileEditor` and the phone surface pass `repo` through
+`useMarkdownEditorCommentState`. The bridge passes that repository name to
+`useDiffFileComments` and `buildDiffComment`, using the existing Preview and
+Source convention. The primary repository uses the existing empty-name
+convention. Retain legacy unqualified-comment behavior from the selector.
+Do not infer an additional repository's identity from the primary repository ID.
+
+When Files opens a workspace-prefixed path, resolve its checkout qualifier from
+the known workspace and worktree roots before publishing the tab identity.
+Keep the initial workspace read request unchanged. Preserve explicit qualifiers
+and unqualified paths that do not match a known checkout root.
+
+The pinned engine exposes its comment input only in read-only mode. Editable
+hybrid selection therefore uses Kandev's existing `EditorCommentPopover`.
+Observe the engine selection and caret position, and capture the source range
+before opening the popover. Keep its native textarea outside the EditContext
+host. Submit through the same repository-qualified bridge without changing
+read-only state or source content. Dispose selection subscriptions with the
+editor instance.
+
+Invalidate a captured selection when source, file identity, instance, visibility,
+or read-only state changes. Recheck that ownership before submission. Clamp the
+comment trigger to the visible viewport. Return focus after an accepted comment
+only while the same editor remains active.
+
 An explicit comparison surface can supply baseline content to the adapter. The
 ordinary Files editor does not treat its saved `originalContent` buffer as a
 comparison baseline because that would stack the old and edited blocks during
@@ -289,6 +379,13 @@ The Files entry point opens one focused `100dvh` editor surface. Its fixed
 header shows file identity, mode, dirty state, Save, and Back. Less frequent
 actions use a menu. The editor body is the only vertical scroll owner.
 
+Keep Save in the fixed header. Use a compact, labelled current-mode trigger
+and a visible actions trigger instead of placing every mode and Reload beside
+Save. Mode choices and Reload use the existing responsive menu primitives.
+The remote-update cue remains visible while Reload is in the menu.
+This composition follows the persistent-toolbar pattern in the mobile UI
+language guide. It does not require a second full-screen choice surface.
+
 Controls have at least 44-pixel touch targets. The header and editing surface
 respect safe-area insets. The body keeps enough keyboard clearance for the
 active line and selection handles. Wide tables keep their existing local
@@ -312,6 +409,16 @@ The adapter wraps initialization and source updates in a local error boundary.
 If the package fails, Kandev keeps the canonical source, records a diagnostic,
 and presents an accessible Source action. The failed hybrid instance is
 disposed before retry.
+
+Desktop and phone coordinators clear the failed instance's retention flag and
+select Source. A later explicit Edit action mounts a fresh instance with the
+latest canonical source. Healthy instances remain mounted across mode changes
+to retain undo history and transient widths. Teardown has one owner and is
+idempotent across initialization, update failure, and React cleanup.
+
+Each failure produces one localized recovery message and one content-free
+diagnostic. An unsupported browser gets a capability explanation rather than
+repeated initialization attempts. Neither path saves or rewrites content.
 
 An unsupported construct does not count as an editor failure. The adapter
 shows source for that construct. If an upgrade changes source bytes without a
@@ -373,6 +480,24 @@ no page overflow.
 Security tests keep the existing unsafe HTML and URL cases. Adapter tests add
 unsafe link activation, unsupported HTML, initialization failure, and exact
 source fallback cases.
+
+Mocked lifecycle tests prove callback wiring and teardown only. Source
+preservation evidence must mount the pinned real engine through the production
+adapter. The corpus covers CRLF and LF, frontmatter, nested lists, escaped table
+pipes, raw HTML, and unsupported constructs. Apply edits through the rendered
+editor, then compare the canonical bytes before and after undo, mode changes,
+and authoritative replacement. Remove the unused `applyMarkdownSourceEdit`
+helper if it remains outside the production path.
+
+Browser tests cover capability absence before mount and failed initialization
+followed by explicit retry. Chromium with the capability removed proves the
+host's fallback branch, not native Safari or Firefox compatibility.
+Native non-Chromium smoke results must be recorded separately.
+
+## Implementation plans
+
+- [Original Markdown editing package](../../../plans/markdown-file-editing/plan.md).
+- [Review remediation package](../../../plans/markdown-editing-remediation/plan.md).
 
 ## Related decisions
 

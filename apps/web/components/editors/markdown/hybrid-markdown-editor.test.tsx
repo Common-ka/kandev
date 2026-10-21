@@ -1,234 +1,12 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { SourcePositionHandle } from "../source-position";
+import { installTableGeometry, upstream } from "./hybrid-markdown-editor.test-helpers";
 
-function installTableGeometry(table: HTMLTableElement) {
-  const tableRect = { left: 48, top: 48, width: 240, height: 120, right: 288, bottom: 168 };
-  const wrapper = table.parentElement as HTMLDivElement;
-  Object.defineProperty(wrapper, "getBoundingClientRect", { value: () => tableRect });
-  Object.defineProperty(table, "getBoundingClientRect", { value: () => tableRect });
-  Array.from(table.rows).forEach((row, rowIndex) => {
-    Object.defineProperty(row, "getBoundingClientRect", {
-      value: () => ({
-        ...tableRect,
-        top: 48 + rowIndex * 40,
-        bottom: 88 + rowIndex * 40,
-        height: 40,
-      }),
-    });
-    Array.from(row.cells).forEach((cell, cellIndex) => {
-      Object.defineProperty(cell, "getBoundingClientRect", {
-        value: () => ({
-          ...tableRect,
-          left: 48 + cellIndex * 120,
-          right: 168 + cellIndex * 120,
-          width: 120,
-          top: 48 + rowIndex * 40,
-          bottom: 88 + rowIndex * 40,
-          height: 40,
-        }),
-      });
-    });
-  });
-}
-
-// The faithful upstream lifecycle mock keeps its model, view, and controller state together.
-// eslint-disable-next-line max-lines-per-function
-const upstream = vi.hoisted(() => {
-  type SourceReplacement = {
-    replaceRange: { start: number; endExclusive: number };
-    newText: string;
-  };
-  type SourceEdit = { replacements: readonly SourceReplacement[] };
-  type SourceEditListener = (event: { edit: SourceEdit }) => void;
-  const state: {
-    models: MockEditorModel[];
-    views: MockEditorView[];
-    controllers: MockEditorController[];
-    histories: MockLocalHistoryStrategy[];
-    syntaxHighlighters: { dispose: ReturnType<typeof vi.fn> }[];
-    failView: boolean;
-  } = {
-    models: [],
-    views: [],
-    controllers: [],
-    histories: [],
-    syntaxHighlighters: [],
-    failView: false,
-  };
-
-  function observable<T>(initial: T) {
-    let value = initial;
-    return {
-      get: vi.fn(() => value),
-      set: vi.fn((next: T) => {
-        value = next;
-      }),
-    };
-  }
-
-  class MockStringValue {
-    constructor(readonly value: string) {}
-  }
-
-  class MockOffsetRange {
-    constructor(
-      readonly start: number,
-      readonly endExclusive: number,
-    ) {}
-  }
-
-  class MockEditorModel {
-    sourceText = observable(new MockStringValue(""));
-    readonlyMode = observable(false);
-    baseline = observable<MockStringValue | undefined>(undefined);
-    gutterMarkers = observable<readonly unknown[]>([]);
-    document = observable<{ content: readonly { kind: string; length: number }[] }>({
-      content: [],
-    });
-    activeBlock = observable<
-      { kind: string; length: number; headerRow?: { cells: unknown[] } } | undefined
-    >(undefined);
-    selection = observable<unknown>(undefined);
-    listener: SourceEditListener | undefined;
-    sourceEditSubscription = { dispose: vi.fn() };
-    replaceSourceText = vi.fn((value: MockStringValue) => this.sourceText.set(value));
-    onWillApplySourceEdit = vi.fn((listener: SourceEditListener) => {
-      this.listener = listener;
-      return this.sourceEditSubscription;
-    });
-    applyUserEdit(edit: SourceEdit) {
-      this.listener?.({ edit });
-      const source = this.sourceText.get().value;
-      const nextSource = [...edit.replacements]
-        .sort((left, right) => right.replaceRange.start - left.replaceRange.start)
-        .reduce(
-          (next, replacement) =>
-            `${next.slice(0, replacement.replaceRange.start)}${replacement.newText}${next.slice(
-              replacement.replaceRange.endExclusive,
-            )}`,
-          source,
-        );
-      this.sourceText.set(new MockStringValue(nextSource));
-    }
-    applyEdit = vi.fn((edit: SourceEdit, selection?: unknown) => {
-      this.applyUserEdit(edit);
-      this.selection.set(selection);
-    });
-    dispose = vi.fn();
-
-    constructor() {
-      state.models.push(this);
-    }
-  }
-
-  class MockEditorView {
-    element = document.createElement("div");
-    dispose = vi.fn();
-    options: unknown;
-
-    constructor(_model: MockEditorModel, options: unknown) {
-      if (state.failView) throw new Error("view failed");
-      this.options = options;
-      state.views.push(this);
-    }
-  }
-
-  class MockEditorController {
-    dispose = vi.fn();
-
-    constructor(
-      readonly model: MockEditorModel,
-      readonly view: MockEditorView,
-      readonly options: unknown,
-    ) {
-      state.controllers.push(this);
-    }
-  }
-
-  class MockCommentsModel {
-    set = vi.fn();
-  }
-
-  class MockCommentsView {
-    dispose = vi.fn();
-  }
-
-  class MockCommentModeController {
-    dispose = vi.fn();
-  }
-
-  class MockLocalHistoryStrategy {
-    record = vi.fn((operation: () => void) => operation());
-
-    constructor(readonly model: MockEditorModel) {
-      state.histories.push(this);
-    }
-  }
-
-  class MockStringEdit {
-    static replace(replaceRange: { start: number; endExclusive: number }, newText: string) {
-      return { replacements: [{ replaceRange, newText }] };
-    }
-  }
-
-  class MockSelection {
-    static collapsed(offset: number) {
-      return { anchor: offset, active: offset };
-    }
-  }
-
-  function setupActiveTable(
-    model: MockEditorModel,
-    view: MockEditorView,
-    source: string,
-    bodyRows: string,
-    columnCount = 2,
-  ) {
-    const table = {
-      kind: "table",
-      length: source.length,
-      headerRow: { cells: Array.from({ length: columnCount }, () => ({})) },
-    };
-    model.document.set({ content: [table] });
-    model.activeBlock.set(table);
-    const header = Array.from({ length: columnCount }, (_, index) => `<th>${index + 1}</th>`).join(
-      "",
-    );
-    const delimiter = Array.from({ length: columnCount }, () => "<td>---</td>").join("");
-    view.element.innerHTML = `
-      <div class="md-table-wrapper">
-        <table class="md-table md-block-active">
-          <tr>${header}</tr>
-          <tr class="md-table-delimiter-row">${delimiter}</tr>
-          ${bodyRows}
-        </table>
-      </div>`;
-    return table;
-  }
-
-  return {
-    state,
-    EditorModel: MockEditorModel,
-    EditorView: MockEditorView,
-    EditorController: MockEditorController,
-    LocalHistoryStrategy: MockLocalHistoryStrategy,
-    StringEdit: MockStringEdit,
-    Selection: MockSelection,
-    setupActiveTable,
-    createDefaultMonacoSyntaxHighlighter: vi.fn(() => {
-      const highlighter = { dispose: vi.fn(), create: vi.fn() };
-      state.syntaxHighlighters.push(highlighter);
-      return highlighter;
-    }),
-    StringValue: MockStringValue,
-    OffsetRange: MockOffsetRange,
-    CommentsModel: MockCommentsModel,
-    CommentsView: MockCommentsView,
-    CommentModeController: MockCommentModeController,
-  };
-});
-
-vi.mock("@vscode/markdown-editor", () => upstream);
+vi.mock(
+  "@vscode/markdown-editor",
+  async () => (await import("./hybrid-markdown-editor.test-helpers")).upstream,
+);
 vi.mock("@vscode/markdown-editor/editor.css", () => ({}));
 vi.mock("@vscode/markdown-editor/themes/default.css", () => ({}));
 
@@ -243,6 +21,7 @@ const TABLE_RESIZER_0 = "markdown-table-resizer-0";
 afterEach(cleanup);
 
 beforeEach(() => {
+  vi.stubGlobal("EditContext", class EditContext {});
   upstream.state.models.length = 0;
   upstream.state.views.length = 0;
   upstream.state.controllers.length = 0;
@@ -389,6 +168,7 @@ describe("HybridMarkdownEditor contracts", () => {
   });
 
   it("reports initialization failures and requests the Source fallback", () => {
+    const diagnostic = vi.spyOn(console, "warn").mockImplementation(() => {});
     upstream.state.failView = true;
     const onError = vi.fn();
     const onSourceFallback = vi.fn();
@@ -402,6 +182,18 @@ describe("HybridMarkdownEditor contracts", () => {
       />,
     );
 
+    expect(diagnostic.mock.calls).toEqual([
+      [
+        "hybrid_markdown_editor_failure",
+        {
+          fileType: "markdown",
+          mode: "edit",
+          operation: "initialize",
+          upstreamVersion: "0.0.2-84",
+        },
+      ],
+    ]);
+    diagnostic.mockRestore();
     expect(onError).toHaveBeenCalledWith(expect.objectContaining({ message: "view failed" }));
     expect(onSourceFallback).toHaveBeenCalledOnce();
     expect(upstream.state.models[0].dispose).toHaveBeenCalledOnce();
@@ -556,5 +348,156 @@ describe("HybridMarkdownEditor table edge pointer lifecycle", () => {
       expect(table.querySelector("col")?.getAttribute("style")).toContain("120px"),
     );
     expect(onChange).not.toHaveBeenCalled();
+  });
+});
+
+// @covers AC-UI-MARKDOWN-FILE-EDITING-001.10
+describe("HybridMarkdownEditor recovery boundary", () => {
+  it.each([undefined, () => {}])(
+    "does not allocate the engine when EditContext is unavailable or nonconstructible: %s",
+    (capability) => {
+      vi.stubGlobal("EditContext", capability);
+      const onSourceFallback = vi.fn();
+      render(
+        <HybridMarkdownEditor
+          content="# preserved\r\n"
+          onChange={vi.fn()}
+          onSourceFallback={onSourceFallback}
+        />,
+      );
+      expect(upstream.state.models).toHaveLength(0);
+      expect(onSourceFallback).toHaveBeenCalledOnce();
+    },
+  );
+
+  it("disposes once after update failure and ignores queued and late edits", async () => {
+    const diagnostic = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const onChange = vi.fn();
+    const onSourceFallback = vi.fn();
+    const { rerender, unmount } = render(
+      <HybridMarkdownEditor
+        content="# initial"
+        onChange={onChange}
+        onSourceFallback={onSourceFallback}
+      />,
+    );
+    const model = upstream.state.models[0];
+    const view = upstream.state.views[0];
+    model.replaceSourceText.mockImplementation(() => {
+      throw new Error("private document text");
+    });
+    model.applyUserEdit({
+      replacements: [{ replaceRange: { start: 0, endExclusive: 0 }, newText: "queued" }],
+    });
+    rerender(
+      <HybridMarkdownEditor
+        content="# authoritative"
+        onChange={onChange}
+        onSourceFallback={onSourceFallback}
+      />,
+    );
+    model.applyUserEdit({
+      replacements: [{ replaceRange: { start: 0, endExclusive: 0 }, newText: "late" }],
+    });
+    await Promise.resolve();
+    expect(onChange).not.toHaveBeenCalled();
+    expect(onSourceFallback).toHaveBeenCalledOnce();
+    expect(screen.getByTestId("hybrid-markdown-editor").childElementCount).toBe(0);
+    unmount();
+    expect(model.dispose).toHaveBeenCalledOnce();
+    expect(view.dispose).toHaveBeenCalledOnce();
+    expect(diagnostic.mock.calls).toEqual([
+      [
+        "hybrid_markdown_editor_failure",
+        { fileType: "markdown", mode: "edit", operation: "update", upstreamVersion: "0.0.2-84" },
+      ],
+    ]);
+    diagnostic.mockRestore();
+  });
+});
+
+// @covers AC-UI-MARKDOWN-FILE-EDITING-002.13
+describe("editable hybrid comments", () => {
+  it("captures a user selection before native comment input focus and preserves the source", async () => {
+    const onComment = vi.fn();
+    const onChange = vi.fn();
+    render(
+      <HybridMarkdownEditor
+        content="# Heading\n\nBody"
+        onChange={onChange}
+        onComment={onComment}
+      />,
+    );
+    const model = upstream.state.models[0];
+    await act(async () =>
+      model.selection.set({ isCollapsed: false, range: { start: 2, endExclusive: 9 } }),
+    );
+    fireEvent.click(screen.getByTestId("hybrid-markdown-comment-trigger"));
+    await act(async () => model.selection.set(undefined));
+    const textarea = screen.getByRole("textbox");
+    expect(screen.getByTestId("hybrid-markdown-editor").contains(textarea)).toBe(false);
+    fireEvent.change(textarea, { target: { value: "Check heading" } });
+    fireEvent.keyDown(textarea, { key: "Enter", ctrlKey: true });
+    expect(onComment).toHaveBeenCalledWith({ text: "Check heading", start: 2, endExclusive: 9 });
+    expect(onChange).not.toHaveBeenCalled();
+    expect(model.readonlyMode.get()).toBe(false);
+  });
+});
+
+// @covers AC-UI-MARKDOWN-FILE-EDITING-001.5
+describe("HybridMarkdownEditor source position port", () => {
+  it("restores reversed source selection with the public range reveal and cancels on hide", () => {
+    const callback = vi.fn();
+    const props = {
+      content: "one\r\ntwo\r\nthree",
+      onChange: vi.fn(),
+      onSourcePositionHandle: callback,
+    };
+    const { rerender, unmount } = render(<HybridMarkdownEditor {...props} isActive={false} />);
+    expect(callback).not.toHaveBeenCalled();
+    rerender(<HybridMarkdownEditor {...props} isActive />);
+    const handle = callback.mock.lastCall![0] as SourcePositionHandle;
+    act(() => handle.restore({ selection: { anchor: 12, active: 6 }, nearestLine: 2 }));
+    const model = upstream.state.models[0];
+    const view = upstream.state.views[0];
+    expect(model.selection.get()).toMatchObject({ anchor: 12, active: 6 });
+    expect(handle.capture()).toEqual({ selection: { anchor: 12, active: 6 }, nearestLine: 2 });
+    expect(view.revealRangeInCenterIfOutsideViewport).toHaveBeenCalledWith(
+      expect.objectContaining({ start: 6, endExclusive: 12 }),
+      "instant",
+    );
+    rerender(<HybridMarkdownEditor {...props} isActive={false} />);
+    expect(view.pendingReveal.dispose).toHaveBeenCalledOnce();
+    view.focus.mockClear();
+    handle.restore({ nearestLine: 1 });
+    expect(view.focus).not.toHaveBeenCalled();
+    unmount();
+  });
+
+  it("clamps selection after accepted replacement and cancels reveals on replacement and failure", () => {
+    const callback = vi.fn();
+    const props = {
+      content: "one\r\ntwo\r\nthree",
+      onChange: vi.fn(),
+      onSourcePositionHandle: callback,
+    };
+    const { rerender } = render(<HybridMarkdownEditor {...props} />);
+    const handle = callback.mock.lastCall![0] as SourcePositionHandle;
+    const model = upstream.state.models[0];
+    const view = upstream.state.views[0];
+    act(() => handle.restore({ selection: { anchor: 12, active: 6 }, nearestLine: 2 }));
+    rerender(<HybridMarkdownEditor {...props} content="xy" />);
+    expect(model.selection.get()).toMatchObject({ anchor: 2, active: 2 });
+    expect(view.pendingReveal.dispose).toHaveBeenCalledOnce();
+    expect(callback).toHaveBeenCalledTimes(1);
+    act(() => handle.restore({ selection: { anchor: 1, active: 0 }, nearestLine: 1 }));
+    model.replaceSourceText.mockImplementation(() => {
+      throw new Error("private source");
+    });
+    rerender(<HybridMarkdownEditor {...props} content="failed replacement" />);
+    expect(view.pendingReveal.dispose).toHaveBeenCalledTimes(2);
+    view.focus.mockClear();
+    handle.restore({ nearestLine: 1 });
+    expect(view.focus).not.toHaveBeenCalled();
   });
 });

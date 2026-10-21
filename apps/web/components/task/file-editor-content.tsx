@@ -9,8 +9,9 @@ import { useDockviewStore } from "@/lib/state/dockview-store";
 import type { FilePreviewKind } from "@/lib/utils/file-types";
 import { HtmlPreviewContent } from "./html-preview-content";
 import { MarkdownPreviewContent } from "./markdown-preview-content";
+import type { SourcePositionProps } from "@/components/editors/source-position";
 
-export type FileEditorContentProps = {
+export type FileEditorContentProps = SourcePositionProps & {
   path: string;
   isSymlink?: boolean;
   content: string;
@@ -87,6 +88,8 @@ export const FileEditorContent = memo(function FileEditorContent(props: FileEdit
         onDownload={props.onDownload}
         onTogglePreview={props.onTogglePreview ?? props.onToggleMarkdownPreview}
         toolbarModeControl={props.toolbarModeControl}
+        onSourcePositionHandle={props.onSourcePositionHandle}
+        isActive={props.isActive}
       />
     );
   }

@@ -15,6 +15,7 @@ import type { Layout } from "react-resizable-panels";
 import { useTaskCanvasLifecycleActivation } from "./dockview-canvas-activation";
 import type { TaskCanvasesLoadStatus } from "@/hooks/domains/task/use-task-canvases";
 import type { TaskTopbarRepository } from "./task-page-content-helpers";
+import { FileDraftSessionProvider } from "./file-draft-session-provider";
 import { statusSummaryTaskError } from "@/lib/task-status-summary";
 import { useTaskLaunchErrorContext } from "./task-launch-error-context";
 
@@ -65,12 +66,14 @@ export const TaskLayout = memo(function TaskLayout(props: TaskLayoutProps) {
   return (
     <TaskSheetSelectionProvider workspaceId={props.workspaceId}>
       <MobileNavigationGuardProvider>
-        <ResponsiveTaskLayout {...props} />
-        <ResponsiveTaskPicker
-          key={pickerWorkspaceId}
-          workspaceId={props.workspaceId}
-          workflowId={props.workflowId}
-        />
+        <FileDraftSessionProvider sessionId={props.sessionId}>
+          <ResponsiveTaskLayout {...props} />
+          <ResponsiveTaskPicker
+            key={pickerWorkspaceId}
+            workspaceId={props.workspaceId}
+            workflowId={props.workflowId}
+          />
+        </FileDraftSessionProvider>
       </MobileNavigationGuardProvider>
     </TaskSheetSelectionProvider>
   );

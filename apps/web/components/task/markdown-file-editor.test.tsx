@@ -1,6 +1,32 @@
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import type { SourcePosition, SourcePositionProps } from "@/components/editors/source-position";
+import type { MarkdownFileMode } from "./markdown-file-mode";
+const positionHarness = vi.hoisted(() => ({
+  positions: {
+    source: { nearestLine: 1 },
+    edit: { nearestLine: 1 },
+    preview: { nearestLine: 1 },
+  } as Record<MarkdownFileMode, SourcePosition>,
+}));
+function PositionBoundary({
+  mode,
+  onSourcePositionHandle,
+  isActive = true,
+}: SourcePositionProps & { mode: MarkdownFileMode }) {
+  useEffect(() => {
+    if (!isActive || !onSourcePositionHandle) return;
+    onSourcePositionHandle({
+      capture: () => positionHarness.positions[mode],
+      restore: (position) => {
+        positionHarness.positions[mode] = position;
+      },
+    });
+    return () => onSourcePositionHandle(null);
+  }, [mode, isActive, onSourcePositionHandle]);
+  return null;
+}
 import {
   MarkdownFileEditor,
   sourceLineEndOffset,
@@ -12,6 +38,8 @@ const MARKDOWN_PREVIEW_CONTENT_TEST_ID = vi.hoisted(() => "markdown-preview-cont
 
 const commentMocks = vi.hoisted(() => ({
   addComment: vi.fn(),
+  selectComments: vi.fn(),
+  hybridAvailable: true,
   comments: [] as Array<{
     id: string;
     source: "diff";
@@ -28,7 +56,10 @@ const commentMocks = vi.hoisted(() => ({
 }));
 
 vi.mock("@/hooks/domains/comments/use-diff-comments", () => ({
-  useDiffFileComments: () => commentMocks.comments,
+  useDiffFileComments: (...args: unknown[]) => {
+    commentMocks.selectComments(...args);
+    return commentMocks.comments;
+  },
 }));
 
 vi.mock("@/lib/state/slices/comments", () => ({
@@ -43,13 +74,20 @@ vi.mock("./file-editor-content", () => ({
     toolbarModeControl,
     onChange,
     onSave,
-  }: {
+    onSourcePositionHandle,
+    isActive,
+  }: SourcePositionProps & {
     markdownPreview?: boolean;
     toolbarModeControl?: ReactNode;
     onChange: (value: string) => void;
     onSave: () => void;
   }) => (
     <div data-testid="source-editor" data-markdown-preview={String(markdownPreview)}>
+      <PositionBoundary
+        mode="source"
+        isActive={isActive}
+        onSourcePositionHandle={onSourcePositionHandle}
+      />
       <div data-testid="source-toolbar-mode-control">{toolbarModeControl}</div>
       <button type="button" onClick={() => onChange("# edited")}>
         Change
@@ -66,12 +104,19 @@ vi.mock("./markdown-preview-content", () => ({
     content,
     toolbarModeControl,
     showToolbar = true,
-  }: {
+    onSourcePositionHandle,
+    isActive,
+  }: SourcePositionProps & {
     content: string;
     toolbarModeControl?: ReactNode;
     showToolbar?: boolean;
   }) => (
     <div data-testid={MARKDOWN_PREVIEW_CONTENT_TEST_ID}>
+      <PositionBoundary
+        mode="preview"
+        isActive={isActive}
+        onSourcePositionHandle={onSourcePositionHandle}
+      />
       {showToolbar && <div data-testid="preview-toolbar-mode-control">{toolbarModeControl}</div>}
       {content}
     </div>
@@ -79,18 +124,23 @@ vi.mock("./markdown-preview-content", () => ({
 }));
 
 vi.mock("@/components/editors/markdown/hybrid-markdown-editor", () => ({
+  isHybridMarkdownSupported: () => commentMocks.hybridAvailable,
   HybridMarkdownEditor: ({
     content,
     baseline,
     onChange,
     comments,
     onComment,
-  }: {
+    onSourceFallback,
+    onSourcePositionHandle,
+    isActive,
+  }: SourcePositionProps & {
     content: string;
     baseline?: string;
     onChange: (value: string) => void;
     comments?: readonly unknown[];
     onComment?: (comment: { text: string; start: number; endExclusive: number }) => void;
+    onSourceFallback?: () => void;
   }) => (
     <div
       data-testid="hybrid-editor"
@@ -98,6 +148,14 @@ vi.mock("@/components/editors/markdown/hybrid-markdown-editor", () => ({
       data-baseline={baseline}
       data-comment-count={String(comments?.length ?? 0)}
     >
+      <PositionBoundary
+        mode="edit"
+        isActive={isActive}
+        onSourcePositionHandle={onSourcePositionHandle}
+      />
+      <button type="button" onClick={onSourceFallback}>
+        Fail hybrid
+      </button>
       <button type="button" onClick={() => onChange("# hybrid edit")}>
         Change hybrid
       </button>
@@ -128,6 +186,7 @@ afterEach(() => {
   cleanup();
   commentMocks.addComment.mockReset();
   commentMocks.comments = [];
+  commentMocks.hybridAvailable = true;
 });
 
 const baseProps = {
@@ -296,5 +355,118 @@ describe("MarkdownFileEditor", () => {
     expect(screen.queryByTestId(MARKDOWN_EDIT_MODE_TEST_ID)).toBeNull();
     expect(screen.getByTestId("markdown-mode-preview")).toBeTruthy();
     expect(screen.getByTestId("markdown-mode-source")).toBeTruthy();
+  });
+});
+
+// @covers AC-UI-MARKDOWN-FILE-EDITING-002.13
+describe("Markdown repository-qualified comments", () => {
+  it("reads and writes the selected secondary repository without the primary ID", () => {
+    render(
+      <MarkdownFileEditor
+        {...baseProps}
+        repo="secondary"
+        repositoryId={undefined}
+        mode="edit"
+        enableComments
+      />,
+    );
+    expect(commentMocks.selectComments).toHaveBeenLastCalledWith(
+      "session-1",
+      "README.md",
+      undefined,
+      "secondary",
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Add hybrid comment" }));
+    expect(commentMocks.addComment).toHaveBeenLastCalledWith(
+      expect.objectContaining({ repositoryName: "secondary" }),
+    );
+    expect(commentMocks.addComment.mock.lastCall?.[0].repositoryId).toBeUndefined();
+  });
+});
+
+// @covers AC-UI-MARKDOWN-FILE-EDITING-002.15
+describe("Markdown hybrid recovery", () => {
+  it("discards a failed retained editor and retries with the exact current draft", () => {
+    const onModeChange = vi.fn();
+    const { rerender } = render(
+      <MarkdownFileEditor {...baseProps} mode="edit" onModeChange={onModeChange} />,
+    );
+    const first = screen.getByTestId(HYBRID_EDITOR_TEST_ID);
+    fireEvent.click(screen.getByRole("button", { name: "Fail hybrid" }));
+    expect(screen.queryByTestId(HYBRID_EDITOR_TEST_ID)).toBeNull();
+    expect(screen.getByTestId("source-editor")).toBeTruthy();
+    expect(onModeChange).not.toHaveBeenCalled();
+    rerender(
+      <MarkdownFileEditor
+        {...baseProps}
+        mode="edit"
+        content={"# exact retry draft\r\n"}
+        onModeChange={onModeChange}
+      />,
+    );
+    fireEvent.click(screen.getByTestId(MARKDOWN_EDIT_MODE_TEST_ID));
+    expect(screen.getByTestId(HYBRID_EDITOR_TEST_ID)).not.toBe(first);
+    expect(screen.getByTestId(HYBRID_EDITOR_TEST_ID).getAttribute("data-content")).toBe(
+      "# exact retry draft\r\n",
+    );
+  });
+});
+
+// @covers AC-UI-MARKDOWN-FILE-EDITING-001.10
+it("keeps restored Edit preference intact while showing Source without browser capability", () => {
+  commentMocks.hybridAvailable = false;
+  const onModeChange = vi.fn();
+  const onChange = vi.fn();
+  const onSave = vi.fn();
+  render(
+    <MarkdownFileEditor
+      {...baseProps}
+      mode="edit"
+      content={"# preserved\r\n"}
+      onModeChange={onModeChange}
+      onChange={onChange}
+      onSave={onSave}
+    />,
+  );
+  expect(screen.getByTestId("source-editor")).toBeTruthy();
+  expect((screen.getByTestId(MARKDOWN_EDIT_MODE_TEST_ID) as HTMLButtonElement).disabled).toBe(true);
+  expect(screen.getByTestId(MARKDOWN_EDIT_MODE_TEST_ID).getAttribute("title")).toBeTruthy();
+  expect(screen.getByRole("status")).toBeTruthy();
+  expect(onModeChange).not.toHaveBeenCalled();
+  expect(onChange).not.toHaveBeenCalled();
+  expect(onSave).not.toHaveBeenCalled();
+});
+
+// @covers AC-UI-MARKDOWN-FILE-EDITING-002.13
+it("scopes primary repository hybrid reads with the empty repository name", () => {
+  render(<MarkdownFileEditor {...baseProps} repo={undefined} mode="edit" enableComments />);
+  expect(commentMocks.selectComments).toHaveBeenLastCalledWith(
+    "session-1",
+    "README.md",
+    "repo-1",
+    "",
+  );
+});
+
+// @covers AC-UI-MARKDOWN-FILE-EDITING-001.5
+it("transfers selection and nearest line between desktop Markdown modes", () => {
+  const selected = { selection: { anchor: 7, active: 2 }, nearestLine: 1 };
+  positionHarness.positions.source = selected;
+  positionHarness.positions.preview = { nearestLine: 1 };
+  positionHarness.positions.edit = { nearestLine: 1 };
+  function ControlledEditor() {
+    const [mode, setMode] = useState<MarkdownFileMode>("source");
+    return <MarkdownFileEditor {...baseProps} mode={mode} onModeChange={setMode} />;
+  }
+  render(<ControlledEditor />);
+  fireEvent.click(screen.getByTestId("markdown-mode-preview"));
+  expect(positionHarness.positions.preview).toEqual(selected);
+  fireEvent.click(screen.getByTestId("markdown-mode-edit"));
+  expect(positionHarness.positions.edit).toEqual(selected);
+  positionHarness.positions.edit = { selection: { anchor: 3, active: 6 }, nearestLine: 1 };
+  fireEvent.click(screen.getByTestId("markdown-mode-source"));
+  expect(positionHarness.positions.source).toEqual({
+    selection: { anchor: 3, active: 6 },
+    nearestLine: 1,
   });
 });

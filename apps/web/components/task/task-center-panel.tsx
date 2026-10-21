@@ -35,6 +35,7 @@ import { useNormalizedTaskReviews } from "./review-panel-provider";
 import { useReviewItemSelection } from "./review-selection";
 import {
   getFileTabKey,
+  useCanonicalFileTabs,
   upsertOpenFileTab,
   type FileEditorTab,
 } from "./task-center-panel-file-tabs";
@@ -322,7 +323,7 @@ function useCenterPanelState(props: TaskCenterPanelProps) {
     activeTaskId,
   );
   const { reviews, selectedReview, selectReview, reviewLabel } = useTaskReview(activeTaskId);
-  const [openFileTabs, setOpenFileTabs] = useState<OpenFileTab[]>([]);
+  const [openFileTabs, setOpenFileTabs] = useCanonicalFileTabs(activeSessionId);
   const [selectedDiff, setSelectedDiff] = useState<SelectedDiff | null>(null);
   const {
     leftTab,

@@ -166,6 +166,7 @@ export { applyLayoutFixups } from "./dockview-layout-builders";
 export type FileEditorState = {
   /** Transient buffer lifetime, preserved by edits and never persisted. */
   instanceId?: symbol;
+  saveOperation?: symbol;
   path: string;
   /**
    * Multi-repo subpath (the repository_name, e.g. "enrichment-commons") this
@@ -227,6 +228,13 @@ type DockviewStore = {
   api: DockviewApi | null;
   setApi: (api: DockviewApi | null) => void;
   openFiles: Map<string, FileEditorState>;
+  fileDrafts: Map<string, Map<string, FileEditorState>>;
+  activeFileSessionId: string | null;
+  fileSessionEpoch: symbol;
+  mobileFileKeys: Map<string, string>;
+  activateFileSession: (sessionId: string | null) => void;
+  selectFileDraft: (key: string | null) => void;
+  ensureFileState: (key: string, file: FileEditorState) => void;
   setFileState: (path: string, state: FileEditorState) => void;
   updateFileState: (path: string, updates: Partial<FileEditorState>) => void;
   removeFileState: (path: string) => void;
@@ -1863,6 +1871,10 @@ export const useDockviewStore = create<DockviewStore>((set, get) => ({
   setSelectedDiff: (diff) => set({ selectedDiff: diff }),
   scrollTarget: null,
   openFiles: new Map(),
+  fileDrafts: new Map(),
+  activeFileSessionId: null,
+  fileSessionEpoch: Symbol(),
+  mobileFileKeys: new Map(),
   ...buildFileStateActions(set),
   centerGroupId: CENTER_GROUP,
   rightTopGroupId: RIGHT_TOP_GROUP,

@@ -2,14 +2,17 @@
 
 import {
   useCallback,
+  useContext,
   useEffect,
   useLayoutEffect,
   useRef,
-  useState,
   type Dispatch,
   type MutableRefObject,
   type SetStateAction,
 } from "react";
+import { FileDraftSessionContext } from "../file-draft-session-context";
+import { useDockviewStore } from "@/lib/state/dockview-store";
+import { buildRepoScopedItemId } from "@/lib/state/dockview-panel-actions";
 import { useAppStore } from "@/components/state-provider";
 import { calculateHash } from "@/lib/utils/file-diff";
 import { getWebSocketClient } from "@/lib/ws/connection";
@@ -28,6 +31,10 @@ export type MobileFileSavedSnapshot = {
 
 export function getMobileFileIdentity(file: Pick<OpenFileTab, "path" | "repo">): string {
   return `${file.repo ?? ""}\u0000${file.path}`;
+}
+
+export function getMobileFileInstanceId(file: OpenFileTab): symbol | undefined {
+  return "instanceId" in file && typeof file.instanceId === "symbol" ? file.instanceId : undefined;
 }
 
 export function hasSelectedMobileFileChange(
@@ -68,26 +75,52 @@ export function reconcileMobileFileUpdate(
   };
 }
 
+/** Phone selection references the same records as desktop file panels. */
+export function useCanonicalMobileFile(sessionId: string | null) {
+  const selectedFile = useDockviewStore((state) => {
+    const key = state.mobileFileKeys.get(sessionId ?? "");
+    return key ? (state.fileDrafts.get(sessionId ?? "")?.get(key) ?? null) : null;
+  });
+  useLayoutEffect(() => {
+    useDockviewStore.getState().activateFileSession(sessionId);
+  }, [sessionId]);
+  const setSelectedFile = useCallback<Dispatch<SetStateAction<OpenFileTab | null>>>(
+    (update) => {
+      const store = useDockviewStore.getState();
+      if (store.activeFileSessionId !== sessionId) return;
+      const key = store.mobileFileKeys.get(sessionId ?? "");
+      const current = key ? (store.openFiles.get(key) ?? null) : null;
+      const next = typeof update === "function" ? update(current) : update;
+      if (next === current) return;
+      if (!next) {
+        if (key) store.removeFileState(key);
+        store.selectFileDraft(null);
+        return;
+      }
+      const nextKey = buildRepoScopedItemId(next.path, next.repo);
+      if (key === nextKey && current) store.updateFileState(nextKey, next);
+      else store.ensureFileState(nextKey, next);
+      store.selectFileDraft(nextKey);
+    },
+    [sessionId],
+  );
+  return [selectedFile, setSelectedFile] as const;
+}
+
 export function useMobileFileSessionLifecycle(
   effectiveSessionId: string | null,
-  setSelectedFile: Dispatch<SetStateAction<OpenFileTab | null>>,
+  _setSelectedFile: Dispatch<SetStateAction<OpenFileTab | null>>,
   setSelectedFileMode: Dispatch<SetStateAction<MarkdownFileMode | undefined>>,
 ) {
-  const [trackedSessionId, setTrackedSessionId] = useState<string | null>(effectiveSessionId);
   const latestRequestIdRef = useRef(0);
   const openFileAbortRef = useRef<AbortController | null>(null);
 
-  if (trackedSessionId !== effectiveSessionId) {
-    setTrackedSessionId(effectiveSessionId);
-    setSelectedFile(null);
-    setSelectedFileMode(undefined);
-  }
-
   useLayoutEffect(() => {
+    setSelectedFileMode(undefined);
     latestRequestIdRef.current += 1;
     openFileAbortRef.current?.abort();
     openFileAbortRef.current = null;
-  }, [effectiveSessionId]);
+  }, [effectiveSessionId, setSelectedFileMode]);
 
   useEffect(
     () => () => {
@@ -136,8 +169,10 @@ export function useMobileSelectedFileWorkspaceSync(
   setSelectedFile: Dispatch<SetStateAction<OpenFileTab | null>>,
 ) {
   const connectionStatus = useAppStore((state) => state.connection.status);
+  const retainedOwner = useContext(FileDraftSessionContext);
 
   useEffect(() => {
+    if (retainedOwner) return;
     const client = getWebSocketClient();
     if (!client || !sessionId || connectionStatus !== "connected") return;
     let requestVersion = 0;
@@ -147,12 +182,19 @@ export function useMobileSelectedFileWorkspaceSync(
       const current = selectedFileRef.current;
       if (!current || !hasSelectedMobileFileChange(current, message.payload.changes)) return;
       const version = ++requestVersion;
+      const epoch = useDockviewStore.getState().fileSessionEpoch;
+      const instanceId = "instanceId" in current ? current.instanceId : undefined;
       void requestFileContent(client, sessionId, current.path, current.repo)
         .then(async (response) => {
           const remoteHash = await calculateHash(response.content);
-          if (version !== requestVersion) return;
+          if (version !== requestVersion || useDockviewStore.getState().fileSessionEpoch !== epoch)
+            return;
           setSelectedFile((latest) => {
-            if (!latest || getMobileFileIdentity(latest) !== getMobileFileIdentity(current)) {
+            if (
+              !latest ||
+              getMobileFileIdentity(latest) !== getMobileFileIdentity(current) ||
+              (instanceId && (!("instanceId" in latest) || latest.instanceId !== instanceId))
+            ) {
               return latest;
             }
             return reconcileMobileFileUpdate(
@@ -173,7 +215,7 @@ export function useMobileSelectedFileWorkspaceSync(
       requestVersion += 1;
       unsubscribe();
     };
-  }, [connectionStatus, selectedFileRef, sessionId, setSelectedFile]);
+  }, [connectionStatus, retainedOwner, selectedFileRef, sessionId, setSelectedFile]);
 }
 
 export function useSelectedMobileFileCallbacks(

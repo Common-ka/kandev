@@ -19,10 +19,12 @@ import { useMonacoCursorNavigation } from "./use-monaco-cursor-navigation";
 import { initMonacoThemes } from "./monaco-init";
 import { useTranslation } from "react-i18next";
 import type { FilePreviewKind } from "@/lib/utils/file-types";
+import type { SourcePositionProps } from "../source-position";
+import { useMonacoSourcePosition } from "./use-monaco-source-position";
 
 initMonacoThemes();
 
-type MonacoCodeEditorProps = {
+type MonacoCodeEditorProps = SourcePositionProps & {
   path: string;
   content: string;
   originalContent: string;
@@ -158,6 +160,16 @@ function useMonacoCodeEditorSetup(props: MonacoCodeEditorProps) {
     contentRef,
     editorRef: state.editorRef,
     editorReady: state.editorInstance !== null,
+  });
+  useMonacoSourcePosition({
+    editor: state.editorInstance,
+    content,
+    path,
+    worktreePath,
+    repo,
+    sessionId,
+    isActive: props.isActive,
+    onSourcePositionHandle: props.onSourcePositionHandle,
   });
   useMonacoCursorNavigation({
     editor: state.editorInstance,

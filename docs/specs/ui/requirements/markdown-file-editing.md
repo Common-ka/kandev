@@ -1,5 +1,5 @@
 ---
-status: draft
+status: active
 system: ui
 created: 2026-08-27
 owners:
@@ -72,6 +72,10 @@ change.
 - **AC-UI-MARKDOWN-FILE-EDITING-001.9:** Edit mode shall apply theme-aware
   syntax highlighting to supported fenced code blocks while keeping code
   fences and code content in canonical Markdown source.
+- **AC-UI-MARKDOWN-FILE-EDITING-001.10:** When the browser cannot support
+  hybrid editing, the system shall keep Preview and Source available.
+  The Edit control shall explain its unavailable state without changing the
+  source or the saved mode preference.
 
 ### REQ-UI-MARKDOWN-FILE-EDITING-002: Safe file workflow integration
 
@@ -121,6 +125,17 @@ workflow, so that switching presentation does not risk my work.
   table column by pointer, touch, or keyboard, the system shall update the
   visible column width without changing canonical source. The width shall
   survive mode switches while the file tab remains open.
+- **AC-UI-MARKDOWN-FILE-EDITING-002.13:** Comments shall retain the selected
+  file's repository identity in every mode. Files with the same path in
+  different repositories shall not share repository-qualified comments.
+- **AC-UI-MARKDOWN-FILE-EDITING-002.14:** When an external write equals the
+  current draft, the system shall recognize the file as saved. Subsequent
+  edits shall save against that accepted version. A delayed response shall
+  not replace newer edits or change another file's draft.
+- **AC-UI-MARKDOWN-FILE-EDITING-002.15:** After an Edit failure, selecting
+  Edit again shall either start a usable editor or return to Source with an
+  accessible failure message. The system shall preserve unsaved content and
+  shall not show an empty editor surface.
 
 ### REQ-UI-MARKDOWN-FILE-EDITING-003: Responsive and accessible editing
 
@@ -149,6 +164,23 @@ the Files surface, so that I can complete the same task without a desktop.
   shall use the surrounding file-surface density on fine pointers and at least
   44-pixel hit targets on coarse pointers without covering table content or
   adding another scroll owner. A coarse-pointer action shall not require hover.
+- **AC-UI-MARKDOWN-FILE-EDITING-003.8:** Changing between phone, tablet, and
+  desktop layouts shall preserve each open Markdown draft and its file and
+  session identity. Editing or saving that file in the new layout shall use
+  the same current draft.
+- **AC-UI-MARKDOWN-FILE-EDITING-003.9:** Navigation that would discard an
+  unsaved Markdown draft shall require a discard decision. Cancelling shall
+  retain the draft and current destination. Browser unload shall use the
+  browser's supported unsaved-change warning.
+- **AC-UI-MARKDOWN-FILE-EDITING-003.10:** At phone widths of 320 pixels and
+  above, Save shall remain visible and operable when a remote update is
+  available. Reload and mode choices shall remain reachable with translated
+  labels, without page-level horizontal scrolling.
+
+## Implementation plans
+
+- [Original Markdown editing package](../../../plans/markdown-file-editing/plan.md).
+- [Review remediation package](../../../plans/markdown-editing-remediation/plan.md).
 
 ## Out of scope
 

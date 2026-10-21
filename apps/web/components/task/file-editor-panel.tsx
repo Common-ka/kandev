@@ -371,6 +371,7 @@ function LoadingFilePanel() {
 }
 
 type LoadedFilePanelProps = {
+  draftIdentity?: symbol;
   category: FileCategory;
   fileKey: string;
   path: string;
@@ -387,6 +388,7 @@ type LoadedFilePanelProps = {
 };
 
 function LoadedFilePanel({
+  draftIdentity,
   category,
   fileKey,
   path,
@@ -420,6 +422,7 @@ function LoadedFilePanel({
       <PanelBody padding={false} scroll={false}>
         {isMarkdownFile(editorProps.path) ? (
           <MarkdownFileEditor
+            draftIdentity={draftIdentity}
             path={editorProps.path}
             content={editorProps.content}
             originalContent={editorProps.originalContent}
@@ -441,7 +444,6 @@ function LoadedFilePanel({
             onDelete={editorProps.onDelete}
             onOpenFile={onOpenFile}
             onOpenLink={onOpenLink}
-            onSourceFallback={() => onMarkdownModeChange("source")}
           />
         ) : (
           <FileEditorContent {...editorProps} />
@@ -484,6 +486,7 @@ function resolveFileEditorPanelState({
 }
 
 type LoadedFileEditorPanelProps = {
+  draftIdentity?: symbol;
   category: FileCategory;
   fileKey: string;
   panelProps: Pick<
@@ -518,6 +521,7 @@ type LoadedFileEditorPanelProps = {
 };
 
 function LoadedFileEditorPanel({
+  draftIdentity,
   category,
   fileKey,
   panelProps,
@@ -531,6 +535,7 @@ function LoadedFileEditorPanel({
 }: LoadedFileEditorPanelProps) {
   return (
     <LoadedFilePanel
+      draftIdentity={draftIdentity}
       category={category}
       fileKey={fileKey}
       path={buffer.path}
@@ -554,6 +559,7 @@ export const FileEditorPanel = memo(function FileEditorPanel({
   const fileKey = buildRepoScopedItemId(path, repo);
 
   const file = useFileEditorBuffer(fileKey);
+  const draftIdentity = useDockviewStore((state) => state.openFiles.get(fileKey)?.instanceId);
   const setFileState = useDockviewStore((s) => s.setFileState);
   const updateFileState = useDockviewStore((s) => s.updateFileState);
 
@@ -620,6 +626,7 @@ export const FileEditorPanel = memo(function FileEditorPanel({
 
   return (
     <LoadedFileEditorPanel
+      draftIdentity={draftIdentity}
       category={category}
       fileKey={fileKey}
       panelProps={panelProps}

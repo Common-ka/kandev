@@ -50,6 +50,8 @@ import {
   useExternalVcsFileStatus,
 } from "@/components/editors/external-vcs-file-link";
 import { useTranslation } from "react-i18next";
+import type { SourcePositionProps } from "@/components/editors/source-position";
+import { useMarkdownPreviewSourcePosition } from "./use-markdown-preview-source-position";
 
 interface MarkdownPreviewToolbarProps {
   path: string;
@@ -143,7 +145,7 @@ function MarkdownPreviewToolbar({
   );
 }
 
-interface MarkdownPreviewContentProps {
+interface MarkdownPreviewContentProps extends SourcePositionProps {
   path: string;
   isSymlink?: boolean;
   content: string;
@@ -448,9 +450,19 @@ export const MarkdownPreviewContent = memo(function MarkdownPreviewContent({
   toolbarModeControl,
   toolbarActions,
   showToolbar = true,
+  onSourcePositionHandle,
+  isActive,
 }: MarkdownPreviewContentProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  useMarkdownPreviewSourcePosition({
+    content,
+    identity: JSON.stringify([sessionId, repositoryName, path]),
+    rootRef,
+    scrollRef,
+    isActive,
+    onSourcePositionHandle,
+  });
   const [overlayRoot, setOverlayRoot] = useState<HTMLElement | null>(null);
   const commentsEnabled = enableComments && !!sessionId;
   const commentState = useMarkdownPreviewComments({

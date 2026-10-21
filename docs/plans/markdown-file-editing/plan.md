@@ -1,6 +1,6 @@
 ---
 created: 2026-08-27
-status: in_progress
+status: completed
 requirements:
   - REQ-UI-MARKDOWN-FILE-EDITING-001
   - REQ-UI-MARKDOWN-FILE-EDITING-002
@@ -93,7 +93,7 @@ file surfaces before proving both flows with production-build E2E tests.
 
 | Acceptance criteria                                   | Evidence                                                                                                 |
 | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `AC-UI-MARKDOWN-FILE-EDITING-001.2`, `.3`, `.6`       | `components/editors/markdown/hybrid-markdown-editor.test.tsx` and `markdown-source-preservation.test.ts` |
+| `AC-UI-MARKDOWN-FILE-EDITING-001.2`, `.3`, `.6`       | Adapter lifecycle tests and the real-engine corpus in `e2e/tests/task/markdown-file-editing.spec.ts` |
 | `AC-UI-MARKDOWN-FILE-EDITING-001.1`, `.4`, `.5`, `.7` | `components/task/markdown-file-editor.test.tsx`                                                          |
 | `AC-UI-MARKDOWN-FILE-EDITING-002.1`, `.2`             | Existing `components/task/markdown-preview-content*.test.tsx` plus coordinator regression cases          |
 | `AC-UI-MARKDOWN-FILE-EDITING-002.3`, `.4`, `.5`, `.8` | `components/task/markdown-file-editor.test.tsx` and existing file-state tests                            |
@@ -118,10 +118,27 @@ file surfaces before proving both flows with production-build E2E tests.
 - [x] [Task 03: Add Mobile Markdown Editing](task-03-mobile-markdown-editing.md)
 - [x] [Task 04: Prove Markdown Editing End to End](task-04-markdown-editor-e2e.md)
 - [x] [Task 05: Polish Code and Table Editing](task-05-polish-code-and-table-editing.md)
-- [ ] [Task 06: Add Positional Markdown Table Edits](task-06-positional-table-edits.md)
-- [ ] [Task 07: Add Table Edge Editing Chrome](task-07-table-edge-editing-chrome.md)
+- [x] [Task 06: Add Positional Markdown Table Edits](task-06-positional-table-edits.md)
+- [x] [Task 07: Add Table Edge Editing Chrome](task-07-table-edge-editing-chrome.md)
 
 ## Verification results
+
+### Review follow-up at b03dce19114c
+
+The [remediation package](../markdown-editing-remediation/plan.md) completed
+on 2026-10-20 in the existing PR branch worktree. It repairs draft lifetime,
+save baselines, repository comment identity, recovery, phone actions, and
+source-position transfer. Real-engine browser tests replace the unused helper's
+preservation claim. Tasks 06 and 07 now record passing targeted table checks.
+
+Current remediation evidence: 311 focused tests, all 10 desktop Markdown browser
+scenarios, all seven phone Markdown scenarios, and two file-confirmation
+scenarios. TypeScript, changed-file lint, translation checks, and builds passed.
+The counts below describe earlier implementation work and are not current-head
+acceptance totals. The changes remain uncommitted, and integration with main
+remains outside this package.
+
+### Historical implementation results
 
 - `rtk make fmt` passed.
 - `rtk make typecheck` passed for all applications.

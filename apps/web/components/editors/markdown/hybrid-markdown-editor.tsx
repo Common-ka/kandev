@@ -5,7 +5,6 @@ import {
   CommentModeController,
   CommentsModel,
   CommentsView,
-  createDefaultMonacoSyntaxHighlighter,
   EditorController,
   EditorModel,
   EditorView,
@@ -17,27 +16,31 @@ import {
   type Comment,
   type CommentSubmission,
   type EditorViewOptions,
-  type IMonarchApi,
   type MonacoSyntaxHighlighter,
-  type TableAstNode,
 } from "@vscode/markdown-editor";
-import { language as cssLanguage } from "monaco-editor/esm/vs/basic-languages/css/css.js";
-import { language as htmlLanguage } from "monaco-editor/esm/vs/basic-languages/html/html.js";
-import { language as javascriptLanguage } from "monaco-editor/esm/vs/basic-languages/javascript/javascript.js";
-import { language as pythonLanguage } from "monaco-editor/esm/vs/basic-languages/python/python.js";
-import { language as rustLanguage } from "monaco-editor/esm/vs/basic-languages/rust/rust.js";
-import { language as shellLanguage } from "monaco-editor/esm/vs/basic-languages/shell/shell.js";
-import { language as typescriptLanguage } from "monaco-editor/esm/vs/basic-languages/typescript/typescript.js";
-import { language as yamlLanguage } from "monaco-editor/esm/vs/basic-languages/yaml/yaml.js";
-import { compile } from "monaco-editor/esm/vs/editor/standalone/common/monarch/monarchCompile.js";
-import { MonarchTokenizer } from "monaco-editor/esm/vs/editor/standalone/common/monarch/monarchLexer.js";
 import "@vscode/markdown-editor/editor.css";
 import { insertMarkdownTableColumn, insertMarkdownTableRow } from "./markdown-table-edit";
-import {
-  HybridMarkdownTableEdgeChrome,
-  type HybridMarkdownTableEdgeChromeProps,
-} from "./hybrid-markdown-table-edge";
+import { HybridMarkdownTableEdgeChrome } from "./hybrid-markdown-table-edge";
+import { findActiveTableRange, useActiveTableControlsHost } from "./hybrid-markdown-table-controls";
 import "./hybrid-markdown-editor.css";
+import { createMarkdownSyntaxHighlighter } from "./hybrid-markdown-syntax-highlighter";
+import { HybridMarkdownComments } from "./hybrid-markdown-comments";
+import type { SourcePositionProps } from "../source-position";
+import {
+  useHybridSourcePosition,
+  cancelHybridSourcePositionReveal,
+} from "./use-hybrid-source-position";
+
+export function isHybridMarkdownSupported(): boolean {
+  const capability = (globalThis as { EditContext?: unknown }).EditContext;
+  if (typeof capability !== "function") return false;
+  try {
+    Reflect.construct(Object, [], capability);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export type MarkdownSourceRange = {
   start: number;
@@ -55,7 +58,7 @@ export type MarkdownComment = MarkdownSourceRange & {
   createdAt?: number;
 };
 
-export type HybridMarkdownEditorProps = {
+export type HybridMarkdownEditorProps = SourcePositionProps & {
   content: string;
   readOnly?: boolean;
   baseline?: string;
@@ -76,6 +79,9 @@ export type MarkdownCommentSubmission = {
 };
 
 type EditorLifecycle = {
+  active: boolean;
+  selectionSubscription?: { dispose: () => void };
+  sourcePositionReveal?: { dispose: () => void };
   model: EditorModel;
   view: EditorView;
   controller: EditorController;
@@ -109,6 +115,8 @@ export function HybridMarkdownEditor({
   onComment,
   onError,
   onSourceFallback,
+  onSourcePositionHandle,
+  isActive = true,
 }: HybridMarkdownEditorProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const lifecycleRef = useRef<EditorLifecycle | null>(null);
@@ -127,7 +135,7 @@ export function HybridMarkdownEditor({
   callbackRefs.onError.current = onError;
   callbackRefs.onSourceFallback.current = onSourceFallback;
 
-  useHybridEditorLifecycle({
+  const editorLifecycle = useHybridEditorLifecycle({
     rootRef,
     lifecycleRef,
     canonicalContentRef,
@@ -147,6 +155,14 @@ export function HybridMarkdownEditor({
     gutterMarkers,
     comments,
   });
+  useHybridSourcePosition({
+    lifecycle: editorLifecycle,
+    rootRef,
+    content,
+    isActive,
+    onSourcePositionHandle,
+    onError: (error) => reportEditorFailure(lifecycleRef, callbackRefs, error),
+  });
   const tableControlsHost = useActiveTableControlsHost(rootRef, !readOnly, lifecycleRef);
 
   return (
@@ -160,6 +176,11 @@ export function HybridMarkdownEditor({
         }
         data-testid="hybrid-markdown-editor"
       />
+      <HybridMarkdownComments
+        lifecycle={editorLifecycle}
+        enabled={isActive && !readOnly && !!onComment}
+        onComment={onComment}
+      />
       <HybridMarkdownTableEdgeChrome
         host={tableControlsHost?.host ?? null}
         tableKey={tableControlsHost?.tableKey ?? null}
@@ -168,97 +189,6 @@ export function HybridMarkdownEditor({
       />
     </>
   );
-}
-
-type ActiveTableControlsHost = Pick<HybridMarkdownTableEdgeChromeProps, "host" | "tableKey">;
-
-const ACTIVE_TABLE_EDGE_WRAPPER_CLASS = "kandev-markdown-table-edge-wrapper";
-
-type ActiveTableHostWithWrapper = ActiveTableControlsHost & {
-  wrapper: HTMLElement;
-};
-
-function ensureActiveTableHost(
-  root: HTMLDivElement,
-  lifecycleRef: MutableRef<EditorLifecycle | null>,
-): ActiveTableHostWithWrapper | null {
-  const activeTable = root.querySelector<HTMLElement>(".md-table.md-block-active");
-  const wrapper = activeTable?.closest<HTMLElement>(".md-table-wrapper");
-  if (!wrapper || !root.contains(wrapper)) return null;
-
-  const existing = Array.from(wrapper.children).find(
-    (child): child is HTMLDivElement =>
-      child instanceof HTMLDivElement && child.dataset.kandevTableControls === "true",
-  );
-  const host = existing ?? document.createElement("div");
-  if (!existing) {
-    host.dataset.kandevTableControls = "true";
-    host.className = "kandev-markdown-table-controls-host";
-    wrapper.prepend(host);
-  }
-
-  const activeBlock = lifecycleRef.current?.model.activeBlock.get();
-  const range =
-    activeBlock?.kind === "table" && lifecycleRef.current
-      ? findActiveTableRange(lifecycleRef.current.model, activeBlock as TableAstNode)
-      : undefined;
-  return { host, tableKey: range ? `table-${range.start}` : "active-table", wrapper };
-}
-
-function useActiveTableControlsHost(
-  rootRef: MutableRef<HTMLDivElement | null>,
-  enabled: boolean,
-  lifecycleRef: MutableRef<EditorLifecycle | null>,
-): ActiveTableControlsHost | null {
-  const [hostState, setHostState] = useState<ActiveTableControlsHost | null>(null);
-
-  useEffect(() => {
-    const root = rootRef.current;
-    if (!root || !enabled) {
-      setHostState(null);
-      return;
-    }
-
-    let currentHost: HTMLDivElement | null = null;
-    let currentWrapper: HTMLElement | null = null;
-    const reconcile = () => {
-      const next = ensureActiveTableHost(root, lifecycleRef);
-      if (!next) {
-        currentHost?.remove();
-        currentWrapper?.classList.remove(ACTIVE_TABLE_EDGE_WRAPPER_CLASS);
-        currentHost = null;
-        currentWrapper = null;
-        setHostState(null);
-        return;
-      }
-
-      if (currentWrapper && currentWrapper !== next.wrapper) {
-        currentWrapper.classList.remove(ACTIVE_TABLE_EDGE_WRAPPER_CLASS);
-      }
-      if (currentHost && currentHost !== next.host) currentHost.remove();
-      if (!next.wrapper.classList.contains(ACTIVE_TABLE_EDGE_WRAPPER_CLASS)) {
-        next.wrapper.classList.add(ACTIVE_TABLE_EDGE_WRAPPER_CLASS);
-      }
-      currentHost = next.host;
-      currentWrapper = next.wrapper;
-      setHostState((current) =>
-        current?.host === next.host && current.tableKey === next.tableKey
-          ? current
-          : { host: next.host, tableKey: next.tableKey },
-      );
-    };
-
-    reconcile();
-    const observer = new MutationObserver(reconcile);
-    observer.observe(root, { attributes: true, childList: true, subtree: true });
-    return () => {
-      observer.disconnect();
-      currentHost?.remove();
-      currentWrapper?.classList.remove(ACTIVE_TABLE_EDGE_WRAPPER_CLASS);
-    };
-  }, [enabled, lifecycleRef, rootRef]);
-
-  return hostState;
 }
 
 type LifecycleHookOptions = {
@@ -283,7 +213,8 @@ function useHybridEditorLifecycle({
   baseline,
   gutterMarkers,
   comments,
-}: LifecycleHookOptions): void {
+}: LifecycleHookOptions): EditorLifecycle | null {
+  const [currentLifecycle, setCurrentLifecycle] = useState<EditorLifecycle | null>(null);
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
@@ -296,9 +227,17 @@ function useHybridEditorLifecycle({
       disposeEditorLifecycle(lifecycle);
       lifecycle = null;
       lifecycleRef.current = null;
+      setCurrentLifecycle(null);
+      root.replaceChildren();
+      reportEditorDiagnostic("initialize");
       callbackRefs.onError.current?.(error);
       callbackRefs.onSourceFallback.current?.();
     };
+
+    if (!isHybridMarkdownSupported()) {
+      callbackRefs.onSourceFallback.current?.();
+      return;
+    }
 
     try {
       lifecycle = createEditorLifecycle({
@@ -313,8 +252,11 @@ function useHybridEditorLifecycle({
           if (!handler) return false;
           return handler(url) === false ? false : undefined;
         },
-        onComment: (submission) => callbackRefs.onComment.current?.(submission),
+        onComment: (submission) => {
+          if (!disposed && lifecycle?.active) callbackRefs.onComment.current?.(submission);
+        },
         onSourceEdit: (nextContent) => {
+          if (disposed || !lifecycle?.active) return;
           try {
             canonicalContentRef.current = nextContent;
             callbackRefs.onChange.current(nextContent);
@@ -324,6 +266,7 @@ function useHybridEditorLifecycle({
         },
       });
       lifecycleRef.current = lifecycle;
+      setCurrentLifecycle(lifecycle);
     } catch (error) {
       fail(error);
     }
@@ -338,6 +281,7 @@ function useHybridEditorLifecycle({
     // Callback and document updates are synchronized by the effects below.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  return currentLifecycle;
 }
 
 type ContentSyncOptions = Pick<
@@ -356,7 +300,17 @@ function useHybridEditorContentSync({
     if (!lifecycle || canonicalContentRef.current === content) return;
 
     try {
+      const selection = lifecycle.model.selection.get();
+      cancelHybridSourcePositionReveal(lifecycle);
       lifecycle.model.replaceSourceText(new StringValue(content));
+      if (selection)
+        setObservable(
+          lifecycle.model.selection,
+          new Selection(
+            Math.max(0, Math.min(content.length, selection.anchor)),
+            Math.max(0, Math.min(content.length, selection.active)),
+          ),
+        );
       canonicalContentRef.current = content;
     } catch (error) {
       reportEditorFailure(lifecycleRef, callbackRefs, error);
@@ -457,6 +411,7 @@ function createEditorLifecycle({
     sourceEditSubscription = subscribeToAppliedSourceEdits(model, onSourceEdit);
 
     return {
+      active: true,
       model,
       view,
       controller,
@@ -489,8 +444,11 @@ function reportEditorFailure(
   error: unknown,
 ): void {
   const lifecycle = lifecycleRef.current;
-  if (lifecycle) disposeEditorLifecycle(lifecycle);
+  if (!lifecycle?.active) return;
+  lifecycle.view.element.remove();
+  disposeEditorLifecycle(lifecycle);
   lifecycleRef.current = null;
+  reportEditorDiagnostic("update");
   callbackRefs.onError.current?.(error);
   callbackRefs.onSourceFallback.current?.();
 }
@@ -552,11 +510,15 @@ function toCommentSubmission(submission: CommentSubmission): MarkdownCommentSubm
 }
 
 function disposeEditorLifecycle(lifecycle: EditorLifecycle | null): void {
-  if (!lifecycle) return;
+  if (!lifecycle?.active) return;
+  lifecycle.active = false;
   disposeEditorParts(lifecycle);
 }
 
 function disposeEditorParts(parts: Partial<EditorLifecycle>): void {
+  parts.sourcePositionReveal?.dispose();
+  parts.sourcePositionReveal = undefined;
+  parts.selectionSubscription?.dispose();
   parts.sourceEditSubscription?.dispose();
   parts.commentMode?.dispose();
   parts.commentsView?.dispose();
@@ -566,22 +528,6 @@ function disposeEditorParts(parts: Partial<EditorLifecycle>): void {
   // The pinned package exposes EditorModel.dispose() at runtime, but its public
   // declaration does not include the lifecycle method.
   (parts.model as unknown as { dispose?: () => void } | undefined)?.dispose?.();
-}
-
-function createMarkdownSyntaxHighlighter(): MonacoSyntaxHighlighter {
-  return createDefaultMonacoSyntaxHighlighter(
-    { compile, MonarchTokenizer } as unknown as IMonarchApi,
-    {
-      typescript: typescriptLanguage,
-      javascript: javascriptLanguage,
-      css: cssLanguage,
-      html: htmlLanguage,
-      python: pythonLanguage,
-      rust: rustLanguage,
-      shell: shellLanguage,
-      yaml: yamlLanguage,
-    },
-  );
 }
 
 function applyActiveTableEdit(
@@ -612,16 +558,12 @@ function applyActiveTableEdit(
   );
 }
 
-function findActiveTableRange(
-  model: EditorModel,
-  activeTable: TableAstNode,
-): MarkdownSourceRange | undefined {
-  let start = 0;
-  for (const node of model.document.get().content) {
-    if (node === activeTable) {
-      return { start, endExclusive: start + node.length };
-    }
-    start += node.length;
-  }
-  return undefined;
+function reportEditorDiagnostic(operation: "initialize" | "update"): void {
+  // i18n-exempt: Structured diagnostic identifiers contain no user copy or document data.
+  console.warn("hybrid_markdown_editor_failure", {
+    fileType: "markdown",
+    mode: "edit",
+    operation,
+    upstreamVersion: "0.0.2-84",
+  });
 }

@@ -50,6 +50,9 @@ export type PendingFileSave = {
 };
 
 export type SaveDeleteParams = {
+  retainedOwner?:
+    | import("@/components/task/file-draft-session-context").FileDraftSessionOwner
+    | null;
   activeSessionIdRef: React.MutableRefObject<string | null>;
   activeEditorVisitRef: React.MutableRefObject<symbol | null>;
   updateFileState: (path: string, updates: Partial<FileEditorState>) => void;
@@ -77,7 +80,22 @@ function captureOwner(fileKey: string, params: SaveDeleteParams) {
     if (file) return !!file.instanceId && current?.instanceId === file.instanceId;
     return !current && getFileEditorPanel(fileKey) === panel;
   };
-  return { sessionId, visit, file, panel, api, isCurrent };
+  const retained = params.retainedOwner;
+  const retainedVisit = retained?.visitRef.current;
+  const epoch = useDockviewStore.getState().fileSessionEpoch;
+  const isCanonicalCurrent = () => {
+    if (!retained) return isCurrent();
+    const state = useDockviewStore.getState();
+    return (
+      retained.sessionIdRef.current === sessionId &&
+      !!retainedVisit &&
+      retained.visitRef.current === retainedVisit &&
+      state.fileSessionEpoch === epoch &&
+      !!file?.instanceId &&
+      state.openFiles.get(fileKey)?.instanceId === file.instanceId
+    );
+  };
+  return { sessionId, visit, file, panel, api, isCurrent, isCanonicalCurrent };
 }
 
 function publishSavedFile(
@@ -99,14 +117,36 @@ function publishSavedFile(
     remoteContent: undefined,
     remoteOriginalHash: undefined,
   });
+  return stillClean;
+}
+
+function publishSaveFeedback(
+  file: FileEditorState,
+  resolution: string | undefined,
+  stillClean: boolean,
+  params: SaveDeleteParams,
+) {
   if (stillClean) updatePanelAfterSave(file.path, file.name, file.repo);
+  if (resolution === "overwritten") {
+    params.toast({
+      title: t("editors:fileSavedOverwritten"),
+      description: t("editors:fileSavedOverwrittenDescription"),
+      variant: "default",
+    });
+  }
+}
+
+function isSavableFile(
+  file: FileEditorState | undefined,
+): file is FileEditorState & { instanceId: symbol } {
+  return !!file?.isDirty && !!file.instanceId;
 }
 
 async function performSaveFile(path: string, repo: string | undefined, params: SaveDeleteParams) {
   const fileKey = buildRepoScopedItemId(path, repo);
   const owner = captureOwner(fileKey, params);
   const file = owner?.file;
-  if (!owner || !file?.isDirty || !file.instanceId) return;
+  if (!owner || !isSavableFile(file)) return;
   const client = getWebSocketClient();
   if (!client) return;
   const marker = {
@@ -116,6 +156,10 @@ async function performSaveFile(path: string, repo: string | undefined, params: S
     api: owner.api,
   };
   params.setSavingFiles((prev) => (owner.isCurrent() ? new Map(prev).set(fileKey, marker) : prev));
+  const operation = Symbol();
+  params.updateFileState(fileKey, { saveOperation: operation });
+  const ownsSave = () =>
+    owner.isCanonicalCurrent() && getOpenFiles().get(fileKey)?.saveOperation === operation;
   try {
     const diff = generateUnifiedDiff(file.originalContent, file.content, file.path);
     const response = await updateFileContent(client, owner.sessionId, {
@@ -125,17 +169,17 @@ async function performSaveFile(path: string, repo: string | undefined, params: S
       desiredContent: file.content,
       repo: file.repo,
     });
-    if (!owner.isCurrent()) return;
+    if (!ownsSave()) return;
     if (response.success && response.new_hash) {
-      publishSavedFile(fileKey, file, response.new_hash, owner.sessionId, params);
-      if (response.resolution === "overwritten") {
-        params.toast({
-          title: t("editors:fileSavedOverwritten"),
-          description: t("editors:fileSavedOverwrittenDescription"),
-          variant: "default",
-        });
-      }
-    } else {
+      const stillClean = publishSavedFile(
+        fileKey,
+        file,
+        response.new_hash,
+        owner.sessionId,
+        params,
+      );
+      if (owner.isCurrent()) publishSaveFeedback(file, response.resolution, stillClean, params);
+    } else if (owner.isCurrent()) {
       params.toast({
         title: t("editors:saveFailed"),
         description: response.error || t("editors:failedToSaveFile"),

@@ -406,6 +406,33 @@ Select **Jump to latest** above the composer to return to the newest message,
 including agent replies. The action appears only when newer content is below
 the transcript. It does not change the session's auto-scroll preference.
 
+## Edit a Markdown file
+
+Open a `.md` file from **Files**. New files open in **Preview**.
+Choose a mode for the work you need:
+
+- **Preview** renders the current draft without editing it.
+- **Edit** keeps rendered context around the source text you change.
+- **Source** gives you the plain-text editor and exact Markdown syntax.
+
+Switching modes does not save the file. Select **Save** when the draft is
+ready, or use the editor's save shortcut. The draft stays with its file when
+you rotate a phone or change between phone and desktop layouts.
+
+On a phone, the header keeps **Save** visible. Open the current-mode menu to
+change modes. When an agent changes a file that you are editing, your local
+draft stays intact. Use **Reload** in the file actions menu to replace it with
+the outside version.
+
+Edit requires browser support for the hybrid editor. When that support is
+unavailable, use Preview and Source. `.mdx` files also use Preview and Source.
+If Edit fails, Kandev keeps your draft in Source. You can continue there or
+select Edit again to retry when the browser supports it.
+
+Leaving an unsaved draft requires a discard decision. Cancel the decision to
+keep editing, or save before leaving. Unsaved drafts are not a backup across
+browser shutdown.
+
 ## Inspect changes
 
 Open **+ > Changes** on desktop. A repository-less task has no Git state, so Kandev closes this panel automatically.

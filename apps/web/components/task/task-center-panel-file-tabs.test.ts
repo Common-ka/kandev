@@ -84,3 +84,10 @@ describe("upsertOpenFileTab", () => {
     expect(result[3]).toMatchObject(newFile);
   });
 });
+
+it("keeps unsaved tabs when adding a file beyond the clean-tab limit", () => {
+  const dirty = { ...file, content: "draft", isDirty: true };
+  const tabs = [dirty, ...[1, 2, 3].map((index) => ({ ...file, path: `file-${index}.md` }))];
+  const result = upsertOpenFileTab(tabs, { ...file, path: "new.md" });
+  expect(result.find((tab) => tab.path === dirty.path)?.content).toBe("draft");
+});

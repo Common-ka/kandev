@@ -2,6 +2,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, renderHook, act, screen, waitFor } from "@testing-library/react";
+import { useDockviewStore } from "@/lib/state/dockview-store";
 import { useState } from "react";
 import type { OpenFileTab } from "@/lib/types/backend";
 import type { ReviewItemSummary } from "@/lib/plugins/types";
@@ -109,6 +110,15 @@ const CHAT_LINK_PATH = "src/chat-link.ts";
 const REPO = "frontend";
 const DIRTY_DRAFT_CONTENT = "draft content";
 
+beforeEach(() => {
+  useDockviewStore.setState({
+    openFiles: new Map(),
+    fileDrafts: new Map(),
+    mobileFileKeys: new Map(),
+    activeFileSessionId: null,
+  });
+});
+
 describe("mobilePanelTopNavHeight", () => {
   it("reserves the fixed header only when no earlier page feedback owns the offset", () => {
     expect(mobilePanelTopNavHeight(false)).toBe("3.5rem");
@@ -158,7 +168,7 @@ describe("useMobilePanelHandlers", () => {
 
     act(() => result.current.handleOpenFile(MOCK_FILE));
 
-    expect(result.current.selectedFile).toEqual(MOCK_FILE);
+    expect(result.current.selectedFile).toMatchObject(MOCK_FILE);
     expect(handlePanelChange).toHaveBeenCalledWith("files");
   });
 
@@ -177,7 +187,7 @@ describe("useMobilePanelHandlers", () => {
     const openFile = fetchAndOpenFileMock.mock.calls[0]?.[2] as (file: OpenFileTab) => void;
     act(() => openFile(MOCK_FILE));
 
-    expect(result.current.selectedFile).toEqual(MOCK_FILE);
+    expect(result.current.selectedFile).toMatchObject(MOCK_FILE);
     expect(handlePanelChange).toHaveBeenCalledWith("files");
   });
 
@@ -284,7 +294,7 @@ describe("useMobilePanelHandlers", () => {
       }),
     );
 
-    expect(result.current.selectedFile).toEqual({
+    expect(result.current.selectedFile).toMatchObject({
       ...MOCK_FILE,
       path: "README.md",
       name: "README.md",
@@ -424,7 +434,7 @@ describe("useMobilePanelHandlers selection state", () => {
   it("handlePanelChangeAndClearSheet clears the viewer when switching panels", () => {
     const { result, handlePanelChange } = renderHandlers();
     act(() => result.current.handleOpenFile(MOCK_FILE));
-    expect(result.current.selectedFile).toEqual(MOCK_FILE);
+    expect(result.current.selectedFile).toMatchObject(MOCK_FILE);
 
     act(() => result.current.handlePanelChangeAndClearSheet("plan"));
 
@@ -479,7 +489,7 @@ describe("useMobilePanelHandlers selection state", () => {
   it("clears selectedFile when effectiveSessionId changes", () => {
     const { result, rerender } = renderHandlers();
     act(() => result.current.handleOpenFile(MOCK_FILE));
-    expect(result.current.selectedFile).toEqual(MOCK_FILE);
+    expect(result.current.selectedFile).toMatchObject(MOCK_FILE);
 
     rerender({ sid: "s2" });
     expect(result.current.selectedFile).toBeNull();
@@ -489,7 +499,7 @@ describe("useMobilePanelHandlers selection state", () => {
     const { result, rerender } = renderHandlers();
     act(() => result.current.handleOpenFile(MOCK_FILE));
     rerender({ sid: "s1" });
-    expect(result.current.selectedFile).toEqual(MOCK_FILE);
+    expect(result.current.selectedFile).toMatchObject(MOCK_FILE);
   });
 
   it("rejects stale handleOpenFileFromChat callback after session change", () => {
@@ -522,7 +532,7 @@ describe("useMobilePanelHandlers selection state", () => {
       result.current.handleOpenFile(MOCK_FILE);
       result.current.handleOpenFile(OTHER_FILE);
     });
-    expect(result.current.selectedFile).toEqual(OTHER_FILE);
+    expect(result.current.selectedFile).toMatchObject(OTHER_FILE);
   });
 });
 
@@ -562,7 +572,7 @@ describe("useMobilePanelHandlers switcher navigation", () => {
     act(() => result.current.confirmPendingNavigation());
 
     expect(switcherAction).not.toHaveBeenCalled();
-    expect(result.current.selectedFile).toEqual(OTHER_FILE);
+    expect(result.current.selectedFile).toMatchObject(OTHER_FILE);
   });
 });
 
@@ -807,4 +817,34 @@ describe("resolveMobileReviewSource", () => {
     expect(resolveMobileReviewSource(false, true)).toBe("gitlab");
     expect(resolveMobileReviewSource(false, false)).toBeNull();
   });
+});
+
+// @covers AC-UI-MARKDOWN-FILE-EDITING-003.8
+it("retains and saves one draft across the 768px boundary", () => {
+  const options = { effectiveSessionId: "responsive-session", handlePanelChange: vi.fn() };
+  const mobile = renderHook(() => useMobilePanelHandlers(options));
+  act(() => mobile.result.current.handleOpenFile(MOCK_FILE));
+  act(() => mobile.result.current.handleSelectedFileChange("responsive draft"));
+  mobile.unmount();
+  const returned = renderHook(() => useMobilePanelHandlers(options));
+  expect(returned.result.current.selectedFile?.content).toBe("responsive draft");
+});
+
+it("keeps a replacement draft when an older same-path discard is confirmed", () => {
+  const hook = renderHook(() =>
+    useMobilePanelHandlers({
+      effectiveSessionId: "replacement-navigation",
+      handlePanelChange: vi.fn(),
+    }),
+  );
+  act(() => hook.result.current.handleOpenFile(MOCK_FILE));
+  act(() => hook.result.current.handleSelectedFileChange("old draft"));
+  act(() => hook.result.current.handlePanelChangeAndClearSheet("chat"));
+  act(() =>
+    useDockviewStore
+      .getState()
+      .setFileState(MOCK_FILE.path, { ...MOCK_FILE, content: "replacement draft", isDirty: true }),
+  );
+  act(() => hook.result.current.confirmPendingNavigation());
+  expect(hook.result.current.selectedFile?.content).toBe("replacement draft");
 });

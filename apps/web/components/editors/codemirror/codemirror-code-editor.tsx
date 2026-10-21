@@ -20,8 +20,10 @@ import {
   revealPendingCodeMirrorCursor,
 } from "./codemirror-cursor-navigation";
 import { useTranslation } from "react-i18next";
+import type { SourcePositionProps } from "../source-position";
+import { useCodeMirrorSourcePosition } from "../use-source-position";
 
-type FileEditorContentProps = {
+type FileEditorContentProps = SourcePositionProps & {
   path: string;
   content: string;
   originalContent: string;
@@ -97,6 +99,13 @@ function useCodeMirrorCodeEditorSetup(props: FileEditorContentProps) {
   const editorAreaRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<ReactCodeMirrorRef>(null);
   const [editorView, setEditorView] = useState<EditorView | null>(null);
+  useCodeMirrorSourcePosition({
+    view: editorView,
+    content,
+    identity: JSON.stringify([sessionId, repo, path]),
+    isActive: props.isActive,
+    onSourcePositionHandle: props.onSourcePositionHandle,
+  });
   const state = useCodeMirrorEditorState({
     path,
     repo,

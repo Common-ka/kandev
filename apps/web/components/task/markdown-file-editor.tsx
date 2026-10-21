@@ -1,11 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { IconDeviceFloppy, IconLoader2, IconRefresh, IconTrash } from "@tabler/icons-react";
+import { useCallback, type ReactNode } from "react";
 import { Button } from "@kandev/ui/button";
-import { ScrollOnOverflow } from "@kandev/ui/scroll-on-overflow";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@kandev/ui/tooltip";
-import { FileViewerExternalLink } from "./file-viewer-header";
 import { FileEditorContent } from "./file-editor-content";
 import { MarkdownPreviewContent } from "./markdown-preview-content";
 import {
@@ -18,9 +14,14 @@ import {
   isMarkdownFileModeSupported,
   type MarkdownFileMode,
 } from "./markdown-file-mode";
+import { useMarkdownFilePresentation } from "./use-markdown-file-presentation";
+import {
+  useMarkdownSourcePosition,
+  type MarkdownSourcePositionPorts,
+} from "./use-markdown-source-position";
+import { MarkdownFileActions, MarkdownEditToolbar } from "./markdown-file-toolbar";
+import { MarkdownHybridRecoveryStatus } from "./markdown-hybrid-recovery-status";
 import { useMarkdownEditorCommentState } from "./markdown-editor-comment-bridge";
-import { PanelHeaderBarSplit } from "./panel-primitives";
-import { toRelativePath } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 
 export {
@@ -30,6 +31,7 @@ export {
 } from "./markdown-editor-comment-bridge";
 
 export type MarkdownFileEditorProps = {
+  draftIdentity?: symbol;
   path: string;
   content: string;
   originalContent: string;
@@ -58,11 +60,21 @@ export type MarkdownFileEditorProps = {
   onSourceFallback?: () => void;
 };
 
-const MODE_ORDER: readonly MarkdownFileMode[] = ["preview", "edit", "source"];
-const SAVE_SHORTCUT =
-  typeof navigator !== "undefined" && navigator.platform.includes("Mac") ? "\u2318" : "Ctrl";
+function useMarkdownEditorSaveShortcut(mode: MarkdownFileMode, onSave: () => void) {
+  return useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (mode !== "edit") return;
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
+        event.preventDefault();
+        onSave();
+      }
+    },
+    [mode, onSave],
+  );
+}
 
 export function MarkdownFileEditor({
+  draftIdentity,
   path,
   content,
   originalContent,
@@ -90,41 +102,30 @@ export function MarkdownFileEditor({
   onError,
   onSourceFallback,
 }: MarkdownFileEditorProps) {
-  const supportedModes = MODE_ORDER.filter((candidate) =>
-    isMarkdownFileModeSupported(path, candidate),
-  );
-  const safeMode = supportedModes.includes(mode) ? mode : "source";
-  const [hybridMounted, setHybridMounted] = useState(mode === "edit");
-  const [previewMounted, setPreviewMounted] = useState(mode === "preview");
+  const presentation = useMarkdownFilePresentation({ path, mode, onModeChange, onSourceFallback });
+  const position = useMarkdownSourcePosition({
+    identity: JSON.stringify([sessionId, repo, path]),
+    draftIdentity,
+    content,
+    mode: presentation.safeMode,
+    onModeChange: presentation.handleModeChange,
+  });
+  const handleSourceFallback = useCallback(() => {
+    position.prepareModeChange("source");
+    presentation.handleSourceFallback();
+  }, [position.prepareModeChange, presentation.handleSourceFallback]);
   const { hybridComments, handleHybridComment } = useMarkdownEditorCommentState({
     path,
     content,
     sessionId,
-    repositoryId,
+    repositoryId: repo ? undefined : repositoryId,
+    repositoryName: repo,
     enableComments,
     providedComments: comments,
     onComment,
   });
 
-  useEffect(() => {
-    if (safeMode !== mode) onModeChange(safeMode);
-  }, [mode, onModeChange, safeMode]);
-
-  useEffect(() => {
-    if (safeMode === "edit") setHybridMounted(true);
-    if (safeMode === "preview") setPreviewMounted(true);
-  }, [safeMode]);
-
-  const handleKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (safeMode !== "edit") return;
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
-        event.preventDefault();
-        onSave();
-      }
-    },
-    [onSave, safeMode],
-  );
+  const handleKeyDown = useMarkdownEditorSaveShortcut(presentation.safeMode, onSave);
 
   return (
     <MarkdownFileEditorLayout
@@ -141,13 +142,21 @@ export function MarkdownFileEditor({
       worktreePath={worktreePath}
       repo={repo}
       enableComments={enableComments}
-      mode={safeMode}
-      supportedModes={supportedModes}
+      mode={presentation.safeMode}
+      supportedModes={presentation.supportedModes}
       gutterMarkers={gutterMarkers}
       comments={hybridComments}
-      keepHybridMounted={hybridMounted && isMarkdownFileModeSupported(path, "edit")}
-      keepPreviewMounted={previewMounted}
-      onModeChange={onModeChange}
+      keepHybridMounted={
+        presentation.hybridMounted &&
+        presentation.hybridAvailable &&
+        !presentation.hybridFailed &&
+        isMarkdownFileModeSupported(path, "edit")
+      }
+      hybridAvailable={presentation.hybridAvailable}
+      hybridFailed={presentation.hybridFailed}
+      keepPreviewMounted={presentation.previewMounted}
+      sourcePositionHandles={position.sourcePositionHandles}
+      onModeChange={position.handleModeChange}
       onChange={onChange}
       onSave={onSave}
       onReloadFromAgent={onReloadFromAgent}
@@ -156,7 +165,7 @@ export function MarkdownFileEditor({
       onOpenLink={onOpenLink}
       onComment={handleHybridComment}
       onError={onError}
-      onSourceFallback={onSourceFallback}
+      onSourceFallback={handleSourceFallback}
       onKeyDown={handleKeyDown}
     />
   );
@@ -168,7 +177,10 @@ type MarkdownFileEditorLayoutProps = Omit<MarkdownFileEditorProps, "mode" | "com
   comments: readonly MarkdownComment[];
   keepHybridMounted: boolean;
   keepPreviewMounted: boolean;
+  hybridAvailable: boolean;
+  hybridFailed: boolean;
   onKeyDown: (event: React.KeyboardEvent<HTMLDivElement>) => void;
+  sourcePositionHandles: MarkdownSourcePositionPorts;
 };
 
 function MarkdownFileEditorLayout({
@@ -191,6 +203,8 @@ function MarkdownFileEditorLayout({
   comments,
   keepHybridMounted,
   keepPreviewMounted,
+  hybridAvailable,
+  hybridFailed,
   onModeChange,
   onChange,
   onSave,
@@ -202,6 +216,7 @@ function MarkdownFileEditorLayout({
   onError,
   onSourceFallback,
   onKeyDown,
+  sourcePositionHandles,
 }: MarkdownFileEditorLayoutProps) {
   return (
     <div
@@ -210,6 +225,7 @@ function MarkdownFileEditorLayout({
       onKeyDown={onKeyDown}
     >
       <MarkdownFilePresentation
+        sourcePositionHandles={sourcePositionHandles}
         mode={mode}
         path={path}
         content={content}
@@ -229,6 +245,8 @@ function MarkdownFileEditorLayout({
         supportedModes={supportedModes}
         keepHybridMounted={keepHybridMounted}
         keepPreviewMounted={keepPreviewMounted}
+        hybridAvailable={hybridAvailable}
+        hybridFailed={hybridFailed}
         onChange={onChange}
         onSave={onSave}
         onReloadFromAgent={onReloadFromAgent}
@@ -244,7 +262,7 @@ function MarkdownFileEditorLayout({
   );
 }
 
-type MarkdownFilePresentationProps = Pick<
+type MarkdownFilePresentationProps = { sourcePositionHandles: MarkdownSourcePositionPorts } & Pick<
   MarkdownFileEditorProps,
   | "path"
   | "content"
@@ -272,11 +290,13 @@ type MarkdownFilePresentationProps = Pick<
   | "onSourceFallback"
   | "onModeChange"
 > & {
-  keepHybridMounted: boolean;
-  keepPreviewMounted: boolean;
-  mode: MarkdownFileMode;
-  supportedModes: readonly MarkdownFileMode[];
-};
+    keepHybridMounted: boolean;
+    keepPreviewMounted: boolean;
+    hybridAvailable: boolean;
+    hybridFailed: boolean;
+    mode: MarkdownFileMode;
+    supportedModes: readonly MarkdownFileMode[];
+  };
 
 type MarkdownSurfaceProps = MarkdownFilePresentationProps & {
   modeControl: ReactNode;
@@ -288,6 +308,7 @@ function MarkdownFilePresentation(props: MarkdownFilePresentationProps) {
     <MarkdownModeControl
       mode={props.mode}
       supportedModes={props.supportedModes}
+      hybridAvailable={props.hybridAvailable}
       onModeChange={props.onModeChange}
     />
   );
@@ -302,10 +323,16 @@ function MarkdownFilePresentation(props: MarkdownFilePresentationProps) {
     />
   );
   return (
-    <div className="min-h-0 flex-1">
-      <MarkdownEditSurface {...props} modeControl={modeControl} fileActions={fileActions} />
-      <MarkdownPreviewSurface {...props} modeControl={modeControl} fileActions={fileActions} />
-      <MarkdownSourceSurface {...props} modeControl={modeControl} fileActions={fileActions} />
+    <div className="flex h-full min-h-0 flex-1 flex-col">
+      <MarkdownHybridRecoveryStatus
+        unavailable={!props.hybridAvailable}
+        failed={props.hybridFailed}
+      />
+      <div className="min-h-0 flex-1">
+        <MarkdownEditSurface {...props} modeControl={modeControl} fileActions={fileActions} />
+        <MarkdownPreviewSurface {...props} modeControl={modeControl} fileActions={fileActions} />
+        <MarkdownSourceSurface {...props} modeControl={modeControl} fileActions={fileActions} />
+      </div>
     </div>
   );
 }
@@ -329,6 +356,7 @@ function MarkdownEditSurface({
   onComment,
   onError,
   onSourceFallback,
+  sourcePositionHandles,
 }: MarkdownSurfaceProps) {
   if (!keepHybridMounted) return null;
   return (
@@ -360,6 +388,8 @@ function MarkdownEditSurface({
           onComment={onComment}
           onError={onError}
           onSourceFallback={onSourceFallback}
+          isActive={mode === "edit"}
+          onSourcePositionHandle={sourcePositionHandles.edit}
         />
       </div>
     </div>
@@ -381,6 +411,7 @@ function MarkdownPreviewSurface({
   onOpenLink,
   modeControl,
   fileActions,
+  sourcePositionHandles,
 }: MarkdownSurfaceProps) {
   if (!keepPreviewMounted) return null;
   return (
@@ -403,6 +434,8 @@ function MarkdownPreviewSurface({
         toolbarModeControl={modeControl}
         toolbarActions={fileActions}
         showToolbar={mode === "preview"}
+        isActive={mode === "preview"}
+        onSourcePositionHandle={sourcePositionHandles.preview}
       />
     </div>
   );
@@ -426,6 +459,7 @@ function MarkdownSourceSurface(props: MarkdownSurfaceProps) {
       repo={props.repo}
       enableComments={props.enableComments}
       markdownPreview={false}
+      onSourcePositionHandle={props.sourcePositionHandles.source}
       toolbarModeControl={props.modeControl}
       onChange={props.onChange}
       onSave={props.onSave}
@@ -438,10 +472,16 @@ function MarkdownSourceSurface(props: MarkdownSurfaceProps) {
 type MarkdownModeControlProps = {
   mode: MarkdownFileMode;
   supportedModes: readonly MarkdownFileMode[];
+  hybridAvailable: boolean;
   onModeChange: (mode: MarkdownFileMode) => void;
 };
 
-function MarkdownModeControl({ mode, supportedModes, onModeChange }: MarkdownModeControlProps) {
+function MarkdownModeControl({
+  mode,
+  supportedModes,
+  hybridAvailable,
+  onModeChange,
+}: MarkdownModeControlProps) {
   const { t } = useTranslation();
   return (
     <div
@@ -458,139 +498,15 @@ function MarkdownModeControl({ mode, supportedModes, onModeChange }: MarkdownMod
           className="h-5 cursor-pointer rounded-sm px-1.5 text-xs"
           data-testid={`markdown-mode-${candidate}`}
           aria-pressed={candidate === mode}
+          disabled={candidate === "edit" && !hybridAvailable}
+          title={
+            candidate === "edit" && !hybridAvailable ? t("task:markdownEditUnavailable") : undefined
+          }
           onClick={() => onModeChange(candidate)}
         >
           {t(`task:markdownMode${capitalize(candidate)}`)}
         </Button>
       ))}
     </div>
-  );
-}
-
-type MarkdownFileActionsProps = {
-  isDirty: boolean;
-  isSaving: boolean;
-  hasRemoteUpdate: boolean;
-  onSave: () => void;
-  onReloadFromAgent?: () => void;
-  onDelete?: () => void;
-};
-
-function MarkdownFileActions({
-  isDirty,
-  isSaving,
-  hasRemoteUpdate,
-  onSave,
-  onReloadFromAgent,
-  onDelete,
-}: MarkdownFileActionsProps) {
-  const { t } = useTranslation();
-  return (
-    <>
-      {hasRemoteUpdate && onReloadFromAgent && (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="h-6 cursor-pointer gap-1 px-2 text-xs"
-              onClick={onReloadFromAgent}
-              data-testid="markdown-file-reload"
-            >
-              <IconRefresh className="h-3.5 w-3.5" />
-              {t("editors:reload")}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>{t("editors:applyLatestAgentChangesToFile")}</TooltipContent>
-        </Tooltip>
-      )}
-      {onDelete && (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 cursor-pointer p-0 hover:text-destructive"
-              onClick={onDelete}
-              aria-label={t("editors:deleteFile")}
-              data-testid="markdown-file-delete"
-            >
-              <IconTrash className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>{t("editors:deleteFile")}</TooltipContent>
-        </Tooltip>
-      )}
-      <Button
-        type="button"
-        variant="default"
-        size="sm"
-        className="h-6 cursor-pointer gap-1 px-2 text-xs"
-        disabled={!isDirty || isSaving}
-        onClick={onSave}
-        data-testid="markdown-file-save"
-      >
-        {isSaving ? (
-          <>
-            <IconLoader2 className="h-3.5 w-3.5 animate-spin" />
-            {t("editors:saving")}
-          </>
-        ) : (
-          <>
-            <IconDeviceFloppy className="h-3.5 w-3.5" />
-            {t("common:save")}
-            <span className="text-xs text-muted-foreground">({SAVE_SHORTCUT}+S)</span>
-          </>
-        )}
-      </Button>
-    </>
-  );
-}
-
-type MarkdownEditToolbarProps = {
-  path: string;
-  worktreePath?: string;
-  modeControl: ReactNode;
-  fileActions: ReactNode;
-  sessionId?: string | null;
-  taskId?: string | null;
-  repositoryId?: string | null;
-  repositoryName?: string;
-};
-
-function MarkdownEditToolbar({
-  path,
-  worktreePath,
-  modeControl,
-  fileActions,
-  sessionId,
-  taskId,
-  repositoryId,
-  repositoryName,
-}: MarkdownEditToolbarProps) {
-  return (
-    <PanelHeaderBarSplit
-      className="markdown-file-toolbar"
-      left={
-        <ScrollOnOverflow className="min-w-0 font-mono text-xs text-muted-foreground">
-          {toRelativePath(path, worktreePath)}
-        </ScrollOnOverflow>
-      }
-      right={
-        <div className="flex items-center gap-1">
-          {modeControl}
-          <FileViewerExternalLink
-            path={path}
-            sessionId={sessionId}
-            taskId={taskId}
-            repositoryId={repositoryId}
-            repositoryName={repositoryName}
-          />
-          {fileActions}
-        </div>
-      }
-    />
   );
 }

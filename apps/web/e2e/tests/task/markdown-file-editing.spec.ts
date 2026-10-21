@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { execFileSync } from "node:child_process";
 import { expect, type Locator, type Page } from "@playwright/test";
 import { test } from "../../fixtures/test-base";
 import type { SeedData } from "../../fixtures/test-base";
@@ -32,6 +33,45 @@ ${Array.from(
 const UNSUPPORTED_MARKDOWN_SOURCE = '<div data-unsupported="true">Unsupported source</div>';
 const LONG_EDIT_PARAGRAPH =
   "Kandev should read as a restrained developer workbench. The shell is dense and quiet, with panels, command surfaces, and state indicators arranged so users can keep their place across tasks, sessions, repositories, and integrations.";
+const PRESERVATION_LINES = [
+  "\uFEFF---",
+  "title: Preserve source bytes",
+  "---",
+  "",
+  "# Exact source",
+  "",
+  "Target paragraph stays unchanged.",
+  "",
+  "**Strong** and _emphasis_ with `inline code`.",
+  "",
+  "- Parent",
+  "  - Nested",
+  "- [ ] Task",
+  "",
+  "| Escaped \\| pipe | Value |",
+  "| :--- | ---: |",
+  "| first | second |",
+  "",
+  "```typescript",
+  "const preserved = '<Component value={1} />';",
+  "```",
+  "",
+  "$x^2$ and $$y = x + 1$$",
+  "",
+  "A footnote[^note] and [link](https://example.com).",
+  "",
+  "![image](data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7)",
+  "",
+  '<div data-preserve="true">Raw HTML</div>',
+  "",
+  "<!-- preserve this comment -->",
+  "",
+  "<UnknownComponent value={source} />",
+  "",
+  "[^note]: A footnote definition.",
+  "",
+];
+let restoreMarkdownRepository: (() => void) | undefined;
 
 async function seedMarkdownSession({
   testPage,
@@ -52,6 +92,8 @@ async function seedMarkdownSession({
 }): Promise<{ session: SessionPage; filePath: string; sessionId: string; gateway: WsWatcher }> {
   const repoDir = path.join(backend.tmpDir, "repos", "e2e-repo");
   const git = new GitHelper(repoDir, makeGitEnv(backend.tmpDir));
+  const originalSha = git.getCurrentSha();
+  restoreMarkdownRepository = () => git.exec(`git reset --hard ${originalSha}`);
   git.createFile(fileName, content);
   git.stageAll();
   git.commit(`seed ${fileName}`);
@@ -244,6 +286,325 @@ async function expectSingleCompactToolbar(testPage: Page) {
 
 test.describe("Markdown file editing", () => {
   test.describe.configure({ retries: 0, timeout: 120_000 });
+  test.afterEach(() => {
+    restoreMarkdownRepository?.();
+    restoreMarkdownRepository = undefined;
+  });
+
+  // @covers AC-UI-MARKDOWN-FILE-EDITING-001.5, AC-UI-MARKDOWN-FILE-EDITING-002.4
+  test("review regression: position handoff keeps a long-document selection through Preview and Source", async ({
+    testPage,
+    apiClient,
+    seedData,
+    backend,
+  }) => {
+    const fileName = `markdown-position-${Date.now()}.md`;
+    const { session, filePath, gateway } = await seedMarkdownSession({
+      testPage,
+      apiClient,
+      seedData,
+      backend,
+      fileName,
+      content: MARKDOWN_CONTENT,
+      taskTitle: "Markdown source positions",
+    });
+    await openFile(session, testPage, fileName);
+    const editor = testPage.getByTestId("markdown-file-editor");
+    await editor.getByTestId("markdown-mode-edit").click();
+    const paragraph = editor
+      .getByTestId("hybrid-markdown-editor")
+      .locator(".md-paragraph", { hasText: "Long desktop paragraph 40 " });
+    await paragraph.scrollIntoViewIfNeeded();
+    await clickAfterText(testPage, paragraph, "Long");
+    for (let index = 0; index < 4; index++) await testPage.keyboard.press("Shift+ArrowLeft");
+    await editor.getByTestId("markdown-mode-preview").click();
+    await expect(
+      editor.getByTestId("markdown-preview").locator("p", {
+        hasText: "Long desktop paragraph 40 ",
+      }),
+    ).toBeInViewport();
+    await editor.getByTestId("markdown-mode-source").click();
+    const source = testPage.getByRole("textbox", { name: "Editor content" });
+    await source.focus();
+    await testPage.keyboard.insertText("Selected");
+    const saved = gateway.waitForResponse("workspace.file.update");
+    await testPage.keyboard.press(process.platform === "darwin" ? "Meta+s" : "Control+s");
+    await saved;
+    expect(fs.readFileSync(filePath, "utf8")).toBe(
+      MARKDOWN_CONTENT.replace("Long desktop paragraph 40 ", "Selected desktop paragraph 40 "),
+    );
+    await editor.getByTestId("markdown-mode-edit").click();
+    await expect(
+      editor.getByTestId("hybrid-markdown-editor").locator(".md-paragraph", {
+        hasText: "Selected desktop paragraph 40 ",
+      }),
+    ).toBeInViewport();
+  });
+
+  for (const newline of ["\n", "\r\n"]) {
+    test(`preserves the real engine source corpus with ${newline === "\n" ? "LF" : "CRLF"} through edits, undo, modes, and save`, async ({
+      testPage,
+      apiClient,
+      seedData,
+      backend,
+    }) => {
+      const fileName = `markdown-corpus-${Date.now()}.md`;
+      const content = PRESERVATION_LINES.join(newline);
+      const { session, filePath, gateway } = await seedMarkdownSession({
+        testPage,
+        apiClient,
+        seedData,
+        backend,
+        fileName,
+        content,
+        taskTitle: "Markdown exact source",
+      });
+      await openFile(session, testPage, fileName);
+      const editor = testPage.getByTestId("markdown-file-editor");
+      await editor.getByTestId("markdown-mode-edit").click();
+      const hybrid = editor.getByTestId("hybrid-markdown-editor");
+      const paragraph = hybrid.locator(".md-paragraph", {
+        hasText: "paragraph stays unchanged.",
+      });
+      await clickAfterText(testPage, paragraph, "Target");
+      await editor.getByTestId("markdown-mode-preview").click();
+      await editor.getByTestId("markdown-mode-source").click();
+      await editor.getByTestId("markdown-mode-edit").click();
+      await expect(editor.getByTestId("markdown-file-save")).toBeDisabled();
+      expect(fs.readFileSync(filePath, "utf8")).toBe(content);
+      await clickAfterText(testPage, paragraph, "Target");
+      await testPage.keyboard.insertText("!");
+      await expect(paragraph).toContainText("Target! paragraph stays unchanged.");
+      const modifier = process.platform === "darwin" ? "Meta" : "Control";
+      await testPage.keyboard.press(`${modifier}+z`);
+      await expect(paragraph).toContainText("Target paragraph stays unchanged.");
+      await expect(editor.getByTestId("markdown-file-save")).toBeDisabled();
+      await testPage.keyboard.press(`${modifier}+Shift+z`);
+      await expect(paragraph).toContainText("Target! paragraph stays unchanged.");
+      await editor.getByTestId("markdown-mode-preview").click();
+      const saved = gateway.waitForResponse("workspace.file.update");
+      await editor.getByTestId("markdown-file-save").click();
+      await saved;
+      expect(fs.readFileSync(filePath, "utf8")).toBe(
+        content.replace("Target paragraph", "Target! paragraph"),
+      );
+    });
+  }
+
+  // @covers AC-UI-MARKDOWN-FILE-EDITING-002.13
+  test("review regression: repository comments retain secondary identity from editable selection", async ({
+    testPage,
+    apiClient,
+    seedData,
+    backend,
+  }) => {
+    const secondaryName = "markdown-comments-secondary";
+    const repoDir = path.join(backend.tmpDir, "repos", secondaryName);
+    fs.mkdirSync(repoDir, { recursive: true });
+    const gitEnv = makeGitEnv(backend.tmpDir);
+    const primaryGit = new GitHelper(path.join(backend.tmpDir, "repos", "e2e-repo"), gitEnv);
+    const primarySha = primaryGit.getCurrentSha();
+    restoreMarkdownRepository = () => primaryGit.exec(`git reset --hard ${primarySha}`);
+    primaryGit.createFile("README.md", "# Primary repository\n\nA separate README document.\n");
+    primaryGit.stageAll();
+    primaryGit.commit("seed primary Markdown");
+    execFileSync("git", ["init", "-b", "main"], { cwd: repoDir, env: gitEnv });
+    const git = new GitHelper(repoDir, gitEnv);
+    const content = "# Secondary repository\n\nSelect this paragraph to comment.\n";
+    git.createFile("README.md", content);
+    git.stageAll();
+    git.commit("seed secondary Markdown");
+    const repository = await apiClient.createRepository(seedData.workspaceId, repoDir, "main", {
+      name: secondaryName,
+      pull_before_worktree: false,
+    });
+    let task: { id: string; session_id: string } | undefined;
+    try {
+      task = await apiClient.createTaskWithAgent(
+        seedData.workspaceId,
+        "Markdown repository comments",
+        seedData.agentProfileId,
+        {
+          description: "/e2e:simple-message",
+          workflow_id: seedData.workflowId,
+          workflow_step_id: seedData.startStepId,
+          repository_ids: [seedData.repositoryId, repository.id],
+          executor_profile_id: seedData.worktreeExecutorProfileId,
+        },
+      );
+      await testPage.goto(`/t/${task.id}`);
+      const session = new SessionPage(testPage);
+      await session.waitForLoad();
+      await session.waitForChatIdle({ timeout: 45_000 });
+      const environment = await apiClient.getTaskEnvironment(task.id);
+      const secondaryPath = environment?.repos?.find(
+        (entry) => entry.repository_id === repository.id,
+      )?.worktree_path;
+      const primaryPath = environment?.repos?.find(
+        (entry) => entry.repository_id === seedData.repositoryId,
+      )?.worktree_path;
+      expect(secondaryPath).toBeTruthy();
+      expect(primaryPath).toBeTruthy();
+      expect(environment?.workspace_path).toBeTruthy();
+      const primaryRoot = path.relative(environment!.workspace_path!, primaryPath!);
+      const workingFilePath = path.join(secondaryPath!, "README.md");
+      expect(fs.readFileSync(workingFilePath, "utf8")).toBe(content);
+      await session.clickTab("Files");
+      await (await session.fileTree.waitForFileTreeNode(secondaryName)).click();
+      await (await session.fileTree.waitForFileTreeNode(`${secondaryName}/README.md`)).dblclick();
+      const editor = testPage.locator('[data-testid="markdown-file-editor"]:visible');
+      await editor.getByTestId("markdown-mode-edit").click();
+      const hybrid = editor.getByTestId("hybrid-markdown-editor");
+      await hybrid.locator(".md-paragraph").first().click();
+      await testPage.keyboard.press("Home");
+      await testPage.keyboard.press("Shift+End");
+      const commentTrigger = testPage.getByTestId("hybrid-markdown-comment-trigger");
+      await expect(commentTrigger).toBeVisible();
+      await commentTrigger.click();
+      const marker = "Review this secondary repository paragraph";
+      await testPage.getByPlaceholder("Add your comment or instruction...").fill(marker);
+      await testPage.keyboard.press(process.platform === "darwin" ? "Meta+Enter" : "Control+Enter");
+      await expect
+        .poll(() =>
+          testPage.evaluate(
+            ({ sessionId, text }) => {
+              const comments = JSON.parse(
+                sessionStorage.getItem(`kandev.comments.${sessionId}`) ?? "[]",
+              );
+              return comments.find((comment: { text: string }) => comment.text === text);
+            },
+            { sessionId: task!.session_id, text: marker },
+          ),
+        )
+        .toMatchObject({
+          source: "diff",
+          repositoryName: secondaryName,
+          filePath: "README.md",
+          text: marker,
+          status: "pending",
+        });
+      await expect(hybrid).toContainText(marker);
+      await expect(editor.getByTestId("markdown-file-save")).toBeDisabled();
+      expect(fs.readFileSync(path.join(repoDir, "README.md"), "utf8")).toBe(content);
+      expect(fs.readFileSync(workingFilePath, "utf8")).toBe(content);
+      await session.clickTab("Files");
+      if (primaryRoot) await (await session.fileTree.waitForFileTreeNode(primaryRoot)).click();
+      await (
+        await session.fileTree.waitForFileTreeNode(path.posix.join(primaryRoot, "README.md"))
+      ).dblclick();
+      await editor.getByTestId("markdown-mode-edit").click();
+      await expect(hybrid).not.toContainText(marker);
+      await session.clickTab("Files");
+      await (await session.fileTree.waitForFileTreeNode(`${secondaryName}/README.md`)).dblclick();
+      await expect(hybrid).toContainText(marker);
+    } finally {
+      if (task) {
+        if (!testPage.isClosed()) {
+          await testPage.evaluate(
+            (sessionId) => sessionStorage.removeItem(`kandev.comments.${sessionId}`),
+            task.session_id,
+          );
+        }
+        await apiClient.deleteTask(task.id, { cascade: true, discardWorktreeChanges: true });
+      }
+      await apiClient.deleteRepository(repository.id);
+    }
+  });
+
+  // @covers AC-UI-MARKDOWN-FILE-EDITING-002.15
+  test("review regression: hybrid recovery retries a failed instance with the unsaved source", async ({
+    testPage,
+    apiClient,
+    seedData,
+    backend,
+  }) => {
+    await testPage.addInitScript(() => {
+      const nativeEditContext = Reflect.get(window, "EditContext");
+      let attempts = 0;
+      Reflect.set(
+        window,
+        "EditContext",
+        new Proxy(nativeEditContext, {
+          construct(target, args, newTarget) {
+            if (document.querySelector('[data-testid="hybrid-markdown-editor"]')) {
+              attempts += 1;
+              if (attempts === 1) throw new Error("Expected Markdown initialization failure");
+            }
+            return Reflect.construct(target, args, newTarget);
+          },
+        }),
+      );
+    });
+    const fileName = `markdown-retry-${Date.now()}.md`;
+    const content = "# Retry preserves source\n\nOriginal paragraph.\n";
+    const draft = `${content}\nUnsaved recovery marker`;
+    const { session, filePath, gateway } = await seedMarkdownSession({
+      testPage,
+      apiClient,
+      seedData,
+      backend,
+      fileName,
+      content,
+      taskTitle: "Markdown retry",
+    });
+    await openFile(session, testPage, fileName);
+    const editor = testPage.getByTestId("markdown-file-editor");
+    await editor.getByTestId("markdown-mode-source").click();
+    const source = testPage.getByRole("textbox", { name: "Editor content" });
+    await expect(source).toBeAttached();
+    await source.focus();
+    await testPage.keyboard.press(process.platform === "darwin" ? "Meta+A" : "Control+A");
+    await testPage.keyboard.insertText(draft);
+    await editor.getByTestId("markdown-mode-edit").click();
+    await expect(editor.getByTestId("markdown-mode-source")).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await editor.getByTestId("markdown-mode-edit").click();
+    const hybrid = editor.getByTestId("hybrid-markdown-editor");
+    await expect(hybrid).toBeVisible();
+    await expect(hybrid).toContainText("Unsaved recovery marker");
+    const saved = gateway.waitForResponse("workspace.file.update");
+    await editor.getByTestId("markdown-file-save").click();
+    await saved;
+    expect(fs.readFileSync(filePath, "utf8")).toBe(draft);
+  });
+
+  // @covers AC-UI-MARKDOWN-FILE-EDITING-001.10
+  test("review regression: hybrid recovery keeps Source usable without EditContext", async ({
+    testPage,
+    apiClient,
+    seedData,
+    backend,
+  }) => {
+    await testPage.addInitScript(() => Reflect.deleteProperty(window, "EditContext"));
+    const fileName = `markdown-capability-${Date.now()}.md`;
+    const content = "# Source fallback\n\nExact content.\n";
+    const { session, filePath, gateway } = await seedMarkdownSession({
+      testPage,
+      apiClient,
+      seedData,
+      backend,
+      fileName,
+      content,
+      taskTitle: "Markdown browser fallback",
+    });
+    await openFile(session, testPage, fileName);
+    const editor = testPage.getByTestId("markdown-file-editor");
+    await expect(editor.getByTestId("markdown-mode-edit")).toBeDisabled();
+    await editor.getByTestId("markdown-mode-source").click();
+    const source = testPage.getByRole("textbox", { name: "Editor content" });
+    await expect(source).toBeAttached();
+    await source.focus();
+    await testPage.keyboard.press(process.platform === "darwin" ? "Meta+A" : "Control+A");
+    const edited = `${content}\nSaved without hybrid editing.`;
+    await testPage.keyboard.insertText(edited);
+    const saved = gateway.waitForResponse("workspace.file.update");
+    await testPage.keyboard.press(process.platform === "darwin" ? "Meta+s" : "Control+s");
+    await saved;
+    expect(fs.readFileSync(filePath, "utf8")).toBe(edited);
+    await expect(editor.getByTestId("hybrid-markdown-editor")).toHaveCount(0);
+  });
 
   test("opens in Preview, edits the rendered hybrid buffer, saves, and restores Edit mode", async ({
     testPage,
@@ -324,9 +685,7 @@ test.describe("Markdown file editing", () => {
     });
     await editor.getByTestId("markdown-mode-edit").click();
     await editor.getByTestId("markdown-mode-preview").click();
-    await expect
-      .poll(() => previewScroll.evaluate((element) => (element as HTMLElement).scrollTop))
-      .toBe(previewScrollTop);
+    await expect(preview.getByText(marker, { exact: true })).toBeInViewport();
     await editor.getByTestId("markdown-mode-edit").click();
     await expect(testPage.getByTestId("hybrid-markdown-editor")).toBeVisible({ timeout: 15_000 });
 

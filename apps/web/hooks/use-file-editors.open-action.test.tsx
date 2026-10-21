@@ -25,6 +25,10 @@ const mocks = vi.hoisted(() => {
 
   type DockState = {
     api: null;
+    fileSessionEpoch: symbol;
+    activateFileSession: (sessionId: string | null) => void;
+    selectFileDraft: (key: string | null) => void;
+    ensureFileState: (key: string, state: MockFileState) => void;
     openFiles: Map<string, MockFileState>;
     isRestoringLayout: boolean;
     setFileState: (key: string, state: MockFileState) => void;
@@ -40,6 +44,12 @@ const mocks = vi.hoisted(() => {
   const resetDockState = () => {
     dockState = {
       api: null,
+      fileSessionEpoch: Symbol(),
+      activateFileSession: vi.fn(),
+      selectFileDraft: vi.fn(),
+      ensureFileState: vi.fn((key: string, state: MockFileState) => {
+        if (!dockState.openFiles.has(key)) dockState.openFiles.set(key, state);
+      }),
       openFiles: new Map(),
       isRestoringLayout: false,
       setFileState: vi.fn((key: string, state: MockFileState) => {

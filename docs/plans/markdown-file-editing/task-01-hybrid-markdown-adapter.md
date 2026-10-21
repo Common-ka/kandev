@@ -55,9 +55,9 @@ surface depends on it.
 
 ```bash
 cd apps && pnpm install --frozen-lockfile
-pnpm --filter @kandev/web test -- --run \
-  components/editors/markdown/hybrid-markdown-editor.test.tsx \
-  components/editors/markdown/markdown-source-preservation.test.ts
+pnpm --filter @kandev/web exec vitest run \
+  components/editors/markdown/hybrid-markdown-editor.test.tsx
+pnpm --filter @kandev/web e2e:run --project=chromium tests/task/markdown-file-editing.spec.ts
 pnpm --filter @kandev/web typecheck
 pnpm --filter @kandev/web lint
 ```
@@ -68,7 +68,7 @@ pnpm --filter @kandev/web lint
 - `apps/pnpm-lock.yaml`
 - `apps/web/components/editors/markdown/hybrid-markdown-editor.tsx`
 - `apps/web/components/editors/markdown/hybrid-markdown-editor.test.tsx`
-- `apps/web/components/editors/markdown/markdown-source-preservation.test.ts`
+- `apps/web/e2e/tests/task/markdown-file-editing.spec.ts`
 - `apps/web/components/editors/markdown/fixtures/`
 
 ## Dependencies
@@ -94,6 +94,11 @@ None.
 - Existing `MarkdownPreviewContent` safety and comment tests.
 
 ## Results
+
+The entries below are historical. The review found that the replacement helper
+had no production caller. [Remediation Task 06](../markdown-editing-remediation/task-06-engine-evidence.md)
+removes it and replaces its preservation claim with exact-byte browser tests
+through the actual engine. The verification commands above use that replacement.
 
 - Added the exact `@vscode/markdown-editor@0.0.2-84` dependency and lockfile entry.
 - Added the source-preserving replacement helper and the Kandev-owned upstream adapter.

@@ -1,7 +1,7 @@
 ---
 id: "06-positional-table-edits"
 title: "Add Positional Markdown Table Edits"
-status: pending
+status: completed
 wave: 6
 depends_on: ["05-polish-code-and-table-editing"]
 plan: "plan.md"
@@ -78,4 +78,12 @@ pnpm run typecheck
 
 ## Results
 
-Pending.
+Verified on 2026-10-20 in the remediation worktree based on
+`b03dce19114c4a63b8a6716894906dbc7f351c95`. Focused table and adapter tests,
+TypeScript, and translation checks passed. Real desktop and phone browser
+flows passed for row and column insertion, delimiter preservation, contained
+table layout, and column resizing with exact saved source assertions.
+
+[Remediation Task 06](../markdown-editing-remediation/task-06-engine-evidence.md)
+records the complete commands and environment limitations. These results
+replace the prior pending acceptance status. No push or merge was performed.

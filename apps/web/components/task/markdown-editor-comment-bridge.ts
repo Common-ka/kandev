@@ -64,6 +64,7 @@ export function useMarkdownEditorCommentState({
   content,
   sessionId,
   repositoryId,
+  repositoryName,
   enableComments,
   providedComments,
   onComment,
@@ -72,11 +73,17 @@ export function useMarkdownEditorCommentState({
   content: string;
   sessionId?: string | null;
   repositoryId?: string | null;
+  repositoryName?: string;
   enableComments: boolean;
   providedComments?: readonly MarkdownComment[];
   onComment?: (comment: MarkdownCommentSubmission) => void;
 }) {
-  const fileComments = useDiffFileComments(sessionId ?? "", path, repositoryId ?? undefined);
+  const fileComments = useDiffFileComments(
+    sessionId ?? "",
+    path,
+    repositoryId ?? undefined,
+    repositoryName ?? "",
+  );
   const addComment = useCommentsStore((state) => state.addComment);
   const hybridComments = useMemo<MarkdownComment[]>(
     () =>
@@ -104,6 +111,7 @@ export function useMarkdownEditorCommentState({
         );
         const comment = buildDiffComment({
           filePath: path,
+          repositoryName,
           sessionId,
           startLine: sourceLines.startLine,
           endLine: sourceLines.endLine,
@@ -116,7 +124,7 @@ export function useMarkdownEditorCommentState({
       }
       onComment?.(submission);
     },
-    [addComment, content, enableComments, onComment, path, repositoryId, sessionId],
+    [addComment, content, enableComments, onComment, path, repositoryId, repositoryName, sessionId],
   );
 
   return { hybridComments, handleHybridComment };
