@@ -209,7 +209,7 @@ export interface MarketplacePermissions {
  */
 export interface MarketplaceEntry {
   id: string;
-  kind?: "plugin" | "canvas";
+  kind?: "plugin" | "canvas" | "theme";
   name: string;
   description: string;
   author: string;
@@ -255,6 +255,7 @@ export interface MarketplaceSource {
 export interface MarketplaceCatalog {
   plugins: MarketplaceEntry[];
   canvases?: MarketplaceEntry[];
+  themes?: MarketplaceEntry[];
   sources: MarketplaceSource[];
 }
 

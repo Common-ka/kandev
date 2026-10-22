@@ -143,7 +143,7 @@ func (s *Service) RunAutoUpdatePass(ctx context.Context) (AutoUpdateOutcome, err
 	if err != nil {
 		return AutoUpdateOutcome{}, fmt.Errorf("plugins: auto-update catalog fetch: %w", err)
 	}
-	return s.applyAutoUpdates(ctx, catalog.Plugins), nil
+	return s.applyAutoUpdates(ctx, append(catalog.Plugins, catalog.Themes...)), nil
 }
 
 // autoUpdateCandidates returns the set of active, opted-in plugin ids eligible
