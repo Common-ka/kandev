@@ -170,3 +170,28 @@ must include task/session/base/full HEAD, all absolute changed paths, complete
 binary/full-index base-to-head diff plus SHA256, full source/docs and receipts.
 Parent independently reads the full diff and reruns focused tests before a
 separate same-session delivery authorization. No push, PR or merge before that.
+
+## Review remediation
+
+The browser fixture now compares the source snapshots stored in each checkpoint
+receipt instead of taking a second observation. This keeps the compared state
+and recorded state identical and removes duplicate repository scans. Production
+form behavior, requirements, design and public copy are unchanged.
+
+An external diagnostic executes the actual fixture check function with controlled
+snapshot reads. The original check missed a captured mutation when the later read
+was restored (one intended RED, ordinary stable-source control passed). The
+corrected check passes both controls. This is fixture-boundary evidence, separate
+from the real consumer/HTTP and shipped-browser proofs above; it adds no product
+export or permanent source-text assertion.
+
+Post-remediation local commands passed: the two-control diagnostic, strict ESLint
+for the changed fixture, the normal 8 GiB typecheck, and the documented managed
+Jira browser commands (desktop 3 passed in 29.8 s; Pixel 5 native taps 2 passed in
+35.1 s), with zero retries and normal guards. All five fixture cleanup receipts
+have no cleanup errors and preserve source/seed/owned-repository state. Existing
+permanent browser controls remain the fixture's runtime coverage.
+
+Exact committed-head capture, CI, semantic review and combined-base delivery
+receipts are tracked externally and refreshed after the remediation commit;
+prior delivery evidence remains historical rather than a claim about a new head.

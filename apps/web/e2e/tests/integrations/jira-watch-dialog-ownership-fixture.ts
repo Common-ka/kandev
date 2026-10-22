@@ -102,8 +102,8 @@ export async function withJiraWatchFixture(
   const check = (phase: string) => {
     const snapshots = guards.map((g) => snapshot(g.directory));
     checkpoints.push({ phase, snapshots });
-    for (const before of guards) {
-      const after = snapshot(before.directory);
+    for (const [index, before] of guards.entries()) {
+      const after = snapshots[index];
       expect(after.contentSha256, `${before.directory} complete source bytes preserved`).toBe(
         before.contentSha256,
       );
