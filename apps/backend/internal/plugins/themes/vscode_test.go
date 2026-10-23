@@ -4,6 +4,8 @@ import (
 	"testing"
 )
 
+const boldFontStyle = "bold"
+
 // @covers AC-PLUGINS-THEMES-002.1
 func TestConvertVSCodeJSONC(t *testing.T) {
 	data := []byte(`{ // a real exported palette
@@ -19,7 +21,7 @@ func TestConvertVSCodeJSONC(t *testing.T) {
 	if imported.Definition.UI["background"] != "#272822" || imported.Definition.Syntax["comment"].Foreground != "#a6e22e" || imported.Report.Ignored != 1 {
 		t.Fatalf("conversion = %+v", imported)
 	}
-	if imported.Definition.Semantic["variable.readonly"].FontStyle != "bold" {
+	if imported.Definition.Semantic["variable.readonly"].FontStyle != boldFontStyle {
 		t.Fatal("semantic style lost")
 	}
 	again, err := ConvertVSCode(data, "")
@@ -52,7 +54,7 @@ func TestConvertVSCodeUnscopedDefaults(t *testing.T) {
 			if d.Editor["foreground"] != "#ffffff" || d.Editor["background"] != "#222222" {
 				t.Fatalf("defaults lost: %+v", d.Editor)
 			}
-			if len(d.Textmate) != 1 || d.Syntax["comment"].FontStyle != "bold" {
+			if len(d.Textmate) != 1 || d.Syntax["comment"].FontStyle != boldFontStyle {
 				t.Fatal("scoped rules changed")
 			}
 			if imported.Report.Ignored != 1 {

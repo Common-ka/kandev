@@ -1,38 +1,13 @@
 import { createServer } from "node:http";
-import { cpSync, readFileSync, writeFileSync, mkdtempSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
-import path from "node:path";
-import { execFileSync } from "node:child_process";
-import { createHash } from "node:crypto";
 import { expect, type Page } from "@playwright/test";
 import type { ApiClient } from "../../helpers/api-client";
 import { waitForHttp } from "../../helpers/causal-waits";
-
-function themeArchives(dir: string) {
-  const root = path.resolve(__dirname, "../../../../..");
-  const sample = path.join(dir, "sample");
-  cpSync(path.join(root, "apps/backend/internal/plugins/themes/testdata/sample"), sample, {
-    recursive: true,
-  });
-  const manifestPath = path.join(sample, "manifest.yaml");
-  const manifest = readFileSync(manifestPath, "utf8").replace(
-    "id: theme-study",
-    "id: theme-update-study",
-  );
-  return ["1.0.0", "2.0.0"].map((version) => {
-    writeFileSync(manifestPath, manifest.replace("version: 1.0.0", `version: ${version}`));
-    const archivePath = path.join(dir, `${version}.tar.gz`);
-    execFileSync("go", ["run", "./cmd/plugin-pack", "-dir", sample, "-out", archivePath], {
-      cwd: path.join(root, "apps/backend"),
-    });
-    const archive = readFileSync(archivePath);
-    return { version, archive, digest: createHash("sha256").update(archive).digest("hex") };
-  });
-}
+import { buildThemeRelease } from "./theme-package-fixture";
 
 export async function updateThemeFromMarketplace(page: Page, api: ApiClient) {
-  const dir = mkdtempSync(path.join(tmpdir(), "theme-update-marketplace-"));
-  const releases = themeArchives(dir);
+  const releases = ["1.0.0", "2.0.0"].map((version) =>
+    buildThemeRelease("theme-update-study", version),
+  );
   let release = releases[0];
   let url = "";
   const server = createServer((req, res) => {
@@ -116,6 +91,5 @@ export async function updateThemeFromMarketplace(page: Page, api: ApiClient) {
         .rawRequest("DELETE", `/api/plugins/marketplace/sources/${sourceId}`)
         .catch(() => undefined);
     await new Promise<void>((resolve) => server.close(() => resolve()));
-    rmSync(dir, { recursive: true, force: true });
   }
 }

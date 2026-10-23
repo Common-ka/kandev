@@ -1,28 +1,9 @@
 import { createServer } from "node:http";
-import { readFileSync, mkdtempSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
-import path from "node:path";
-import { execFileSync } from "node:child_process";
-import { createHash } from "node:crypto";
 import { test, expect } from "../../fixtures/test-base";
+import { buildThemeRelease } from "./theme-package-fixture";
 
 test("installs a verified theme from a real registry source", async ({ testPage, apiClient }) => {
-  const root = path.resolve(__dirname, "../../../../..");
-  const dir = mkdtempSync(path.join(tmpdir(), "theme-marketplace-"));
-  execFileSync(
-    "go",
-    [
-      "run",
-      "./cmd/plugin-pack",
-      "-dir",
-      path.join(root, "apps/backend/internal/plugins/themes/testdata/sample"),
-      "-out",
-      path.join(dir, "theme.tar.gz"),
-    ],
-    { cwd: path.join(root, "apps/backend") },
-  );
-  const archive = readFileSync(path.join(dir, "theme.tar.gz"));
-  const digest = createHash("sha256").update(archive).digest("hex");
+  const { archive, digest } = buildThemeRelease("theme-study", "1.0.0");
   let url = "";
   const server = createServer((req, res) => {
     if (req.url === "/theme.tar.gz") {
@@ -82,7 +63,6 @@ test("installs a verified theme from a real registry source", async ({ testPage,
         .rawRequest("DELETE", `/api/plugins/marketplace/sources/${sourceId}`)
         .catch(() => undefined);
     await new Promise<void>((resolve) => server.close(() => resolve()));
-    rmSync(dir, { recursive: true, force: true });
   }
 });
 

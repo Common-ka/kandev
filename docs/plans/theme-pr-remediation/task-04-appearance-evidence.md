@@ -120,3 +120,49 @@ regressions and the original application-themes delivery records.
 - Documentation catalog/spec validation and whitespace checks passed.
 - Original delivery evidence is preserved as historical. The live PR remains
   draft; its final validation/body update preserves screenshots and bot sections.
+
+
+### CI follow-up
+
+The first repair head's Backend Static Checks reported `goconst` for the repeated
+`bold` expectation shared by the converter tests and implementation. Extracting
+the test expectation into a constant leaves fixture inputs and assertions intact
+and changes no product behavior or public contract. `TestConvertVSCode*` and
+changed-package lint pass after the extraction. Local golangci-lint 2.9.0 did
+not reproduce the remote diagnostic before extraction; the exact CI log is the
+regression evidence, and a fresh remote run remains required.
+
+Backend test shard 2 failed before producing test results: the Go module proxy
+returned an HTTP/2 `INTERNAL_ERROR` while downloading
+`github.com/mark3labs/mcp-go@v1.0.0-beta.1`. No test assertion ran. The next
+synchronize event retries that dependency download without a product change.
+Remote CI/review evidence remains pending separately from local checks.
+
+The same matrix exposed two Plugins page failures because its API mock omitted
+`getPlugin`, which the release-aware update action now uses. The exact file
+reproduced both failures, then passed all 25 cases with the installed-record mock
+restored. No assertions or cases were removed.
+
+Desktop and phone marketplace E2E jobs failed with `spawnSync go ENOENT`: the
+browser runtime image deliberately has no Go toolchain. Both desktop cases
+reproduced with Go removed from PATH and retries disabled. The shared fixture
+now copies the existing native sample, writes checksums with Node, and uses the
+same tar tool as other marketplace fixtures. Two desktop cases and the phone
+case pass without Go and without retries. Package validation still runs in the
+real backend. Web typecheck and changed-file ESLint pass.
+
+The Postgres cohort also reported
+`TestPostgresCanonicalDeliveryTurnRetryAndCancellation/cancel` from the newer
+base revision: cancellation returned a wrapped `driver: bad connection` rather
+than `context canceled`. The owning source/test are from the base's workflow
+entry-stamp change, with no overlapping theme changes. The exact cancellation
+case passed 20 consecutive runs with `-race` on an isolated Postgres 17 database
+and a conflict-free synthetic merge. No delivery behavior or cancellation
+assertion was weakened. Its fresh remote result remains required; an isolated
+pass does not waive the failed job.
+
+Reproduction command on that merge:
+`go test -trimpath -race ./internal/task/repository/sqlite -run '^TestPostgresCanonicalDeliveryTurnRetryAndCancellation$/cancel$' -count=20`
+with `KANDEV_TEST_POSTGRES_DSN` pointing to the disposable database. The first
+matrix remains historical failure evidence (9 failed checks, including dependent
+aggregate gates); the correction push requires new exact-head CI evidence.

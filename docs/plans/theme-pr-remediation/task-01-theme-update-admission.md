@@ -71,7 +71,7 @@ valid-update positive control with identical admission prerequisites.
 - `apps/backend/internal/plugins/{themes_handlers_test.go,autoupdate_test.go}`
 - `apps/web/components/settings/plugins/{plugins-settings.tsx,use-plugin-update-action.ts,use-plugin-update-action.test.tsx,use-plugin-actions.ts,use-plugin-actions.test.tsx}`
 - `apps/web/lib/types/plugins.ts`
-- `apps/web/e2e/tests/plugins/{theme-marketplace.spec.ts,mobile-theme-marketplace-update.spec.ts,theme-marketplace-update-flow.ts}`
+- `apps/web/e2e/tests/plugins/{theme-marketplace.spec.ts,mobile-theme-marketplace-update.spec.ts,theme-marketplace-update-flow.ts,theme-package-fixture.ts}`
 
 ## Dependencies
 
