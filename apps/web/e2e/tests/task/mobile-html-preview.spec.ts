@@ -1,6 +1,6 @@
 import { type Page } from "@playwright/test";
 import path from "node:path";
-import { test, expect } from "../../fixtures/test-base";
+import { test, expect, resetSeedRepositoryCheckout } from "../../fixtures/test-base";
 import type { SeedData } from "../../fixtures/test-base";
 import type { ApiClient } from "../../helpers/api-client";
 import type { BackendContext } from "../../fixtures/backend";
@@ -8,6 +8,7 @@ import { assertNoDocumentHorizontalOverflow } from "../../helpers/layout-asserti
 import { GitHelper, makeGitEnv, createStandardProfile } from "../../helpers/git-helper";
 import { routeMainWebSocketWithPreviewFeedbackCreateFailure } from "../../helpers/ws-drop";
 import { SessionPage } from "../../pages/session-page";
+import { waitForScreenshotCaptureMode } from "../preview/preview-feedback-helpers";
 
 const SVG_ASSET =
   '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><rect width="24" height="24" fill="#60a5fa"/></svg>';
@@ -101,6 +102,14 @@ async function setupMobileHtmlPreviewTest({
 
 test.describe("Mobile HTML preview", () => {
   test.describe.configure({ retries: 0, timeout: 120_000 });
+
+  test.beforeEach(({ backend, seedData }) => {
+    resetSeedRepositoryCheckout(seedData, backend.tmpDir);
+  });
+
+  test.afterEach(({ backend, seedData }) => {
+    resetSeedRepositoryCheckout(seedData, backend.tmpDir);
+  });
 
   test("renders native scripts and relative assets in the focused viewer", async ({
     testPage,
@@ -232,6 +241,7 @@ test.describe("Mobile HTML preview", () => {
 
     await drawer.getByRole("button", { name: "Select screenshot region", exact: true }).tap();
     await expect(trigger).toHaveAttribute("data-capture-mode", "screenshot");
+    await waitForScreenshotCaptureMode(frame);
     const screenshotTarget = frame.locator("#capture-card");
     const region = await screenshotTarget.evaluate((element) => {
       const rect = element.getBoundingClientRect();

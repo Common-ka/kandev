@@ -35,7 +35,7 @@ func (h *TaskHandlers) doListTaskSessions(ctx context.Context, msg *ws.Message, 
 	if taskID == "" {
 		return ws.NewError(msg.ID, msg.Action, ws.ErrorCodeValidation, "task_id is required", nil)
 	}
-	sessions, err := h.service.ListTaskSessions(ctx, taskID)
+	sessions, err := h.service.ListTaskSessionSummaryObservations(ctx, taskID)
 	if err != nil {
 		h.logger.Error("failed to list task sessions", zap.Error(err))
 		return ws.NewError(msg.ID, msg.Action, ws.ErrorCodeInternalError, "Failed to list task sessions", nil)
@@ -108,6 +108,7 @@ type wsCreateTaskRequest struct {
 	PlanMode               bool                      `json:"plan_mode,omitempty"`
 	Attachments            []v1.MessageAttachment    `json:"attachments,omitempty"`
 	ParentID               string                    `json:"parent_id,omitempty"`
+	InitialWorkspaceLayout string                    `json:"initial_workspace_layout,omitempty"`
 }
 
 func (h *TaskHandlers) wsCreateTask(ctx context.Context, msg *ws.Message) (*ws.Message, error) {
@@ -204,6 +205,7 @@ func (h *TaskHandlers) wsCreateTask(ctx context.Context, msg *ws.Message) (*ws.M
 		PlanMode:                    req.PlanMode,
 		StartAgent:                  req.StartAgent,
 		ParentID:                    req.ParentID,
+		InitialWorkspaceLayout:      req.InitialWorkspaceLayout,
 	})
 	if err != nil {
 		h.logger.Error("failed to create task", zap.Error(err))

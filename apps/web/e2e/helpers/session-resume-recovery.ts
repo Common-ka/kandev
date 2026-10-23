@@ -75,6 +75,33 @@ export function captureSessionRecoveryMessages(page: Page) {
   return { requestIds, requestCounts, requests, responses };
 }
 
+/** Wait for both the live runtime and its durable inventory to settle after Stop. */
+export async function waitForStoppedRecoveryRuntime(
+  apiClient: ApiClient,
+  tmpDir: string,
+  fixture: WorktreeRecoveryFixture,
+) {
+  const sessionId = fixture.task.session_id!;
+  await expect
+    .poll(
+      async () => {
+        const status = await apiClient.wsRequest<{ is_agent_running: boolean }>(
+          "task.session.status",
+          { task_id: fixture.task.id, session_id: sessionId },
+        );
+        return status.is_agent_running;
+      },
+      { timeout: 30_000, message: "Waiting for the stopped recovery runtime to exit" },
+    )
+    .toBe(false);
+  await expect
+    .poll(() => readManagedCloneRecoveryConsumers(tmpDir, fixture.environment.id), {
+      timeout: 30_000,
+      message: "Waiting for the stopped recovery runtime inventory to settle",
+    })
+    .toEqual([{ sessionId, state: "CANCELLED", runtimeStatus: "stopped" }]);
+}
+
 export function capturedSessionRecoveryRequest(requests: Map<string, unknown>, action: string) {
   return requests.get(action);
 }
@@ -94,6 +121,17 @@ export function capturedSessionRecoveryResponseType(
   action: string,
 ) {
   return capturedSessionRecoveryResponse(requestIds, responses, action)?.type ?? null;
+}
+
+/** Observe the visible pending message and its phase in the same DOM assertion. */
+export async function expectWorkspaceRecoveryResuming(page: Page): Promise<void> {
+  const pending = page.getByTestId("workspace-recovery-agent-pending").filter({ visible: true });
+  const progress = page
+    .getByTestId("workspace-recovery-progress")
+    .filter({ has: pending, visible: true });
+  await expect(progress).toHaveAttribute("data-recovery-phase", "resuming", {
+    timeout: 60_000,
+  });
 }
 
 export function assertSuccessfulRelocationResponse(

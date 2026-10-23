@@ -81,8 +81,21 @@ func (s recoveryOutcomeSummary) logFields() []zap.Field {
 	}
 }
 
-// Start starts the lifecycle manager background tasks
+// The startup policy belongs to one call, without mutating manager-wide configuration.
+type deferredStartupRecoveryKey struct{}
+
+// StartDeferredRemoteRecovery adopts local survivors before admitting new local
+// instances. Remote attachment stays behind readiness and its exact owner guard.
+func (m *Manager) StartDeferredRemoteRecovery(ctx context.Context) error {
+	if err := m.PrepareStartupRecovery(ctx); err != nil {
+		return err
+	}
+	return m.Start(context.WithValue(ctx, deferredStartupRecoveryKey{}, true))
+}
+
+// Start starts the lifecycle manager with its call-scoped startup policy.
 func (m *Manager) Start(ctx context.Context) error {
+	deferRemote, _ := ctx.Value(deferredStartupRecoveryKey{}).(bool)
 	if m.executorRegistry == nil {
 		m.logger.Warn("no runtime registry configured")
 		return nil
@@ -91,17 +104,7 @@ func (m *Manager) Start(ctx context.Context) error {
 	runtimeNames := m.executorRegistry.List()
 	m.logger.Info("starting lifecycle manager", zap.Int("runtimes", len(runtimeNames)))
 
-	// Check health of all registered runtimes
-	healthResults := m.executorRegistry.HealthCheckAll(ctx)
-	for name, err := range healthResults {
-		if err != nil {
-			m.logger.Warn("runtime health check failed",
-				zap.String("runtime", string(name)),
-				zap.Error(err))
-		} else {
-			m.logger.Info("runtime is healthy", zap.String("runtime", string(name)))
-		}
-	}
+	m.checkStartupRuntimeHealth(ctx, deferRemote)
 
 	// AC-EXECUTORS-SURVIVAL-003.1: start this pass's re-tracked-session set
 	// empty so a stale entry from an earlier Start() call (tests, or a
@@ -109,24 +112,29 @@ func (m *Manager) Start(ctx context.Context) error {
 	m.resetRetrackedSessions()
 
 	// Read every runtime-owned startup recovery record before contacting any
-	// endpoint. Remote plugin rows carry decrypted auth tokens only in memory.
+	// endpoint. Remote credentials are hydrated only on clones used for one
+	// recovery attempt.
 	startup.BeginStep(ctx, startup.StepSessionsRecovery)
-	records, listErr := m.ListLiveStandaloneExecutorsRunning(ctx)
+	standaloneRecords, listErr := m.ListLiveStandaloneExecutorsRunning(ctx)
 	pluginRecords, pluginListErr := m.ListLivePluginExecutorsRunning(ctx)
+	remoteRecords, remoteListErr := m.ListLiveRemoteExecutorsRunning(ctx)
 	if listErr == nil && pluginListErr != nil {
 		listErr = pluginListErr
 	}
-	if listErr == nil {
-		for _, record := range pluginRecords {
-			if record == nil {
-				continue
-			}
-			record.TransientAuthToken = m.revealRuntimeSecret(ctx, record.Metadata, MetadataKeyAuthTokenSecret)
-		}
-		records = append(records, pluginRecords...)
+	if remoteListErr != nil {
+		m.logger.Warn("remote execution recovery inventory could not be read; remote owners remain untouched",
+			zap.Error(remoteListErr))
 	}
-	recoveryOutcome := recoveryOutcomeSummary{candidateCountKnown: listErr == nil}
-	m.runRecoveryErr = listErr
+	records := append([]*models.ExecutorRunning(nil), standaloneRecords...)
+	remoteRecordsForRecovery := make([]*models.ExecutorRunning, 0, len(remoteRecords)+len(pluginRecords))
+	if listErr == nil && !deferRemote {
+		remoteRecordsForRecovery = m.initialRemoteRecoveryRecords(ctx, pluginRecords, remoteRecords)
+		records = append(records, remoteRecordsForRecovery...)
+	}
+
+	inventoryKnown := listErr == nil && remoteListErr == nil
+	recoveryOutcome := recoveryOutcomeSummary{candidateCountKnown: inventoryKnown}
+	m.runRecoveryErr = errors.Join(listErr, remoteListErr)
 	if listErr != nil {
 		// A failed read leaves the record set unknown, which is not the same
 		// thing as empty. AC-EXECUTORS-SURVIVAL-002.6 stops a live instance
@@ -159,7 +167,21 @@ func (m *Manager) Start(ctx context.Context) error {
 	if passthroughLookup == nil {
 		passthroughLookup = func(context.Context, string) (bool, bool) { return false, false }
 	}
-	guardedSessions := SessionsToGuard(ctx, sessionIDsFromExecutorRunning(records), passthroughLookup)
+	guardInventory := append([]*models.ExecutorRunning(nil), records...)
+	guardInventory = append(guardInventory, remoteRecords...)
+	guardedSessions := SessionsToGuard(ctx, sessionIDsFromExecutorRunning(guardInventory), passthroughLookup)
+	guardedSet := make(map[string]struct{}, len(guardedSessions))
+	for _, sessionID := range guardedSessions {
+		guardedSet[sessionID] = struct{}{}
+	}
+	for _, remoteRecord := range remoteRecords {
+		if remoteRecord != nil && remoteRecord.SessionID != "" {
+			if _, exists := guardedSet[remoteRecord.SessionID]; !exists {
+				guardedSessions = append(guardedSessions, remoteRecord.SessionID)
+				guardedSet[remoteRecord.SessionID] = struct{}{}
+			}
+		}
+	}
 	for _, sessionID := range guardedSessions {
 		m.recoveryGuard.AcquireOrObserve(sessionID)
 	}
@@ -172,10 +194,13 @@ func (m *Manager) Start(ctx context.Context) error {
 	// survived, which the AC forbids. Only standalone records reach here
 	// (ListLiveStandaloneExecutorsRunning), and StandaloneExecutor is the
 	// only backend that reads them, so this narrows nothing else.
-	records = recoverableRecords(records, guardedSessions)
-	if listErr == nil {
+	standaloneRecords = recoverableRecords(standaloneRecords, guardedSessions)
+	records = append(append([]*models.ExecutorRunning(nil), standaloneRecords...), remoteRecordsForRecovery...)
+	if inventoryKnown {
 		recoveryOutcome.candidateCount = len(records)
 		startup.SetTotal(ctx, startup.StepSessionsRecovery, int64(len(records)))
+	} else {
+		startup.Degrade(ctx, startup.StepSessionsRecovery)
 	}
 
 	// AC-EXECUTORS-SURVIVAL-003.7: bound this pass's
@@ -195,7 +220,7 @@ func (m *Manager) Start(ctx context.Context) error {
 	var detailedOutcomes map[string]RecoveryCandidateOutcome
 	if listErr == nil {
 		var err error
-		recovered, detailedOutcomes, err = m.executorRegistry.RecoverAllDetailed(recoveryCtx, records)
+		recovered, detailedOutcomes, err = m.executorRegistry.recoverDetailed(recoveryCtx, records, deferRemote)
 		if err != nil {
 			m.runRecoveryErr = err
 			m.logger.Warn("failed to recover executions from some runtimes", zap.Error(err))
@@ -225,6 +250,33 @@ func (m *Manager) Start(ctx context.Context) error {
 	var stopWG sync.WaitGroup
 	if len(recovered) > 0 {
 		for _, ri := range recovered {
+			if ri != nil {
+				if pending := m.pendingRemoteRecoveryForSession(ri.SessionID); pending != nil {
+					if !m.beginRemoteRecovery(pending) {
+						m.discardRemoteRecoveryInstance(ri)
+						startup.Advance(ctx, startup.StepSessionsRecovery, 1)
+						continue
+					}
+					err := m.processRecoveredRemoteInstance(recoveryCtx, pending, ri)
+					m.finishRemoteRecoveryAttempt(pending)
+					if err != nil {
+						m.logger.Debug("remote recovery candidate remains guarded after startup attach",
+							zap.String("session_id", ri.SessionID), zap.Error(err))
+						if _, tracked := m.executionStore.Get(ri.InstanceID); !tracked {
+							m.discardRemoteRecoveryInstance(ri)
+						}
+					} else {
+						recordOutcomes[ri.SessionID] = recoveryOutcomeRetracked
+					}
+					startup.Advance(ctx, startup.StepSessionsRecovery, 1)
+					continue
+				}
+				if isRemoteRecoveryRuntime(ri.RuntimeName) {
+					m.discardRemoteRecoveryInstance(ri)
+					startup.Advance(ctx, startup.StepSessionsRecovery, 1)
+					continue
+				}
+			}
 			if recoveryCtx.Err() != nil {
 				// AC-EXECUTORS-SURVIVAL-003.7: the deadline elapsed before this
 				// record could be reconstructed -- treat it as not re-tracked
@@ -285,6 +337,7 @@ func (m *Manager) Start(ctx context.Context) error {
 				// stale relative to what the instance actually resumed.
 				ACPSessionID: ri.ProviderSessionID,
 			}
+			execution.restoreIdleActivity(ri.Metadata)
 			// AC-EXECUTORS-SURVIVAL-002.14's declared source for task
 			// identity is the recovery-inventory record alone, never the
 			// adopted instance (buildRecoveredInstances no longer falls
@@ -578,9 +631,23 @@ func (m *Manager) Start(ctx context.Context) error {
 	m.recoveryComplete.Store(true)
 
 	// Start remote status polling loop for runtimes exposing remote status.
-	m.wg.Add(1)
-	go m.remoteStatusLoop(ctx)
-	m.logger.Info("remote status loop started")
+	remoteStatusCtx, cancelRemoteStatus := context.WithCancel(ctx)
+	stopRemoteStatus := func() bool { return false }
+	if m.stopContext != nil {
+		stopRemoteStatus = context.AfterFunc(m.stopContext, cancelRemoteStatus)
+	}
+	startup.AfterReady(ctx, func() {
+		m.wg.Add(1)
+		go func() {
+			defer cancelRemoteStatus()
+			defer stopRemoteStatus()
+			if deferRemote {
+				m.pollRemoteStatuses(remoteStatusCtx)
+			}
+			m.remoteStatusLoop(remoteStatusCtx)
+		}()
+		m.logger.Info("remote status loop started")
+	})
 	// Set up callbacks for passthrough mode (using standalone runtime)
 	if standaloneRT, err := m.executorRegistry.GetBackend(executor.NameStandalone); err == nil {
 		if interactiveRunner := standaloneRT.GetInteractiveRunner(); interactiveRunner != nil {
@@ -636,24 +703,8 @@ func (m *Manager) hydrateRecoveredTaskEnvironmentID(ctx context.Context, executi
 	return nil
 }
 
-// reDeriveRecoveredAgentIdentity implements AC-EXECUTORS-SURVIVAL-002.14's
-// last reconstruction-table row: agent identity, agent and continuation
-// commands and their arguments, and the history setting are re-derived from
-// the restored agent profile and the agent-type registry -- the same
-// computation an ordinary launch performs, never read from the adopted
-// instance, so a compromised or stale instance cannot tell the backend which
-// command to run for the session's next turn.
-//
-// Re-derivation reflects the profile and registry as they stand at recovery,
-// not as they stood before the restart (AC-EXECUTORS-SURVIVAL-002.3): a
-// profile edited or an agent type removed during the outage takes effect
-// exactly as it would on the session's next ordinary turn.
-//
-// getAgentConfigForExecution and buildFreshAgentCommand are the same
-// primitives an in-session context reset uses (manager_interaction.go's
-// prepareAgentRestart), reused as-is: both already consume nothing but
-// execution fields already restored by this point (AgentProfileID,
-// RuntimeName, metadata), with no launch-request-only dependency.
+// reDeriveRecoveredAgentIdentity derives child commands from the authorized
+// profile and registry. A retained wrapper comes from protected process state.
 func (m *Manager) reDeriveRecoveredAgentIdentity(ctx context.Context, execution *AgentExecution) error {
 	agentConfig, err := m.getAgentConfigForExecution(execution)
 	if err != nil {
@@ -672,6 +723,10 @@ func (m *Manager) reDeriveRecoveredAgentIdentity(ctx context.Context, execution 
 	execution.ContinueCommand = commands.continue_
 	execution.AgentArgs = commands.args
 	execution.ContinueArgs = commands.continueArgs
+	execution.LaunchWrapper, err = recoveredLaunchWrapper(ctx, execution, commands.wrapper)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -746,7 +801,7 @@ func (m *Manager) stopUnreconstructableRecoveredInstance(ctx context.Context, ri
 		m.recoveryGuard.Release(ri.SessionID)
 		return
 	}
-	if err := backend.StopInstance(ctx, ri, true); err != nil {
+	if err := m.stopWorkspaceRuntime(ctx, backend, ri, true); err != nil {
 		m.logger.Warn("failed to stop unreconstructable recovered instance",
 			zap.String("instance_id", ri.InstanceID),
 			zap.String("session_id", ri.SessionID),
@@ -816,7 +871,14 @@ func (m *Manager) IsShuttingDown() bool {
 
 // closeStopCh closes the manager shutdown channel at most once.
 func (m *Manager) closeStopCh() {
-	m.stopOnce.Do(func() { close(m.stopCh) })
+	m.turnChangeRetryMu.Lock()
+	defer m.turnChangeRetryMu.Unlock()
+	m.stopOnce.Do(func() {
+		close(m.stopCh)
+		if m.cancelStop != nil {
+			m.cancelStop()
+		}
+	})
 }
 
 // Stop stops the lifecycle manager and releases resources held by executors.
@@ -951,13 +1013,22 @@ func (m *Manager) CleanupStaleExecutionBySessionIDIfCurrent(
 }
 
 func (m *Manager) cleanupStaleExecution(ctx context.Context, execution *AgentExecution) error {
+	return m.cleanupStaleExecutionWithCheckpoint(ctx, execution, nil)
+}
+
+func (m *Manager) cleanupStaleExecutionWithCheckpoint(
+	ctx context.Context, execution *AgentExecution, checkpoint func(context.Context) error,
+) error {
 	if execution == nil {
 		return nil
 	}
 	execution.remoteInstanceLifecycleMu.Lock()
 	defer execution.remoteInstanceLifecycleMu.Unlock()
-	execution.agentctlLifecycleMu.Lock()
 	sessionID := execution.SessionID
+	retired := m.isRetiredLocalExecution(execution)
+	if retired && !retiredExecutionProcessTerminated(execution) {
+		return fmt.Errorf("stale runtime owner termination is unproven: %w", agentctl.ErrRuntimeStopUnconfirmed)
+	}
 
 	m.logger.Info("cleaning up stale agent execution",
 		zap.String("session_id", sessionID),
@@ -967,9 +1038,15 @@ func (m *Manager) cleanupStaleExecution(ctx context.Context, execution *AgentExe
 	// goroutines. Without this, the old agentctl instance keeps running when a new
 	// execution is created for the same session, causing git polling on deleted worktrees.
 	// This is idempotent — returns success if the instance is already gone.
-	if err := m.stopAgentViaBackend(ctx, execution.ID, execution, stopReasonStaleExecutionCleanup, false, false); err != nil {
-		execution.agentctlLifecycleMu.Unlock()
-		return fmt.Errorf("stop stale runtime %s: %w", execution.ID, err)
+	if !retired {
+		if err := m.stopAgentViaBackend(ctx, execution.ID, execution, stopReasonStaleExecutionCleanup, false, false); err != nil {
+			return fmt.Errorf("stop stale runtime %s: %w", execution.ID, err)
+		}
+	}
+	if checkpoint != nil {
+		if err := checkpoint(ctx); err != nil {
+			return fmt.Errorf("checkpoint stopped runtime %s: %w", execution.ID, err)
+		}
 	}
 
 	// End session trace span only after the runtime has stopped. A failed stop
@@ -977,6 +1054,7 @@ func (m *Manager) cleanupStaleExecution(ctx context.Context, execution *AgentExe
 	execution.EndSessionSpan()
 
 	// Close agentctl connection if it exists
+	execution.agentctlLifecycleMu.Lock()
 	if client := execution.currentAgentCtlClient(); client != nil { // protected by agentctlLifecycleMu
 		client.Close()
 	}
@@ -989,7 +1067,9 @@ func (m *Manager) cleanupStaleExecution(ctx context.Context, execution *AgentExe
 	// Delete the persistence row in lockstep with store removal so we never
 	// leave a phantom executors_running row pointing at a non-existent
 	// execution. Best-effort; "not found" is expected and silently swallowed.
-	m.deleteExecutorRunning(ctx, sessionID, execution.ID)
+	if !retired {
+		m.deleteExecutorRunning(ctx, sessionID, execution.ID)
+	}
 
 	return nil
 }

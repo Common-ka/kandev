@@ -4,6 +4,8 @@ system: workspaces
 requirements:
   - REQ-WORKSPACES-SETTINGS-UPDATES-001
   - REQ-WORKSPACES-SETTINGS-UPDATES-002
+  - REQ-WORKSPACES-SETTINGS-UPDATES-003
+  - REQ-WORKSPACES-REPOSITORY-SAVE-001
 ---
 
 # Workspace settings update system design
@@ -21,6 +23,8 @@ authoritative for their independent contracts.
 | --- | --- |
 | `REQ-WORKSPACES-SETTINGS-UPDATES-001` | Admission and presence; persistence seam; observations; compatibility; verification |
 | `REQ-WORKSPACES-SETTINGS-UPDATES-002` | Current catalogue publication; client compatibility inventory; independent client verification |
+| `REQ-WORKSPACES-SETTINGS-UPDATES-003` | Successful creation publication; creation consumer inventory; creation verification |
+| `REQ-WORKSPACES-REPOSITORY-SAVE-001` | Repository settings acknowledgement reconciliation |
 
 ## Verified baseline path
 
@@ -322,6 +326,123 @@ Internal contracts and the four-file package describe the repair. The implemente
 this assessment; no public documentation edit or new ADR is needed for the local
 current-store idiom.
 
+## Successful creation publication
+
+Requirement 003 extends the same current-catalogue boundary to the explicit
+Settings Add Workspace action. The backend field-presence contract, merged
+Save implementation, and their existing delivery records remain unchanged.
+The [creation work order](../../../plans/workspace-create-catalogue-preservation/task-01-preserve-create-catalogue.md)
+records the completed local implementation and validation. Hosted review and
+verified merge remain separate delivery gates.
+
+`WorkspacesPage` in `app/settings/workspace/page.tsx` is mounted at
+`/settings/workspaces` by `src/settings-routes.tsx`. It renders
+`WorkspacesPageClient`, whose `handleAddWorkspace` trims the name and awaits
+real `useRequest(createWorkspaceAction)`. That action uses its existing
+`fetchJson` boundary to POST `/api/v1/workspaces` and propagate backend errors.
+At the diagnostic baseline, the callback called `setWorkspaces` with
+`mapWorkspaceItem(created)` followed by the `items` captured before the await.
+Registered workspace notifications could already have changed the owning store.
+Replacing it with the captured array lost those current choices; it did not
+delete a backend row.
+
+The implemented handler uses the existing `useAppStoreApi` in this component
+to read the initiating provider's current items and setter only after successful
+acknowledgement. It keeps that read, mapping, identity filtering, and publication
+synchronous, without an intervening await or scheduled callback. It reuses the
+existing `mapWorkspaceItem` unchanged for the accepted response and prepends
+that mapped item to current rows whose ID differs from the accepted ID. This is
+a local same-identity upsert: it accepts one canonical response descriptor, removes any
+already-notified occurrence of that identity, and keeps every nonmatching row
+and its relative order. Do not reconstruct existing descriptors, spread the
+response across unrelated rows, or read another provider/global store.
+
+The accepted response continues to own its mapped descriptor, including caller
+scopes, role, unit, member count, configuration default, Office identity, idle
+defaults and timestamps. This does not add same-ID timestamp arbitration or a
+guarantee that an earlier creation response overrides a later independent edit
+in chronological order. Subsequent registered events retain their current
+semantics. Independent workspace metadata is retained exactly as it exists in
+the current catalogue at publication.
+
+Keep `setWorkspaces`' existing non-null active identity retention and unchanged
+`activeIdRevision`. Its no-active-ID fallback still selects the first row
+without adding a new selection revision. A registered creation on an empty
+catalogue has its own existing active-ID/revision behavior; retain that result
+if it precedes acknowledgement. An intervening real selection or deletion may
+already have changed active identity/revision; preserve those current values.
+Do not capture them at request start or invoke a selection action on success.
+
+Keep request payload, blank-name return, request status, accepted form clearing
+and closing, and rejected-form/toast behavior intact. The sole expected
+production edit is `workspaces-page-client.tsx`, using an existing context API;
+no store slice, mapper, WS handler, transport, backend, or layout edit is needed.
+Checkpoint any causally necessary extra immediate glue before expanding scope.
+
+### Creation consumer inventory
+
+Read-only audit at baseline `714ee9c2c6e52b90272e56613029826f40646719`:
+
+| Boundary / consumer | Contract and disposition |
+| --- | --- |
+| `WorkspacesPage` / `WorkspacesPageClient.handleAddWorkspace` | Owning creation publication seam; read live provider state after POST acknowledgement |
+| `StateProvider` / `createAppStore` / `useAppStoreApi` | Real per-provider ownership; nested providers share their parent; isolation tests use independent roots |
+| `useRequest` / `createWorkspaceAction` / its `fetchJson` | Existing POST, trimmed payload, status and real backend error; read-only |
+| `mapWorkspaceItem` | Authoritative accepted descriptor and absence/default mapping; read-only |
+| Registered `registerWorkspacesHandlers` | Created upsert, updated row projection, deleted membership/active fallback; actual test stimuli, no edits |
+| Workspace slice `setWorkspaces` / `setActiveWorkspace` | Existing identity/revision/fallback and explicit-selection behavior; read-only |
+| `orderWorkspacesForDisplay` / `WorkspaceListItem` | Management list promotes active row without reordering other rows; store order differs legitimately from visible order |
+| `AppSidebarWorkspacePicker` / shared `WorkspacePickerContent` | Real catalogue choices and names, existing selection/navigation; read-only |
+| `AppNavSheet` | Uses the same picker outside its phone menu scroller; unchanged state semantics and composition |
+| `useWorkspaceSectionCounts` / section API clients | Independent read effects on real management cards; transports return legitimate empty count data in tests |
+| Merged `buildWorkspaceSaveHandler` / immediate form caller | Existing current-store accepted Save projection; requirement 002 retained, no replay or remigration |
+| Delete draft, placement, Office onboarding, backend creation/bootstrap | Independent boundaries, read-only; no creation lifecycle or deletion claim |
+
+The previous Save inventory's creation row describes the scope of that earlier
+proof. Requirement 003 now qualifies this separate creation callback; it does
+not expand the earlier work order or its tests. Adjacent UI settings and Kanban
+bootstrap requirements remain independent. No new system owner or ADR is
+needed for this existing provider-store idiom.
+
+### Creation verification, mobile, and public documentation
+
+Independently author
+`app/settings/workspace/workspaces-create.integration.test.tsx`, with an optional
+colocated `workspaces-create.test-helpers.tsx`. Mount the real `WorkspacesPage`,
+`StateProvider` (using actual `createAppStore`), Toast/Tooltip providers, real
+routing and sidebar picker. Submit actual Add Workspace controls through real
+`useRequest`, action, and client. Deliver external messages through the actual
+registered workspace handlers bound to that provider. Mock only external
+fetch/WS delivery, including legitimate section-count responses; reject any
+unexpected transport. An observer may expose the owning store without replacing
+product hooks, actions, handlers, primitives, components, or mapper.
+
+The linked plan maps criteria .1-.5 to a bounded causal matrix: held success
+with independent addition/update/deletion; notifications after settlement;
+same-ID notification before and after acknowledgement; descriptor/default,
+ordinary/empty/blank/rejected creation; current selection and independent-store
+controls. Reach actual store, picker and management choices before and after
+held acknowledgement and assert the accepted workspace as well. Expected
+regression assertions, rather than fixture exceptions, establish RED. Settlement
+controls may pass before the fix. Own and join deferred transport, asynchronous
+count reads, and cleanup; leave no timers or provider observations behind.
+No protected ROOT source proof is read, copied, imported, or replayed.
+
+Mobile parity uses the skill's pure state/data exception. This correction
+changes no JSX composition, layout, copy, controls, touch, scrolling, navigation,
+or breakpoints. The phone `AppNavSheet` consumes the same picker/catalogue.
+Real component/provider tests prove the shared publication outcome; no new
+Playwright test, browser session, screenshot, UI preview, build, or database
+run is planned. A surface change invalidates the exception and checkpoints ROOT.
+
+Public-doc audit: `docs/public/tasks-and-workflows.md`'s Create a workspace
+procedure still directs Add Workspace then naming and adding; Kanban bootstrap
+and workspace defaults remain unchanged. `docs/public/team-access.md`'s placement
+instructions, root README, and screenshot catalogue remain accurate. No public
+docs change is needed: this restores choices in the existing procedure without
+adding an operation, setting, terminology, wire contract, or image. Internal
+requirement/design and delivery records carry the change.
+
 ## Related contracts and decisions
 
 - [Organization unit design](org-units.md).
@@ -329,3 +450,44 @@ current-store idiom.
 - [Existing task/workflow field-update contract](../../tasks/requirements/task-field-updates.md).
 - [Settings save coordinator](../../../decisions/0046-settings-route-save-coordinator.md).
 - [SQLite transaction entry](../../../decisions/2026-10-05-sqlite-writer-transaction-admission.md).
+
+## Repository settings acknowledgement reconciliation
+
+REQ-WORKSPACES-REPOSITORY-SAVE-001 is owned by the repository lifecycle here;
+[settings manual save](../../ui/requirements/settings-manual-save.md) continues
+to own the reusable coordinator and route guard. The existing POST repository,
+PATCH repository, POST/PUT script and DELETE script actions remain authoritative.
+
+The page captures an immutable submitted repository and accepted baseline. After
+repository creation or update succeeds, settle every admitted script mutation,
+retaining each fulfilled response or deletion separately. Build the next baseline
+from accepted repository metadata, previous scripts and fulfilled operations;
+failed script operations never enter it. Match acknowledgements by submitted
+script identity, never by a filtered response array index. Reconcile a separate
+complete submitted draft projection so failed temporary scripts and newer edits
+remain visible while successful identities become canonical. Newer removals stay
+removed; an acknowledged create removed during Save remains in the baseline so
+retry can delete it. Canonical repository identity also reaches unsaved scripts.
+
+Publish both projections before rethrowing the first failure in stable submission
+order. Promise settlement waits for every sibling, so the existing coordinator
+cannot release Save for retry while an earlier script request remains pending.
+Retries compare scripts with the accepted baseline and submit only missing,
+changed or deleted rows. A per-repository in-flight promise also joins overlapping
+calls at the page handler boundary. Repository creation failure admits no script
+requests; successful creation with failed scripts still becomes one established
+repository. Reset restores this accepted baseline locally through the contributor.
+
+The guarantee covers acknowledged operations in the mounted page. Backend APIs,
+schema, cache ownership, secret policy and ambiguous transport semantics stay unchanged.
+
+Desktop and phone keep the existing repository card and fixed shared Save surface,
+settings-content scroll owner, safe-area handling and touch primitives. The shipped
+phone repository settings page is the exemplar; this repair changes state only.
+Focused real-hook/action/coordinator tests own partial and ordinary outcomes,
+late sibling settlement, newer edits/removals, deletion and Reset. Managed desktop
+and Pixel 5 browser tests use disposable repositories, reject one script before
+forwarding it, persist the remaining operations through the real backend, retry
+and reload, then verify canonical identities and exact script inventory.
+
+[Repository Save implementation plan](../../../plans/repository-save-acknowledgements/plan.md).

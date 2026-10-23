@@ -17,8 +17,11 @@ consumed by settings and navigation. Settings presentation, executor
 suspension, and organization reach consume those values and keep their own
 contracts. The existing workspace catalog has no capability that owns partial
 settings persistence; this pair supplies that narrow contract. The client
-publication boundary below preserves catalogue choices during a settings save
-without changing that persistence contract.
+publication boundaries below preserve catalogue choices during a settings save
+and successful Add Workspace creation without changing that persistence contract.
+
+Repository settings also preserve acknowledged progress across multi-request Save
+failures under REQ-WORKSPACES-REPOSITORY-SAVE-001 below.
 
 ## Terms and boundary
 
@@ -129,17 +132,93 @@ and event contracts remain active and unchanged.
   settings shall not become supplied values because the catalogue changed.
   Backend partial-field intent guarantees in requirement 001 remain intact.
 
+### REQ-WORKSPACES-SETTINGS-UPDATES-003: Preserve current catalogue during creation
+
+**Intent:** A successful Add Workspace acknowledgement shall make the accepted
+workspace available without discarding independent workspace choices or changes
+already visible while creation was pending.
+
+This extends only creation publication in Settings. Requirements 001 and 002
+retain their backend field-presence and merged settings-Save contracts.
+
+#### Acceptance criteria
+
+- **AC-WORKSPACES-SETTINGS-UPDATES-003.1:** When another workspace is added,
+  updated, or removed while Add Workspace is pending, successful acknowledgement
+  shall preserve every other workspace's current membership, relative order,
+  and descriptor values. It shall neither remove an added choice, restore an
+  earlier value, nor resurrect a removed choice. Independent notifications
+  received after acknowledgement shall retain their existing effect.
+- **AC-WORKSPACES-SETTINGS-UPDATES-003.2:** Acknowledgement shall expose the
+  accepted workspace exactly once, including when its creation notification
+  arrived first. It shall retain the accepted descriptor's name, description,
+  ownership, placement, caller role/scopes, member count, defaults, idle policy,
+  workspace kind, and timestamps with existing absent-value behavior. The
+  accepted workspace shall occupy the existing creation position, preserving
+  the relative order of other workspaces.
+- **AC-WORKSPACES-SETTINGS-UPDATES-003.3:** The real workspace picker and Settings
+  management list shall retain current choices and names and show one accepted
+  workspace after acknowledgement. Current active identity and selection
+  revision shall survive, including a selection made while creation was pending.
+  If there is no active identity, ordinary creation shall retain the existing
+  first-workspace selection behavior. Choosing a retained workspace shall use
+  the existing selection and navigation behavior. Desktop and phone users shall
+  receive this outcome through the shared catalogue.
+- **AC-WORKSPACES-SETTINGS-UPDATES-003.4:** Ordinary and initially empty catalogue
+  creation shall retain the trimmed-name request and successful form clearing
+  and closing. A blank name shall issue no creation request. Acknowledgement
+  shall publish into the initiating view's catalogue without changing another
+  independent view's store.
+- **AC-WORKSPACES-SETTINGS-UPDATES-003.5:** Rejected creation shall publish no
+  accepted workspace from that request. Independently notified catalogue
+  changes, current selection, entered name, open form, and existing request
+  error feedback shall remain available.
+
+### REQ-WORKSPACES-REPOSITORY-SAVE-001: Repository settings acknowledgements
+
+**Intent:** Repository settings Save retains acknowledged progress when another
+request in the same save fails. This covers new and established repositories
+and their custom scripts, using the existing route-local manual-save contract.
+
+#### Acceptance criteria
+
+- **AC-WORKSPACES-REPOSITORY-SAVE-001.1:** Every acknowledged repository creation
+  or metadata update and script creation, update, or deletion shall advance only
+  its accepted baseline, even when a sibling request fails. Failed operations
+  shall leave their draft changes visible and dirty. Retry shall retain canonical
+  identities and shall not recreate acknowledged resources or repeat clean script operations.
+- **AC-WORKSPACES-REPOSITORY-SAVE-001.2:** Save shall remain pending until every
+  admitted sibling operation settles. Any failure shall remain a rejected save
+  through the shared coordinator, with visible error feedback and usable retry.
+- **AC-WORKSPACES-REPOSITORY-SAVE-001.3:** Edits or removals made during Save shall
+  survive acknowledgement. Successful temporary identities shall become canonical
+  without marking newer values saved. Reset after settlement shall restore the
+  acknowledged baseline, including successful scripts and excluding successful deletions.
+- **AC-WORKSPACES-REPOSITORY-SAVE-001.4:** Desktop and phone shall provide the
+  same retry outcome through the existing settings cards and shared Save surface.
+  A completed retry shall persist exactly the intended repository and scripts
+  after reload. Complete-success and definite-failure paths shall remain usable.
+
+This is acknowledgement reconciliation in the mounted page. It does not promise
+exactly-once creation after an ambiguous transport failure, persist unfinished
+drafts across reload, or change backend API, schema, authorization, or cache ownership.
+
 ## Out of scope
+
+The repository Save refinement above changes only route-local acknowledgement
+reconciliation. The following exclusions continue to apply to workspace catalogue
+and backend updates.
 
 - New fields, transport capabilities, revision tokens, schema changes, settings
   controls, or hierarchy/runtime behavior. Client-store changes beyond the
-  settings acknowledgement publication in requirement 002 are excluded.
+  settings and Add Workspace acknowledgement publication in requirements 002
+  and 003 are excluded.
 - Changes to reach policy, authentication, legacy visibility, or task numbering.
 - Universal serialization with unrelated workspace writers.
 - Global event order, target-settings revision arbitration, guaranteed response
   freshness, or a new guarantee that clients reject stale target projections.
-- Changes to delete/create/placement routes or other save callers; catalogue
-  loss is not backend workspace deletion.
+- Changes to delete/placement routes, other creation or save callers, or
+  creation persistence; catalogue loss is not backend workspace deletion.
 - Suspension/recovery behavior owned by the executor system.
 
 ## References
@@ -150,3 +229,4 @@ and event contracts remain active and unchanged.
 - [Settings manual save](../../ui/requirements/settings-manual-save.md).
 - [Backend implementation plan](../../../plans/preserve-workspace-settings-updates/plan.md).
 - [Catalogue preservation plan](../../../plans/workspace-save-catalogue-preservation/plan.md).
+- [Creation catalogue preservation plan](../../../plans/workspace-create-catalogue-preservation/plan.md).

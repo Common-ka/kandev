@@ -1,6 +1,7 @@
 /* eslint-disable max-lines -- session WebSocket handlers share one event registry. */
 import type { StoreApi } from "zustand";
 import { createDebugLogger } from "@/lib/debug/log";
+import { parseStrictRfc3339Timestamp } from "@/lib/utils/strict-timestamp";
 import type { AppState } from "@/lib/state/store";
 import type { QueueMeta } from "@/lib/state/slices/session/types";
 import type { WsHandlers } from "@/lib/ws/handlers/types";
@@ -24,6 +25,7 @@ import { t } from "@/lib/i18n";
 import { maybeMarkQuickChatUnseenIdle } from "@/lib/ws/handlers/quick-chat-unseen";
 import { readLastAgentError } from "@/lib/session-last-agent-error";
 import { sessionStateConfirmsAgentctlExecutionReady } from "@/lib/session-state";
+import { isSessionRestartPending } from "@/lib/session/session-restart-state";
 import {
   sanitizeWorkspaceRestorationDetails,
   type WorkspaceRestorationAttempt,
@@ -226,9 +228,9 @@ export function isStaleSessionStateEvent(
   payloadUpdatedAt: string | undefined,
 ): boolean {
   if (!payloadUpdatedAt || !existing?.updated_at) return false;
-  const payloadTime = Date.parse(payloadUpdatedAt);
-  const existingTime = Date.parse(existing.updated_at);
-  if (Number.isNaN(payloadTime) || Number.isNaN(existingTime)) return false;
+  const payloadTime = parseStrictRfc3339Timestamp(payloadUpdatedAt);
+  const existingTime = parseStrictRfc3339Timestamp(existing.updated_at);
+  if (payloadTime === null || existingTime === null) return false;
   // Strict less-than: equal timestamps are treated as not-stale so identical
   // events upsert idempotently rather than being silently dropped.
   return payloadTime < existingTime;
@@ -242,6 +244,7 @@ export function isStaleSessionStateEvent(
 // composer can switch affordance without a refetch; cancellation_* carry the
 // backend-owned cancellation projection.
 const CARRIED_WHEN_DEFINED = [
+  "session_recovery_blocks",
   "review_status",
   "error_message",
   "is_passthrough",
@@ -360,6 +363,21 @@ function inheritAgentctlStatus(state: AppState, fromSessionId: string, toSession
   }
 }
 
+/** Retains the active restart target or a protected user pin during automatic adoption. */
+function shouldPreserveSessionSelection(
+  store: StoreApi<AppState>,
+  taskId: string,
+  incoming: { sessionId: string; newState: TaskSessionState | undefined },
+) {
+  const state = store.getState();
+  return (
+    (state.tasks.activeTaskId === taskId &&
+      isSessionRestartPending(store, state.tasks.activeSessionId)) ||
+    (state.tasks.pinnedSessionId !== incoming.sessionId &&
+      shouldPreservePinnedSessionForTask(state, taskId, incoming))
+  );
+}
+
 /**
  * After a `session.state_changed` event, decide whether the chat UI should
  * follow a workflow-driven session switch. Covers both event orderings:
@@ -378,12 +396,7 @@ function maybeAdoptSessionOnTransition(
   previousState: TaskSessionState | undefined,
 ): void {
   const state = store.getState();
-  if (
-    state.tasks.pinnedSessionId !== sessionId &&
-    shouldPreservePinnedSessionForTask(state, taskId, { sessionId, newState })
-  ) {
-    return;
-  }
+  if (shouldPreserveSessionSelection(store, taskId, { sessionId, newState })) return;
 
   if (!wasKnownToStore && shouldAdoptNewSession(state, taskId, newState)) {
     const oldSessionId = state.tasks.activeSessionId;

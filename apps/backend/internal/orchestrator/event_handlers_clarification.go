@@ -9,6 +9,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 
 	"github.com/kandev/kandev/internal/agent/runtime/lifecycle"
@@ -103,7 +104,7 @@ func (s *Service) handleClarificationStaleDismissed(ctx context.Context, event *
 	}
 
 	s.captureGitStatusSnapshot(writeCtx, data.SessionID)
-	s.finalizeAutomationRun(writeCtx, data.TaskID, true, "")
+	s.markAutomationRunTerminalForTurn(writeCtx, data.TaskID, data.SessionID, data.ClarificationTurnID, true, "")
 	transitioned := s.processOnTurnCompleteViaEngine(writeCtx, data.TaskID, session)
 	if !transitioned {
 		s.writeTaskReviewState(writeCtx, data.TaskID, data.SessionID)
@@ -227,6 +228,9 @@ func (s *Service) resumeDetachedClarificationWithPrompt(
 	}
 	if err := s.authorizeTaskSessionPair(ctx, data.TaskID, data.SessionID); err != nil {
 		return err
+	}
+	if options.deliverySubmissionID == "" {
+		options.deliverySubmissionID = "clarification:" + uuid.NewString()
 	}
 	prompt := buildClarificationPrompt(data)
 
@@ -406,7 +410,10 @@ func (s *Service) resumeClarificationViaFallback(ctx context.Context, data clari
 		nil,
 		false,
 		launchOriginAutomatic,
-		promptTaskOptions{expectedCurrentTurnID: data.ClarificationTurnID},
+		promptTaskOptions{
+			expectedCurrentTurnID: data.ClarificationTurnID,
+			deliverySubmissionID:  "clarification:" + uuid.NewString(),
+		},
 	); err != nil {
 		if !s.retryClarificationAfterCancel(ctx, data, prompt, err) {
 			s.logger.Error("failed to resume agent via clarification watchdog fallback",
@@ -988,19 +995,6 @@ func (s *Service) cancelAgentSilentExpectedWithGuard(
 	return waitErr
 }
 
-func (s *Service) cancelAgentSilentWithGuardAction(
-	ctx context.Context,
-	taskID string,
-	sessionID string,
-	unlockGuard func(),
-	relockGuard func(context.Context) error,
-	action func(context.Context) (bool, error),
-) (bool, error) {
-	return s.cancelAgentSilentWithGuardActionKind(
-		ctx, taskID, sessionID, unlockGuard, relockGuard, action, cancellationKindSilent,
-	)
-}
-
 func (s *Service) cancelAgentSilentWithGuardActionKind(
 	ctx context.Context,
 	taskID string,
@@ -1077,23 +1071,6 @@ func (s *Service) cancelAgentSilentWithGuardActionKindExclusiveConflict(
 		}
 	}
 	return operation, dispatched, waitErr
-}
-
-func (s *Service) logSilentCancelReconciled(taskID, sessionID string, err error) {
-	if errors.Is(err, lifecycle.ErrCancelEscalated) {
-		s.logger.Warn("agent did not acknowledge silent clarification cancel; reconciling session state",
-			zap.String("task_id", taskID),
-			zap.String("session_id", sessionID),
-			zap.Error(err))
-		return
-	}
-	// Agent crashed or exited mid-turn — clarification recovery cannot signal a cancel,
-	// but we still reconcile state below so a fresh prompt can run. Error level so this
-	// surfaces for root-cause investigation of the crash.
-	s.logger.Error("agent process appears to have crashed during clarification recovery",
-		zap.String("task_id", taskID),
-		zap.String("session_id", sessionID),
-		zap.Error(err))
 }
 
 func (s *Service) cancelClarificationWatchdogsForSession(

@@ -319,6 +319,10 @@ var _ interface {
 	RegisterInitialPromptDispatchCallbacks(executionID string, onDispatched, onFailure func()) error
 } = (*lifecycleAdapter)(nil)
 var _ runtimeapi.DurableDeliveryCapabilityReader = (*lifecycleAdapter)(nil)
+var _ interface {
+	InspectDeliveryRecordEvidence(context.Context, runtimeapi.DeliveryRecordEvidenceRequest) (*runtimeapi.DeliveryRecordEvidence, error)
+	ReadDeliveryRecordSubmission(context.Context, runtimeapi.DeliveryRecordSubmissionRequest) (*runtimeapi.DeliveryRecordSubmission, error)
+} = (*lifecycleAdapter)(nil)
 
 // newLifecycleAdapter creates a new lifecycle adapter
 func newLifecycleAdapter(mgr *lifecycle.Manager, reg *registry.Registry, log *logger.Logger) *lifecycleAdapter {
@@ -397,7 +401,9 @@ func (a *lifecycleAdapter) LaunchAgent(ctx context.Context, req *executor.Launch
 		requestedBaseBranch = execution.PrepareResult.RequestedBaseBranch
 		baseBranch = execution.PrepareResult.BaseBranch
 		baseBranchFallbackWarning = execution.PrepareResult.BaseBranchFallbackWarning
-		if worktreePath == "" && execution.PrepareResult.WorktreeID != "" && len(execution.PrepareResult.Worktrees) == 0 {
+		if execution.PrepareResult.WorktreePath != "" {
+			worktreePath = execution.PrepareResult.WorktreePath
+		} else if worktreePath == "" && execution.PrepareResult.WorktreeID != "" && len(execution.PrepareResult.Worktrees) == 0 {
 			worktreePath = execution.PrepareResult.WorkspacePath
 		}
 	}
@@ -407,6 +413,7 @@ func (a *lifecycleAdapter) LaunchAgent(ctx context.Context, req *executor.Launch
 			worktrees = append(worktrees, executor.RepoWorktreeResult{
 				TaskRepositoryID:          w.TaskRepositoryID,
 				RepositoryID:              w.RepositoryID,
+				WorkspaceRelativePath:     w.WorkspaceRelativePath,
 				BranchSlug:                w.BranchSlug,
 				WorktreeID:                w.WorktreeID,
 				WorktreeBranch:            w.WorktreeBranch,
@@ -446,23 +453,32 @@ func buildLifecycleLaunchRequest(
 ) *lifecycle.LaunchRequest {
 	launchReq := &lifecycle.LaunchRequest{
 		TaskID:                        req.TaskID,
+		CausingRunID:                  req.CausingRunID,
 		TaskScope:                     req.TaskScope,
 		SessionSettingsPolicy:         lifecycleSessionSettingsPolicy(req.SessionSettingsPolicy),
 		RequiredNativeConversationID:  req.RequiredNativeConversationID,
+		InterruptedSubmissionID:       req.InterruptedSubmissionID,
+		InterruptedStreamID:           req.InterruptedStreamID,
+		InterruptedHarnessGeneration:  req.InterruptedHarnessGeneration,
+		CandidateExecutionID:          req.CandidateExecutionID,
+		OnExecutionAllocated:          req.OnExecutionAllocated,
 		WorkspaceID:                   req.WorkspaceID,
 		SessionID:                     req.SessionID,
 		TaskEnvironmentID:             req.TaskEnvironmentID,
 		WorkspaceReuseRequired:        req.WorkspaceReuseRequired,
 		AllowBranchReplacement:        req.AllowBranchReplacement,
 		ForceContextContinuation:      req.ForceContextContinuation,
+		ReplaceNativeConversation:     req.ReplaceNativeConversation,
 		RecoveryAction:                req.RecoveryAction,
 		TaskTitle:                     req.TaskTitle,
 		AgentProfileID:                officeProfileID,
 		ExecutionProfileID:            req.AgentProfileID,
 		StartAgent:                    req.StartAgent,
+		SuppressBootStatusMessage:     req.SuppressBootStatusMessage,
 		TurnID:                        req.TurnID,
 		WorkspacePath:                 workspacePath,
 		OriginalWorkspacePath:         req.OriginalWorkspacePath,
+		WorkspaceLayout:               req.WorkspaceLayout,
 		TaskDescription:               req.TaskDescription,
 		Attachments:                   convertToLifecycleAttachments(req.Attachments),
 		Env:                           req.Env,
@@ -485,6 +501,7 @@ func buildLifecycleLaunchRequest(
 		McpProfile:                    req.McpProfile,
 		IsEphemeral:                   req.IsEphemeral,
 		IsPassthrough:                 req.IsPassthrough,
+		ResumePassthrough:             req.ResumePassthrough,
 		SetupScript:                   req.SetupScript,
 		CopyFiles:                     req.CopyFiles,
 		UseWorktree:                   req.UseWorktree,
@@ -514,6 +531,7 @@ func buildLifecycleLaunchRequest(
 		RepoName:                      req.RepoName,
 		BranchSlug:                    req.BranchSlug,
 		BranchIdentitySlug:            req.BranchIdentitySlug,
+		WorkspaceRelativePath:         req.WorkspaceRelativePath,
 	}
 	launchReq.WorkspaceFolders = lifecycleWorkspaceFolders(req.WorkspaceFolders)
 	launchReq.RouteOverride = lifecycleRouteOverride(req.RouteOverride)
@@ -534,7 +552,11 @@ func lifecycleWorkspaceFolders(folders []executor.WorkspaceFolderSpec) []lifecyc
 	}
 	result := make([]lifecycle.WorkspaceFolderSpec, 0, len(folders))
 	for _, f := range folders {
-		result = append(result, lifecycle.WorkspaceFolderSpec{Name: f.Name, LocalPath: f.LocalPath})
+		result = append(result, lifecycle.WorkspaceFolderSpec{
+			Name:                  f.Name,
+			LocalPath:             f.LocalPath,
+			WorkspaceRelativePath: f.WorkspaceRelativePath,
+		})
 	}
 	return result
 }
@@ -591,6 +613,7 @@ func lifecycleRepoLaunchSpecs(repos []executor.RepoSpec) []lifecycle.RepoLaunchS
 			CopyFiles:                  r.CopyFiles,
 			BranchSlug:                 r.BranchSlug,
 			BranchIdentitySlug:         r.BranchIdentitySlug,
+			WorkspaceRelativePath:      r.WorkspaceRelativePath,
 		})
 	}
 	return specs
@@ -843,7 +866,7 @@ func (a *lifecycleAdapter) PromptAgentWithDispatchCallback(ctx context.Context, 
 // ownership check and acceptance callbacks to the lifecycle execution.
 func (a *lifecycleAdapter) RegisterInitialPromptAdmissionCallbacks(
 	executionID string,
-	beforeAdmission func() error,
+	beforeAdmission func(context.Context, string, []v1.MessageAttachment) error,
 	onDispatched, onFailure func(),
 ) error {
 	return a.mgr.RegisterInitialPromptAdmissionCallbacks(
@@ -857,7 +880,7 @@ func (a *lifecycleAdapter) PromptAgentWithAdmissionCallback(
 	prompt string,
 	attachments []v1.MessageAttachment,
 	dispatchOnly bool,
-	beforeAdmission func() error,
+	beforeAdmission func(context.Context, string, []v1.MessageAttachment) error,
 	onDispatched func(),
 ) (*executor.PromptResult, error) {
 	result, err := a.mgr.PromptAgentWithAdmissionCallback(
@@ -874,7 +897,7 @@ func (a *lifecycleAdapter) PromptAgentWithAdmissionCallbackAndSubmissionID(
 	agentInstanceID, prompt string,
 	attachments []v1.MessageAttachment,
 	dispatchOnly bool,
-	beforeAdmission func() error,
+	beforeAdmission func(context.Context, string, []v1.MessageAttachment) error,
 	onDispatched func(),
 	submissionID string,
 ) (*executor.PromptResult, error) {
@@ -915,7 +938,7 @@ var _ interface {
 } = (*lifecycleAdapter)(nil)
 
 var _ interface {
-	RegisterInitialPromptAdmissionCallbacks(string, func() error, func(), func()) error
+	RegisterInitialPromptAdmissionCallbacks(string, func(context.Context, string, []v1.MessageAttachment) error, func(), func()) error
 	RegisterInitialPromptDispatchCallbacks(string, func(), func()) error
 } = (*lifecycleAdapter)(nil)
 
@@ -1018,6 +1041,31 @@ func (a *lifecycleAdapter) RecoverAgentPromptStream(ctx context.Context, session
 	return a.mgr.RecoverAgentPromptStream(ctx, sessionID)
 }
 
+func (a *lifecycleAdapter) RecoverSilentRestoreCandidateStream(ctx context.Context, sessionID, executionID, nativeID string) error {
+	return a.mgr.RecoverSilentRestoreCandidateStream(ctx, sessionID, executionID, nativeID)
+}
+
+func (a *lifecycleAdapter) RecoverAgentPromptStreamWithIdentity(
+	ctx context.Context,
+	identity lifecycle.AgentDeliveryRecoveryIdentity,
+) lifecycle.DeliveryReconciliationResult {
+	return a.mgr.RecoverAgentPromptStreamWithIdentity(ctx, identity)
+}
+
+func (a *lifecycleAdapter) InspectDeliveryRecordEvidence(
+	ctx context.Context,
+	request runtimeapi.DeliveryRecordEvidenceRequest,
+) (*runtimeapi.DeliveryRecordEvidence, error) {
+	return a.mgr.InspectDeliveryRecordEvidence(ctx, request)
+}
+
+func (a *lifecycleAdapter) ReadDeliveryRecordSubmission(
+	ctx context.Context,
+	request runtimeapi.DeliveryRecordSubmissionRequest,
+) (*runtimeapi.DeliveryRecordSubmission, error) {
+	return a.mgr.ReadDeliveryRecordSubmission(ctx, request)
+}
+
 func (a *lifecycleAdapter) BindResumeAttempt(ctx context.Context, sessionID, attemptID string) error {
 	return a.mgr.BindResumeAttempt(ctx, sessionID, attemptID)
 }
@@ -1076,6 +1124,13 @@ func (a *lifecycleAdapter) CleanupStaleExecutionBySessionIDIfCurrent(
 func (a *lifecycleAdapter) EnsureWorkspaceExecutionForSession(ctx context.Context, taskID, sessionID string) error {
 	_, err := a.mgr.EnsureWorkspaceExecutionForSession(ctx, taskID, sessionID)
 	return err
+}
+
+func (a *lifecycleAdapter) CleanupFailedRestoreIfCurrent(
+	ctx context.Context, sessionID, executionID string, updatedAt time.Time,
+	checkpoint func(context.Context) error,
+) error {
+	return a.mgr.CleanupFailedRestoreIfCurrent(ctx, sessionID, executionID, updatedAt, checkpoint)
 }
 
 func (a *lifecycleAdapter) GetExecutionIDForSession(ctx context.Context, sessionID string) (string, error) {
@@ -1161,6 +1216,12 @@ func (a *lifecycleAdapter) ResolveAgentProfile(ctx context.Context, profileID st
 // and this lookup must never lazily create an execution.
 func (a *lifecycleAdapter) HasLiveExecution(sessionID string) bool {
 	return a.mgr.HasLiveAgentExecution(sessionID)
+}
+
+// HasPendingRemoteRecovery reports whether the exact remote execution owner
+// still has retryable lifecycle recovery pending.
+func (a *lifecycleAdapter) HasPendingRemoteRecovery(sessionID, executionID string) bool {
+	return a.mgr.HasPendingRemoteRecovery(sessionID, executionID)
 }
 
 // GetGitLog retrieves the git log for a session from baseCommit to HEAD.

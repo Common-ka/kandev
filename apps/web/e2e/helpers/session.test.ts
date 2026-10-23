@@ -4,6 +4,7 @@ import type { Page } from "@playwright/test";
 import type { SeedData } from "../fixtures/test-base";
 import type { ApiClient } from "./api-client";
 import { seedIdleSession, waitForAgentMessage } from "./session";
+import { waitForSessionSettledBaseline } from "../tests/chat/quick-chat-helpers";
 
 vi.mock("../pages/session-page", () => ({
   SessionPage: class {
@@ -12,6 +13,8 @@ vi.mock("../pages/session-page", () => ({
     async composerReady() {}
   },
 }));
+
+vi.mock("../fixtures/test-base", async () => ({ expect: (await import("vitest")).expect }));
 
 describe("session causal helpers", () => {
   it("does not seed an idle session until the initial turn is durably complete", async () => {
@@ -27,6 +30,12 @@ describe("session causal helpers", () => {
     const apiClient = {
       createTaskWithAgent: async () => ({ id: "task-1", session_id: "session-1" }),
       listSessionTurns,
+      listSessionMessages: async () => ({
+        messages: [{ author_type: "agent", content: "simple mock response" }],
+      }),
+      listTaskSessions: async () => ({
+        sessions: [{ id: "session-1", state: "WAITING_FOR_INPUT" }],
+      }),
     } as unknown as ApiClient;
     const page = { goto: async () => undefined } as unknown as Page;
     const seedData = {} as SeedData;
@@ -64,5 +73,51 @@ describe("session causal helpers", () => {
     await waitForAgentMessage(apiClient, "session-1", "started", 2_000);
 
     expect(reads).toBe(3);
+  });
+
+  it("waits for the opening turn before accepting an idle Quick Chat baseline", async () => {
+    const api = {
+      listTaskSessions: vi.fn().mockResolvedValue({
+        sessions: [{ id: "quick", state: "WAITING_FOR_INPUT" }],
+      }),
+      listSessionTurns: vi
+        .fn()
+        .mockResolvedValueOnce({ turns: [] })
+        .mockResolvedValueOnce({ turns: [{ id: "opening", completed_at: null }] })
+        .mockResolvedValue({ turns: [{ id: "opening", completed_at: "2026-10-15T00:00:00Z" }] }),
+    };
+    await waitForSessionSettledBaseline(api as unknown as ApiClient, "task", "quick");
+    expect(api.listSessionTurns).toHaveBeenCalledTimes(3);
+    expect(api.listSessionTurns).toHaveBeenLastCalledWith("quick");
+  });
+
+  it("retains the active-session fence when an earlier Quick Chat turn is complete", async () => {
+    const api = {
+      listTaskSessions: vi
+        .fn()
+        .mockResolvedValueOnce({ sessions: [{ id: "quick", state: "RUNNING" }] })
+        .mockResolvedValue({ sessions: [{ id: "quick", state: "WAITING_FOR_INPUT" }] }),
+      listSessionTurns: vi.fn().mockResolvedValue({
+        turns: [{ id: "opening", completed_at: "2026-10-15T00:00:00Z" }],
+      }),
+    };
+    await waitForSessionSettledBaseline(api as unknown as ApiClient, "task", "quick");
+    expect(api.listTaskSessions).toHaveBeenCalledTimes(2);
+    expect(api.listSessionTurns).toHaveBeenLastCalledWith("quick");
+  });
+
+  it("does not accept another session's settled state for the Quick Chat baseline", async () => {
+    const api = {
+      listTaskSessions: vi
+        .fn()
+        .mockResolvedValueOnce({ sessions: [{ id: "other", state: "WAITING_FOR_INPUT" }] })
+        .mockResolvedValue({ sessions: [{ id: "quick", state: "WAITING_FOR_INPUT" }] }),
+      listSessionTurns: vi.fn().mockResolvedValue({
+        turns: [{ id: "opening", completed_at: "2026-10-15T00:00:00Z" }],
+      }),
+    };
+    await waitForSessionSettledBaseline(api as unknown as ApiClient, "task", "quick");
+    expect(api.listTaskSessions).toHaveBeenCalledTimes(2);
+    expect(api.listSessionTurns).toHaveBeenLastCalledWith("quick");
   });
 });

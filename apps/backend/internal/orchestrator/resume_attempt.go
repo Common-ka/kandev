@@ -687,6 +687,9 @@ func (s *Service) beginResumeAttempt(
 		if s.cancelledResumeTeardownForSession(sessionID) != nil {
 			return nil, false, fmt.Errorf("%w: cancelled startup teardown is still in progress", ErrResumeAttemptCancelled)
 		}
+		if err := s.validateWorkflowAutoStartResumeAdmission(ctx, taskID, sessionID); err != nil {
+			return nil, false, err
+		}
 		// The guard marker is only valid for this registration call. Do not
 		// carry it into lifecycle work that can outlive the guard owner.
 		attemptCtx := context.WithValue(ctx, cancelInFlightGuardHeldContextKey{}, false)
@@ -709,6 +712,11 @@ func (s *Service) beginResumeAttempt(
 					return nil, false, fmt.Errorf("wait for cancelled startup teardown before resume: %w", err)
 				}
 				continue
+			}
+			if err := s.validateWorkflowAutoStartResumeAdmission(ctx, taskID, sessionID); err != nil {
+				lock.Unlock()
+				release()
+				return nil, false, err
 			}
 			attempt, owner := s.resumeAttemptStore().begin(ctx, taskID, sessionID)
 			if owner {
@@ -841,6 +849,50 @@ func (s *Service) resumeAttemptAllowsExecution(sessionID, executionID string, or
 	return resumeAttemptTombstoneAllowsExecution(registry, sessionID, executionID, originID)
 }
 
+func (s *Service) activeResumeAttemptOwnsStartup(sessionID, executionID, originID string) bool {
+	id, ok := parseResumeAttemptIdentity(originID)
+	if !ok || sessionID == "" || executionID == "" {
+		return false
+	}
+	registry := s.resumeAttemptStore()
+	registry.mu.Lock()
+	defer registry.mu.Unlock()
+	current := registry.attempts[sessionID]
+	if current == nil || current.id != id || current.ctx.Err() != nil || current.accepted {
+		return false
+	}
+	return activeResumeAttemptAllowsExecutionLocked(registry, current, executionID, originID)
+}
+
+// resumeAttemptOwnsUnacceptedStartupStop identifies a stop from the exact
+// latest resume attempt that never transferred startup ownership to a
+// provider turn. Such a callback can accompany a failed startup, but it must
+// not complete a turn after that failure has already been projected.
+func (s *Service) resumeAttemptOwnsUnacceptedStartupStop(sessionID, executionID, originID string) bool {
+	id, ok := parseResumeAttemptIdentity(originID)
+	if !ok || sessionID == "" || executionID == "" {
+		return false
+	}
+	registry := s.resumeAttemptStore()
+	registry.mu.Lock()
+	defer registry.mu.Unlock()
+	if current := registry.attempts[sessionID]; current != nil {
+		return current.id == id && current.ctx.Err() == nil && !current.accepted &&
+			activeResumeAttemptAllowsExecutionLocked(registry, current, executionID, originID)
+	}
+	tombstone, found := registry.tombstoneLocked(sessionID, id)
+	if !found || tombstone.cancelled || tombstone.accepted ||
+		tombstone.executionID != executionID {
+		return false
+	}
+	for _, later := range registry.tombstones[sessionID] {
+		if later.id > id {
+			return false
+		}
+	}
+	return true
+}
+
 // resumeAttemptOwnsNotice reports whether the attempt is still the session's
 // newest accepted startup owner. A completed attempt remains eligible for a
 // replay after its owner releases the registry entry, but an older event cannot
@@ -945,6 +997,11 @@ func resumeAttemptTombstoneAllowsExecution(
 	if tombstone.cancelled {
 		return false
 	}
+	for _, later := range registry.tombstones[sessionID] {
+		if later.id > id {
+			return false
+		}
+	}
 	return tombstone.executionID == "" || executionID == "" || tombstone.executionID == executionID
 }
 
@@ -994,6 +1051,10 @@ func (s *Service) cancelResumeAttempts() {
 // this safe when a retry has already installed a replacement execution.
 func (s *Service) cleanupCancelledResumeAttempt(attempt *resumeAttempt) {
 	if attempt == nil || s.executor == nil {
+		return
+	}
+	if owned, _ := attempt.ctx.Value(silentRestoreStartupContextKey{}).(bool); owned {
+		// The restore owner must checkpoint termination before inventory cleanup.
 		return
 	}
 	executionID := attempt.execution()

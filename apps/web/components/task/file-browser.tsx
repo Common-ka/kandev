@@ -474,6 +474,13 @@ function FileBrowserTreeContent({
   );
 }
 
+function canShowCreateMenu(
+  workspaceBlocked: boolean,
+  { onCreateFile, onAddSources }: Pick<FileBrowserProps, "onCreateFile" | "onAddSources">,
+) {
+  return !workspaceBlocked && Boolean(onCreateFile || onAddSources);
+}
+
 export function FileBrowser({
   sessionId,
   environmentId,
@@ -533,7 +540,7 @@ export function FileBrowser({
           isOpeningFolder={folderAction.isLoading}
           isFolderDisabled={folderAction.disabled}
           onCollapseAll={treeState.collapseAll}
-          showCreateButton={!workspaceBlocked && Boolean(onCreateFile)}
+          showCreateButton={canShowCreateMenu(workspaceBlocked, { onCreateFile, onAddSources })}
           onUploadFiles={!workspaceBlocked && sessionId ? handleToolbarUpload : undefined}
           onAddSources={workspaceBlocked ? undefined : onAddSources}
           addSourcesButtonRef={addSourcesButtonRef}

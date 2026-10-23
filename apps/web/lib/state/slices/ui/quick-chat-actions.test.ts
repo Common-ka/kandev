@@ -348,6 +348,22 @@ describe("quick terminal tabs", () => {
     });
   });
 
+  it("invalidates older workspace snapshots when terminals start, bind, or close", () => {
+    const store = makeStore();
+    const actions = withTerminalActions(store);
+    const revision = () => store.getState().quickChat.syncRevisionByWorkspace[WORKSPACE_A] ?? 0;
+    let captured = revision();
+    const tabId = actions.createQuickTerminal(WORKSPACE_A);
+    expect(revision()).toBeGreaterThan(captured);
+    captured = revision();
+    actions.updateQuickTerminal(tabId, { sessionId: "pty-1", status: "running" });
+    expect(revision()).toBeGreaterThan(captured);
+    captured = revision();
+    actions.removeQuickTerminal(tabId);
+    expect(revision()).toBeGreaterThan(captured);
+    expect(store.getState().quickChat.syncRevisionByWorkspace[WORKSPACE_B] ?? 0).toBe(0);
+  });
+
   it("updates lifecycle state without changing terminal identity", () => {
     const store = makeStore();
     const actions = withTerminalActions(store);
@@ -414,6 +430,23 @@ describe("quick terminal tabs", () => {
 
     expect(store.getState().quickChat.activeSessionId).toBe(SESSION_B);
     expect(terminalState(store).activeKind).toBe("conversation");
+  });
+});
+
+describe("quick terminal sync revisions", () => {
+  it("invalidates in-flight terminal resyncs after local lifecycle changes", () => {
+    const store = makeStore();
+    const actions = withTerminalActions(store);
+    const revision = store.getState().quickChat.syncRevisionByWorkspace[WORKSPACE_A] ?? 0;
+
+    const tabId = actions.createQuickTerminal(WORKSPACE_A);
+    expect(store.getState().quickChat.syncRevisionByWorkspace[WORKSPACE_A]).toBe(revision + 1);
+
+    actions.updateQuickTerminal(tabId, { status: "running", sessionId: "pty-1" });
+    expect(store.getState().quickChat.syncRevisionByWorkspace[WORKSPACE_A]).toBe(revision + 2);
+
+    actions.removeQuickTerminal(tabId);
+    expect(store.getState().quickChat.syncRevisionByWorkspace[WORKSPACE_A]).toBe(revision + 3);
   });
 });
 

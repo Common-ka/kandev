@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func TestWorkspaceTracker_StopsWhenWorkDirDeleted(t *testing.T) {
+func TestWorkspaceTracker_StopsWhenWorkDirRemoved(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("Windows refuses to unlink a directory while a process holds a handle inside it; the scenario this test exercises cannot occur on Windows")
 	}
@@ -20,20 +20,22 @@ func TestWorkspaceTracker_StopsWhenWorkDirDeleted(t *testing.T) {
 
 	log := newTestLogger(t)
 	wt := NewWorkspaceTracker(repoDir, log)
-	wt.filePollInterval = time.Second
-	wt.gitPollInterval = time.Second
-	// Default mode is slow (30s) — set fast so the test exercises real polling
-	// cadence rather than sitting on a 30s timer. A 1s interval also leaves the
-	// worktree removal outside the next poll while keeping shutdown under the
-	// test's 5s bound.
+	defer wt.Stop()
+	wt.filePollInterval = 100 * time.Millisecond
+	wt.gitPollInterval = 100 * time.Millisecond
+	// Exercise both polling loops at the configured fast cadence.
 	wt.SetPollMode(PollModeFast)
+
 	wt.Start(context.Background())
-	t.Cleanup(wt.Stop)
 	waitForWorkspaceTrackerInitialScans(t, wt)
 
-	// Delete the work directory to simulate worktree removal
-	if err := os.RemoveAll(repoDir); err != nil {
-		t.Fatalf("failed to remove workdir: %v", err)
+	// Remove the watched path atomically; delete its contents after Git stops.
+	removedDir := filepath.Join(t.TempDir(), "removed-worktree")
+	if err := os.Rename(repoDir, removedDir); err != nil {
+		t.Fatalf("failed to remove watched workdir: %v", err)
+	}
+	if _, err := os.Stat(repoDir); !os.IsNotExist(err) {
+		t.Fatalf("watched workdir still exists after removal: %v", err)
 	}
 
 	// Both monitorLoop and pollGitChanges should exit within a few poll cycles
@@ -47,7 +49,7 @@ func TestWorkspaceTracker_StopsWhenWorkDirDeleted(t *testing.T) {
 	case <-done:
 		// Both goroutines exited — success
 	case <-time.After(5 * time.Second):
-		t.Fatal("workspace tracker goroutines did not stop after workdir was deleted")
+		t.Fatal("workspace tracker goroutines did not stop after workdir was removed")
 	}
 }
 

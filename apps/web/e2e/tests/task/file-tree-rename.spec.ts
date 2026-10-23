@@ -1,3 +1,4 @@
+import { visitOtherBrowserTab } from "../../helpers/external-focus";
 import { type Page } from "@playwright/test";
 import path from "node:path";
 import fs from "node:fs";
@@ -7,11 +8,12 @@ import { GitHelper, makeGitEnv, createStandardProfile } from "../../helpers/git-
 import { SessionPage } from "../../pages/session-page";
 import { watchWs } from "../../helpers/causal-waits";
 
+test.use({ channel: "chromium" });
+
 // Inline rename lives in file-context-menu.tsx and file-tree-node-name.tsx.
 // Entry points (today, in product code):
 //   - Right-click -> "Rename" menu item
-//   - The input is focused after rename mode mounts. A blur handoff gate keeps
-//     the context menu's initial focus restoration from committing the rename.
+//   - The input is focused after the context menu restores focus.
 // Commit on Enter, cancel on Escape, commit on blur.
 // We test the user-visible flow only (no direct DOM hacks).
 
@@ -108,6 +110,11 @@ test.describe("File tree inline rename", () => {
     // doing it explicitly is robust against focus-timing edge cases).
     await input.press("ControlOrMeta+A");
     await input.fill("renamed.ts");
+    // @covers AC-UI-EDIT-FOCUS-001.1
+    await visitOtherBrowserTab(testPage, async () => {
+      await expect(input).toHaveValue("renamed.ts");
+      expect(fs.existsSync(path.join(repoDir, "renamed.ts"))).toBe(false);
+    });
     await input.press("Enter");
 
     // Old node disappears from the tree, new node appears.
@@ -169,8 +176,8 @@ test.describe("File tree inline rename", () => {
     git.exec("git checkout main");
     git.createFile("blur-original.ts", "blur");
     git.createFile("blur-other.ts", "other");
-    for (let index = 0; index < 60; index++) {
-      git.createFile(`middle-${String(index).padStart(3, "0")}.ts`, "filler");
+    for (let i = 0; i < 60; i++) {
+      git.createFile(`m-filler-${String(i).padStart(2, "0")}.ts`, "filler");
     }
     git.stageAll();
     git.commit("seed blur file");
@@ -187,22 +194,22 @@ test.describe("File tree inline rename", () => {
 
     const node = await session.fileTree.waitForFileTreeNode("blur-original.ts");
 
+    const otherNode = session.fileTreeNode("blur-other.ts");
+    await expect(otherNode).toBeVisible();
     const input = await startRenameViaContextMenu(testPage, node);
     await input.press("ControlOrMeta+A");
     await input.fill("blur-final.ts");
-    await expect(input).toHaveAttribute("data-blur-commit-ready", "true");
     // Click another file to blur the input. The other node also belongs to
     // the tree, so we don't lose tree-container focus state.
     await expect(input).toBeFocused();
-    const companion = session.fileTreeNode("blur-other.ts");
-    await expect(companion).toBeVisible();
-    await companion.click();
+    await otherNode.click();
 
-    await session.fileTree.waitForFileTreeNode("blur-final.ts");
-    await expect(session.fileTreeNode("blur-original.ts")).toHaveCount(0);
     await expect
       .poll(() => fs.existsSync(path.join(repoDir, "blur-final.ts")), { timeout: 10_000 })
       .toBe(true);
+    expect(fs.existsSync(path.join(repoDir, "blur-original.ts"))).toBe(false);
+    await session.fileTree.waitForFileTreeNode("blur-final.ts");
+    await expect(session.fileTreeNode("blur-original.ts")).toHaveCount(0);
   });
 
   test("rename is a no-op when the name is unchanged", async ({

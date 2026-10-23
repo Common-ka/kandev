@@ -1,6 +1,6 @@
 import type { AppState, KanbanState } from "@/lib/state/store";
 import { primaryTaskRepository } from "@/lib/types/http";
-import type { WorkflowSnapshot, Message, Task } from "@/lib/types/http";
+import type { WorkflowSnapshot, WorkflowStep, Message, Task } from "@/lib/types/http";
 import { pickAssignee, pickPendingAction, workspaceModeFromMetadata } from "@/lib/kanban/map-task";
 import {
   isPRReviewFromMetadata,
@@ -27,7 +27,9 @@ function resolveWorkspaceOrphaned(task: WorkflowSnapshot["tasks"][number]): bool
   return task.workspace_orphaned ?? false;
 }
 
-function snapshotWorkflowStep(step: WorkflowSnapshot["steps"][number]) {
+export function workflowStepToState(
+  step: WorkflowSnapshot["steps"][number] | (WorkflowStep & { order_revision?: number }),
+) {
   return {
     id: step.id,
     title: step.name,
@@ -75,6 +77,7 @@ function parseLabels(value: string | undefined): string[] {
   }
 }
 
+// eslint-disable-next-line max-lines-per-function -- The boot mapper projects one complete task record for hydration.
 export function snapshotToState(snapshot: WorkflowSnapshot): Partial<AppState> {
   // Handle empty snapshot (ephemeral tasks have no workflow)
   if (!snapshot.workflow) {
@@ -113,6 +116,7 @@ export function snapshotToState(snapshot: WorkflowSnapshot): Partial<AppState> {
         // same values so queue classification and ordering stay consistent
         // after a workflow switch or reconnect.
         priority: task.priority,
+        initialWorkspaceLayout: task.initial_workspace_layout,
         origin: task.origin,
         createdAt: task.created_at,
         wipAdmitted: task.wip_admitted,
@@ -124,6 +128,7 @@ export function snapshotToState(snapshot: WorkflowSnapshot): Partial<AppState> {
           repository_id: r.repository_id,
           base_branch: r.base_branch,
           checkout_branch: r.checkout_branch,
+          workspace_relative_path: r.workspace_relative_path,
           branch_policy_id: r.branch_policy_id,
           branch_policy_name: r.branch_policy_name,
           branch_policy_base_branch: r.branch_policy_base_branch,
@@ -165,7 +170,7 @@ export function snapshotToState(snapshot: WorkflowSnapshot): Partial<AppState> {
     kanban: {
       workflowId: snapshot.workflow.id,
       isLoading: false,
-      steps: snapshot.steps.map(snapshotWorkflowStep),
+      steps: snapshot.steps.map(workflowStepToState),
       tasks,
       taskCoverage: snapshot.task_coverage
         ? {

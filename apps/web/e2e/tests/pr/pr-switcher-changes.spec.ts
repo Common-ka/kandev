@@ -204,11 +204,11 @@ test.describe("PR switcher changes panel", () => {
 
     // --- Click Task A to enter session view ---
     const taskACommitsLoaded = gateway.waitForResponse("github.pr_commits.get", {
-      where: (payload) =>
+      requestWhere: (payload) =>
         payload.owner === "testorg" && payload.repo === "testrepo" && payload.number === 101,
     });
     const taskAFilesLoaded = gateway.waitForResponse("github.pr_files.get", {
-      where: (payload) =>
+      requestWhere: (payload) =>
         payload.owner === "testorg" && payload.repo === "testrepo" && payload.number === 101,
     });
     await kanban.taskCardInColumn("Auth Fix Task", doneStep.id).click();
@@ -243,11 +243,11 @@ test.describe("PR switcher changes panel", () => {
 
     // --- Switch to Task B ---
     const taskBCommitsLoaded = gateway.waitForResponse("github.pr_commits.get", {
-      where: (payload) =>
+      requestWhere: (payload) =>
         payload.owner === "testorg" && payload.repo === "testrepo" && payload.number === 202,
     });
     const taskBFilesLoaded = gateway.waitForResponse("github.pr_files.get", {
-      where: (payload) =>
+      requestWhere: (payload) =>
         payload.owner === "testorg" && payload.repo === "testrepo" && payload.number === 202,
     });
     await session.taskInSidebar("Dashboard Task").click();

@@ -558,10 +558,10 @@ function useFileEditorActions({
   };
 }
 
-export function useFileEditors() {
+export function useFileEditors(detailActive = true) {
   const retainedOwner = useContext(FileDraftSessionContext);
   const activeSessionId = useAppStore((state) => state.tasks.activeSessionId);
-  const gitStatus = useSessionGitStatus(activeSessionId);
+  const gitStatus = useSessionGitStatus(activeSessionId, { detailActive });
   const { toast } = useToast();
   const [pendingSaves, setSavingFiles] = useState<Map<string, PendingFileSave>>(new Map());
 

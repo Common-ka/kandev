@@ -22,7 +22,7 @@ const ARIA_LABEL = "aria-label";
 
 const state = {
   ...defaultState,
-  features: { canvases: false },
+  features: { ...defaultState.features, canvases: false, coordinator: true },
   workspaces: {
     activeId: "ws-1" as string | null,
     items: [{ id: "ws-1", name: "Workspace", office_workflow_id: null as string | null }],
@@ -546,3 +546,7 @@ describe("AppNavSections theme toggle", () => {
     expect(mocks.setTheme).toHaveBeenCalledWith("light");
   });
 });
+
+vi.mock("@/components/navigation/mobile-task-search-action", () => ({
+  MobileTaskSearchAction: () => null,
+}));

@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math"
 	"strconv"
 	"time"
 
@@ -64,6 +63,25 @@ const durableDeliveryReplayPageSize = 1000
 // completion boundary; a page of 1000 events is only one page and never means
 // that replay is complete.
 func (sm *StreamManager) ReplayRecoveredDelivery(ctx context.Context, execution *AgentExecution) error {
+	return sm.replayRecoveredDelivery(ctx, execution, false, nil)
+}
+
+// ReplayRecoveredDeliveryWithoutLifecycleCallbacks projects authenticated
+// retained evidence without applying in-memory execution state transitions.
+// It is used when recovery has a proven durable owner but no live execution.
+func (sm *StreamManager) ReplayRecoveredDeliveryWithoutLifecycleCallbacks(
+	ctx context.Context,
+	execution *AgentExecution,
+) error {
+	return sm.replayRecoveredDelivery(ctx, execution, true, nil)
+}
+
+func (sm *StreamManager) replayRecoveredDelivery(
+	ctx context.Context,
+	execution *AgentExecution,
+	suppressLifecycleCallbacks bool,
+	ownerCurrent func() error,
+) error {
 	if execution == nil || execution.DeliveryMode != DurableDeliveryV1 {
 		return nil
 	}
@@ -89,11 +107,15 @@ func (sm *StreamManager) ReplayRecoveredDelivery(ctx context.Context, execution 
 		return errors.New("durable recovery agentctl client is unavailable")
 	}
 	defer releaseClient()
+	if after > 0 && !suppressLifecycleCallbacks {
+		sm.scheduleDurableDeliveryAck(execution, client, agentctl.AgentEvent{DeliveryStreamID: streamID, DeliverySequence: after})
+	}
 
 	startupGeneration := execution.startupAttemptSnapshot()
 	for after < target {
 		next, err := sm.replayRecoveredDeliveryPage(
 			ctx, execution, client, delivery, streamID, after, target, startupGeneration,
+			suppressLifecycleCallbacks, ownerCurrent,
 		)
 		if err != nil {
 			return err
@@ -111,6 +133,8 @@ func (sm *StreamManager) replayRecoveredDeliveryPage(
 	delivery AgentDeliveryRepository,
 	streamID string,
 	after, target, startupGeneration uint64,
+	suppressLifecycleCallbacks bool,
+	ownerCurrent func() error,
 ) (uint64, error) {
 	remaining := target - after
 	limit := durableDeliveryReplayPageSize
@@ -120,6 +144,11 @@ func (sm *StreamManager) replayRecoveredDeliveryPage(
 	page, stream, err := client.ReplayDelivery(ctx, streamID, after, limit)
 	if err != nil {
 		return after, fmt.Errorf("replay durable delivery after sequence %d: %w", after, err)
+	}
+	if ownerCurrent != nil {
+		if err := ownerCurrent(); err != nil {
+			return after, err
+		}
 	}
 	if err := validateRecoveredReplayStream(stream, execution, streamID, target); err != nil {
 		return after, err
@@ -135,7 +164,14 @@ func (sm *StreamManager) replayRecoveredDeliveryPage(
 		if committed.Sequence != after+1 {
 			return after, fmt.Errorf("durable replay expected sequence %d, received %d", after+1, committed.Sequence)
 		}
-		if err := sm.processRecoveredDeliveryEvent(ctx, execution, client, delivery, committed, startupGeneration); err != nil {
+		if ownerCurrent != nil {
+			if err := ownerCurrent(); err != nil {
+				return after, err
+			}
+		}
+		if err := sm.processRecoveredDeliveryEvent(
+			ctx, execution, client, delivery, committed, startupGeneration, suppressLifecycleCallbacks,
+		); err != nil {
 			return after, err
 		}
 		after = committed.Sequence
@@ -168,6 +204,7 @@ func (sm *StreamManager) processRecoveredDeliveryEvent(
 	delivery AgentDeliveryRepository,
 	committed journal.Event,
 	startupGeneration uint64,
+	suppressLifecycleCallbacks bool,
 ) error {
 	var event agentctl.AgentEvent
 	if err := json.Unmarshal(committed.Payload, &event); err != nil {
@@ -181,7 +218,17 @@ func (sm *StreamManager) processRecoveredDeliveryEvent(
 	event.DeliveryHarnessGeneration = committed.HarnessGeneration
 	event.DeliverySequence = committed.Sequence
 	event.DeliverySubmissionID = committed.SubmissionID
-	if err := sm.processAgentEvent(ctx, execution, client, delivery, event, startupGeneration); err != nil {
+	event.Recovered = true
+	event.RecoveredActivityAt = &committed.CreatedAt
+	prepared, err := sm.prepareAgentEvent(ctx, execution, client, delivery, event)
+	if err != nil {
+		return fmt.Errorf("durable replay event ownership check: %w", err)
+	}
+	if suppressLifecycleCallbacks {
+		prepared.skipCallback = true
+		prepared.skipAcknowledgement = true
+	}
+	if err := sm.processPreparedAgentEvent(ctx, execution, client, delivery, prepared, startupGeneration); err != nil {
 		return fmt.Errorf("process durable replay sequence %d: %w", committed.Sequence, err)
 	}
 	return nil
@@ -270,18 +317,6 @@ func (sm *StreamManager) deliveryReplayCursor(ctx context.Context, repository Ag
 	return uint64(cursor.ProjectedSequence), nil
 }
 
-func (sm *StreamManager) receiveDurableAgentEvent(
-	ctx context.Context,
-	execution *AgentExecution,
-	event agentctl.AgentEvent,
-	repository AgentDeliveryRepository,
-) (bool, error) {
-	if event.DeliverySequence > math.MaxInt64 {
-		return false, fmt.Errorf("delivery sequence %d exceeds backend range", event.DeliverySequence)
-	}
-	return sm.receiveDurableAgentDeliveryEvent(ctx, durableAgentEvent(execution, event), repository)
-}
-
 func (sm *StreamManager) receiveDurableAgentDeliveryEvent(
 	ctx context.Context,
 	deliveryEvent *models.AgentDeliveryEvent,
@@ -308,27 +343,6 @@ func (sm *StreamManager) receiveDurableAgentDeliveryEvent(
 		return false, err
 	}
 	return cursor == nil || cursor.ProjectedSequence < deliveryEvent.Sequence, nil
-}
-
-func (sm *StreamManager) projectDurableAgentEvent(
-	ctx context.Context,
-	execution *AgentExecution,
-	event agentctl.AgentEvent,
-	repository AgentDeliveryRepository,
-) error {
-	return sm.projectDurableAgentEventWithEffect(ctx, execution, event, repository, deliveryEffectForEvent(event))
-}
-
-func (sm *StreamManager) projectDurableAgentEventWithEffect(
-	ctx context.Context,
-	execution *AgentExecution,
-	event agentctl.AgentEvent,
-	repository AgentDeliveryRepository,
-	effect *models.AgentDeliveryEffect,
-) error {
-	return sm.projectDurableAgentDeliveryEventWithEffect(
-		ctx, durableAgentEvent(execution, event), repository, effect,
-	)
 }
 
 func (sm *StreamManager) projectDurableAgentDeliveryEventWithEffect(
@@ -375,47 +389,6 @@ func projectedDeliveryTerminalOutcome(event *models.AgentDeliveryEvent) models.D
 	default:
 		return ""
 	}
-}
-
-func (sm *StreamManager) projectAndAcknowledgeDurableAgentEvent(
-	ctx context.Context,
-	execution *AgentExecution,
-	event agentctl.AgentEvent,
-	repository AgentDeliveryRepository,
-	acknowledger agentDeliveryAcknowledger,
-) error {
-	return sm.projectAndAcknowledgeDurableAgentEventWithEffect(
-		ctx, execution, event, repository, acknowledger, deliveryEffectForEvent(event),
-	)
-}
-
-func (sm *StreamManager) projectAndAcknowledgeDurableAgentEventWithEffect(
-	ctx context.Context,
-	execution *AgentExecution,
-	event agentctl.AgentEvent,
-	repository AgentDeliveryRepository,
-	acknowledger agentDeliveryAcknowledger,
-	effect *models.AgentDeliveryEffect,
-) error {
-	deliveryEvent := durableAgentEvent(execution, event)
-	if err := sm.projectDurableAgentDeliveryEventWithEffect(ctx, deliveryEvent, repository, effect); err != nil {
-		return err
-	}
-	return acknowledgeDurableAgentEvent(ctx, event, acknowledger)
-}
-
-func (sm *StreamManager) projectAndAcknowledgeDurableAgentDeliveryEventWithEffect(
-	ctx context.Context,
-	deliveryEvent *models.AgentDeliveryEvent,
-	event agentctl.AgentEvent,
-	repository AgentDeliveryRepository,
-	acknowledger agentDeliveryAcknowledger,
-	effect *models.AgentDeliveryEffect,
-) error {
-	if err := sm.projectDurableAgentDeliveryEventWithEffect(ctx, deliveryEvent, repository, effect); err != nil {
-		return err
-	}
-	return acknowledgeDurableAgentEvent(ctx, event, acknowledger)
 }
 
 func deliveryEffectForEvent(event agentctl.AgentEvent) *models.AgentDeliveryEffect {
@@ -487,6 +460,7 @@ func deliveryEventIsStale(
 	if event == nil || event.HarnessGeneration == 0 || event.IncarnationID == "" {
 		return false, nil
 	}
+	authenticated := event.TaskID != "" || event.ExecutionID != "" || event.OwnerGeneration != 0 || event.ExpectedStreamID != ""
 	reader, ok := repository.(harnessGenerationReader)
 	if !ok {
 		return false, nil
@@ -495,14 +469,46 @@ func deliveryEventIsStale(
 	if execution != nil && execution.SessionID != "" {
 		sessionID = execution.SessionID
 	}
-	current, err := reader.GetCurrentHarnessSessionGeneration(ctx, sessionID, event.IncarnationID)
+	current, err := deliveryHarnessGeneration(ctx, execution, reader, sessionID, event.IncarnationID)
 	if errors.Is(err, models.ErrTaskSessionNotFound) {
+		if authenticated {
+			return false, ErrDurableAdoptionIdentityMismatch
+		}
 		return false, nil
 	}
 	if err != nil {
 		return false, err
 	}
+	if authenticated && (current == nil || current.Generation != event.HarnessGeneration || execution == nil ||
+		execution.DeliveryMode != DurableDeliveryV1 || execution.DeliveryStreamID != event.ExpectedStreamID ||
+		execution.DeliveryIncarnationID != event.IncarnationID || execution.DeliveryHarnessGeneration != uint64(event.HarnessGeneration)) {
+		return false, ErrDurableAdoptionIdentityMismatch
+	}
 	return current != nil && current.Generation > event.HarnessGeneration, nil
+}
+
+func deliveryHarnessGeneration(
+	ctx context.Context, execution *AgentExecution, reader harnessGenerationReader, sessionID, incarnationID string,
+) (*models.HarnessSessionGeneration, error) {
+	if execution == nil || !execution.deliveryBootstrap.Load() {
+		return awaitSilentRestoreGeneration(ctx, execution, reader, sessionID, incarnationID)
+	}
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+	for {
+		current, err := reader.GetCurrentHarnessSessionGeneration(ctx, sessionID, incarnationID)
+		if !errors.Is(err, models.ErrTaskSessionNotFound) {
+			execution.deliveryBootstrap.Store(false)
+			return current, err
+		}
+		timer := time.NewTimer(25 * time.Millisecond)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return nil, ctx.Err()
+		case <-timer.C:
+		}
+	}
 }
 
 func acknowledgeDurableAgentEvent(ctx context.Context, event agentctl.AgentEvent, acknowledger agentDeliveryAcknowledger) error {
@@ -542,7 +548,7 @@ func durableAgentEvent(execution *AgentExecution, event agentctl.AgentEvent) *mo
 	}
 	payloadEvent := event
 	if payloadEvent.TurnID == "" && execution != nil {
-		payloadEvent.TurnID = execution.promptTurnIDSnapshot()
+		payloadEvent.TurnID = execution.promptTurnIDForEvent(event)
 	}
 	payloadEvent.CanonicalMessageID = canonicalAgentMessageID(execution, event)
 	payloadEvent.CanonicalProjection = false
@@ -557,6 +563,10 @@ func durableAgentEvent(execution *AgentExecution, event agentctl.AgentEvent) *mo
 		SessionID:         sessionID,
 		IncarnationID:     incarnationID,
 		HarnessGeneration: int64(harnessGeneration),
+		TaskID:            durableEventTaskID(execution),
+		ExecutionID:       durableEventExecutionID(execution),
+		OwnerGeneration:   durableEventOwnerGeneration(execution, harnessGeneration),
+		ExpectedStreamID:  durableEventExpectedStreamID(execution),
 		StreamID:          event.DeliveryStreamID,
 		Sequence:          int64(event.DeliverySequence),
 		SubmissionID:      event.DeliverySubmissionID,
@@ -566,8 +576,36 @@ func durableAgentEvent(execution *AgentExecution, event agentctl.AgentEvent) *mo
 	}
 }
 
+func durableEventTaskID(execution *AgentExecution) string {
+	if execution == nil || execution.DeliveryMode != DurableDeliveryV1 {
+		return ""
+	}
+	return execution.TaskID
+}
+
+func durableEventExecutionID(execution *AgentExecution) string {
+	if execution == nil || execution.DeliveryMode != DurableDeliveryV1 {
+		return ""
+	}
+	return execution.ID
+}
+
+func durableEventOwnerGeneration(execution *AgentExecution, harnessGeneration uint64) int64 {
+	if execution == nil || execution.DeliveryMode != DurableDeliveryV1 {
+		return 0
+	}
+	return int64(harnessGeneration)
+}
+
+func durableEventExpectedStreamID(execution *AgentExecution) string {
+	if execution == nil || execution.DeliveryMode != DurableDeliveryV1 {
+		return ""
+	}
+	return execution.DeliveryStreamID
+}
+
 func canonicalAgentDeliveryEvent(event agentctl.AgentEvent) bool {
-	return event.Type == streams.EventTypeMessageChunk || event.Type == streams.EventTypeReasoning
+	return event.Type == streams.EventTypeMessageChunk || event.Type == streams.EventTypeReasoning || event.Type == streams.EventTypeShellOutputUpdate || canonicalShellStartEvent(event)
 }
 
 func canonicalMessageType(event agentctl.AgentEvent) string {
@@ -590,7 +628,7 @@ func canonicalAgentMessageID(execution *AgentExecution, event agentctl.AgentEven
 	}
 	turnID := event.TurnID
 	if turnID == "" && execution != nil {
-		turnID = execution.promptTurnIDSnapshot()
+		turnID = execution.promptTurnIDForEvent(event)
 	}
 	scope := event.ProtocolMessageID
 	if scope == "" {
@@ -599,11 +637,20 @@ func canonicalAgentMessageID(execution *AgentExecution, event agentctl.AgentEven
 	if scope == "" {
 		scope = event.DeliverySubmissionID
 	}
+	if scope == "" && event.PromptGeneration == 0 && execution != nil {
+		// Older peers lack native message IDs. Keep separate dispatch eras as
+		// an opaque message scope without assigning that old turn as owner.
+		if precedingTurn := execution.promptTurnIDSnapshot(); precedingTurn != "" {
+			scope = "native-after:" + precedingTurn
+		}
+	}
 	if scope == "" {
 		scope = "prompt:" + strconv.FormatUint(event.PromptGeneration, 10)
 	}
 	if scope == "prompt:0" {
-		scope = "stream"
+		// With no grouping evidence, keep durable chunks distinct rather than
+		// merging unrelated native replies into one stream-wide transcript row.
+		scope = "sequence:" + strconv.FormatUint(event.DeliverySequence, 10)
 	}
 	digest := sha256.Sum256([]byte(streamID + ":" + event.Type + ":" + scope))
 	return "agent-delivery-" + fmt.Sprintf("%x", digest[:16])

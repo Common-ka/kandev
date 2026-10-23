@@ -566,6 +566,30 @@ describe("ChatMessage sender badge", () => {
   });
 });
 
+describe("ChatMessage blocked delivery badge", () => {
+  it("keeps the saved user instruction visible with its blocked delivery state", () => {
+    const Wrapper = wrapper();
+
+    render(
+      <Wrapper>
+        <ChatMessage
+          comment={userMessage({
+            content: "Inspect the saved work and continue",
+            metadata: { delivery_status: "blocked" },
+          })}
+          label="Message"
+          className=""
+        />
+      </Wrapper>,
+    );
+
+    expect(screen.getByTestId("user-message-delivery-blocked").textContent).toBe(
+      "Delivery is blocked while session recovery is pending.",
+    );
+    expect(screen.getByText("Inspect the saved work and continue", { exact: true })).not.toBeNull();
+  });
+});
+
 describe("ChatMessage raw view", () => {
   it("shows user raw_content with hidden kandev-system blocks when raw view is enabled", () => {
     const raw = `<kandev-system>This message was sent by an agent working in task "Sender" (${SENDER_TASK_ID}).</kandev-system>
@@ -822,7 +846,7 @@ describe("ChatMessage image attachments", () => {
     expect(openSpy).not.toHaveBeenCalled();
     const dialog = screen.getByRole("dialog");
     const preview = screen.getByAltText(FULL_SIZE_ATTACHMENT_1_ALT);
-    expect(dialog.className).toContain("w-fit");
+    expect(dialog.className).toContain("w-[min(96vw,1126px)]");
     expect(dialog.className).toContain("max-w-[calc(100vw-1rem)]");
     expect(preview.className).toContain("w-[min(92vw,1100px)]");
     expect(preview.className).toContain("max-h-[calc(100dvh-5rem)]");

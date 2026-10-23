@@ -113,6 +113,8 @@ vi.mock("@/hooks/domains/session/use-session-actions", () => ({
     setPrimary: () => mocks.setPrimary(sessionId),
     stop: () => mocks.stop(sessionId),
     resume: () => mocks.resume(sessionId),
+    restart: vi.fn(),
+    isRestarting: false,
     remove: async (options?: unknown) => {
       const ok = await mocks.remove(sessionId, options);
       if (ok) onDeleted?.();
@@ -391,6 +393,8 @@ describe("PreviewSessionBody delivery", () => {
       sessionId: "session-1",
       taskId: TASK_ID,
       hideSessionsDropdown: true,
+      isVisible: false,
+      detailActive: true,
     });
     expect(mocks.taskChatPanelProps).not.toHaveProperty("onSend");
   });

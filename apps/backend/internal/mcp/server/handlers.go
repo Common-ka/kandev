@@ -46,12 +46,52 @@ const (
 	reqKey               = "required"
 	typeKey              = "type"
 	stringType           = "string"
+	retryKeyArg          = "retry_key"
 	agentProfileIDArg    = "agent_profile_id"
 )
 
+// transportRequestIDMetaKey is the Kandev-private `_meta` key under which the
+// BeforeCallTool hook records the agent's JSON-RPC request id. mcp-go hands the
+// id to hooks but not to tool handlers, so the hook stamps it onto the request
+// the handler receives.
+const transportRequestIDMetaKey = "kandev.transport_request_id"
+
+// stampTransportRequestID records the JSON-RPC request id on the call request
+// so handlers can build a retry-stable identity. RequestId.String() renders
+// numeric and string ids deterministically regardless of JSON decoding.
+func stampTransportRequestID(request *mcp.CallToolRequest, id any) {
+	if request == nil || id == nil {
+		return
+	}
+	if request.Params.Meta == nil {
+		request.Params.Meta = &mcp.Meta{}
+	}
+	if request.Params.Meta.AdditionalFields == nil {
+		request.Params.Meta.AdditionalFields = map[string]any{}
+	}
+	request.Params.Meta.AdditionalFields[transportRequestIDMetaKey] = mcp.NewRequestId(id).String()
+}
+
+// clarificationRetryKey identifies one agent tool call across exact transport
+// retries: the MCP connection (client session) plus the JSON-RPC request id the
+// agent chose. JSON-RPC ids restart on every new connection, so the connection
+// scope keeps two different calls from aliasing each other. Empty when either
+// component is unavailable, which leaves the backend on its random identity.
+func clarificationRetryKey(ctx context.Context, req mcp.CallToolRequest) string {
+	connectionID := mcpConnectionID(ctx)
+	if connectionID == "" || req.Params.Meta == nil {
+		return ""
+	}
+	requestID, _ := req.Params.Meta.AdditionalFields[transportRequestIDMetaKey].(string)
+	if requestID == "" {
+		return ""
+	}
+	return connectionID + "/" + requestID
+}
+
 func moveTaskEntryOptionsToolOption() mcp.ToolOption {
 	return mcp.WithObject("entry_options",
-		mcp.Description("One-shot overrides applied only when the task enters the target step; they never change durable step configuration and require an actual workflow step change."),
+		mcp.Description("One-shot overrides applied only when the task enters the target step; they never change durable step configuration and require an actual workflow step change. Rejected when the target step does not start an agent on entry."),
 		mcp.Properties(map[string]any{
 			"reset_context": map[string]any{
 				typeKey:        "boolean",
@@ -316,20 +356,6 @@ func (s *Server) updateTaskHandler() server.ToolHandlerFunc {
 	}
 }
 
-func (s *Server) getTaskPRAutomationHandler() server.ToolHandlerFunc {
-	return func(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		var result map[string]interface{}
-		if err := s.backend.RequestPayload(
-			ctx, ws.ActionMCPGetTaskPRAutomation, map[string]interface{}{"task_id": s.taskID}, &result,
-		); err != nil {
-			return mcp.NewToolResultError(err.Error()), nil
-		}
-		removeLifecyclePromptFields(result)
-		data, _ := json.MarshalIndent(result, "", "  ")
-		return mcp.NewToolResultText(string(data)), nil
-	}
-}
-
 func (s *Server) manageTaskChangeRequestHandler() server.ToolHandlerFunc {
 	return func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		operation, err := req.RequireString("operation")
@@ -477,42 +503,6 @@ func validateChangeRequestAutomationTarget(args map[string]interface{}) string {
 	return ""
 }
 
-func (s *Server) updateTaskPRAutomationHandler() server.ToolHandlerFunc {
-	return func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		payload := map[string]interface{}{"task_id": s.taskID}
-		args := req.GetArguments()
-		if hasLifecyclePromptOverrideArgument(args) {
-			return mcp.NewToolResultError("lifecycle prompt overrides are not supported"), nil
-		}
-		for _, key := range []string{
-			"auto_fix_enabled", "auto_merge_enabled",
-			"prompt_on_review_requested", "prompt_on_merged", "prompt_on_closed",
-		} {
-			if value, ok := args[key].(bool); ok {
-				payload[key] = value
-			}
-		}
-		for _, key := range []string{"auto_fix_prompt_override"} {
-			if value, ok := args[key].(string); ok {
-				payload[key] = value
-			}
-		}
-		if len(payload) == 1 {
-			return mcp.NewToolResultError("at least one PR automation option is required"), nil
-		}
-		var result map[string]interface{}
-		if err := s.backend.RequestPayload(ctx, ws.ActionMCPUpdateTaskPRAutomation, payload, &result); err != nil {
-			return mcp.NewToolResultError(err.Error()), nil
-		}
-		data, _ := json.MarshalIndent(result, "", "  ")
-		return mcp.NewToolResultText(string(data)), nil
-	}
-}
-
-func (s *Server) reportTaskPRAutoFixOutcomeHandler() server.ToolHandlerFunc {
-	return s.reportTaskAutoFixOutcomeHandler(ws.ActionMCPReportPRAutoFixOutcome)
-}
-
 func (s *Server) reportTaskChangeRequestAutoFixOutcomeHandler() server.ToolHandlerFunc {
 	return s.reportTaskAutoFixOutcomeHandler(ws.ActionMCPReportTaskChangeRequestAutoFixOutcome)
 }
@@ -568,19 +558,6 @@ func (s *Server) mrAutomationToolError(logMsg string, err error) (*mcp.CallToolR
 	return mcp.NewToolResultError("failed to process MR automation request"), nil
 }
 
-func (s *Server) getTaskMRAutomationHandler() server.ToolHandlerFunc {
-	return func(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		var result map[string]interface{}
-		if err := s.backend.RequestPayload(
-			ctx, ws.ActionMCPGetTaskMRAutomation, map[string]interface{}{"task_id": s.taskID}, &result,
-		); err != nil {
-			return s.mrAutomationToolError("get task MR automation failed", err)
-		}
-		data, _ := json.MarshalIndent(result, "", "  ")
-		return mcp.NewToolResultText(string(data)), nil
-	}
-}
-
 // copyMRIdentityArgs copies the optional repository_id/project_path/mr_iid
 // triple that scopes a patch to one linked MR. repository_id is frequently
 // an empty string on self-managed hosts without a numeric project ID (R6),
@@ -606,42 +583,6 @@ func copyMRIdentityArgs(payload, args map[string]interface{}) error {
 
 func isValidMRIID(value float64) bool {
 	return !math.IsNaN(value) && !math.IsInf(value, 0) && value > 0 && math.Trunc(value) == value
-}
-
-func (s *Server) updateTaskMRAutomationHandler() server.ToolHandlerFunc {
-	return func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		payload := map[string]interface{}{"task_id": s.taskID}
-		args := req.GetArguments()
-		if hasLifecyclePromptOverrideArgument(args) {
-			return mcp.NewToolResultError("lifecycle prompt overrides are not supported"), nil
-		}
-		if err := copyMRIdentityArgs(payload, args); err != nil {
-			return mcp.NewToolResultError(err.Error()), nil
-		}
-		fieldCount := 0
-		for _, key := range []string{
-			"auto_fix_enabled", "auto_merge_enabled",
-			"prompt_on_review_requested", "prompt_on_merged", "prompt_on_closed",
-		} {
-			if value, ok := args[key].(bool); ok {
-				payload[key] = value
-				fieldCount++
-			}
-		}
-		if value, ok := args["auto_fix_prompt_override"].(string); ok {
-			payload["auto_fix_prompt_override"] = value
-			fieldCount++
-		}
-		if fieldCount == 0 {
-			return mcp.NewToolResultError("at least one MR automation option is required"), nil
-		}
-		var result map[string]interface{}
-		if err := s.backend.RequestPayload(ctx, ws.ActionMCPUpdateTaskMRAutomation, payload, &result); err != nil {
-			return s.mrAutomationToolError("update task MR automation failed", err)
-		}
-		data, _ := json.MarshalIndent(result, "", "  ")
-		return mcp.NewToolResultText(string(data)), nil
-	}
 }
 
 func (s *Server) messageTaskHandler() server.ToolHandlerFunc {
@@ -862,6 +803,11 @@ func (s *Server) askUserQuestionHandler() server.ToolHandlerFunc {
 			"session_id": s.sessionID,
 			questionsArg: questions,
 			"context":    questionCtx,
+		}
+		// Carry the connection-scoped transport identity so an exact retry of
+		// an interrupted call reconciles to the bundle it already created.
+		if retryKey := clarificationRetryKey(ctx, req); retryKey != "" {
+			payload[retryKeyArg] = retryKey
 		}
 
 		// Waiting on a human answer routinely outlasts the agent MCP client's

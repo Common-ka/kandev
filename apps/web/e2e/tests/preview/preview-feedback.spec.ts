@@ -1,5 +1,6 @@
 import { expect } from "@playwright/test";
 import { test } from "../../fixtures/test-base";
+import { mockTurnGate } from "../../helpers/mock-turn-gate";
 import { typeWhileBusy, waitForComposerQueueMode } from "../../helpers/type-while-busy";
 import { routeMainWebSocketWithPreviewFeedbackCreateFailure } from "../../helpers/ws-drop";
 import {
@@ -21,8 +22,10 @@ test.describe("Web preview feedback", () => {
     testPage,
     apiClient,
     seedData,
+    backend,
   }) => {
     const server = await startPreviewServer();
+    const busyTurn = mockTurnGate(backend.tmpDir, "Preview blocking turn completed");
     const createFailure = await routeMainWebSocketWithPreviewFeedbackCreateFailure(testPage);
     try {
       const { session, frame } = await openBrowserPreview(
@@ -190,7 +193,10 @@ test.describe("Web preview feedback", () => {
       await testPage.keyboard.press("Escape");
       await session.waitForChatIdle({ timeout: 45_000 });
 
-      await session.sendMessage("/slow 5s");
+      await session.sendMessage(busyTurn.prompt);
+      await expect(
+        session.activeChat().getByText("Queue blocking turn started", { exact: true }),
+      ).toBeVisible();
       await waitForComposerQueueMode(testPage);
       await session.addBrowserPanel();
       await session.clickTab("Browser");
@@ -207,6 +213,7 @@ test.describe("Web preview feedback", () => {
       await typeWhileBusy(testPage, editor, "Apply the queued preview feedback");
       await session.submitButton().click();
       await expect(testPage.getByTestId("queue-chip")).toBeVisible({ timeout: 15_000 });
+      await busyTurn.release();
 
       const queuedMessage = session
         .activeChat()
@@ -219,6 +226,7 @@ test.describe("Web preview feedback", () => {
       await session.waitForChatIdle({ timeout: 45_000 });
       await expect(session.activeChat()).not.toContainText("1 preview feedback item");
     } finally {
+      await busyTurn.release();
       await apiClient.updateRepository(seedData.repositoryId, { dev_script: "" });
       await server.close();
     }

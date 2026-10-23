@@ -31,6 +31,7 @@ import type {
   InstallJob,
 } from "@/lib/api";
 import type { Agent, AgentDiscovery, RuntimeUpdate } from "@/lib/types/http";
+import { AgentRuntimeSummary } from "./agent-runtime-summary";
 
 type Props = {
   agent: AgentDiscovery;
@@ -74,6 +75,8 @@ function InstalledAgentIdentity({
   authRequired,
   loginAvailable,
   onAuthClick,
+  runtime,
+  status,
 }: {
   agent: AgentDiscovery;
   displayName: string;
@@ -82,6 +85,8 @@ function InstalledAgentIdentity({
   authRequired: boolean;
   loginAvailable: boolean;
   onAuthClick: () => void;
+  runtime?: RuntimeUpdate;
+  status?: AgentUpdateStatus;
 }) {
   const { t } = useTranslation();
   return (
@@ -131,12 +136,12 @@ function InstalledAgentIdentity({
           )}
         </div>
       </div>
-      <p
-        className="text-xs text-muted-foreground line-clamp-2"
-        title={agent.matched_path ?? undefined}
-      >
-        {agent.matched_path ? t("agents:detectedAt", { path: agent.matched_path }) : ""}
-      </p>
+      <AgentRuntimeSummary
+        agent={agent}
+        displayName={displayName}
+        runtime={runtime}
+        status={status}
+      />
     </div>
   );
 }
@@ -319,10 +324,10 @@ export function InstalledAgentCard(props: Props) {
     >
       {/* Header section: identity + agent-level actions. */}
       <div
-        className="flex min-w-0 flex-wrap items-start justify-between gap-3 px-3 py-2.5"
+        className="flex min-w-0 flex-col items-start justify-between gap-3 px-3 py-2.5 md:flex-row md:flex-wrap"
         data-testid={`agent-card-header-${agent.name}`}
       >
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 w-full md:w-auto md:flex-1">
           <InstalledAgentIdentity
             agent={agent}
             displayName={displayName}
@@ -331,9 +336,11 @@ export function InstalledAgentCard(props: Props) {
             authRequired={authRequired}
             loginAvailable={loginAvailable}
             onAuthClick={handleAuthClick}
+            runtime={props.runtimeUpdate}
+            status={props.runtimeUpdateStatus}
           />
         </div>
-        <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
+        <div className="flex min-w-0 w-full flex-wrap items-center justify-end gap-2 md:w-auto">
           {isCollapsed && <CollapsedCountLabel agentName={agent.name} count={profileCount} />}
           <RuntimeVersionControl {...props} />
           <AgentCollapseControl

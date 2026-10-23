@@ -42,7 +42,7 @@ async function seedExpansionTask(
     session.chat.getByText("diff-expansion-setup complete", { exact: false }),
   ).toBeVisible({ timeout: 45_000 });
   await waitForSessionDone(apiClient, task.id, task.session_id, "Diff setup did not settle");
-  await session.waitForChatIdle();
+  await session.waitForChatIdle({ timeout: 30_000 });
 
   return session;
 }
@@ -285,11 +285,8 @@ test.describe("Diff expansion — Pierre Diffs provider", () => {
     await waitForDiffText(testPage, "HUNK_TOP");
     await waitForDiffText(testPage, "HUNK_BOTTOM", 5_000);
 
-    // Shiki renders each token as a <span style="color: #RRGGBB"> inside the
-    // diff's shadow DOM. If the worker pool is broken or the @pierre/diffs ↔
-    // Shiki contract changes, lines still render as plain text without inline
-    // color styles. Highlighting is async (worker pool), so poll instead of
-    // reading once.
+    // Pierre applies dual-theme token colors through shadow-root CSS variables,
+    // so check computed colors instead of relying on inline token styles.
     await expect
       .poll(
         () =>
@@ -298,8 +295,11 @@ test.describe("Diff expansion — Pierre Diffs provider", () => {
             const shadow = container?.shadowRoot;
             if (!shadow) return -1;
             let count = 0;
-            for (const span of shadow.querySelectorAll<HTMLElement>("span[style]")) {
-              if (/color\s*:/i.test(span.getAttribute("style") ?? "")) count++;
+            for (const line of shadow.querySelectorAll<HTMLElement>("[data-line]")) {
+              const lineColor = getComputedStyle(line).color;
+              for (const span of line.querySelectorAll<HTMLElement>("span")) {
+                if (getComputedStyle(span).color !== lineColor) count++;
+              }
             }
             return count;
           }),

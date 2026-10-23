@@ -11,6 +11,14 @@ import type {
   TaskWalkthrough,
 } from "@/lib/types/http";
 import type { EntityReference } from "@/lib/types/entity-reference";
+import type { ObservedPrompts } from "@/lib/session-last-prompt";
+import type { TurnChangeSetSummary } from "@/lib/types/turn-changes";
+
+export type ActiveTurnWindowObservation = {
+  activeTurnId: string | null;
+  reconcileEpoch: number;
+  updatedAt?: string;
+};
 
 export type MessagesState = {
   bySession: Record<string, Message[]>;
@@ -29,9 +37,22 @@ export type MessagesState = {
   >;
 };
 
+/** Prompts are fetched independently from the transcript with their own page metadata. */
+export type PromptsState = MessagesState & {
+  /** Incremented when a session is removed to reject stale prompt requests. */
+  generationBySession: Record<string, number>;
+  /** Incremented whenever an authoritative prompt refresh begins. */
+  refreshGenerationBySession: Record<string, number>;
+  /** Only the transcript's own completed projection read establishes authority. */
+  authoritativeBySession: Record<string, true>;
+  observedBySession: Record<string, ObservedPrompts>;
+  deletedIdsBySession: Record<string, Record<string, true>>;
+};
 export type TurnsState = {
   bySession: Record<string, Turn[]>;
   activeBySession: Record<string, string | null>; // sessionId -> active turnId
+  /** Message IDs whose matching turn rows were read with the same message window. */
+  windowCoverageBySession?: Record<string, { messageIds: string[]; activeTurnObserved: boolean }>;
   /**
    * Sessions whose FULL persisted turn history has entered the store (SSR
    * hydration or a complete REST fetch). Distinct from `bySession` presence:
@@ -56,6 +77,12 @@ export type TurnsState = {
    * Turns started after the boundary (genuine resumes) are unaffected.
    */
   settledBoundaryBySession: Record<string, string>;
+};
+
+export type TurnChangesState = {
+  bySession: Record<string, TurnChangeSetSummary[]>;
+  nextOffsetBySession: Record<string, number | null>;
+  loadedBySession: Record<string, boolean>;
 };
 
 export type TaskSessionsState = {
@@ -269,7 +296,9 @@ export type QueueState = {
 
 export type SessionSliceState = {
   messages: MessagesState;
+  messagePrompts: PromptsState;
   turns: TurnsState;
+  turnChanges: TurnChangesState;
   taskSessions: TaskSessionsState;
   taskSessionsByTask: TaskSessionsByTaskState;
   pendingActionProjectionsBySessionId: Record<string, PendingActionOrphanProjection>;
@@ -333,6 +362,23 @@ export type SessionSliceActions = {
   ) => void;
   /** Sets the session's message-loading flag. */
   setMessagesLoading: (sessionId: string, loading: boolean) => void;
+  replacePromptMessages: (
+    sessionId: string,
+    messages: Message[],
+    meta?: { hasMore?: boolean; oldestCursor?: string | null },
+  ) => void;
+  prependPromptMessages: (
+    sessionId: string,
+    messages: Message[],
+    meta?: { hasMore?: boolean; oldestCursor?: string | null },
+  ) => void;
+  installAuthoritativePromptMessages: (
+    sessionId: string,
+    messages: Message[],
+    meta: { hasMore: boolean; oldestCursor: string | null },
+  ) => void;
+  setPromptMessagesLoading: (sessionId: string, loading: boolean) => void;
+  setPromptMessagesLoadingMore: (sessionId: string, loading: boolean) => void;
   /** Upserts a turn row, rejecting stale updates (see shouldApplyTurnUpdate). */
   addTurn: (turn: Turn) => void;
   /** Merges a complete REST snapshot and reconciles its marker atomically. */
@@ -341,6 +387,14 @@ export type SessionSliceActions = {
     turns: Turn[],
     hydrationEpoch: number,
     options?: { replace?: boolean },
+  ) => void;
+  /** Merges a bounded message-window turn snapshot without claiming full history. */
+  mergeTurnsWindow: (
+    sessionId: string,
+    turns: Turn[],
+    coverage: { message_ids: string[]; active_turn_id: string | null },
+    hydrationEpoch: number,
+    observationAtRequestStart?: ActiveTurnWindowObservation,
   ) => void;
   completeTurn: (
     sessionId: string,
@@ -361,6 +415,13 @@ export type SessionSliceActions = {
   reconcileActiveTurnAfterHydration: (sessionId: string, hydrationEpoch: number) => void;
   /** Records that the session's full persisted turn history is in the store. */
   markTurnsLoaded: (sessionId: string) => void;
+  mergeTurnChangePage: (
+    sessionId: string,
+    summaries: TurnChangeSetSummary[],
+    page: { offset: number; nextOffset?: number },
+  ) => void;
+  mergeTurnChangeSummary: (sessionId: string, summary: TurnChangeSetSummary) => void;
+  markTurnChangesLoaded: (sessionId: string, nextOffset: number | undefined) => void;
   /**
    * Source adoption is an authoritative idle boundary for the listed
    * sessions. `boundaryTimestamp` MUST be server-issued (the WS envelope
@@ -411,6 +472,8 @@ export type SessionSliceActions = {
   setActiveModel: (sessionId: string, modelId: string) => void;
   clearActiveModel: (sessionId: string) => void;
   // Task plan actions
+  beginTaskPlanRead: (taskId: string) => symbol;
+  finishTaskPlanRead: (taskId: string, token: symbol, plan?: TaskPlan | null) => boolean;
   setTaskPlan: (taskId: string, plan: TaskPlan | null) => void;
   setTaskPlanLoading: (taskId: string, loading: boolean) => void;
   setTaskPlanSaving: (taskId: string, saving: boolean) => void;

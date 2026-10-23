@@ -311,17 +311,31 @@ export function reconcileQuickTerminalTabs(
 ): QuickChatState {
   const otherWorkspaces = state.terminalTabs.filter((tab) => tab.workspaceId !== workspaceId);
   const serverById = new Map(serverTabs.map((tab) => [tab.tabId, tab]));
-  const pendingLocal = state.terminalTabs.filter(
-    (tab) =>
-      tab.workspaceId === workspaceId &&
-      !serverById.has(tab.tabId) &&
-      tab.status === "connecting" &&
-      !tab.sessionId,
-  );
+  const pendingLocal = state.terminalTabs.filter((tab) => {
+    if (tab.workspaceId !== workspaceId || tab.status !== "connecting" || tab.sessionId) {
+      return false;
+    }
+    const serverTab = serverById.get(tab.tabId);
+    return !serverTab || (serverTab.status === "exited" && !serverTab.sessionId);
+  });
+  const pendingIds = new Set(pendingLocal.map((tab) => tab.tabId));
 
+  // A reconnect read can observe a newly created descriptor before the
+  // local start binds its PTY. Keep that start mounted until its own request
+  // settles; descriptors restored without a local start remain authoritative.
+  const startingById = new Map(
+    state.terminalTabs
+      .filter(
+        (tab) => tab.workspaceId === workspaceId && tab.status === "connecting" && !tab.sessionId,
+      )
+      .map((tab) => [tab.tabId, tab]),
+  );
   const nextTabs = [
     ...otherWorkspaces,
-    ...[...serverTabs].sort((a, b) => a.sequence - b.sequence),
+    ...[...serverTabs]
+      .sort((a, b) => a.sequence - b.sequence)
+      .filter((tab) => !pendingIds.has(tab.tabId))
+      .map((tab) => (!tab.sessionId ? (startingById.get(tab.tabId) ?? tab) : tab)),
     ...pendingLocal,
   ];
   const validIds = new Set(nextTabs.map((tab) => tab.tabId));

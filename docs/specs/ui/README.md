@@ -17,6 +17,16 @@ destination choices, client-side task navigation, editor presentation, and
 reply ownership. Other systems retain task, runtime, and workspace lifecycle
 state; filesystem mutation authority remains with Workspaces.
 
+Files move selection belongs here: the browser constructs independent move
+roots from selected rows before requesting workspace mutations. Workspaces
+retains entry eligibility, containment, and rename authority.
+
+The reusable settings manual-save interaction belongs here. Its
+[requirements](requirements/settings-manual-save.md) and
+[system design](system-design/settings-manual-save.md) define route coordination
+and contributor draft registration; domain components retain payload and
+persistence ownership under ADR 0046.
+
 ## Ownership
 
 It owns navigation, settings, boards, task/review surfaces, walkthroughs, chat

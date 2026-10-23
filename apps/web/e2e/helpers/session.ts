@@ -119,6 +119,24 @@ export async function waitForAgentMessage(
   );
 }
 
+/** Cancellation is persisted before runtime teardown makes the workspace restorable. */
+export async function waitForRestorableSessionWorkspace(
+  apiClient: ApiClient,
+  taskId: string,
+  sessionId: string,
+): Promise<void> {
+  await expect
+    .poll(
+      () => apiClient.wsRequest("task.session.status", { task_id: taskId, session_id: sessionId }),
+      { timeout: 30_000, message: "Waiting for stopped runtime teardown before workspace restore" },
+    )
+    .toMatchObject({
+      is_agent_running: false,
+      needs_workspace_restore: true,
+      auto_resume_allowed: true,
+    });
+}
+
 export async function waitForSessionState(
   apiClient: ApiClient,
   options: {
@@ -216,6 +234,14 @@ export async function seedIdleSession(
   );
   const sessionId = task.session_id;
   if (!sessionId) throw new Error("createTaskWithAgent did not return a session_id");
+  await waitForAgentMessage(apiClient, sessionId, "simple mock response", 30_000);
+  await waitForSessionDone(
+    apiClient,
+    task.id,
+    sessionId,
+    "Waiting for the initial fixture turn to finish",
+    30_000,
+  );
   await pollUntil(
     () => apiClient.listSessionTurns(sessionId),
     ({ turns }) => turns.length > 0 && turns.every((turn) => Boolean(turn.completed_at)),

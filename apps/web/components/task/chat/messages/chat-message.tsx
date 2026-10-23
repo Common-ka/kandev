@@ -28,6 +28,8 @@ import { attachmentContentUrl } from "@/lib/api/domains/attachment-api";
 import { formatBytes } from "@/lib/utils/format-bytes";
 import { renderUserMessageBody } from "./user-message-body";
 import { useMessageTaskOrigin } from "./message-task-origin-context";
+import { WokenByEntry, wakeTurnIdOf } from "./woken-by-entry";
+import { taskMentionReferences } from "@/lib/tasks/task-mention-references";
 
 type ChatMessageProps = {
   comment: Message;
@@ -105,37 +107,54 @@ type UserMessageMetadata = WorkflowMessageMetadata & {
   sender_task_title?: string;
   sender_session_id?: string;
   sender_session_name?: string;
+  delivery_status?: string;
 };
+
+function userMessageAttachments(metadata: UserMessageMetadata | undefined) {
+  const attachments = metadata?.attachments || [];
+  return {
+    imageAttachments: attachments.filter((attachment) => attachment.type === "image"),
+    fileAttachments: attachments.filter((attachment) => attachment.type === "resource"),
+  };
+}
+
+function userMessageSenderTask(metadata: UserMessageMetadata | undefined): SenderTaskInfo | null {
+  if (!metadata?.sender_task_id) return null;
+  return {
+    id: metadata.sender_task_id,
+    snapshotTitle: metadata.sender_task_title || "",
+    sessionId: metadata.sender_session_id,
+    sessionName: metadata.sender_session_name,
+  };
+}
+
+function userMessageMetadataFlags(
+  metadata: UserMessageMetadata | undefined,
+  hasContent: boolean,
+  hasAttachments: boolean,
+) {
+  return {
+    hasPlanMode: !!metadata?.plan_mode,
+    hasReviewComments: !!metadata?.has_review_comments,
+    hasHiddenPrompts: !!metadata?.has_hidden_prompts,
+    hasContent,
+    hasAttachments,
+    deliveryBlocked: metadata?.delivery_status === "blocked",
+  };
+}
 
 function parseUserMessageMetadata(comment: Message) {
   const metadata = comment.metadata as UserMessageMetadata | undefined;
-  const imageAttachments = (metadata?.attachments || []).filter((att) => att.type === "image");
-  const fileAttachments = (metadata?.attachments || []).filter((att) => att.type === "resource");
-  const contextFiles = metadata?.context_files || [];
-  const hasPlanMode = !!metadata?.plan_mode;
-  const hasReviewComments = !!metadata?.has_review_comments;
-  const hasHiddenPrompts = !!metadata?.has_hidden_prompts;
+  const { imageAttachments, fileAttachments } = userMessageAttachments(metadata);
   const hasContent = !!(comment.content && comment.content.trim() !== "");
   const hasAttachments = imageAttachments.length > 0 || fileAttachments.length > 0;
-  const senderTask: SenderTaskInfo | null = metadata?.sender_task_id
-    ? {
-        id: metadata.sender_task_id,
-        snapshotTitle: metadata.sender_task_title || "",
-        sessionId: metadata.sender_session_id,
-        sessionName: metadata.sender_session_name,
-      }
-    : null;
   const workflowMessage = workflowMessageInfoFromMetadata(metadata);
   return {
     imageAttachments,
     fileAttachments,
-    contextFiles,
-    hasPlanMode,
-    hasReviewComments,
-    hasHiddenPrompts,
-    hasContent,
-    hasAttachments,
-    senderTask,
+    contextFiles: metadata?.context_files || [],
+    ...userMessageMetadataFlags(metadata, hasContent, hasAttachments),
+    senderTask: userMessageSenderTask(metadata),
     workflowMessage,
   };
 }
@@ -147,6 +166,7 @@ function UserContextBadges({
   contextFiles,
   senderTask,
   workflowMessage,
+  deliveryBlocked,
 }: {
   destinationTaskId: string;
   hasPlanMode: boolean;
@@ -154,6 +174,7 @@ function UserContextBadges({
   contextFiles: Array<{ path: string; name: string; is_directory?: boolean }>;
   senderTask: SenderTaskInfo | null;
   workflowMessage: WorkflowStepMessageInfo | null;
+  deliveryBlocked: boolean;
 }) {
   const { t } = useTranslation();
   if (
@@ -161,12 +182,22 @@ function UserContextBadges({
     !hasReviewComments &&
     contextFiles.length === 0 &&
     !senderTask &&
-    !workflowMessage
+    !workflowMessage &&
+    !deliveryBlocked
   )
     return null;
   return (
     <div className="flex justify-end gap-1.5 mb-1 flex-wrap">
       {workflowMessage && <WorkflowStepMessageBadge workflow={workflowMessage} />}
+      {deliveryBlocked && (
+        <span
+          role="status"
+          data-testid="user-message-delivery-blocked"
+          className="inline-flex items-center rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] text-amber-700 dark:text-amber-300"
+        >
+          {t("task:deliveryMessageBlocked")}
+        </span>
+      )}
       {senderTask && <SenderTaskBadge sender={senderTask} destinationTaskId={destinationTaskId} />}
       {hasPlanMode && (
         <span className="inline-flex items-center gap-1 rounded-full bg-slate-500/20 px-2 py-0.5 text-[10px] text-slate-400">
@@ -264,6 +295,20 @@ function UserMessageAttachments({
   );
 }
 
+function useUserMentionComponents(comment: Message) {
+  const promptNames = usePromptMentionNames();
+  const entityReferences = useMemo(
+    () => entityReferencesFromMetadata(comment.metadata),
+    [comment.metadata],
+  );
+  const taskMentions = useMemo(
+    () => taskMentionReferences(comment.raw_content || comment.content),
+    [comment.raw_content, comment.content],
+  );
+  const components = usePromptMentionMarkdownComponents(promptNames, entityReferences);
+  return { components, taskMentions };
+}
+
 function UserMessageContent({
   comment,
   showRaw,
@@ -275,13 +320,8 @@ function UserMessageContent({
 }: UserMessageProps) {
   const userNavigation = useUserMessageNavigation(sessionId ?? null, comment.id);
   const taskOrigin = useMessageTaskOrigin();
-  const promptNames = usePromptMentionNames();
+  const { components: promptMentionComponents, taskMentions } = useUserMentionComponents(comment);
   const { isFavorite, toggleFavorite } = useMessageFavorite(comment.session_id, comment.id);
-  const entityReferences = useMemo(
-    () => entityReferencesFromMetadata(comment.metadata),
-    [comment.metadata],
-  );
-  const promptMentionComponents = usePromptMentionMarkdownComponents(promptNames, entityReferences);
   const {
     imageAttachments,
     fileAttachments,
@@ -293,6 +333,7 @@ function UserMessageContent({
     hasAttachments,
     senderTask,
     workflowMessage,
+    deliveryBlocked,
   } = parseUserMessageMetadata(comment);
 
   return (
@@ -305,6 +346,7 @@ function UserMessageContent({
           contextFiles={contextFiles}
           senderTask={senderTask}
           workflowMessage={workflowMessage}
+          deliveryBlocked={deliveryBlocked}
         />
         <div
           data-testid="user-message-bubble"
@@ -327,6 +369,7 @@ function UserMessageContent({
             content: comment.content,
             rawContent: comment.raw_content,
             promptMentionComponents,
+            taskMentions,
             taskId: comment.task_id,
             worktreePath,
             onOpenFile,
@@ -399,8 +442,8 @@ export const ChatMessage = memo(function ChatMessage({
     );
   }
 
-  if (comment.author_type === "user") {
-    return (
+  const ordinary =
+    comment.author_type === "user" ? (
       <UserMessageContent
         comment={comment}
         showRaw={showRaw}
@@ -410,19 +453,19 @@ export const ChatMessage = memo(function ChatMessage({
         onOpenFile={onOpenFile}
         onScrollToMessage={onScrollToMessage}
       />
+    ) : (
+      <AgentMessageContent
+        comment={comment}
+        showRaw={showRaw}
+        onToggleRaw={toggleRaw}
+        showRichBlocks={showRichBlocks}
+        sessionId={sessionId}
+        isTurnActive={isTurnActive}
+        worktreePath={worktreePath}
+        onOpenFile={onOpenFile}
+      />
     );
-  }
-
-  return (
-    <AgentMessageContent
-      comment={comment}
-      showRaw={showRaw}
-      onToggleRaw={toggleRaw}
-      showRichBlocks={showRichBlocks}
-      sessionId={sessionId}
-      isTurnActive={isTurnActive}
-      worktreePath={worktreePath}
-      onOpenFile={onOpenFile}
-    />
-  );
+  const wakeTurnId = wakeTurnIdOf(comment.metadata);
+  if (wakeTurnId) return <WokenByEntry comment={comment} turnId={wakeTurnId} fallback={ordinary} />;
+  return ordinary;
 });

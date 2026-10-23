@@ -8,10 +8,7 @@ import {
 } from "@/lib/ws/client";
 import { getWebSocketClient } from "@/lib/ws/connection";
 import { launchSession } from "@/lib/services/session-launch-service";
-import {
-  buildResumeRequest,
-  buildRestoreWorkspaceRequest,
-} from "@/lib/services/session-launch-helpers";
+import { buildRestoreWorkspaceRequest } from "@/lib/services/session-launch-helpers";
 import { useSessionRecoveryFeedback } from "./use-session-recovery-feedback";
 import {
   clearArchiveRecovery,
@@ -40,6 +37,7 @@ import {
   recoveryInspectionBusyDetails,
   recoveryInspectionBusyMessage,
   resolveRequestErrorMessage,
+  resumeSession as requestSessionResume,
 } from "@/lib/services/session-recovery-service";
 import { useAppStore, useAppStoreApi } from "@/components/state-provider";
 import {
@@ -335,6 +333,25 @@ function sendSessionFocus(
   }
 }
 
+function prioritizeVisibleRestart(
+  requested: { current: string | null },
+  key: string,
+  session: SessionLike,
+  taskId: string,
+  sessionId: string,
+): void {
+  if (
+    requested.current === key ||
+    document.visibilityState !== "visible" ||
+    !session?.session_recovery_blocks?.some(
+      (block) => block.consumer_reference === "agent_delivery",
+    )
+  )
+    return;
+  requested.current = key;
+  sendSessionFocus(getWebSocketClient(), taskId, sessionId);
+}
+
 type ResumeActionParams = {
   status: SessionStatus;
   taskId: string;
@@ -581,6 +598,7 @@ function useSessionResetAndCheck({
   const requestGenerationRef = useRef(0);
   const startupRecoveryInFlightRef = useRef(new Map<string, Promise<void>>());
   const focusRequestInFlightRef = useRef(false);
+  const restartPriorityRequestRef = useRef<string | null>(null);
   const lastFocusRequestAtRef = useRef(0);
   const [committedRequest, setCommittedRequest] = useState<SessionRequestIdentity>({
     key: requestKey,
@@ -597,7 +615,7 @@ function useSessionResetAndCheck({
       generation: requestGenerationRef.current,
     };
     setCommittedRequest(activeRequestRef.current);
-  }, [requestKey, preventAutoResume]);
+  }, [requestKey, preventAutoResume, skipAutomaticRecovery]);
 
   // Reset all local state when session or task changes to prevent stale data
   // from a previous session leaking into the new one (e.g. topbar branch).
@@ -621,12 +639,19 @@ function useSessionResetAndCheck({
       !sessionId ||
       connectionStatus !== "connected" ||
       taskArchiveState !== false ||
-      preventAutoResume ||
-      hasAttemptedResume.current
+      preventAutoResume
     )
       return;
-    hasAttemptedResume.current = true;
     const capturedRequest = activeRequestRef.current;
+    prioritizeVisibleRestart(
+      restartPriorityRequestRef,
+      JSON.stringify([capturedRequest.key, capturedRequest.generation]),
+      session,
+      taskId,
+      sessionId,
+    );
+    if (hasAttemptedResume.current) return;
+    hasAttemptedResume.current = true;
     const guardedSetters = buildGuardedSetters(activeRequestRef, capturedRequest, setters);
     const canContinue = () => isCurrentRequest(activeRequestRef.current, capturedRequest);
     const recoveryKey = JSON.stringify([capturedRequest.key, capturedRequest.generation]);
@@ -664,6 +689,7 @@ function useSessionResetAndCheck({
 
   useEffect(() => {
     if (
+      skipAutomaticRecovery ||
       !taskId ||
       !sessionId ||
       connectionStatus !== "connected" ||
@@ -689,6 +715,13 @@ function useSessionResetAndCheck({
       focusRequestInFlightRef.current = true;
       try {
         const recoveryKey = JSON.stringify([capturedRequest.key, capturedRequest.generation]);
+        prioritizeVisibleRestart(
+          restartPriorityRequestRef,
+          recoveryKey,
+          session,
+          taskId,
+          sessionId,
+        );
         const startupRecovery = startupRecoveryInFlightRef.current.get(recoveryKey);
         if (startupRecovery) {
           await startupRecovery;
@@ -739,6 +772,7 @@ function useSessionResetAndCheck({
     connectionStatus,
     preventAutoStart,
     preventAutoResume,
+    skipAutomaticRecovery,
     session,
     sessionId,
     setters,
@@ -955,7 +989,11 @@ function useManualResumeSession({
     clearResumptionNoticeUnlessInspectionBusy(guardedSetters, noticeKind);
     guardedSetters.setRecoveryFailure?.(null);
     try {
-      const response = await launchSession(buildResumeRequest(taskId, sessionId).request);
+      const response = await requestSessionResume(
+        taskId,
+        sessionId,
+        t("task:failedToResumeSession"),
+      );
       if (!canContinue()) {
         startingProjection?.rollback();
         return false;

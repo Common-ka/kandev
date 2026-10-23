@@ -5,6 +5,8 @@ import { useAppStore, useAppStoreApi } from "@/components/state-provider";
 import { isCurrentWorkspaceContext } from "@/lib/state/workspace-context";
 import type { KanbanState } from "@/lib/state/slices/kanban/types";
 import { reconcileTaskOverviewRead } from "@/lib/state/slices/task-overview-merge";
+import { getWorkflowSnapshotReads } from "@/lib/state/workflow-snapshot-reads";
+import { raceSharedRead } from "@/lib/state/shared-resource-reads";
 
 type KanbanTask = KanbanState["tasks"][number];
 
@@ -94,7 +96,8 @@ function reconcileFetchedOverview(
 ): boolean {
   if (!readId || !nextState.kanban) return true;
   const state = store.getState();
-  const tasks = reconcileTaskOverviewRead(state.taskOverview, nextState.kanban.tasks, readId, true);
+  const incoming = nextState.kanban.tasks;
+  const tasks = reconcileTaskOverviewRead(state.taskOverview, incoming, readId, true);
   if (!tasks) return false;
   const workflowId = snapshot.workflow.id;
   nextState.kanban.tasks = tasks.filter(
@@ -116,16 +119,20 @@ function reconcileFetchedOverview(
       },
     },
   };
-  state.finishTaskOverviewRead(readId);
+  state.finishTaskOverviewRead(readId, incoming);
   return true;
 }
 
 export function useWorkflowSnapshot(workflowId: string | null) {
   const store = useAppStoreApi();
+  const sharedReads = getWorkflowSnapshotReads(store);
   const connectionStatus = useAppStore((state) => state.connection.status);
   const skippedInitialHydratedRef = useRef(false);
+  const previousConnectionStatusRef = useRef(connectionStatus);
 
   useEffect(() => {
+    const forceRefresh = previousConnectionStatusRef.current !== connectionStatus;
+    previousConnectionStatusRef.current = connectionStatus;
     if (!workflowId) return;
     let cancelled = false;
     const requestState = store.getState();
@@ -140,12 +147,21 @@ export function useWorkflowSnapshot(workflowId: string | null) {
       skippedInitialHydratedRef.current = true;
       return;
     }
+    const controller = new AbortController();
+    const release = sharedReads.retain(workflowId);
     const setLoading = store.getState().kanban.workflowId !== workflowId;
     if (setLoading) {
       store.setState((state) => ({ ...state, kanban: { ...state.kanban, isLoading: true } }));
     }
     const overviewRead = store.getState().beginTaskOverviewRead?.();
-    fetchWorkflowSnapshot(workflowId, { cache: "no-store" })
+    raceSharedRead(
+      sharedReads.read(
+        workflowId,
+        (signal) => fetchWorkflowSnapshot(workflowId, { cache: "no-store", init: { signal } }),
+        { refresh: forceRefresh },
+      ),
+      controller.signal,
+    )
       .then((snapshot) => {
         if (
           cancelled ||
@@ -184,6 +200,7 @@ export function useWorkflowSnapshot(workflowId: string | null) {
         console.warn("[useWorkflowSnapshot] failed to load snapshot:", error);
       })
       .finally(() => {
+        release();
         if (overviewRead) store.getState().finishTaskOverviewRead(overviewRead);
         // Only clear the flag this effect raised; skip when cancelled or when a concurrent caller owns it.
         if (
@@ -197,7 +214,8 @@ export function useWorkflowSnapshot(workflowId: string | null) {
       });
     return () => {
       cancelled = true;
+      controller.abort();
       if (overviewRead) store.getState().finishTaskOverviewRead(overviewRead);
     };
-  }, [workflowId, store, connectionStatus]);
+  }, [workflowId, store, sharedReads, connectionStatus]);
 }

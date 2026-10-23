@@ -124,6 +124,7 @@ const (
 	ActionSessionLaunch                   = "session.launch"
 	ActionSessionFork                     = "session.fork"
 	ActionSessionEnsure                   = "session.ensure"
+	ActionSessionRecoverBatch             = "session.recover_batch"
 	ActionSessionRecover                  = "session.recover"
 	ActionSessionWorkspaceRecoveryGet     = "session.workspace_recovery.get"
 	ActionSessionWorkspaceRecoveryChanged = "session.workspace_recovery.changed"
@@ -281,6 +282,7 @@ const (
 	ActionSessionTurnStarted            = "session.turn.started"
 	ActionSessionTurnCompleted          = "session.turn.completed"
 	ActionSessionTurnRemoved            = "session.turn.removed"
+	ActionSessionTurnChangesUpdated     = "session.turn.changes.updated"
 	ActionSessionAvailableCommands      = "session.available_commands"
 	ActionSessionModeChanged            = "session.mode_changed"
 	ActionSessionAgentCapabilities      = "session.agent_capabilities"
@@ -328,9 +330,10 @@ const (
 	ActionSystemMetricsUpdated          = "system.metrics.updated"
 	ActionUpdateAvailable               = "system.update_available"
 
-	ActionAgentProfileDeleted = "agent.profile.deleted"
-	ActionAgentProfileCreated = "agent.profile.created"
-	ActionAgentProfileUpdated = "agent.profile.updated"
+	ActionAgentProfileDeleted    = "agent.profile.deleted"
+	ActionAgentProfileCreated    = "agent.profile.created"
+	ActionAgentProfileUpdated    = "agent.profile.updated"
+	ActionAgentProfilesReordered = "agent.profiles.reordered"
 
 	// ActionAgentSettingsUpdated carries a full agent settings record
 	// (dto.AgentDTO) after a settings-side change such as a custom TUI agent's
@@ -512,7 +515,6 @@ const (
 	ActionMCPClarificationTimeout                  = "mcp.clarification_timeout"
 	ActionMCPSetTaskTitle                          = "mcp.set_task_title"
 	ActionMCPGetDiagnosticBundle                   = "mcp.get_diagnostic_bundle"
-
 	// Office task handoffs (cross-task context).
 	ActionMCPListRelatedTasks         = "mcp.list_related_tasks"
 	ActionMCPListTaskDocuments        = "mcp.list_task_documents"
@@ -568,6 +570,8 @@ const (
 	ActionMCPDeleteExecutorProfile = "mcp.delete_executor_profile"
 
 	ActionMCPMoveTask                    = "mcp.move_task"
+	ActionMCPTransferTask                = "mcp.transfer_task"
+	ActionMCPAuditTaskTransferAttempt    = "mcp.audit_task_transfer_attempt"
 	ActionMCPDeleteTask                  = "mcp.delete_task"
 	ActionMCPArchiveTask                 = "mcp.archive_task"
 	ActionMCPUpdateTaskState             = "mcp.update_task_state"

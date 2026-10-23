@@ -126,6 +126,7 @@ export type WsFrame = {
   action?: string;
   eventType?: string;
   payload: Record<string, unknown>;
+  rawPayload?: unknown;
 };
 
 export type WaitForWsOptions = {
@@ -134,7 +135,12 @@ export type WaitForWsOptions = {
   where?: (payload: Record<string, unknown>) => boolean;
 };
 
-export type WaitForWsResponseOptions = WaitForWsOptions & {
+export type WaitForWsResponseOptions = {
+  timeout?: number;
+  /** Narrow outgoing requests before correlating their replies. */
+  requestWhere?: (payload: Record<string, unknown>) => boolean;
+  /** Ignore correlated responses until their data matches the expected change. */
+  where?: (payload: unknown) => boolean;
   /** Start the response timeout after this operation completes. */
   timeoutAfter?: Promise<unknown>;
 };
@@ -168,6 +174,7 @@ function decodeFrame(payload: string | Buffer | Uint8Array): WsFrame | null {
       action: typeof parsed.action === "string" ? parsed.action : undefined,
       eventType: typeof parsed.event_type === "string" ? parsed.event_type : undefined,
       payload: body && typeof body === "object" ? (body as Record<string, unknown>) : {},
+      rawPayload: body,
     };
   } catch {
     return null; // binary terminal traffic and other non-JSON frames
@@ -255,7 +262,7 @@ function waitForResponse(
   action: string,
   options: WaitForWsResponseOptions,
 ): Promise<WsFrame> {
-  const { timeout = DEFAULT_TIMEOUT, timeoutAfter, where } = options;
+  const { timeout = DEFAULT_TIMEOUT, timeoutAfter, where, requestWhere } = options;
   return new Promise<WsFrame>((resolve, reject) => {
     const requestIds = new Set<string>();
     const wait = armWsWait(
@@ -265,7 +272,7 @@ function waitForResponse(
       timeoutAfter,
     );
     wait.listen(channels.sent, (frame) => {
-      if (frame.action === action && frame.id && (!where || where(frame.payload))) {
+      if (frame.action === action && frame.id && (!requestWhere || requestWhere(frame.payload))) {
         requestIds.add(frame.id);
       }
     });
@@ -278,6 +285,7 @@ function waitForResponse(
         return;
       }
       if (frame.type !== "response") return;
+      if (where && !where(frame.rawPayload)) return;
       wait.dispose();
       resolve(frame);
     });

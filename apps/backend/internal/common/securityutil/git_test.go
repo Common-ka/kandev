@@ -2,6 +2,37 @@ package securityutil
 
 import "testing"
 
+// @covers AC-PLATFORM-GIT-DIFF-FILE-METADATA-001.14
+func TestIsKnownSafeGitFlagAllowsIgnoreSubmodulesNone(t *testing.T) {
+	if !IsKnownSafeGitFlag("--ignore-submodules=none") {
+		t.Fatal("the gitlink visibility comparison flag must be allowed")
+	}
+}
+
+// @covers AC-PLATFORM-GIT-DIFF-FILE-METADATA-001.14
+func TestIsKnownSafeGitFlagAllowsIgnoreSubmodulesDirty(t *testing.T) {
+	if !IsKnownSafeGitFlag("--ignore-submodules=dirty") {
+		t.Fatal("the pointer-only cumulative comparison flag must be allowed")
+	}
+}
+
+func TestIsKnownSafeGitFlagRejectsIgnoreSubmodulesVariants(t *testing.T) {
+	for _, flag := range []string{
+		"--ignore-submodules", "--ignore-submodule", "--ignore-submod", "--ignore-submodules=",
+		"--ignore-submodules=all", "--ignore-submodules=untracked",
+		"--ignore-submodules=other", "--ignore-submodules=none-extra", "--ignore-submodules=none=all",
+		" --ignore-submodules=none", "--ignore-submodules=none ", "--ignore-submodules=none\t",
+		"--ignore-submodules=none\n", "--ignore-submodules=none\x00",
+		"--ignore-submodules=dirty-extra", "--ignore-submodules=dirty=none",
+		" --ignore-submodules=dirty", "--ignore-submodules=dirty ", "--ignore-submodules=dirty\t",
+		"--ignore-submodules=dirty\n", "--ignore-submodules=dirty\x00",
+	} {
+		if IsKnownSafeGitFlag(flag) {
+			t.Errorf("unsupported gitlink visibility flag %q admitted", flag)
+		}
+	}
+}
+
 // @covers AC-PLATFORM-GIT-DIFF-FILE-METADATA-001.12
 func TestIsKnownSafeGitFlagAllowsSubmoduleShort(t *testing.T) {
 	if !IsKnownSafeGitFlag("--submodule=short") {
@@ -158,6 +189,25 @@ func TestIsKnownSafeGitFlagAllowsRequiredGitOperationFlags(t *testing.T) {
 	for _, flag := range []string{"--dry-run", "--first-parent", "--is-ancestor"} {
 		if !IsKnownSafeGitFlag(flag) {
 			t.Fatalf("%s must be allowed for the git operations that use it", flag)
+		}
+	}
+}
+
+func TestIsKnownSafeGitFlagAllowsTurnCheckpointCommands(t *testing.T) {
+	for _, flag := range []string{
+		"--absolute-git-dir", "--show-object-format", "--raw", "--no-abbrev", "--numstat",
+		"--binary", "--ignore-all-space",
+		"--bool", "--default=false", "--find-copies-harder", "--no-assume-unchanged",
+		"--no-skip-worktree", "--renormalize", "--sparse", "--stdin", "--no-split-index",
+		"-r", "-v", "-s", "-u", "-q",
+	} {
+		if !IsKnownSafeGitFlag(flag) {
+			t.Errorf("turn checkpoint flag %q rejected", flag)
+		}
+	}
+	for _, flag := range []string{"--sparse=true", "--show-object-format=storage", "--default=false-extra", "--no-split-index=true"} {
+		if IsKnownSafeGitFlag(flag) {
+			t.Errorf("unsafe turn checkpoint flag variant %q accepted", flag)
 		}
 	}
 }

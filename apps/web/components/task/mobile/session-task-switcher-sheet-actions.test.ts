@@ -154,12 +154,9 @@ describe("useSheetActions dirty-navigation boundary", () => {
   it("defers task selection until the dirty-navigation boundary confirms it", () => {
     const onOpenChange = vi.fn();
     const { result } = renderHook(() =>
-      useSheetActions(
-        WORKSPACE_ID,
-        onOpenChange,
-        createTaskSheetSelectionController(),
-        mocks.navigationRequest,
-      ),
+      useSheetActions(WORKSPACE_ID, onOpenChange, createTaskSheetSelectionController(), {
+        onRequestNavigation: mocks.navigationRequest,
+      }),
     );
 
     act(() => result.current.handleSelectTask(mocks.targetTaskId));
@@ -178,12 +175,9 @@ describe("useSheetActions dirty-navigation boundary", () => {
   it("defers workspace switching until the dirty-navigation boundary confirms it", async () => {
     const onOpenChange = vi.fn();
     const { result } = renderHook(() =>
-      useSheetActions(
-        WORKSPACE_ID,
-        onOpenChange,
-        createTaskSheetSelectionController(),
-        mocks.navigationRequest,
-      ),
+      useSheetActions(WORKSPACE_ID, onOpenChange, createTaskSheetSelectionController(), {
+        onRequestNavigation: mocks.navigationRequest,
+      }),
     );
 
     await act(async () => {
@@ -209,12 +203,9 @@ describe("useSheetActions task mutation navigation", () => {
   it("keeps a created task upserted but defers activation until navigation confirms", () => {
     const onOpenChange = vi.fn();
     const { result } = renderHook(() =>
-      useSheetActions(
-        WORKSPACE_ID,
-        onOpenChange,
-        createTaskSheetSelectionController(),
-        mocks.navigationRequest,
-      ),
+      useSheetActions(WORKSPACE_ID, onOpenChange, createTaskSheetSelectionController(), {
+        onRequestNavigation: mocks.navigationRequest,
+      }),
     );
     const createdTask = {
       ...mocks.targetTask,
@@ -249,12 +240,9 @@ describe("useSheetActions task mutation navigation", () => {
   it("defers archive of the active task until the dirty-navigation boundary confirms it", async () => {
     mocks.state.tasks.activeTaskId = mocks.targetTaskId;
     const { result } = renderHook(() =>
-      useSheetActions(
-        WORKSPACE_ID,
-        vi.fn(),
-        createTaskSheetSelectionController(),
-        mocks.navigationRequest,
-      ),
+      useSheetActions(WORKSPACE_ID, vi.fn(), createTaskSheetSelectionController(), {
+        onRequestNavigation: mocks.navigationRequest,
+      }),
     );
 
     act(() => result.current.handleArchiveTask(mocks.targetTaskId, { cascade: false }));
@@ -271,12 +259,9 @@ describe("useSheetActions task mutation navigation", () => {
   it("defers delete of the active task until the dirty-navigation boundary confirms it", async () => {
     mocks.state.tasks.activeTaskId = mocks.targetTaskId;
     const { result } = renderHook(() =>
-      useSheetActions(
-        WORKSPACE_ID,
-        vi.fn(),
-        createTaskSheetSelectionController(),
-        mocks.navigationRequest,
-      ),
+      useSheetActions(WORKSPACE_ID, vi.fn(), createTaskSheetSelectionController(), {
+        onRequestNavigation: mocks.navigationRequest,
+      }),
     );
 
     act(() => result.current.handleDeleteTask(mocks.targetTaskId));
