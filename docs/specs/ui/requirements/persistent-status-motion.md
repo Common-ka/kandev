@@ -2,7 +2,7 @@
 status: active
 system: ui
 created: 2026-08-23
-updated: 2026-09-10
+updated: 2026-10-23
 owners:
   - kandev
 ---
@@ -149,7 +149,7 @@ governs hidden targets.
 
 ### REQ-UI-PERSISTENT-STATUS-MOTION-006: Reduced persistent motion
 
-This requirement is draft for the dense workbench performance package.
+This requirement is implemented by the dense workbench performance package.
 It qualifies the visible-motion criteria in 001 through 003 when the user
 requests reduced motion. Their default visual behavior remains unchanged.
 
@@ -173,12 +173,12 @@ host-owned persistent status indicators.
 - [Idle CPU (completed)](../../../plans/frontend-idle-cpu/plan.md)
 - [Animation CPU (completed)](../../../plans/frontend-animation-cpu/plan.md)
 - [Rendering CPU follow-up (draft)](../../../plans/frontend-rendering-cpu/plan.md)
-- [Dense workbench performance (draft)](../../../plans/dense-workbench-performance/plan.md)
+- [Dense workbench performance (in progress)](../../../plans/dense-workbench-performance/plan.md)
 
 ## Out of scope
 
 - Removing default visible status motion when reduced motion is not requested.
 - Changing task, session, or run state rules.
-- Changing motion preferences beyond the draft requirement 006.
+- Changing motion preferences beyond requirement 006.
 - Migrating one-shot entrance, selection, search, or confirmation cues.
 - Changing plugin-owned animations, including Kandy celebration effects.

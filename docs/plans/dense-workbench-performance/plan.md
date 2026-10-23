@@ -31,7 +31,9 @@ Reduced-motion mode will show static status indicators with unchanged meaning.
 
 The user authorized implementation, sustained optimization, and incremental
 commits and pushes on 2026-10-23 after the design handoff. Execute the six work
-orders sequentially in the primary session. Delegation and deployment have not
+orders in the primary session. Motion validation can follow the first transport
+repair while durable-stream receipt work remains open: these changes have no
+code dependency, and baseline assets are already frozen. Delegation and deployment have not
 been requested. The baseline precedes production edits.
 
 ## Evidence and baseline
@@ -143,7 +145,7 @@ absolute timing assertions in CI.
 
 - [ ] [01: Dense fixture and baseline](task-01-dense-baseline.md)
 - [ ] [02: Incremental conversation repair](task-02-conversation-repair.md)
-- [ ] [03: Persistent motion eligibility](task-03-motion-eligibility.md)
+- [x] [03: Persistent motion eligibility](task-03-motion-eligibility.md)
 - [ ] [04: Asset delivery and import boundaries](task-04-asset-delivery.md)
 - [ ] [05: Dockview and editor lifecycle](task-05-workbench-lifecycle.md)
 - [ ] [06: Matched comparison and regression evidence](task-06-performance-comparison.md)
@@ -173,5 +175,8 @@ Design validation on 2026-10-22 passed:
   orders covered, with valid requirements, criteria, plans, and design links.
 - `git diff --check`: passed.
 
-Only documentation changed. Implementation, product tests, dense fixture
-execution, and A/B performance results are pending. Files remain uncommitted.
+Implementation began on 2026-10-23. The design package and serialized-receipt
+repair are committed. The dense pilot passed with 1,000 tasks and 36,000
+messages. Motion eligibility is implemented with passing component and
+browser checks. See each work order for exact evidence and remaining work.
+Controlled A/B performance results remain pending.

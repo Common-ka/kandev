@@ -12,9 +12,9 @@ requirements:
 
 # Persistent Status Motion System Design
 
-## Draft reduced-motion extension
+## Reduced-motion extension
 
-`REQ-UI-PERSISTENT-STATUS-MOTION-006` is proposed in the
+`REQ-UI-PERSISTENT-STATUS-MOTION-006` is implemented in the
 [dense workbench package](../../../plans/dense-workbench-performance/plan.md).
 This section supersedes earlier preservation of each primitive's reduced-motion
 policy only for the host-owned persistent indicators in that requirement.

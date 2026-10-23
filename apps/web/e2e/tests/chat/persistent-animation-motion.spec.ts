@@ -1,3 +1,4 @@
+import { verifyReducedMotionFallback } from "./reduced-motion-helpers";
 import { test, expect } from "../../fixtures/test-base";
 import {
   expectCompositorMotionPaused,
@@ -61,4 +62,13 @@ test("keeps the busy task composer glow animated until the turn settles", async 
 
   await session.waitForChatIdle({ timeout: 30_000 });
   await expect(glow).toHaveCount(0);
+});
+
+test("keeps static status visible with reduced motion in the CSS fallback", async ({
+  testPage,
+  apiClient,
+  seedData,
+}) => {
+  test.setTimeout(60_000);
+  await verifyReducedMotionFallback(testPage, apiClient, seedData);
 });

@@ -1,10 +1,10 @@
 ---
 id: "03-motion-eligibility"
 title: "Persistent motion eligibility"
-status: pending
+status: done
 wave: 3
 depends_on: 
-  - "02-conversation-repair"
+  - "01-dense-baseline"
 plan: "plan.md"
 requirements:
   - REQ-UI-PERSISTENT-STATUS-MOTION-004
@@ -72,7 +72,9 @@ pnpm run typecheck
 
 ## Dependencies and parallelism
 
-Requires `02-conversation-repair`. Sequential execution only.
+Requires the frozen baseline from `01-dense-baseline`. This independent motion
+change follows the first transport repair while durable-stream receipt work
+continues. Browser suites and benchmark arms still run sequentially.
 
 ## Inputs
 
@@ -94,5 +96,21 @@ and preference changes; a screenshot alone does not prove motion eligibility.
 
 ## Results
 
-Pending. No implementation or performance result is claimed.
+2026-10-23: Four failing component regressions confirmed that GridSpinner and
+CompositorSpin ignored initial and changed reduced-motion preferences. Both
+now cancel owned effects when reduced motion is enabled, restore normal motion
+when it is disabled, and remove preference listeners on unmount. Scoped CSS
+keeps the static grid cubes visible at their normal maximum scale. The existing
+visibility controller and normal timing remain unchanged.
+
+All 35 focused component tests pass, including hidden-to-visible transitions,
+deferred grid setup, normal timing, and listener cleanup. Four desktop and
+four phone Chromium tests passed, including real busy/settled transitions and
+CSS fallback. Fresh-build targeted desktop and phone preference tests also
+passed after the final timing-preservation adjustment. Frontend type checking,
+scoped lint, and documentation validation passed.
+
+The user-facing animation guide documents the static status behavior. Dense
+A/B timing remains owned by work order 06. No CPU improvement is inferred from
+an animation count alone.
 
