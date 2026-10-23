@@ -188,6 +188,7 @@ test.describe("PR Details layout panel", () => {
     await apiClient.mockGitHubReset();
     await apiClient.mockGitHubSetUser("test-user");
     const task = await createTaskWithSession(apiClient, seedData, "PR action button colors");
+    await apiClient.mockGitHubSetRepositoryDetails("testorg", "testrepo", true);
     await apiClient.mockGitHubAssociateTaskPR({
       task_id: task.id,
       owner: "testorg",

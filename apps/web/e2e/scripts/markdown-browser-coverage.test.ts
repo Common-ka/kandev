@@ -53,6 +53,11 @@ describe("Markdown browser coverage", () => {
     );
     expect(execution.env.KANDEV_E2E_BUILD_IDENTITY).toContain("e2e-build-identity.json");
     expect(execution.env.KANDEV_E2E_EXPECTED_SOURCE_REVISION).toBe("${{ github.sha }}");
+    const homeOwnership = steps.findIndex(
+      (step) => step.run === 'chown "$(id -u):$(id -g)" "$HOME"',
+    );
+    expect(homeOwnership).toBeGreaterThanOrEqual(0);
+    expect(homeOwnership).toBeLessThan(job.steps.indexOf(execution));
   });
 
   it("requires browser success while keeping supplemental reports outside the native catalog", () => {

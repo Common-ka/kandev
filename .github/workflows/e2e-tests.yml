@@ -215,7 +215,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
-          node-version: "24"
+          node-version: '24'
 
       - name: Set up Go
         uses: actions/setup-go@5064d95ba18d4a9dda7c4cc67adeb03aea1a2a14 # v7.0.0 + upstream dependency refresh
@@ -682,6 +682,9 @@ jobs:
       - name: Extract web build
         working-directory: apps/web
         run: tar -xf web-dist.tar && rm web-dist.tar
+
+      - name: Match browser home ownership to the container user
+        run: chown "$(id -u):$(id -g)" "$HOME"
 
       - name: Run native Markdown browser tests
         working-directory: apps/web
@@ -1347,18 +1350,7 @@ jobs:
 
   e2e-report:
     name: E2E Tests Passed
-    needs:
-      [
-        changes,
-        helper_compile,
-        build,
-        playwright_image,
-        e2e,
-        e2e-markdown-browsers,
-        e2e-containers,
-        e2e-kubernetes-compatibility,
-        desktop-e2e,
-      ]
+    needs: [changes, helper_compile, build, playwright_image, e2e, e2e-markdown-browsers, e2e-containers, e2e-kubernetes-compatibility, desktop-e2e]
     if: always()
     # Report aggregation queries GitHub history and downloads artifacts with the
     # job token, so it remains on a GitHub-hosted runner during the pilot.
@@ -1392,7 +1384,7 @@ jobs:
         if: needs.changes.outputs.run == 'true'
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
-          node-version: "24"
+          node-version: '24'
 
       - name: Resolve pnpm store
         if: needs.changes.outputs.run == 'true'

@@ -280,6 +280,28 @@ async function presentationMetrics(testPage: Page, mode: "preview" | "edit") {
   );
 }
 
+async function openRepositoryMarkdown(
+  session: SessionPage,
+  page: Page,
+  repositoryRoot: string,
+  documentHeading: string,
+) {
+  await session.clickTab("Files");
+  if (repositoryRoot) {
+    const root = await session.fileTree.waitForFileTreeNode(repositoryRoot);
+    await expect(
+      root.locator(".tabler-icon-chevron-right, .tabler-icon-chevron-down"),
+    ).toBeVisible();
+    if (await root.locator(".tabler-icon-chevron-right").isVisible()) await root.click();
+  }
+  await (
+    await session.fileTree.waitForFileTreeNode(path.posix.join(repositoryRoot, "README.md"))
+  ).click();
+  const editor = page.locator('[data-testid="markdown-file-editor"]:visible');
+  await expect(editor).toContainText(documentHeading);
+  return editor;
+}
+
 async function expectSingleCompactToolbar(testPage: Page) {
   const editor = testPage.getByTestId("markdown-file-editor");
   const toolbar = editor.locator(".markdown-file-toolbar:visible");
@@ -632,10 +654,12 @@ test.describe("Markdown file editing", () => {
       const primaryRoot = path.relative(environment!.workspace_path!, primaryPath!);
       const workingFilePath = path.join(secondaryPath!, "README.md");
       expect(fs.readFileSync(workingFilePath, "utf8")).toBe(content);
-      await session.clickTab("Files");
-      await (await session.fileTree.waitForFileTreeNode(secondaryName)).click();
-      await (await session.fileTree.waitForFileTreeNode(`${secondaryName}/README.md`)).dblclick();
-      const editor = testPage.locator('[data-testid="markdown-file-editor"]:visible');
+      const editor = await openRepositoryMarkdown(
+        session,
+        testPage,
+        secondaryName,
+        "Secondary repository",
+      );
       await editor.getByTestId("markdown-mode-edit").click();
       const hybrid = editor.getByTestId("hybrid-markdown-editor");
       await hybrid.locator(".md-paragraph").first().click();
@@ -670,15 +694,10 @@ test.describe("Markdown file editing", () => {
       await expect(editor.getByTestId("markdown-file-save")).toBeDisabled();
       expect(fs.readFileSync(path.join(repoDir, "README.md"), "utf8")).toBe(content);
       expect(fs.readFileSync(workingFilePath, "utf8")).toBe(content);
-      await session.clickTab("Files");
-      if (primaryRoot) await (await session.fileTree.waitForFileTreeNode(primaryRoot)).click();
-      await (
-        await session.fileTree.waitForFileTreeNode(path.posix.join(primaryRoot, "README.md"))
-      ).dblclick();
+      await openRepositoryMarkdown(session, testPage, primaryRoot, "Primary repository");
       await editor.getByTestId("markdown-mode-edit").click();
       await expect(hybrid).not.toContainText(marker);
-      await session.clickTab("Files");
-      await (await session.fileTree.waitForFileTreeNode(`${secondaryName}/README.md`)).dblclick();
+      await openRepositoryMarkdown(session, testPage, secondaryName, "Secondary repository");
       await editor.getByTestId("markdown-mode-edit").click();
       await expect(hybrid).toBeVisible();
       await expect(hybrid).toContainText(marker);
@@ -696,10 +715,7 @@ test.describe("Markdown file editing", () => {
         "true",
       );
       await expectMarkdownWalkthroughRange(hybrid, ranges[0], hybrid.locator("table"));
-      await session.clickTab("Files");
-      await (
-        await session.fileTree.waitForFileTreeNode(path.posix.join(primaryRoot, "README.md"))
-      ).dblclick();
+      await openRepositoryMarkdown(session, testPage, primaryRoot, "Primary repository");
       await expect(editor.getByTestId("walkthrough-editor-range")).toHaveCount(0);
       await card.getByTestId("walkthrough-step-file").click();
       const reopenedPreview = editor.getByTestId("markdown-preview-host");

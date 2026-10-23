@@ -249,3 +249,27 @@ in this plan remain historical evidence.
 
 The user-requested `TESTING-PR3113.md` remains outside the commit. Native device
 IME and assistive-technology checks remain pending in the browser parity plan.
+
+The first new CI run exposed textual workflow-contract assertions for Node
+version quoting and the report dependency list. The workflow retains main's
+format for those fields while keeping all three native browser jobs required.
+All 27 E2E workflow-contract tests, five external-runner contract tests, eight
+blob-download tests, three Markdown browser-coverage tests, and action-pin
+validation pass locally. The timeout test used the host's Nix `sleep` path in
+memory because this machine has no `/bin/sleep`; its timeout assertion remains
+unchanged.
+
+The same CI run exposed Firefox's root/home ownership mismatch and two test
+fixture problems. The native-browser job aligns its home directory owner
+with its container user before browser launch. Repository navigation uses
+single clicks, checks document identity, and restores collapsed roots after
+walkthrough reloads. The PR action test seeds merge permission explicitly.
+The workflow-change test waits for its successful move response before
+checking dialog closure.
+
+The repository navigation failure reproduced twice in WebKit. After repair,
+it passed three consecutive WebKit runs. The three affected Chromium cases
+passed all nine executions across three fresh-fixture repetitions. All runs
+used one worker and disabled retries. Browser coverage contract tests and
+changed-file formatting/lint also pass. Application source is unchanged in
+this follow-up, so the published UI captures still describe its rendered UI.
