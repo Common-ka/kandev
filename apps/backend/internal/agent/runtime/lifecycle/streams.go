@@ -2,6 +2,7 @@ package lifecycle
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -687,8 +688,8 @@ func (sm *StreamManager) projectCanonicalAgentEvent(
 			zap.String("event_type", event.Type))
 		return event, false, nil
 	}
-	isAppend, err := projector.ProjectCanonicalAgentDeliveryEvent(
-		ctx, durableEvent, deliveryEffectForEvent(event),
+	isAppend, receipt, err := projectCanonicalSingleWithReceipt(
+		ctx, projector, durableEvent, deliveryEffectForEvent(event),
 	)
 	if err != nil {
 		sm.logger.Error("canonical agent event projection failed",
@@ -700,6 +701,7 @@ func (sm *StreamManager) projectCanonicalAgentEvent(
 	event.CanonicalMessageID = canonicalAgentMessageID(execution, event)
 	event.CanonicalProjection = true
 	event.CanonicalMessageAppend = isAppend
+	event.CanonicalConversationReceipt = receipt
 	// Projection is the canonical commit boundary. ACK transport is scheduled
 	// independently so a lost ACK cannot hide output that is already durable.
 	if scheduleAcknowledgement {
@@ -733,14 +735,14 @@ func (sm *StreamManager) projectCanonicalAgentEvents(
 	if err != nil {
 		return err
 	}
-	appendMessages, err := projector.ProjectCanonicalAgentDeliveryEvents(ctx, events, effects)
+	appendMessages, receipt, err := projectCanonicalBatchWithReceipt(ctx, projector, events, effects)
 	if err != nil {
 		return err
 	}
 	if len(appendMessages) != len(prepared) {
 		return fmt.Errorf("canonical delivery projector returned %d results for %d events", len(appendMessages), len(prepared))
 	}
-	sm.notifyCanonicalAgentEventBatch(execution, prepared, appendMessages, client, startupGeneration)
+	sm.notifyCanonicalAgentEventBatch(execution, prepared, appendMessages, client, startupGeneration, receipt)
 	return nil
 }
 
@@ -787,6 +789,7 @@ func (sm *StreamManager) notifyCanonicalAgentEventBatch(
 	appendMessages []bool,
 	client *agentctl.Client,
 	startupGeneration uint64,
+	receipt json.RawMessage,
 ) {
 	var notification agentctl.AgentEvent
 	var notify bool
@@ -811,6 +814,7 @@ func (sm *StreamManager) notifyCanonicalAgentEventBatch(
 		}
 	}
 	if notify {
+		notification.CanonicalConversationReceipt = receipt
 		if notification.Type == streams.EventTypeReasoning {
 			notification.ReasoningText = content.String()
 		} else {

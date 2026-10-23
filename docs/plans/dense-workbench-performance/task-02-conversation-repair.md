@@ -1,7 +1,7 @@
 ---
 id: "02-conversation-repair"
 title: "Incremental conversation repair"
-status: in_progress
+status: done
 wave: 2
 depends_on: 
   - "01-dense-baseline"
@@ -98,7 +98,77 @@ passes 100 contiguous updates through the broadcaster for both typed and JSON
 transport. `go test -race ./internal/gateway/websocket -count=1` passes.
 
 This is one confirmed transport defect, not proof that the observed live
-instance uses NATS. Durable canonical streaming also publishes receiptless
-message events in `publishCanonicalMessageEvent`; transaction-bound receipts
-for that path and the controlled browser comparison remain pending.
+instance uses NATS. Durable canonical streaming also published receiptless message events in
+`publishCanonicalMessageEvent`. A real mock-agent script reproduced that
+path in the frozen baseline: 20 agent updates produced 20 empty-revision
+resets. The candidate now returns transaction-bound receipts and preserves
+them through generation checks, coalescing, the orchestrator, and service
+privacy projection. It publishes the committed snapshot instead of reading
+a potentially newer message and labelling it with an earlier revision.
 
+
+### Canonical streaming implementation boundary
+
+The durable projector must return a transient receipt from the same SQL
+transaction as its message writes and inbox cursor. Capture the starting
+revision after the existing session lock, record the message/turn rows that
+this transaction actually writes, and read their final snapshots before
+commit. Return no receipt for a replay that makes no source changes. A failed
+transaction returns neither a receipt nor a successful projection.
+
+Carry the receipt with the host notification through existing generation
+checks and coalescing. The low-level agent event cannot import task models;
+use a host-only JSON field excluded from agent wire encoding, then a typed
+receipt inside lifecycle. Merge only complete contiguous intervals for the
+same session. The orchestrator publishes the receipt's committed message
+snapshot through the task service's existing privacy projection. Missing or
+incomplete evidence retains the existing reset/recovery behavior.
+
+This changes notification evidence only. It does not change durable admission,
+ACK order, journal payloads, execution state, or repository retention.
+
+### First browser comparison
+
+One gated 20-update script ran against frozen baseline source `595df36ed5c`
+and the candidate. The probe waits for agent output, not the echoed user
+prompt, before opening its capture window. Both runs verify the final stored
+and displayed agent content. This short check is not the dense timing series.
+
+| Metric | Baseline | Candidate |
+| --- | ---: | ---: |
+| Reset notifications | 20 | 0 |
+| `message.list` requests | 23 | 1 |
+| Decoded history request/response bytes | 249,518 | 10,754 |
+| All captured decoded WS bytes | 277,234 | 83,264 |
+
+Local raw artifacts are
+`.kandev/diagnostics/dense-workbench-performance/baseline-canonical-stream-1792748856792.json`
+and `canonical-stream-1792749213198.json` in that same directory. Counts include
+remaining scheduled reads; the fix does not remove periodic backfill.
+
+Targeted SQLite and disposable PostgreSQL tests pass for text, thinking,
+new/existing turns, immutable snapshots, replay, and transaction rollback.
+Desktop and phone canonical-stream browser checks pass. The desktop plugin
+conversation-recovery tests also pass. Existing client/refresh tests pass
+(41 tests), as do frontend type checking and scoped test lint. Scoped Go lint passed on retry. The first attempt reached its five-minute
+limit without reported findings and is not counted as a pass. Race checks
+passed for the repository, orchestrator, task service, and gateway. The
+lifecycle package exposed an existing Linux fixture that hardcoded
+`/bin/sleep`, which does not exist on the Nix host. The fixture now resolves
+`sleep` through PATH; its focused lifecycle race rerun passes (37.8 seconds).
+
+The full task-service suite passed in 777.571 seconds. The initial full
+service/SQLite run exceeded Go's default ten-minute limit; that run is not a
+pass. The later SQLite run was split after 316 completed top-level cases.
+Four disjoint batches cover all remaining registered cases. The aggregate
+contains 1935 top-level tests: 1617 passed and 318 explicitly skipped,
+with no missing names. PostgreSQL parity above is separate from those skips.
+
+One existing GitHub-issue cancellation fixture failed because its 15-second
+deadline included schema setup. Start the deadline after setup, as the adjacent
+metadata cancellation fixture already does. The corrected test passed three
+consecutive runs under the same concurrent load. The failed batch and all
+rerun evidence remain recorded in
+`.kandev/diagnostics/dense-workbench-performance/sqlite-suite-complete.json`.
+Benchmark databases remain disk-backed. The full dense performance comparison
+is owned by work order 06 and is still pending.

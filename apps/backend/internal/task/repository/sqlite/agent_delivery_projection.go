@@ -36,23 +36,32 @@ func (r *Repository) ProjectCanonicalAgentDeliveryEvent(
 // idempotent, while compatible message chunks share the transaction and the
 // cursor advances only after each committed event has been applied.
 func (r *Repository) ProjectCanonicalAgentDeliveryEvents(
+	ctx context.Context, events []*models.AgentDeliveryEvent, effects []*models.AgentDeliveryEffect,
+) ([]bool, error) {
+	appended, _, err := r.ProjectCanonicalAgentDeliveryEventsWithReceipt(ctx, events, effects)
+	return appended, err
+}
+
+// ProjectCanonicalAgentDeliveryEventsWithReceipt returns source snapshots only
+// after the message writes and inbox cursor commit together.
+func (r *Repository) ProjectCanonicalAgentDeliveryEventsWithReceipt(
 	ctx context.Context,
 	events []*models.AgentDeliveryEvent,
 	effects []*models.AgentDeliveryEffect,
-) ([]bool, error) {
+) ([]bool, *models.ConversationMutationReceipt, error) {
 	streamID, err := validateCanonicalDeliveryBatch(events, effects)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if len(events) == 0 {
-		return nil, nil
+		return nil, nil, nil
 	}
 	if err := r.prepareAgentDeliveryReceiptStatement(ctx); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	tx, err := r.db.BeginTxx(ctx, nil)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer func() { _ = tx.Rollback() }()
 	sessionIDs := make([]string, 0, len(events))
@@ -60,26 +69,35 @@ func (r *Repository) ProjectCanonicalAgentDeliveryEvents(
 		sessionIDs = append(sessionIDs, event.SessionID)
 	}
 	if err := lockAgentDeliveryEventWritesMode(ctx, tx, r.db.DriverName(), sessionIDs, []string{streamID}, sharedCanonicalDeliverySession(events, effects)); err != nil {
-		return nil, err
+		return nil, nil, err
+	}
+
+	changes, err := r.beginCanonicalConversationChanges(ctx, tx, events)
+	if err != nil {
+		return nil, nil, err
 	}
 
 	var projectedSequence int64
 	if err := tx.QueryRowxContext(ctx, r.db.Rebind(`
 		SELECT projected_sequence FROM agent_delivery_cursors WHERE stream_id = ?`),
 		streamID).Scan(&projectedSequence); err != nil {
-		return nil, fmt.Errorf("load canonical delivery cursor: %w", err)
+		return nil, nil, fmt.Errorf("load canonical delivery cursor: %w", err)
 	}
 	appendMessages := make([]bool, len(events))
 	if err := r.projectCanonicalDeliveryBatchTx(
-		ctx, tx, events, effects, appendMessages, projectedSequence,
+		ctx, tx, events, effects, appendMessages, projectedSequence, changes,
 	); err != nil {
-		return nil, err
+		return nil, nil, err
+	}
+	receipt, err := changes.receipt(ctx, r, tx)
+	if err != nil {
+		return nil, nil, err
 	}
 	if err := tx.Commit(); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	r.refreshAgentDeliveryLag(ctx)
-	return appendMessages, nil
+	return appendMessages, receipt, nil
 }
 
 func (r *Repository) projectCanonicalDeliveryBatchTx(
@@ -89,13 +107,14 @@ func (r *Repository) projectCanonicalDeliveryBatchTx(
 	effects []*models.AgentDeliveryEffect,
 	appendMessages []bool,
 	projectedSequence int64,
+	changes *canonicalConversationChanges,
 ) error {
 	group := make([]canonicalDeliveryBatchEntry, 0, len(events))
 	flushGroup := func() error {
 		if len(group) == 0 {
 			return nil
 		}
-		if err := r.projectCanonicalDeliveryBatchGroupTx(ctx, tx, group, appendMessages); err != nil {
+		if err := r.projectCanonicalDeliveryBatchGroupTx(ctx, tx, group, appendMessages, changes); err != nil {
 			return err
 		}
 		group = group[:0]
@@ -165,6 +184,7 @@ func (r *Repository) projectCanonicalDeliveryBatchGroupTx(
 	tx *sqlx.Tx,
 	group []canonicalDeliveryBatchEntry,
 	appendMessages []bool,
+	changes *canonicalConversationChanges,
 ) error {
 	firstContent, content := canonicalDeliveryBatchContent(group)
 	if firstContent != -1 {
@@ -175,7 +195,7 @@ func (r *Repository) projectCanonicalDeliveryBatchGroupTx(
 			aggregate.Text = content
 		}
 		appended, err := r.persistCanonicalAgentMessageTx(
-			ctx, tx, &group[firstContent].stored, aggregate,
+			ctx, tx, &group[firstContent].stored, aggregate, changes,
 		)
 		if err != nil {
 			return err
@@ -294,6 +314,7 @@ func (r *Repository) persistCanonicalAgentMessageTx(
 	tx *sqlx.Tx,
 	event *models.AgentDeliveryEvent,
 	agentEvent streams.AgentEvent,
+	changes *canonicalConversationChanges,
 ) (bool, error) {
 	if agentEvent.Role == authorKindUser {
 		return false, nil
@@ -313,14 +334,18 @@ func (r *Repository) persistCanonicalAgentMessageTx(
 		SELECT task_id FROM task_sessions WHERE id = ?`), event.SessionID).Scan(&taskID); err != nil {
 		return false, fmt.Errorf("load canonical message task: %w", err)
 	}
-	turnID, err := r.canonicalDeliveryTurnTx(ctx, tx, event.SessionID, taskID, agentEvent.TurnID, event)
+	turnID, createdTurn, err := r.canonicalDeliveryTurnTx(ctx, tx, event.SessionID, taskID, agentEvent.TurnID, event)
 	if err != nil {
 		return false, err
+	}
+	if createdTurn {
+		changes.record(models.ConversationEntityTurn, turnID)
 	}
 	messageID := agentEvent.CanonicalMessageID
 	if messageID == "" {
 		messageID = fmt.Sprintf("agent-delivery-%s-%d", event.StreamID, event.Sequence)
 	}
+	changes.record(models.ConversationEntityMessage, messageID)
 	now := r.nowUTC()
 	var existingContent string
 	var existingMetadata string
@@ -408,9 +433,9 @@ func (r *Repository) canonicalDeliveryTurnTx(
 	tx *sqlx.Tx,
 	sessionID, taskID, requestedTurnID string,
 	event *models.AgentDeliveryEvent,
-) (string, error) {
+) (string, bool, error) {
 	if requestedTurnID != "" {
-		return requestedTurnID, nil
+		return requestedTurnID, false, nil
 	}
 	var turnID string
 	err := tx.QueryRowxContext(ctx, r.db.Rebind(`
@@ -418,21 +443,22 @@ func (r *Repository) canonicalDeliveryTurnTx(
 		WHERE task_session_id = ? AND completed_at IS NULL
 		ORDER BY started_at DESC, id DESC LIMIT 1`), sessionID).Scan(&turnID)
 	if err == nil {
-		return turnID, nil
+		return turnID, false, nil
 	}
 	if err != sql.ErrNoRows {
-		return "", fmt.Errorf("load canonical delivery turn: %w", err)
+		return "", false, fmt.Errorf("load canonical delivery turn: %w", err)
 	}
 	turnID = fmt.Sprintf("agent-delivery-turn-%s-%d", event.StreamID, event.Sequence)
 	now := r.nowUTC()
-	_, err = tx.ExecContext(ctx, r.db.Rebind(`
+	result, err := tx.ExecContext(ctx, r.db.Rebind(`
 		INSERT INTO task_session_turns
 		(id, task_session_id, task_id, started_at, completed_at, execution_profile_id,
 		route_generation, metadata, created_at, updated_at)
 		VALUES (?, ?, ?, ?, NULL, '', 0, '{}', ?, ?)
 		ON CONFLICT (id) DO NOTHING`), turnID, sessionID, taskID, now, now, now)
 	if err != nil {
-		return "", fmt.Errorf("create canonical delivery turn: %w", err)
+		return "", false, fmt.Errorf("create canonical delivery turn: %w", err)
 	}
-	return turnID, nil
+	rows, err := result.RowsAffected()
+	return turnID, rows == 1, err
 }
