@@ -89,9 +89,11 @@ about 18.8 minutes of fixture setup. It produced no paired performance result.
 The failure screenshot and context are retained in `reference-grid-4x-failure/`;
 the raw report, backend log, launch receipt, and host-load log remain in the
 same diagnostic directory as the completed reference. Both builds and the
-36,000-message fixture retain recorded hashes. The next run must capture
-cold-failure browser state and traffic before teardown. Keep the existing
-warmup and final-stream correctness gates.
+36,000-message fixture retain recorded hashes. The harness now captures cold-failure browser state, loaded message counts,
+history error details, and traffic before teardown. Two diagnostic unit tests
+and direct Chromium checks passed, including details in a closed disclosure
+and a closed-page diagnostic failure. The existing warmup and final-stream
+correctness gates remain unchanged. The next run starts with the candidate.
 
 ## Kept Threads reduced-motion correction
 

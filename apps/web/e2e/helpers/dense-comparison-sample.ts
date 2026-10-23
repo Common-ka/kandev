@@ -6,14 +6,10 @@ import type { ApiClient } from "./api-client";
 import { DENSE_WORKLOAD, type DenseThread } from "./dense-workbench-fixture";
 import { loadDenseHistory } from "./dense-history";
 import { prepareDenseStream } from "./dense-canonical-stream";
-import {
-  beginDenseWindow,
-  captureDenseTraffic,
-  denseResources,
-  endDenseWindow,
-} from "./dense-measurement";
+import { beginDenseWindow, captureDenseTraffic, endDenseWindow } from "./dense-measurement";
 import { dwell } from "./causal-waits";
 import { inspectDenseAnimations } from "./dense-animation-diagnostics";
+import { loadDenseCold } from "./dense-cold-load";
 
 async function startDenseProfile(cdp: CDPSession, profilePath?: string) {
   if (!profilePath) return;
@@ -94,33 +90,14 @@ export async function runDenseSample(options: {
   await cdp.send("Performance.enable", { timeDomain: "timeTicks" });
   await cdp.send("Emulation.setCPUThrottlingRate", { rate: cpuRate });
   try {
-    const coldStart = performance.now();
-    const response = await page.goto(`/threads?workspace=${seed.workspaceId}`);
-    const documentMs = performance.now() - coldStart;
-    await expect(page.getByTestId("threads-board")).toBeVisible();
-    for (const thread of threads)
-      await expect(
-        page
-          .getByTestId(`thread-column-${thread.taskId}`)
-          .locator("[data-agent-message-body]")
-          .filter({ hasText: stream.warmup }),
-      ).toBeVisible({ timeout: 60_000 });
-    const readyMs = performance.now() - coldStart;
-    await expect
-      .poll(
-        () =>
-          traffic.frames.filter(
-            (f) => f.direction === "received" && f.action === "session.conversation.subscribe",
-          ).length,
-      )
-      .toBeGreaterThanOrEqual(threads.length);
-    const cold = {
-      documentMs,
-      readyMs,
-      contentEncoding: response?.headers()["content-encoding"],
-      resources: await denseResources(page),
-      delivery: traffic.snapshot(),
-    };
+    const cold = await loadDenseCold({
+      page,
+      workspaceId: seed.workspaceId,
+      threads,
+      warmup: stream.warmup,
+      traffic,
+      checkpoint: options.checkpoint,
+    });
     options.checkpoint?.({ cold });
     const historyMode = process.env.KANDEV_DENSE_HISTORY === "all" ? "all" : "newest-window";
     let historyLoadMs = 0;
