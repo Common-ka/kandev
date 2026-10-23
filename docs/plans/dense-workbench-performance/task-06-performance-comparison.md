@@ -64,7 +64,7 @@ logic and apply scoped lint to touched files.
 cd apps/web
 # Set KANDEV_DENSE_BASELINE_ROOT to the immutable baseline checkout first.
 KANDEV_DENSE_COMPARE=1 pnpm e2e:run --project chromium e2e/tests/performance/dense-workbench-comparison.spec.ts
-KANDEV_DENSE_COMPARE=1 pnpm e2e:run --project chromium e2e/tests/performance/dense-navigation-comparison.spec.ts
+KANDEV_DENSE_NAVIGATION=1 pnpm e2e:run --project chromium e2e/tests/performance/dense-navigation-comparison.spec.ts
 node --test e2e/scripts/summarize-dense-performance.test.mjs
 pnpm e2e:run --project chromium tests/performance/dense-workbench-correctness.spec.ts tests/plugins/conversation-recovery.spec.ts tests/task/task-switch-efficiency.spec.ts tests/chat/persistent-animation-motion.spec.ts
 pnpm e2e:run --project mobile-chrome tests/performance/mobile-dense-workbench-correctness.spec.ts tests/task/mobile-task-switch-efficiency.spec.ts tests/chat/mobile-persistent-animation-motion.spec.ts
@@ -174,3 +174,30 @@ match one root read plus the fixture's expanded directories. The restore
 loader bounds concurrency and already shares equivalent pending paths within
 its owner. These counts alone do not establish redundant reads. No folder
 freshness check is removed on that evidence.
+
+### Completed six-pair grid reference
+
+The original baseline and retained candidate `1207817a957` completed twelve
+samples with the full 1,000-task, 30-column, 36,000-message fixture. Six chats
+loaded 100 messages each and each streaming window scheduled 1,800 canonical
+updates. Every sample passed final visible-marker and stored tick-count checks.
+The candidate had no HTTP errors or verification retries. Two baseline samples
+had 59 streaming HTTP 503 errors and ten post-window verification retries in
+total; all samples remain included.
+
+Median paired reductions were 77.62% for cold encoded JS/CSS bytes, 90.85% for
+streaming history requests, 90.83% for decoded history bytes, and 42.93% for
+reduced-motion idle main-thread time. Normal idle was mixed and streaming CPU
+was neutral. Streaming frame-gap p95 regressed in every pair, with a median
+paired increase of 59.93%. One candidate sample took 85.5 seconds through final
+visible content and remains included. These results do not establish overall
+responsiveness or a task-switch gain.
+
+The guarded runner passed in 1.1 hours, including untimed fixture preparation:
+`/tmp/kandev-run.e2e.7RtV7dhF.log`. Raw report:
+`matched-dense-1792789660205.json` under the diagnostic directory. The committed
+[paired results](evidence/reference-grid-1x.json) include all values, hashes,
+fixture counts, and per-sample errors. [results.md](results.md) records medians,
+ranges, interpretation, and the remaining work. No owned builds or tests ran
+during measurement. Network isolation prevented port conflicts; CPU resources
+remained shared. The 4x stress and broader timing matrix remain open.

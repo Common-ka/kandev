@@ -1,7 +1,7 @@
 ---
 id: "04-asset-delivery"
 title: "Asset delivery and import boundaries"
-status: in_progress
+status: done
 wave: 4
 depends_on: 
   - "03-motion-eligibility"
@@ -116,5 +116,9 @@ successfully opens the file editor. Existing resolver/preview/initialization
 tests pass (10 tests). Desktop and phone diff-refresh checks pass for Monaco
 and Pierre. The native phone viewer opens the same file without loading Monaco.
 
-The matched dense and cold-load timing series remains pending. Compression is
-not credited with reducing warm switching or JavaScript execution.
+The six-pair dense grid comparison completed on candidate `1207817a957`.
+Cold JS/CSS encoded bytes were 18,607,703 in every baseline sample and 4,164,838
+in every candidate sample, a 77.62% reduction. Cold chat readiness varied in
+both directions; its median paired reduction was 7.31%. See
+[results.md](results.md) and [the complete paired evidence](evidence/reference-grid-1x.json).
+Compression is not credited with reducing warm switching or JavaScript execution.

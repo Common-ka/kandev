@@ -150,7 +150,7 @@ absolute timing assertions in CI.
 - [ ] [01: Dense fixture and baseline](task-01-dense-baseline.md)
 - [x] [02: Incremental conversation repair](task-02-conversation-repair.md)
 - [x] [03: Persistent motion eligibility](task-03-motion-eligibility.md)
-- [ ] [04: Asset delivery and import boundaries](task-04-asset-delivery.md)
+- [x] [04: Asset delivery and import boundaries](task-04-asset-delivery.md)
 - [ ] [05: Dockview and editor lifecycle](task-05-workbench-lifecycle.md)
 - [ ] [06: Matched comparison and regression evidence](task-06-performance-comparison.md)
 
@@ -183,4 +183,10 @@ Implementation began on 2026-10-23. The design package and serialized-receipt
 repair are committed. The dense pilot passed with 1,000 tasks and 36,000
 messages. Motion eligibility is implemented with passing component and
 browser checks. See each work order for exact evidence and remaining work.
-Controlled A/B performance results remain pending.
+The six-pair unthrottled grid comparison is complete. Cold encoded asset bytes
+fell 77.62%, streaming history requests fell 90.85%, and reduced-motion idle
+main-thread work fell 42.93% by median paired change. Normal streaming CPU did
+not improve, and frame-gap p95 increased 59.93%. All twelve samples passed final
+content checks. The existing six-pair navigation comparison also establishes
+no switching gain. Rendering follow-up, 4x stress, and the remaining scenario
+matrix stay open. See [results.md](results.md) for ranges, errors, and limits.

@@ -1,6 +1,61 @@
 # Dense workbench performance results
 
-Status: measurement in progress. This report distinguishes completed repairs from pending dense timing evidence. The branch is `feature/evaluate-live-thread-bc0`; the frozen baseline is `595df36ed5c1cf02fd90cb972b623ad6edc53df8`.
+Status: the six-pair unthrottled grid comparison is complete. Rendering follow-up
+and the remaining stress/scenario matrix are in progress. The branch is
+`feature/evaluate-live-thread-bc0`; the frozen baseline is
+`595df36ed5c1cf02fd90cb972b623ad6edc53df8`.
+
+## Completed grid reference: six alternating pairs
+
+Candidate `1207817a957afab0e25aaee5b794c5c3e54ec5b2` completed all twelve
+samples against the original baseline, with no source patch or untracked source
+files. Both versions used the same immutable database snapshot: 1,000 tasks,
+30 eligible columns, three sessions per column, and 36,000 stored messages.
+Each sample displayed six chats with 100 loaded messages each and scheduled
+1,800 canonical updates. All samples passed the final visible-marker and stored
+tick-count checks. These are Linux Chromium results, not M2 Air measurements.
+
+The table gives per-arm medians and ranges. Percentage changes are the median
+of the six paired changes, not the percentage difference between the medians.
+
+| Metric | Baseline median (range) | Candidate median (range) | Median paired result |
+| --- | --- | --- | --- |
+| Cold JS/CSS encoded bytes | 18,607,703 (constant) | 4,164,838 (constant) | 77.62% lower |
+| Cold chat readiness, ms | 18,203 (15,589–24,408) | 16,432 (14,290–26,650) | 7.31% lower; mixed |
+| Streaming history requests | 792 (652–826) | 72.5 (72–76) | 90.85% fewer |
+| Streaming decoded history bytes | 145,658,902 (119,682,683–151,882,268) | 13,355,280 (12,374,478–14,005,129) | 90.83% lower |
+| Normal idle main-thread time, ms | 15,543 (15,290–18,466) | 15,497 (14,844–16,436) | 0.58% lower; mixed |
+| Streaming main-thread time, ms | 61,989 (61,551–63,699) | 61,900 (60,295–84,271) | 0.05% higher; no gain |
+| Streaming frame-gap p95, ms | 83.4 (83.3–100.1) | 141.7 (116.7–183.3) | 59.93% higher; regression |
+| Reduced-motion idle main-thread time, ms | 15,885 (14,592–17,299) | 8,747 (7,780–9,917) | 42.93% lower |
+
+The candidate had zero reset notifications during every streaming window;
+baseline had 1,572–1,738 per window. Baseline streaming had 59 HTTP 503 errors
+across two samples and ten post-window verification retries. Candidate had
+zero HTTP errors and zero verification retries in all scenarios. All six pairs,
+including the affected baseline samples and the candidate's 85.5-second
+stream-to-final-content sample, remain in the results.
+
+Rendering remains unresolved. Frame-gap p95 regressed in every pair, including
+the four pairs without HTTP errors. Streaming main-thread utilization increased
+from about 954 to 986 ms per second. Long-task duration was lower in five pairs
+but much higher in the slower candidate sample. The candidate applied more
+incremental store updates; that observation does not establish the cause of
+the regression. No overall responsiveness or warm-switch gain is claimed.
+
+The host used an Intel i7-11700T, 16 logical CPUs, about 32 GiB RAM, Linux
+6.18.49, and Chromium 149.0.7827.55. One measured browser ran at a time, with
+production assets and no concurrent owned builds or tests. Network namespaces
+isolated ports; CPU resources remained shared. The run passed in 1.1 hours,
+including fixture setup, which is outside the timed windows.
+
+[Machine-readable results and provenance](evidence/reference-grid-1x.json)
+include every paired value, build hashes, fixture identity, and error counts.
+Raw artifacts are retained under
+`.kandev/diagnostics/dense-workbench-performance/`: `matched-dense-1792789660205.json`,
+its backend log, `reference-six-pair-grid-1x-summary.json`, and
+`reference-six-pair-grid-1x-host-load.jsonl`. Runner log:
+`/tmp/kandev-run.e2e.7RtV7dhF.log`.
 
 ## Implemented and pushed
 
@@ -12,6 +67,9 @@ Status: measurement in progress. This report distinguishes completed repairs fro
 | `7196cdf7d95` | Carry committed canonical stream receipts into notifications | Streamed content can update incrementally without reset-and-reload              |
 | `51272eb39d5` | Defer hidden file-tree touch action hooks | Controls and actions stay unchanged; hidden hooks no longer mount |
 | `4544d15b977` | Cache status scans, coalesce edge geometry, and stabilize history actions | Removes repeated work while preserving scroll controls and session ownership |
+| `bf3b89bf22e` | Read required table metadata through the existing reader pool | Preserves health checks while avoiding a demonstrated writer-queue dependency |
+| `12bf1c266f3` | Preserve the Markdown element-tree boundary | Keeps unchanged paragraphs and code blocks mounted during text motion |
+| `36695134b36` | Read the live selection range without a second layout flush | Preserves synchronous text-selection behavior; improves the measured focused-composer workload |
 
 Default layout, colors, spacing, and controls are preserved. The file-tree change mounts touch-action hooks only while touch actions are visible. It preserves desktop context menus and native phone actions.
 
@@ -90,7 +148,15 @@ Completed checks include receipt transport and transaction tests, SQLite/Postgre
 
 The SQLite suite was completed as a composite audit: 1,617 registered top-level tests passed and 318 were explicitly skipped. One pre-existing cancellation fixture started its timeout before schema setup and failed under load. Moving the timeout after setup matched its companion fixture; three focused reruns passed. The interrupted original run and the original failed batch are retained as such. Coverage and outcomes are recorded in `sqlite-suite-complete.json`.
 
-Still pending: complete paired dense results, final fresh-build browser checks, long-history stress, and the broader list/split/hidden-tab/layout scenario matrix from [benchmark.md](benchmark.md). The existing visible-composer attribution work remains open. A file-tree hook change does not prove that composer work is resolved.
+The six-pair grid series and retained-build desktop/phone correctness pass are
+complete. The latter includes 22 phone checks, desktop navigation/layout and
+recovery checks, repeated causal motion checks, and list viewport checks; see
+[work order 06](task-06-performance-comparison.md). Still pending: 4x stress,
+rendering-regression follow-up, and the broader list/split/hidden-tab/layout
+timing matrix from [benchmark.md](benchmark.md). The long-history baseline did
+not finish loading within its setup limit, so it supplies no timing comparison.
+The focused-composer selection gain below is a separate two-pair comparison,
+not evidence that all composer or task-switch costs are resolved.
 
 ## Reproduction commands
 
