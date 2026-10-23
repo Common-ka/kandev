@@ -2,7 +2,8 @@
 
 ## Status and reproducibility
 
-This protocol is planned. No before/after gain has been measured.
+This protocol is being executed. Exploratory results and exclusions are recorded
+in [results.md](results.md); the complete paired reference series remains pending.
 Owner: [work order 01](task-01-dense-baseline.md) builds the harness and captures
 the baseline; [work order 06](task-06-performance-comparison.md) runs the final
 comparison. Do not use the changing live deployment as the control.

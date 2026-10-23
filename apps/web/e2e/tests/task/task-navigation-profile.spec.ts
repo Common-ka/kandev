@@ -33,8 +33,8 @@ for (const debug of [false, true]) {
       const tasks = await seedProfile(apiClient, seedData, backend);
       const gate = await routeNavigationResponses(testPage);
       await exposeNavigationStore(testPage);
-      const a = await prepareProfileTask(testPage, apiClient, tasks[0], backend, true);
-      const b = await prepareProfileTask(testPage, apiClient, tasks[1], backend, false);
+      const a = await prepareProfileTask(testPage, apiClient, tasks[0], backend, { first: true });
+      const b = await prepareProfileTask(testPage, apiClient, tasks[1], backend, { first: false });
       const bootDebug = await testPage.evaluate(
         () => (window as Window & { __KANDEV_DEBUG?: boolean }).__KANDEV_DEBUG === true,
       );

@@ -25,7 +25,15 @@ export const PROFILE_FOLDERS = [
   `${HELD}/nested`,
 ];
 
-export async function seedProfile(api: ApiClient, seed: SeedData, backend: BackendContext) {
+export async function seedProfile(
+  api: ApiClient,
+  seed: SeedData,
+  backend: BackendContext,
+  {
+    backgroundTasks = 30,
+    prepareOnly = false,
+  }: { backgroundTasks?: number; prepareOnly?: boolean } = {},
+) {
   const git = new GitHelper(
     path.join(backend.tmpDir, "repos", "e2e-repo"),
     makeGitEnv(backend.tmpDir),
@@ -38,13 +46,15 @@ export async function seedProfile(api: ApiClient, seed: SeedData, backend: Backe
       );
   git.stageAll();
   if (git.exec("git status --short").trim()) git.commit("seed navigation profile tree");
-  for (let i = 0; i < 30; i++)
+  for (let i = 0; i < backgroundTasks; i++)
     await api.createTask(seed.workspaceId, `Profile background ${i}`, {
       workflow_id: seed.workflowId,
       workflow_step_id: seed.startStepId,
     });
-  return seedNavigationTasks(api, seed, backend, {
+  const profileSeed = { ...seed, repositoryBaselineOID: git.getCurrentSha() };
+  return seedNavigationTasks(api, profileSeed, backend, {
     executorProfileId: seed.worktreeExecutorProfileId,
+    prepareOnly,
   });
 }
 
@@ -53,7 +63,7 @@ export async function prepareProfileTask(
   api: ApiClient,
   task: CreateTaskResponse,
   backend: BackendContext,
-  first: boolean,
+  { first, historyCount = 200 }: { first: boolean; historyCount?: number },
 ) {
   if (first) await page.goto(`/t/${task.id}`);
   else await selectNavigationTask(page, task.title);
@@ -69,6 +79,12 @@ export async function prepareProfileTask(
   if (!repoPath?.startsWith(`${backend.tmpDir}${path.sep}`))
     throw new Error("profile fixture did not expose its owned worktree");
   const git = new GitHelper(repoPath, makeGitEnv(backend.tmpDir));
+  const profileFiles = git
+    .exec("git ls-files")
+    .trim()
+    .split("\n")
+    .filter((name) => PROFILE_FOLDERS.some((folder) => name.startsWith(`${folder}/entry-`)));
+  expect(profileFiles).toHaveLength(630);
   git.stageAll();
   if (git.exec("git status --short").trim()) git.commit("profile mock baseline");
   for (let i = 0; i < 72; i++)
@@ -78,7 +94,7 @@ export async function prepareProfileTask(
     );
   const marker = `${AVAILABLE}/000-${task.title.replaceAll(" ", "-")}.txt`;
   git.createFile(marker, "navigation marker\n");
-  await api.seedAgentMessages(task.session_id!, 200, `Profile conversation ${task.title}`);
+  await api.seedAgentMessages(task.session_id!, historyCount, `Profile conversation ${task.title}`);
   await session.clickTab("Changes");
   await expect(
     page.getByRole("button", { name: path.basename(marker), exact: true }),
@@ -89,6 +105,7 @@ export async function prepareProfileTask(
   return {
     task,
     marker,
+    profileFiles: profileFiles.length,
     changedFiles: git.exec("git status --porcelain").trim().split("\n").length,
     messageCount: (await api.listSessionMessages(task.session_id!)).messages.length,
   };
@@ -114,22 +131,9 @@ export async function measureSelection(
       ),
   );
   const paintOpportunityMs = performance.now() - start;
-  await expect
-    .poll(() => {
-      const delivered = new Set(
-        gate.requests
-          .slice(cursor)
-          .filter(
-            (r) =>
-              r.action === "workspace.tree.get" &&
-              r.payload.session_id === item.task.session_id &&
-              r.deliveredAt,
-          )
-          .map((r) => r.payload.path),
-      );
-      return PROFILE_FOLDERS.every((folder) => delivered.has(folder));
-    })
-    .toBe(true);
+  // A cached folder can be restored without a new tree request. The visible
+  // task-specific child proves that the selected task's expanded tree is usable.
+  await expect(new SessionPage(page).fileTreeNode(item.marker)).toBeVisible();
   const restoredMs = performance.now() - start;
   const counts: Record<string, number> = {};
   const keys: Record<string, number> = {};

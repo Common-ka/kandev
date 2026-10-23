@@ -106,3 +106,18 @@ also exposed a fixture assertion that requires every cached folder to issue
 a fresh request; this must be corrected to verify visible restored state
 before using its timings. No application regression is inferred from it.
 
+The baseline was subsequently rebuilt in its frozen checkout for the real
+canonical-stream reproduction. Its current backend SHA-256 is
+`79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de`.
+The earlier hash above identifies the copied pilot binary, not this rebuild.
+The source, lockfile, and per-asset hash manifest are recorded in
+`.kandev/diagnostics/dense-workbench-performance/frozen-baseline-build.json`.
+
+2026-10-23: The full canonical fixture is prepared and verified: 1,000 tasks,
+30 primary histories of 1,000 messages, and 60 sibling histories of 100
+messages (36,000 stored messages in total). Both arms restore the same SQLite
+backup, whose SHA-256 is `e225377880726596e70c21ee85475b8537790f3fdf7e7e8d6f6cde89f661ff2e`.
+The benchmark uses separate runtime homes as well as separate database copies,
+so retained agent journals cannot contaminate the next sample. The raw manifest
+is `.kandev/diagnostics/dense-workbench-performance/matched-dense-1792753924108.json`.
+The timed comparison waits for owned verification jobs to finish.

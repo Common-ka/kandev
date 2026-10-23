@@ -22,6 +22,7 @@ export const ROOT_FILE = "navigation-root.ts";
 type NavigationTaskOptions = {
   executorProfileId?: string;
   withRepository?: boolean;
+  prepareOnly?: boolean;
 };
 
 async function waitForTreeResponse(
@@ -73,7 +74,7 @@ export async function seedNavigationTasks(
   api: ApiClient,
   seed: SeedData,
   backend: BackendContext,
-  { executorProfileId, withRepository = true }: NavigationTaskOptions = {},
+  { executorProfileId, withRepository = true, prepareOnly = false }: NavigationTaskOptions = {},
 ) {
   if (withRepository) resetSeedRepositoryCheckout(seed, backend.tmpDir);
   const branch = withRepository
@@ -82,30 +83,52 @@ export async function seedNavigationTasks(
   const profile = await createStandardProfile(api, "navigation-responsiveness");
   const tasks = [];
   for (const suffix of ["A", "B"]) {
-    const task = await api.createTaskWithAgent(
-      seed.workspaceId,
-      `Navigation ${suffix}`,
-      profile.id,
-      {
-        description: "/e2e:simple-message",
-        workflow_id: seed.workflowId,
-        workflow_step_id: seed.startStepId,
-        ...(branch
-          ? { repositories: [{ repository_id: seed.repositoryId, base_branch: branch }] }
-          : {}),
+    const options = {
+      description: "/e2e:simple-message",
+      workflow_id: seed.workflowId,
+      workflow_step_id: seed.startStepId,
+      ...(branch
+        ? { repositories: [{ repository_id: seed.repositoryId, base_branch: branch }] }
+        : {}),
+      executor_profile_id: executorProfileId ?? seed.worktreeExecutorProfileId,
+    };
+    const task = prepareOnly
+      ? await api.createTask(seed.workspaceId, `Navigation ${suffix}`, {
+          ...options,
+          agent_profile_id: profile.id,
+        })
+      : await api.createTaskWithAgent(
+          seed.workspaceId,
+          `Navigation ${suffix}`,
+          profile.id,
+          options,
+        );
+    if (prepareOnly) {
+      const prepared = await api.launchSession({
+        task_id: task.id,
+        agent_profile_id: profile.id,
         executor_profile_id: executorProfileId ?? seed.worktreeExecutorProfileId,
-      },
-    );
+        workflow_step_id: seed.startStepId,
+        prompt: "",
+        intent: "prepare",
+        launch_workspace: true,
+      });
+      task.session_id = prepared.session_id;
+      await expect
+        .poll(async () => (await api.getTaskEnvironment(task.id))?.status, { timeout: 60_000 })
+        .toBe("ready");
+    }
     tasks.push(task);
     // Local executor sessions share the checkout's Git index, so finish each
     // branch checkout before launching the next session.
-    await waitForSessionDone(
-      api,
-      task.id,
-      task.session_id!,
-      "Navigation fixture turn settled",
-      30_000,
-    );
+    if (!prepareOnly)
+      await waitForSessionDone(
+        api,
+        task.id,
+        task.session_id!,
+        "Navigation fixture turn settled",
+        30_000,
+      );
   }
   return tasks;
 }

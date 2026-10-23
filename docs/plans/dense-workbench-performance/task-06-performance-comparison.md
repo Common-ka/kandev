@@ -62,7 +62,10 @@ logic and apply scoped lint to touched files.
 
 ```bash
 cd apps/web
-KANDEV_DENSE_PROFILE=1 pnpm e2e:run --project chromium tests/performance/dense-workbench-profile.spec.ts
+# Set KANDEV_DENSE_BASELINE_ROOT to the immutable baseline checkout first.
+KANDEV_DENSE_COMPARE=1 pnpm e2e:run --project chromium e2e/tests/performance/dense-workbench-comparison.spec.ts
+KANDEV_DENSE_COMPARE=1 pnpm e2e:run --project chromium e2e/tests/performance/dense-navigation-comparison.spec.ts
+node --test e2e/scripts/summarize-dense-performance.test.mjs
 pnpm e2e:run --project chromium tests/performance/dense-workbench-correctness.spec.ts tests/plugins/conversation-recovery.spec.ts tests/task/task-switch-efficiency.spec.ts tests/chat/persistent-animation-motion.spec.ts
 pnpm e2e:run --project mobile-chrome tests/performance/mobile-dense-workbench-correctness.spec.ts tests/task/mobile-task-switch-efficiency.spec.ts tests/chat/mobile-persistent-animation-motion.spec.ts
 pnpm run typecheck

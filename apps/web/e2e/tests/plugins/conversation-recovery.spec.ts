@@ -130,12 +130,13 @@ test.describe("Conversation recovery", () => {
       seedData,
       "Plugin source recovery",
     );
+    const seededIds: string[] = [];
     for (const [index, content] of [
       "plugin recovery oldest prompt",
       "plugin recovery middle prompt",
       "plugin recovery newest prompt",
     ].entries()) {
-      await apiClient.seedSessionMessage(sessionId, {
+      const seeded = await apiClient.seedSessionMessage(sessionId, {
         type: "message",
         content,
         authorType: "user",
@@ -143,6 +144,7 @@ test.describe("Conversation recovery", () => {
         turnStartedAt: `2026-09-14T12:0${index}:00Z`,
         turnCompletedAt: `2026-09-14T12:0${index}:01Z`,
       });
+      seededIds.push(seeded.messageId);
     }
 
     await testPage.goto(`/t/${taskId}`);
@@ -194,7 +196,26 @@ test.describe("Conversation recovery", () => {
     await expect(panel.locator(`[data-message-id="${laterLive.messageId}"]`)).toBeVisible({
       timeout: 15_000,
     });
-    await panel.getByTestId("fixture-prompt-history-load-more").click();
-    await expect(panel.getByTestId("fixture-prompt-history-row")).toHaveCount(4);
+    const expectedIds = [...seededIds, skipped.messageId, laterLive.messageId].sort();
+    const rows = panel.getByTestId("fixture-prompt-history-row");
+    const loadMore = panel.getByTestId("fixture-prompt-history-load-more");
+    await expect(loadMore).toBeVisible();
+    for (let page = 0; page < 2 && (await rows.count()) < expectedIds.length; page++) {
+      await loadMore.click();
+      await expect
+        .poll(() =>
+          loadMore.evaluateAll(
+            (buttons) => buttons.length === 0 || !(buttons[0] as HTMLButtonElement).disabled,
+          ),
+        )
+        .toBe(true);
+    }
+    await expect(rows).toHaveCount(expectedIds.length);
+    expect(
+      await rows.evaluateAll((elements) =>
+        elements.map((element) => element.getAttribute("data-message-id")).sort(),
+      ),
+    ).toEqual(expectedIds);
+    await expect(loadMore).toHaveCount(0);
   });
 });

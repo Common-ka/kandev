@@ -30,14 +30,47 @@ export function denseMessage(index: number, title: string) {
   );
 }
 
-async function seedHistory(api: ApiClient, sessionId: string, title: string, count: number) {
+async function seedHistory(
+  api: ApiClient,
+  sessionId: string,
+  title: string,
+  count: number,
+  mixed = false,
+) {
   let messageId = "";
   let content = "";
   const hash = createHash("sha256");
   for (let index = 0; index < count; index++) {
     content = denseMessage(index, title);
     hash.update(content);
-    const message = await api.seedSessionMessage(sessionId, { type: "message", content });
+    const type = mixed && index % 10 === 2 ? "tool_execute" : "message";
+    const message = await api.seedSessionMessage(sessionId, {
+      type,
+      content,
+      ...(mixed
+        ? {
+            authorType: index % 20 === 0 ? ("user" as const) : ("agent" as const),
+            newTurn: index % 20 === 0,
+            turnStartedAt: new Date(Date.UTC(2026, 0, 1, 0, 0, index)).toISOString(),
+            turnCompletedAt: new Date(Date.UTC(2026, 0, 1, 0, 0, index + 1)).toISOString(),
+            turnMetadata: { model: "dense-fixture", duration_ms: 1000 },
+            ...(type === "tool_execute"
+              ? {
+                  metadata: {
+                    tool_call_id: `${title}-${index}`,
+                    status: "complete",
+                    normalized: {
+                      shell_exec: {
+                        command: "cat fixture.ts",
+                        output: { stdout: content, exit_code: 0 },
+                      },
+                    },
+                  },
+                }
+              : {}),
+          }
+        : {}),
+    });
     messageId = message.messageId;
   }
   const stored = await api.listSessionMessages(sessionId);
@@ -48,25 +81,54 @@ async function seedHistory(api: ApiClient, sessionId: string, title: string, cou
   return { messageId, content };
 }
 
-export async function seedDenseWorkbench(api: ApiClient, seed: SeedData) {
+function backgroundTaskState(index: number) {
+  return index % 2 === 0 ? "TODO" : "COMPLETED";
+}
+
+export async function seedDenseWorkbench(api: ApiClient, seed: SeedData, canonical = false) {
   const threads: DenseThread[] = [];
   const manifest: Array<{ title: string; messages: number; siblings: number }> = [];
   for (let index = 0; index < DENSE_WORKLOAD.tasks; index++) {
     const title = `Dense task ${String(index).padStart(4, "0")}`;
-    const { task_id: taskId } = await api.seedTask(seed.workspaceId, title, {
-      workflow_id: seed.workflowId,
-      workflow_step_id: seed.startStepId,
-      state: index < DENSE_WORKLOAD.columns ? "IN_PROGRESS" : "BACKLOG",
-    });
-    if (index >= DENSE_WORKLOAD.columns) continue;
-    const { session_id: sessionId } = await api.seedTaskSession(taskId, {
-      state: "WAITING_FOR_INPUT",
-      agentProfileId: seed.agentProfileId,
-      repositoryId: seed.repositoryId,
-      sessionId: randomUUID(),
-    });
+    let taskId: string;
+    let sessionId: string;
+    if (canonical && index < Math.min(6, DENSE_WORKLOAD.columns)) {
+      const task = await api.createTask(seed.workspaceId, title, {
+        agent_profile_id: seed.agentProfileId,
+        workflow_id: seed.workflowId,
+        workflow_step_id: seed.startStepId,
+        repository_ids: [seed.repositoryId],
+      });
+      const prepared = await api.launchSession({
+        task_id: task.id,
+        agent_profile_id: seed.agentProfileId,
+        executor_profile_id: seed.worktreeExecutorProfileId,
+        workflow_step_id: seed.startStepId,
+        prompt: "",
+        intent: "prepare",
+        launch_workspace: true,
+      });
+      taskId = task.id;
+      sessionId = prepared.session_id;
+      await expect
+        .poll(async () => (await api.getTaskEnvironment(taskId))?.status, { timeout: 60_000 })
+        .toBe("ready");
+    } else {
+      ({ task_id: taskId } = await api.seedTask(seed.workspaceId, title, {
+        workflow_id: seed.workflowId,
+        workflow_step_id: seed.startStepId,
+        state: index < DENSE_WORKLOAD.columns ? "IN_PROGRESS" : backgroundTaskState(index),
+      }));
+      if (index >= DENSE_WORKLOAD.columns) continue;
+      ({ session_id: sessionId } = await api.seedTaskSession(taskId, {
+        state: "WAITING_FOR_INPUT",
+        agentProfileId: seed.agentProfileId,
+        repositoryId: seed.repositoryId,
+        sessionId: randomUUID(),
+      }));
+    }
     await api.setPrimarySession(sessionId);
-    const history = await seedHistory(api, sessionId, title, DENSE_WORKLOAD.messages);
+    const history = await seedHistory(api, sessionId, title, DENSE_WORKLOAD.messages, canonical);
     const siblings = [];
     for (let sibling = 0; sibling < 2; sibling++) {
       const { session_id: siblingId } = await api.seedTaskSession(taskId, {
@@ -80,6 +142,7 @@ export async function seedDenseWorkbench(api: ApiClient, seed: SeedData) {
         siblingId,
         `${title} sibling ${sibling}`,
         Math.min(100, DENSE_WORKLOAD.messages),
+        canonical,
       );
       siblings.push(siblingId);
     }
