@@ -138,9 +138,11 @@ The following text records the prior contract and does not govern new implementa
 
 ## Implementation plans
 
+- [Dense follow-up](../../../plans/dense-workbench-performance/plan.md).
+
 - [Remaining validation and remediation](../../../plans/conversation-storage-follow-up/plan.md) owns the outstanding delivery gates.
-- [Storage replacement](../../../plans/conversation-storage-replacement/plan.md) owns the new implementation and validation.
-- The original Host and recovery packages retain their historical results.
+- [Storage replacement](../../../plans/conversation-storage-replacement/plan.md) owns implementation and validation.
+- Original Host and recovery packages retain historical results.
   Their durable replay work orders are not instructions to rebuild the retired transport.
 
 ## Source inventory

@@ -356,3 +356,12 @@ credential storage and probing remain unchanged.
 
 No new public API, database, or architectural ownership boundary is introduced.
 No ADR is required. Client progressive loading and resource lifetimes stay in UI.
+
+
+## Dense workbench follow-up (2026-10-22)
+
+The [dense workbench package](../../../plans/dense-workbench-performance/plan.md) owns the new controlled
+Threads, Dockview, and task-switch comparison. It reuses the contracts and
+existing lifecycle owners documented here. Its implementation and measurements
+are pending. Existing completed results remain historical; unresolved
+attribution work is not closed by the new plan.

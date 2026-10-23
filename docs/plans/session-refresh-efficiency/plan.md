@@ -285,3 +285,12 @@ pass. ESLint reports five existing size/complexity warnings on touched
 route/session files. The Task 05 editor-owner attribution, matched clean-browser
 performance/memory capture, and non-mock single-request latency measurement
 remain open. No performance gain or memory-leak conclusion is claimed.
+
+
+## Dense workbench follow-up (2026-10-22)
+
+The [dense workbench package](../dense-workbench-performance/plan.md) owns the new controlled
+Threads, Dockview, and task-switch comparison. It reuses the contracts and
+existing lifecycle owners documented here. Its implementation and measurements
+are pending. Existing completed results remain historical; unresolved
+attribution work is not closed by the new plan.

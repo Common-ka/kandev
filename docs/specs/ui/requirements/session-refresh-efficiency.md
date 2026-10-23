@@ -158,3 +158,12 @@ retry behavior remain unchanged.
   implements the draft-preservation clarification in `004.4`–`004.6`.
 - [Plan implementation draft preservation](../../../plans/plan-implementation-draft-preservation/plan.md)
   applies the same ownership and matching criteria to implementation actions.
+
+
+## Dense workbench follow-up (2026-10-22)
+
+The [dense workbench package](../../../plans/dense-workbench-performance/plan.md) owns the new controlled
+Threads, Dockview, and task-switch comparison. It reuses the contracts and
+existing lifecycle owners documented here. Its implementation and measurements
+are pending. Existing completed results remain historical; unresolved
+attribution work is not closed by the new plan.

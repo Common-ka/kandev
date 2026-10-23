@@ -103,3 +103,12 @@ No lifecycle optimization is justified from the available capture. Broad row
 identity has existing coverage in `task-switcher-render-stability.test.tsx` and
 `task-switcher-row-render-identity.test.tsx`. The new draft/lifecycle regression
 and matched production trace are still required before this order can close.
+
+
+## Dense workbench follow-up (2026-10-22)
+
+The [dense workbench package](../dense-workbench-performance/task-05-workbench-lifecycle.md) owns the new controlled
+Threads, Dockview, and task-switch comparison. It reuses the contracts and
+existing lifecycle owners documented here. Its implementation and measurements
+are pending. Existing completed results remain historical; unresolved
+attribution work is not closed by the new plan.

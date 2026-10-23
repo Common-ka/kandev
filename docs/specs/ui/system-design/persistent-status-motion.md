@@ -7,9 +7,34 @@ requirements:
   - REQ-UI-PERSISTENT-STATUS-MOTION-003
   - REQ-UI-PERSISTENT-STATUS-MOTION-004
   - REQ-UI-PERSISTENT-STATUS-MOTION-005
+  - REQ-UI-PERSISTENT-STATUS-MOTION-006
 ---
 
 # Persistent Status Motion System Design
+
+## Draft reduced-motion extension
+
+`REQ-UI-PERSISTENT-STATUS-MOTION-006` is proposed in the
+[dense workbench package](../../../plans/dense-workbench-performance/plan.md).
+This section supersedes earlier preservation of each primitive's reduced-motion
+policy only for the host-owned persistent indicators in that requirement.
+
+Reuse `persistent-motion-visibility.tsx`, `CompositorSpin`, `CompositorPulse`,
+and `GridSpinner`. The shared visibility helper already exists; do not rebuild
+its document/intersection lifecycle. Keep no-preference timing, stagger, color,
+geometry, and labels. Suppress infinite motion when `matchMedia` reports reduce,
+including runtime preference changes. Set a deliberate static transform and
+opacity so a grid cell cannot stop at zero scale or a status at zero opacity.
+Scope equivalent CSS fallback rules to owned indicators. Do not scan and pause
+all document animations. Cancel or pause owned effects consistently and clean
+up preference listeners. A visible unfocused split pane remains eligible for
+normal motion. Hidden document, offscreen target, and hidden panel gates remain.
+
+Component tests cover preference changes, fallback, active-state changes while
+hidden, and cleanup. Desktop and phone browser tests assert visible static
+status under reduce and the original visible motion under no-preference.
+Performance captures count running and paused animations separately; the
+number returned by `getAnimations()` is not an active-animation count.
 
 ## Purpose and boundaries
 

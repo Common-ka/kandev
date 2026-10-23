@@ -127,3 +127,12 @@ Follow-up implementation gates completed on 2026-09-17 at code revision
 - PostgreSQL evidence depends on a disposable service and must never use operator data.
 - The broad backend audit still has unrelated process-probe, home-config, and launcher failures in this workspace.
 - Physical SQLite space is reclaimed only by explicit maintenance after backup.
+
+
+## Dense workbench follow-up (2026-10-22)
+
+The [dense workbench package](../dense-workbench-performance/plan.md) owns the new controlled
+Threads, Dockview, and task-switch comparison. It reuses the contracts and
+existing lifecycle owners documented here. Its implementation and measurements
+are pending. Existing completed results remain historical; unresolved
+attribution work is not closed by the new plan.

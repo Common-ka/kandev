@@ -188,3 +188,12 @@ group active. See [evidence.md](evidence.md).
   visibility ownership without treating visible split panes as inactive.
 - Pausing fallback CSS must not suppress later visible or reduced-motion states.
 - The attached trace cannot establish an exact production repair in advance.
+
+
+## Dense workbench follow-up (2026-10-22)
+
+The [dense workbench package](../dense-workbench-performance/plan.md) owns the new controlled
+Threads, Dockview, and task-switch comparison. It reuses the contracts and
+existing lifecycle owners documented here. Its implementation and measurements
+are pending. Existing completed results remain historical; unresolved
+attribution work is not closed by the new plan.
