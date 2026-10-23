@@ -18,6 +18,7 @@ import (
 	"github.com/kandev/kandev/internal/agent/runtime/routingerr"
 	agentctltypes "github.com/kandev/kandev/internal/agentctl/types"
 	"github.com/kandev/kandev/internal/agentctl/types/streams"
+	"github.com/kandev/kandev/internal/common/launchwrapper"
 	"github.com/kandev/kandev/internal/common/logger"
 	"github.com/kandev/kandev/internal/events"
 	"github.com/kandev/kandev/internal/task/models"
@@ -922,10 +923,6 @@ func freshSessionModelCatalogReady(state *CachedModelState) bool {
 	return state != nil && (len(state.Models) > 0 || len(state.ConfigOptions) > 0 || state.ConfigOptionsSettled)
 }
 
-func (m *Manager) effectiveSessionModelForReset(ctx context.Context, execution *AgentExecution) string {
-	return m.captureSessionRuntimeConfigForReset(ctx, execution).Model
-}
-
 func (m *Manager) captureSessionRuntimeConfigForReset(
 	ctx context.Context,
 	execution *AgentExecution,
@@ -1359,6 +1356,7 @@ func (m *Manager) StopAgentWithReason(ctx context.Context, executionID string, r
 		}
 		return fmt.Errorf("execution %q not found: %w", executionID, ErrExecutionNotFound)
 	}
+	execution.cancelStartupRecovery()
 	execution.remoteInstanceLifecycleMu.Lock()
 	defer execution.remoteInstanceLifecycleMu.Unlock()
 	if current, currentExists := m.executionStore.Get(executionID); !currentExists || current != execution {
@@ -1418,7 +1416,15 @@ func (m *Manager) StopAgentWithReason(ctx context.Context, executionID string, r
 	// Try to gracefully stop via agentctl first, then always close connections.
 	// A retained runtime gets a bounded non-cancelled opportunity to
 	// stop the failed process before its environment is preserved for another retry.
+	if reason != StopReasonBackendShutdown {
+		m.preserveTurnChangesBeforeStop(stopCtx, execution, reason)
+	}
 	agentStopFailed := m.stopExecutionAgentctl(stopCtx, executionID, execution, backendForce)
+	// Backend shutdown retains interrupted delivery outcomes. Its terminal
+	// checkpoint follows confirmed process termination, before runtime cleanup.
+	if reason == StopReasonBackendShutdown && !backendForce && !agentStopFailed {
+		m.preserveTurnChangesBeforeStop(stopCtx, execution, reason)
+	}
 
 	// Stop the agent execution via the runtime that created it. A failed stop
 	// must remain tracked: removing it here would turn a retryable cleanup into
@@ -1627,6 +1633,10 @@ func (m *Manager) restartAgentProcess(
 	if err != nil {
 		return err
 	}
+	if err := client.ValidateLaunchWrapper(ctx, preparation.commands.wrapper); err != nil {
+		return err
+	}
+
 	if runtime := preparation.agentConfig.Runtime(); runtime != nil {
 		if err := m.prepareCursorMCPAuth(execution, preparation.profileInfo, execution.ExecutorType, runtime.ProjectMCPStrategy); err != nil {
 			return err
@@ -1799,6 +1809,7 @@ func (m *Manager) resetAgentRestartState(executionID string, commands agentComma
 		exec.ContinueCommand = commands.continue_
 		exec.AgentArgs = commands.args
 		exec.ContinueArgs = commands.continueArgs
+		exec.LaunchWrapper = commands.wrapper
 		m.resetStreamingStateWithHistory(exec)
 		select {
 		case <-exec.promptDoneCh:
@@ -2077,8 +2088,9 @@ const agentStartupLivenessGrace = 75 * time.Second
 //   - Passthrough process ID is set but process is not alive
 //   - Agent is in any other state (stopped, failed, etc.)
 //
-// An unavailable agentctl client, interactive runner, or status endpoint is
-// returned as an error rather than as a false result.
+// An unavailable agentctl client or interactive runner is returned as an error.
+// Status failures remain errors unless the owning runtime confirms that its
+// agentctl process is absent.
 func (m *Manager) ProbeAgentRunningForSession(ctx context.Context, sessionID string) (bool, error) {
 	// First check if we have an execution tracked for this session
 	execution, exists := m.GetExecutionBySessionID(sessionID)
@@ -2116,6 +2128,9 @@ func (m *Manager) ProbeAgentRunningForSession(ctx context.Context, sessionID str
 
 	status, err := client.GetStatus(ctx)
 	if err != nil {
+		if m.confirmAgentctlAbsent(ctx, execution) {
+			return false, nil
+		}
 		m.logger.Debug("failed to get agentctl status",
 			zap.String("session_id", sessionID),
 			zap.Error(err))
@@ -2162,6 +2177,10 @@ func (m *Manager) RecoverAgentPromptStream(ctx context.Context, sessionID string
 	if !exists {
 		return fmt.Errorf("session %q has no execution: %w", sessionID, ErrExecutionNotFound)
 	}
+	return m.recoverAgentPromptStream(ctx, execution)
+}
+
+func (m *Manager) recoverAgentPromptStream(ctx context.Context, execution *AgentExecution) error {
 	client, releaseClient := execution.AcquireAgentCtlClient()
 	if execution.PassthroughProcessID != "" || execution.IsPassthrough {
 		releaseClient()
@@ -2190,14 +2209,13 @@ func (m *Manager) RecoverAgentPromptStream(ctx context.Context, sessionID string
 	}
 	if client.HasAgentStream() {
 		releaseClient()
-		if execution.Status == v1.AgentStatusFailed && execution.FailureCode != durableDeliveryUncertainFailureCode &&
-			execution.FailureCode != durableDeliveryReconnectingFailureCode &&
-			execution.isSessionInitialized() && execution.ACPSessionID != "" {
-			return m.restoreRecoveredFailedExecution(ctx, execution)
-		}
-		return nil
+		return m.restoreExecutionAfterStreamRecovery(ctx, execution)
 	}
 	releaseClient()
+	return m.reconnectAgentPromptStream(ctx, execution)
+}
+
+func (m *Manager) reconnectAgentPromptStream(ctx context.Context, execution *AgentExecution) error {
 	if m.streamManager == nil {
 		return fmt.Errorf("stream manager is not configured")
 	}
@@ -2211,7 +2229,7 @@ func (m *Manager) RecoverAgentPromptStream(ctx context.Context, sessionID string
 	case <-ctx.Done():
 		return ctx.Err()
 	}
-	client, releaseClient = execution.AcquireAgentCtlClient()
+	client, releaseClient := execution.AcquireAgentCtlClient()
 	if client == nil {
 		return fmt.Errorf("agentctl client is unavailable")
 	}
@@ -2220,6 +2238,10 @@ func (m *Manager) RecoverAgentPromptStream(ctx context.Context, sessionID string
 	if !hasAgentStream {
 		return fmt.Errorf("agent stream not connected")
 	}
+	return m.restoreExecutionAfterStreamRecovery(ctx, execution)
+}
+
+func (m *Manager) restoreExecutionAfterStreamRecovery(ctx context.Context, execution *AgentExecution) error {
 	if execution.Status == v1.AgentStatusFailed && execution.FailureCode != durableDeliveryUncertainFailureCode &&
 		execution.FailureCode != durableDeliveryReconnectingFailureCode &&
 		execution.isSessionInitialized() && execution.ACPSessionID != "" {
@@ -2230,11 +2252,15 @@ func (m *Manager) RecoverAgentPromptStream(ctx context.Context, sessionID string
 
 func (m *Manager) restoreRecoveredFailedExecution(ctx context.Context, execution *AgentExecution) error {
 	client, releaseClient := execution.AcquireAgentCtlClient()
-	defer releaseClient()
 	if client == nil {
+		releaseClient()
 		return fmt.Errorf("agentctl client is unavailable")
 	}
 	status, err := client.GetStatus(ctx)
+	// The lease covers only the status read. Marking the execution ready takes
+	// the execution store lock and persists the row, which must not run while
+	// this execution's client lease is held.
+	releaseClient()
 	if err != nil {
 		return fmt.Errorf("failed to verify agent status after stream recovery: %w", err)
 	}
@@ -3163,7 +3189,7 @@ func (m *Manager) stopAgentViaBackend(ctx context.Context, executionID string, e
 		}
 		runtimeInstance.Metadata = metadata
 	}
-	if err := rt.StopInstance(ctx, runtimeInstance, force); err != nil {
+	if err := m.stopWorkspaceRuntime(ctx, rt, runtimeInstance, force); err != nil {
 		// During shutdown the runtime instance may already be stopping or
 		// absent. Only surface this at WARN outside shutdown.
 		if m.IsShuttingDown() {
@@ -3256,12 +3282,11 @@ func (m *Manager) buildFreshAgentCommandWithProfile(
 	}
 
 	opts := agents.CommandOptions{
-		Model:               model,
-		SessionID:           "", // Fresh start — no resume flags
-		AutoApprove:         autoApprove,
-		PermissionValues:    permissionValues,
-		CLIFlagTokens:       cliFlagTokens,
-		CommandPrefixTokens: commandPrefixTokens,
+		Model:            model,
+		SessionID:        "", // Fresh start — no resume flags
+		AutoApprove:      autoApprove,
+		PermissionValues: permissionValues,
+		CLIFlagTokens:    cliFlagTokens,
 		// Runtime is "standalone" / "docker" / "sprites" — MockAgent
 		// reads this to pick a bare name (container PATH lookup) vs.
 		// an absolute host path.
@@ -3276,5 +3301,7 @@ func (m *Manager) buildFreshAgentCommandWithProfile(
 	if err := validateBuiltAgentCommands(args, continueArgs); err != nil {
 		return agentCommands{}, err
 	}
-	return newAgentCommands(args, continueArgs), nil
+	commands := newAgentCommands(args, continueArgs)
+	commands.wrapper = launchwrapper.Profile(commandPrefixTokens)
+	return commands, nil
 }

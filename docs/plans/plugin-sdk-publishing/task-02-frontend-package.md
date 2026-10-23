@@ -123,7 +123,10 @@ record drift, tool mismatch, unexpected files, application imports, runtime
 dependencies, and modified archive bytes. The local Go/npm smoke passed.
 Package contract tests, package typecheck, and web typecheck passed. The web
 check required `NODE_OPTIONS=--max-old-space-size=8192` after the default heap
-limit was exceeded. Exact-head CI remains pending. WO01 Docker validation remains pending in CI.
+limit was exceeded. Final CI remains pending; the earlier Docker builder passed.
+CI exposed inherited `GOFLAGS` in the scoped npm-configuration test. Its fixture
+now supplies clean Go inputs so the test reaches the npm boundary. Production
+public-trust rejection remains unchanged.
 
 Packaging uses Node 24.19.0 and npm 11.21.0. The npm pin supports OIDC publication
 and OIDC dist-tag operations under the current

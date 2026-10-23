@@ -372,7 +372,7 @@ func taskFromProto(p *pluginv1.Task) (Task, error) {
 		WorkflowStepID:         p.GetWorkflowStepId(),
 		Position:               p.GetPosition(),
 		AssigneeAgentProfileID: p.GetAssigneeAgentProfileId(),
-		Labels:                 p.GetLabels(),
+		Labels:                 p.GetLabels(), //nolint:staticcheck // Preserve the released API v1 labels field on the wire.
 		Autopilot:              p.GetAutopilot(),
 		WIPAdmitted:            p.GetWipAdmitted(),
 		QueuedForStepID:        p.GetQueuedForStepId(),

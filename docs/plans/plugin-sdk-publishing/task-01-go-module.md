@@ -35,6 +35,8 @@ plugin binaries continue to execute against the extracted host contract.
   paths affected by the move.
 - Create local Go consumer archive/proxy support and tests under
   `scripts/pluginsdk/`; support `--backend-only --skip-compatibility-check`.
+  Enforce the required isolation and CI cases below, including the exact-module
+  checksum exception and SDK-only backend/E2E selection tests.
   Add `check-proto-generation.mjs` and its tests to snapshot generated outputs,
   regenerate, and byte-compare the results without staging them.
 - Add `sdk_binary_compatibility_test.go` under the host runtime tests. Build a
@@ -44,14 +46,15 @@ plugin binaries continue to execute against the extracted host contract.
 ## Required isolation and CI cases
 
 Use the design's [clean-consumer environments](../../specs/plugins/system-design/sdk-distribution.md#clean-consumers).
-The local proxy has no client fallback and exempts only the exact SDK module
-from checksum lookup. Keep other dependencies authenticated. Set `GOWORK=off`
+The local proxy has no client fallback and sets
+`GONOSUMDB=github.com/kdlbs/kandev/pluginsdk` only for local consumers.
+Keep other dependencies authenticated. Set `GOWORK=off`
 and `GOENV=off`. Allocate fresh caches outside the checkout. Deleting the SDK
 archive must fail even when that version exists publicly.
 
 Update `.github/workflows/backend-tests.yml` and `.github/workflows/e2e-tests.yml`
 for `pluginsdk/**` and `scripts/pluginsdk/**`. Preserve Markdown exclusions and
-required-check reporting. Add `.github/scripts/plugin-sdk-ci-contract_test.py`
+  required-check reporting. Add `.github/scripts/plugin-sdk-ci-contract_test.py`
 with single-path fixtures for SDK Go, proto, module, tooling, and README changes.
 Read actual workflow patterns through `changed-paths.py`. Assert SDK race/vet,
 host compile/runtime coverage, and E2E build/fixture selection for source changes.
@@ -170,7 +173,7 @@ Validation completed locally:
 
 Docker is unavailable locally. The required build-stage check runs in the
 `Plugin SDK Docker builder` CI job, included in the backend gate. This work
-order remains `in_progress` until CI validates the preview remediation below.
+order remains `in_progress` until final CI validates all remediation below.
 
 CI follow-up: the shrink-only deprecation baseline cannot accept a renamed path.
 The existing `Task.Labels` deprecation now has an explicit compatibility-ledger
@@ -182,5 +185,8 @@ The exact-head `Plugin SDK Docker builder` CI job passed for
 Preview CI exposed a second source mount at `cmd/preview/build.go`. Its Docker
 mount now preserves `apps/backend` and read-only `pluginsdk` siblings. Fork
 preview artifacts include both paths and retain the repository-relative layout.
-A fake-Docker command regression test covers the mounts; actual preview CI
-verification awaits the next push.
+A fake-Docker command regression test covers the mounts. Later CI passed the
+Docker builder and preview checks, but exposed SDK lint and legacy-checkout
+issues. Final remediation adds release history to runtime shards, retains the
+existing adapter-only file-length exemption at the new path, and documents the
+deprecated labels read required for API v1 compatibility.

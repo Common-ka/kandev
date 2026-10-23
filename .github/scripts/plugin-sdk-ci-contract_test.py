@@ -39,6 +39,12 @@ class SDKSelectionTests(unittest.TestCase):
         self.assertIn("go vet ./...", text)
         self.assertIn("python3 .github/scripts/plugin-sdk-ci-contract_test.py", text)
 
+    def test_runtime_shards_fetch_the_legacy_sdk_release_source(self):
+        text = (ROOT / ".github/workflows/backend-tests.yml").read_text()
+        job = text.split("  test_shards:\n", 1)[1].split("\n  test_repository", 1)[0]
+        checkout = job.split("      - name: Checkout code\n", 1)[1].split("\n      - name:", 1)[0]
+        self.assertIn("fetch-depth: 0", checkout)
+
     def test_host_fixture_build_and_artifact_checks_remain_selected(self):
         backend = (ROOT / ".github/workflows/backend-tests.yml").read_text()
         e2e = (ROOT / ".github/workflows/e2e-tests.yml").read_text()

@@ -2,7 +2,7 @@
 
 Reviewed: 2026-10-15. Evidence: local source at `d7a44e96e` and the uncommitted
 design package. This review does not establish the state of upstream `main` or
-registry ownership. No implementation or release has run.
+registry ownership. No implementation or release had run at that checkpoint.
 
 ## Reconciliation status
 
@@ -10,7 +10,11 @@ On 2026-10-16, R1–R5 were incorporated into the canonical
 [system design](../../specs/plugins/system-design/sdk-distribution.md), its
 requirements, and work orders 01–05. The sections below preserve the original
 findings and their rationale. Their proposed corrections now describe the
-reconciled draft. They remain unimplemented and are not production failures.
+reconciled design. These were design gaps, not observed production failures.
+Implementation followed the reconciliation after user authorization on
+2026-10-19. The canonical requirements and system design define the contract;
+the [plan](plan.md) and work orders record current validation. This review
+retains its filename as a historical record.
 
 Source was rechecked at PR head `8548962279d8d0700ac44d7a4013ce1a71353329` and
 upstream `main` `76954ff53ea20b0263dd15c01c7149a531668341`. Upstream still omits
@@ -268,5 +272,7 @@ Document checks passed on 2026-10-15: specification catalog validation,
 specification lint, whitespace checks, and 22 local links across seven plan
 documents. On 2026-10-16 the task walkthrough was replaced with the complete
 proposal walkthrough linked above, following user feedback about its scope.
-Product code and release paths have not been executed. The original five work
-orders remain pending. Required amendments are reconciled, with validation recorded in the plan.
+At that review checkpoint, product code and release paths had not been executed,
+and the original five work orders were pending. Required amendments were
+reconciled before implementation. See the plan for subsequent validation;
+public publication remains a separate release gate.

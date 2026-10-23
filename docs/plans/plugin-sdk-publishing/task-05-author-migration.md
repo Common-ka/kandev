@@ -136,7 +136,7 @@ source-build boundary. Release guidance covers protected setup, retained
 artifacts, bootstrap provenance, public verification, and immutable recovery.
 Root/backend guidance, release/plugin skills, live source authority links, and
 both SDK READMEs use the extracted module. Historical completed records remain
-snapshots; the pending agent-tool fixture note identifies the relocated SDK.
+snapshots, including earlier fixture test results that name the old SDK path.
 
 The [template handoff](template-migration.md) records current commits in both
 external templates and preserves their backend-owned packaging dependency.

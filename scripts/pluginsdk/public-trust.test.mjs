@@ -81,7 +81,12 @@ test("reads inherited scoped npm configuration before isolating caches", async (
   await assert.rejects(
     validatePublicTrust({
       cwd: root,
-      env: { ...process.env, GOENV: "off", NPM_CONFIG_USERCONFIG: config },
+      env: {
+        ...process.env,
+        ...cleanGo,
+        GOENV: "off",
+        NPM_CONFIG_USERCONFIG: config,
+      },
     }),
     /public trust.*registry/,
   );

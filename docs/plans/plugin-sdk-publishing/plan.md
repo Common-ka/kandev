@@ -199,9 +199,9 @@ new Playwright suite is applicable.
 
 ## Work orders
 
-- [ ] [Task 01: Extract Go SDK and preserve host execution](task-01-go-module.md) (Docker passed; preview remediation pending)
-- [ ] [Task 02: Package standalone frontend SDK](task-02-frontend-package.md) (local checks passed; CI pending)
-- [ ] [Task 03: Enforce consumer compatibility](task-03-compatibility-check.md) (local checks passed; CI pending)
+- [ ] [Task 01: Extract Go SDK and preserve host execution](task-01-go-module.md) (implemented; final CI validation in progress)
+- [ ] [Task 02: Package standalone frontend SDK](task-02-frontend-package.md) (implemented; final CI validation in progress)
+- [ ] [Task 03: Enforce consumer compatibility](task-03-compatibility-check.md) (implemented; final CI validation in progress)
 - [ ] [Task 04: Publish SDKs through Stable releases](task-04-stable-publication.md)
 - [ ] [Task 05: Document author and maintainer migration](task-05-author-migration.md)
 
@@ -274,3 +274,42 @@ results remain pending. Public Go/npm availability has not been established.
 - External template/Forgejo migrations are separate repository work. This
   package provides the public dependency contract and a handoff, not changes to
   those repositories.
+
+## Validation and review cleanup
+
+The final implementation CI exposed four SDK validation issues: the shared
+lint configuration still matched the old module path; an npm configuration
+test inherited CI's Go flags; runtime shards lacked the legacy release source;
+and a historical work-order path note selected unsupported legacy frontmatter.
+The fixes preserve the narrow adapter lint exemption and API v1 labels mapping,
+isolate only the npm test's Go inputs, fetch release history for runtime tests,
+and leave the historical result unchanged. No publication contract is relaxed.
+Two upstream housekeeping tests now import the extracted SDK module.
+
+The branch incorporates current main, including its fix for fake process IDs
+colliding with the test process in the orphan-reap test. Six review threads
+refer to amendments reconciled before implementation. Their current contract
+and test evidence is being verified for disposition.
+
+Local remediation checks and exact-head CI are tracked separately. The work
+orders remain in progress until the final CI and review gates pass. Registry
+configuration, first publication, external template changes, and author notices
+remain separate release or repository handoffs.
+
+Focused cleanup validation:
+
+- SDK race tests, vet, and lint passed. The imported housekeeping tests passed
+  with the race detector. The real legacy subprocess and the
+  upstream orphan-reap regression each passed three runs with the race detector.
+- Fresh-cache Go/npm consumer passed, including Go-only, frontend-only, combined,
+  and insufficient-host-floor compatibility checks, plus both TypeScript modes.
+- All 43 release/packaging/trust tests passed with the pinned npm tool and GPG
+  available. The signature case was rerun after correcting the local tool PATH.
+- Consumer/proto helper tests: 11 passed. SDK CI contracts: 10 passed. Backend
+  workflow contracts: 25 passed. Release workflow contracts: 68 passed.
+- Documentation coverage passed for exactly the five SDK work orders after the
+  historical-only edit was removed. Catalog: 401 decisions and 1724 specs.
+  Specification and harness checks passed; 204 harness files validated.
+
+These are local results. Final-head CI, review resolution, and lifecycle status
+promotion remain pending until the remote checks complete.

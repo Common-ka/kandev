@@ -43,6 +43,8 @@ rules; an authorized later release supplies public installation evidence.
   the SDK tag after `publish-release`, including on backfill.
 - Verify immutable tag commit, npm integrity/record, uncertain response recovery,
   retry bounds, registry visibility, OIDC/provenance, and no `latest` downgrade.
+- Retain the original archive and signed identity receipt. Implement the explicit
+  `bootstrap_required` state and recovery rules in the contract below.
 - Implement public mode of `consumer-smoke.mjs` and include it in the SDK job.
   Reject null metadata at publication; verify reused SDK versions too.
 
