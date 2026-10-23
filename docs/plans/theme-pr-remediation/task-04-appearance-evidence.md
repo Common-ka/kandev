@@ -166,3 +166,19 @@ Reproduction command on that merge:
 with `KANDEV_TEST_POSTGRES_DSN` pointing to the disposable database. The first
 matrix remains historical failure evidence (9 failed checks, including dependent
 aggregate gates); the correction push requires new exact-head CI evidence.
+
+
+A subsequent matrix reached the backend shard that had previously stopped at
+the module download. It exposed the pre-existing exact subscription-count test:
+`TestTaskEventBroadcaster_NoDuplicateSubscriptions` expected 79 subjects, while
+`plugin.themes_changed` makes the intended total 80. The exact assertion failed
+locally before its expectation was updated. The count remains exact; duplicate
+subscription detection is retained. The full WebSocket package is checked with
+`go test -trimpath -race ./internal/gateway/websocket -count=3`, followed by
+changed-package lint. Remote matrix evidence remains a separate gate.
+
+The three race-enabled WebSocket package runs and changed-package lint passed.
+The second remote matrix completed with 85 passed, 17 skipped, and two failed
+checks: the stale subscription assertion and its dependent backend aggregate.
+Frontend, browser, static, module-download and Postgres checks passed in that
+matrix. The final assertion correction still requires its own remote evidence.
