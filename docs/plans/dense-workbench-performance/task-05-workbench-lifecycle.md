@@ -27,6 +27,46 @@ system_design:
 
 # Task 05: Dockview and editor lifecycle
 
+The completed six-pair grid reference confirms a streaming frame-gap regression
+despite reduced history traffic. A bounded CSS containment experiment tested
+the existing fixed-size native transcript wrapper against the frozen retained
+build. It preserved the tested desktop and phone behavior but regressed
+streaming measurements, so the production change was removed. The CSS
+containment specification establishes layout and paint boundaries, including
+new positioning and stacking contexts; those compatibility effects require
+browser checks ([W3C CSS Containment](https://www.w3.org/TR/css-contain-2/)).
+
+The benchmark's stored-content assertion now checks the exact ordered tick
+sequence, rather than only its count and final marker. The same harness checks
+both versions. Earlier recorded runs retain their original validation scope.
+
+The containment candidate passes typecheck, scoped lint, the production E2E
+asset build, and 112 component tests in four files. Fresh desktop checks passed
+all 28 scrolling, selection, prompt navigation, Markdown wrapping/table resizing,
+and canonical stream cases (`/tmp/kandev-run.e2e.YwYwOtm7.log`, 5.5 minutes).
+Two additional Threads layout cases passed (`containment-layout-logs/`, 1 minute).
+All 23 phone checks passed (`containment-mobile-logs/`, 4.3 minutes), including
+touch scroll state, unloaded prompts, text motion/selection, table wrapping,
+canonical delivery, native Threads controls, session picking, and saved views.
+The desktop and phone captures were inspected; the grid and native phone
+composition remain intact. Captures and the named log directories are under
+the task's diagnostic directory.
+
+The two alternating matched pairs completed in 16.1 minutes. Both arms used the
+same backend binary, 1,000 tasks, six chats with 120 seeded primary messages and
+100 loaded messages each, and 1,800 updates per sample. All four samples passed
+the exact ordered-update check with zero HTTP or verification errors. Normal
+idle main-thread time fell 10.89% and 6.28%; reduced-motion idle fell 11.39% and
+11.73%. Streaming main-thread time increased 3.00% and 3.37%. Frame-gap p95 was
+133.3 → 133.4 ms in pair 1 and 83.4 → 150 ms in pair 2. The experiment was
+removed because the idle gain came with worse streaming results.
+
+Evidence under the diagnostic directory: `matched-dense-1792793604258.json`,
+`containment-two-pair-summary.json`, `containment-two-pair-host-load.jsonl`,
+`rejected-transcript-containment.patch`, and
+`containment-benchmark-logs/kandev-run.e2e.qMzO7hcR.log`. The ordered-update
+assertion remains as benchmark validation; no containment production code remains.
+
 ## Summary
 
 Attribute and reduce repeated work during dense Dockview and task switching. Continue the existing session-efficiency Task 05 investigation, with no speculative layout or editor rewrite.

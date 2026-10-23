@@ -57,6 +57,18 @@ its backend log, `reference-six-pair-grid-1x-summary.json`, and
 `reference-six-pair-grid-1x-host-load.jsonl`. Runner log:
 `/tmp/kandev-run.e2e.7RtV7dhF.log`.
 
+## Rejected containment follow-up
+
+The later CSS containment experiment was rejected and removed. In two matched
+pairs against the retained build, normal idle work fell 6.28–10.89% and
+reduced-motion idle work fell 11.39–11.73%, but streaming main-thread time
+increased 3.00–3.37%. Streaming frame-gap p95 was unchanged in one pair and rose
+from 83.4 to 150 ms in the other. All four samples verified the exact ordered
+1,800-update sequence with zero errors. Desktop and phone correctness passed,
+but those checks do not justify a performance tradeoff. Raw evidence:
+`matched-dense-1792793604258.json`; paired summary:
+`containment-two-pair-summary.json`. Both are in the diagnostic directory.
+
 ## Implemented and pushed
 
 | Commit        | Change                                                       | User-visible effect                                                             |

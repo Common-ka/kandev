@@ -87,7 +87,11 @@ export async function prepareDenseStream(
           (message) => message.author_type === "agent" && message.content.includes(lastMarker),
         );
         expect(final?.metadata?.durable_delivery).toBe(true);
-        expect(final?.content.match(/Dense canonical tick /g)).toHaveLength(updatesPerSession);
+        const ticks = Array.from(
+          final?.content.matchAll(/Dense canonical tick (\d+)/g) ?? [],
+          (match) => Number(match[1]),
+        );
+        expect(ticks).toEqual(Array.from({ length: updatesPerSession }, (_, index) => index));
       }
       return { verificationErrors };
     },
