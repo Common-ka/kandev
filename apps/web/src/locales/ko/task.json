@@ -2900,5 +2900,6 @@
   "questionImageInvalid": "이미지가 손상되었거나 지원하지 않는 형식입니다.",
   "questionImageTooLarge": "이미지가 미리보기 크기 제한을 초과합니다.",
   "questionImageUnavailable": "이미지를 사용할 수 없습니다. 질문에는 계속 답변할 수 있습니다.",
-  "questionImageRetry": "다시 시도"
+  "questionImageRetry": "다시 시도",
+  "mcpReasonSessionExcluded": "이 세션에서 제외됨"
 }

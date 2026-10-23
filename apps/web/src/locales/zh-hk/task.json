@@ -2900,5 +2900,6 @@
   "questionImageInvalid": "此圖像已損壞或格式不受支援。",
   "questionImageTooLarge": "此圖像超過預覽大小限制。",
   "questionImageUnavailable": "圖像不可用。您仍可回答問題。",
-  "questionImageRetry": "重試"
+  "questionImageRetry": "重試",
+  "mcpReasonSessionExcluded": "已從此工作階段排除"
 }

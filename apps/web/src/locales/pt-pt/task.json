@@ -2900,5 +2900,6 @@
   "questionImageInvalid": "Esta imagem está danificada ou tem um formato não suportado.",
   "questionImageTooLarge": "Esta imagem excede o limite de tamanho da pré-visualização.",
   "questionImageUnavailable": "Imagem indisponível. Pode continuar a responder à pergunta.",
-  "questionImageRetry": "Tentar novamente"
+  "questionImageRetry": "Tentar novamente",
+  "mcpReasonSessionExcluded": "Excluído desta sessão"
 }

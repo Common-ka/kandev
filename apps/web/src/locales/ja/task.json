@@ -2900,5 +2900,6 @@
   "questionImageInvalid": "この画像は破損しているか、形式が対応していません。",
   "questionImageTooLarge": "この画像はプレビューのサイズ制限を超えています。",
   "questionImageUnavailable": "画像を表示できません。質問には引き続き回答できます。",
-  "questionImageRetry": "再試行"
+  "questionImageRetry": "再試行",
+  "mcpReasonSessionExcluded": "このセッションから除外されています"
 }

@@ -2900,5 +2900,6 @@
   "questionImageInvalid": "Ţĥĩś ĩḿàĝē ĩś ďàḿàĝēď ōŕ ĥàś àń ũńśũƥƥōŕţēď ƒōŕḿàţ.",
   "questionImageTooLarge": "Ţĥĩś ĩḿàĝē ēxćēēďś ţĥē ƥŕēvĩēŵ śĩźē ĺĩḿĩţ.",
   "questionImageUnavailable": "Ĩḿàĝē ũńàvàĩĺàƀĺē. Ŷōũ ćàń śţĩĺĺ àńśŵēŕ ţĥē qũēśţĩōń.",
-  "questionImageRetry": "Ŕēţŕŷ"
+  "questionImageRetry": "Ŕēţŕŷ",
+  "mcpReasonSessionExcluded": "Ēxćĺũďēď ƒŕōḿ ţĥĩś śēśśĩōń"
 }
