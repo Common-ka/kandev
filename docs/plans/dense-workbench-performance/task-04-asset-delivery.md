@@ -1,7 +1,7 @@
 ---
 id: "04-asset-delivery"
 title: "Asset delivery and import boundaries"
-status: pending
+status: in_progress
 wave: 4
 depends_on: 
   - "03-motion-eligibility"
@@ -87,5 +87,34 @@ Wrong variant headers can break caches or execute compressed bytes as JavaScript
 
 ## Results
 
-Pending. No implementation or performance result is claimed.
+2026-10-23: The Vite build now writes deterministic gzip siblings for JS/CSS
+files of at least 1 KiB when compression reduces their size. The native asset
+handler negotiates gzip/identity, preserves the original MIME type, merges
+Vary, and serves the selected representation through ServeContent. The
+non-seekable path now honors HEAD, conditional requests, and ranges too.
 
+Node tests first failed on absent output and missing error propagation, then
+passed after implementation. Handler tests first failed on negotiation,
+Vary, and non-seekable HTTP semantics, then passed. The production Vite build
+and frontend type check pass. The packaging audit found that Makefile's
+recursive copy, Windows robocopy mirror, and Go embedded tree retain sidecars.
+After `make sync-embedded-web`, `TestEmbeddedCompressedAsset` passed against
+the generated embedded tree, not the fallback shell.
+
+The built asset tree contained 552 compressed files: 62,080,399 original bytes
+and 15,810,996 compressed bytes. All 552 siblings decoded exactly. These are
+whole-build totals, not a page-load claim. Raw file results are in
+`.kandev/diagnostics/dense-workbench-performance/precompressed-assets.json`.
+
+A browser regression captured Monaco loader/editor API requests before opening
+any editor. The initiator stack leads through monaco-init from the route chunk;
+two eager imports in FileEditorContent and DiffViewerResolved invoke module
+initialization. Both now use a lazy boundary that waits for the shared Monaco
+configuration before rendering. Loading copy and default editor selection are
+preserved. The candidate browser check makes no Monaco request before use and
+successfully opens the file editor. Existing resolver/preview/initialization
+tests pass (10 tests). Desktop and phone diff-refresh checks pass for Monaco
+and Pierre. The native phone viewer opens the same file without loading Monaco.
+
+The matched dense and cold-load timing series remains pending. Compression is
+not credited with reducing warm switching or JavaScript execution.
