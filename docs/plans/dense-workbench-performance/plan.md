@@ -2,6 +2,7 @@
 created: 2026-10-22
 status: in_progress
 requirements:
+  - REQ-PLATFORM-POSTGRES-DOMAIN-STORE-PARITY-007
   - REQ-PLUGINS-PROMPT-HISTORY-HOST-006
   - REQ-PLATFORM-SESSION-SUBSCRIPTION-RECOVERY-001
   - REQ-PLATFORM-VIEWPORT-SESSION-DELIVERY-001
@@ -11,6 +12,7 @@ requirements:
   - REQ-UI-PERSISTENT-STATUS-MOTION-006
   - REQ-PLATFORM-WEB-ASSET-DELIVERY-001
 system_design:
+  - ../../specs/platform/system-design/postgres-domain-store-parity.md
   - ../../specs/plugins/system-design/conversation-source-reconciliation.md
   - ../../specs/platform/system-design/session-subscription-recovery.md
   - ../../specs/platform/system-design/viewport-bounded-session-delivery.md
@@ -95,15 +97,15 @@ statuses actually established by new evidence.
 
 ## Technical approach and compatibility
 
-| Boundary | Change and invariant | Evidence/fallback |
-| --- | --- | --- |
-| Task repository/service to gateway | Trace ordinary message and turn publications through transaction receipts and `conversation_delivery.go`. Preserve complete revision intervals and privacy projection. | SQLite production path plus PostgreSQL receipt parity if touched. Exceptional incomplete receipts still reset. |
-| Core chat and plugin facade | Apply complete batches by ID. Coalesce only equivalent concurrent recovery reads within the existing store/session/auth owner. | Native and plugin consumers, missed delivery, stale responses, reconnect. No global cache or removal of periodic backfill. |
-| Threads | Preserve viewport-owned activation and current visible tile count. | Six-visible-tile grid and horizontally scrolled 30-column list. |
-| Dockview | Preserve `detailActive`, split visibility, saved layout, pinned tabs, environment mapping, and fast/slow switch semantics. | Same-layout, changed-layout, cross-environment, and A-B-A cases. No forced fast path across incompatible layouts. |
-| Composer | Retain mounted editor state; gate only proven unnecessary hidden effects. | Text, rich draft, attachments, focus, expand/collapse, delayed send acknowledgement. |
-| Status motion | Extend existing owned primitives for reduced motion. | Web Animations and CSS fallback; static status stays visible. |
-| Static assets | Build gzip siblings and negotiate in the native handler. | Identity fallback, packaged resources, original decoded bytes, desktop and phone route load. |
+| Boundary                           | Change and invariant                                                                                                                                                   | Evidence/fallback                                                                                                          |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Task repository/service to gateway | Trace ordinary message and turn publications through transaction receipts and `conversation_delivery.go`. Preserve complete revision intervals and privacy projection. | SQLite production path plus PostgreSQL receipt parity if touched. Exceptional incomplete receipts still reset.             |
+| Core chat and plugin facade        | Apply complete batches by ID. Coalesce only equivalent concurrent recovery reads within the existing store/session/auth owner.                                         | Native and plugin consumers, missed delivery, stale responses, reconnect. No global cache or removal of periodic backfill. |
+| Threads                            | Preserve viewport-owned activation and current visible tile count.                                                                                                     | Six-visible-tile grid and horizontally scrolled 30-column list.                                                            |
+| Dockview                           | Preserve `detailActive`, split visibility, saved layout, pinned tabs, environment mapping, and fast/slow switch semantics.                                             | Same-layout, changed-layout, cross-environment, and A-B-A cases. No forced fast path across incompatible layouts.          |
+| Composer                           | Retain mounted editor state; gate only proven unnecessary hidden effects.                                                                                              | Text, rich draft, attachments, focus, expand/collapse, delayed send acknowledgement.                                       |
+| Status motion                      | Extend existing owned primitives for reduced motion.                                                                                                                   | Web Animations and CSS fallback; static status stays visible.                                                              |
+| Static assets                      | Build gzip siblings and negotiate in the native handler.                                                                                                               | Identity fallback, packaged resources, original decoded bytes, desktop and phone route load.                               |
 
 ## UI preservation and motion preview
 
@@ -124,15 +126,15 @@ The [benchmark protocol](benchmark.md) defines the fixture, measurements,
 comparison, and limits. Work orders name exact commands and implementation
 targets. New filenames are planned outputs, not existing test evidence.
 
-| Acceptance criteria | Owned evidence |
-| --- | --- |
-| `AC-PLUGINS-PROMPT-HISTORY-HOST-006.3`, `.6`, `.9`, `.10` | WO02: real writer-to-gateway regression, core/facade tests, desktop and phone recovery flows |
-| `AC-PLATFORM-SESSION-SUBSCRIPTION-RECOVERY-001.2`, `.3`, `.8` | WO02: subscription acknowledgement, shared recovery, reconnect and late-read races |
-| `AC-PLATFORM-VIEWPORT-SESSION-DELIVERY-001.1` | WO01/05: visible consumer counts while horizontal scrolling and switching panels |
-| `AC-UI-SESSION-REFRESH-EFFICIENCY-003.3`, `.4`, `004.1` through `.3` | WO05: mounted real editors, A-B-A draft/scroll restoration, desktop and phone navigation |
-| `AC-UI-PERSISTENT-STATUS-MOTION-004.1` through `.5`, `006.1` through `.3` | WO03: hidden/visible and runtime preference tests, desktop/mobile browser motion checks |
-| `AC-PLATFORM-WEB-ASSET-DELIVERY-001.1` through `.4` | WO04: build helper, handler, packaged asset smoke and browser checks |
-| All above | WO06: matched A/B evidence, correctness matrix, no unsupported performance claims |
+| Acceptance criteria                                                       | Owned evidence                                                                               |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `AC-PLUGINS-PROMPT-HISTORY-HOST-006.3`, `.6`, `.9`, `.10`                 | WO02: real writer-to-gateway regression, core/facade tests, desktop and phone recovery flows |
+| `AC-PLATFORM-SESSION-SUBSCRIPTION-RECOVERY-001.2`, `.3`, `.8`             | WO02: subscription acknowledgement, shared recovery, reconnect and late-read races           |
+| `AC-PLATFORM-VIEWPORT-SESSION-DELIVERY-001.1`                             | WO01/05: visible consumer counts while horizontal scrolling and switching panels             |
+| `AC-UI-SESSION-REFRESH-EFFICIENCY-003.3`, `.4`, `004.1` through `.3`      | WO05: mounted real editors, A-B-A draft/scroll restoration, desktop and phone navigation     |
+| `AC-UI-PERSISTENT-STATUS-MOTION-004.1` through `.5`, `006.1` through `.3` | WO03: hidden/visible and runtime preference tests, desktop/mobile browser motion checks      |
+| `AC-PLATFORM-WEB-ASSET-DELIVERY-001.1` through `.4`                       | WO04: build helper, handler, packaged asset smoke and browser checks                         |
+| All above                                                                 | WO06: matched A/B evidence, correctness matrix, no unsupported performance claims            |
 
 Run targeted Chromium E2Es for streaming, recovery, dense Threads, Dockview,
 and navigation. Run mobile-chrome counterparts for recovery, status motion,
@@ -144,7 +146,7 @@ absolute timing assertions in CI.
 ## Work orders
 
 - [ ] [01: Dense fixture and baseline](task-01-dense-baseline.md)
-- [ ] [02: Incremental conversation repair](task-02-conversation-repair.md)
+- [x] [02: Incremental conversation repair](task-02-conversation-repair.md)
 - [x] [03: Persistent motion eligibility](task-03-motion-eligibility.md)
 - [ ] [04: Asset delivery and import boundaries](task-04-asset-delivery.md)
 - [ ] [05: Dockview and editor lifecycle](task-05-workbench-lifecycle.md)

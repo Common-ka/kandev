@@ -5,10 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3"
-
-	"github.com/kandev/kandev/internal/db"
 	"github.com/kandev/kandev/internal/startup"
 )
 
@@ -22,10 +18,9 @@ func TestPersistenceContentionFixture(t *testing.T) {
 		{name: "reader pool", stage: "reader_ping", poolToHold: "reader"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			writer := openSingleConnectionSQLite(t)
-			reader := openSingleConnectionSQLite(t)
-			pool := db.NewPool(writer, reader)
-			t.Cleanup(func() { _ = pool.Close() })
+			pool := openSQLiteHealthPool(t)
+			writer, reader := pool.Writer(), pool.Reader()
+			reader.SetMaxOpenConns(1)
 			if _, err := writer.Exec("CREATE TABLE required_probe (id TEXT PRIMARY KEY)"); err != nil {
 				t.Fatalf("create required table: %v", err)
 			}
@@ -91,15 +86,4 @@ func TestPersistenceContentionFixture(t *testing.T) {
 			t.Log("recovery=successful")
 		})
 	}
-}
-
-func openSingleConnectionSQLite(t *testing.T) *sqlx.DB {
-	t.Helper()
-	conn, err := sqlx.Open("sqlite3", ":memory:")
-	if err != nil {
-		t.Fatalf("open sqlite: %v", err)
-	}
-	conn.SetMaxOpenConns(1)
-	t.Cleanup(func() { _ = conn.Close() })
-	return conn
 }

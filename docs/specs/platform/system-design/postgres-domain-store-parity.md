@@ -102,6 +102,12 @@ An immediate probe runs before readiness. A background probe then runs every 15 
 
 Each probe pings the shared writer and reader. It also checks each descriptor's required tables through `internal/db` schema helpers.
 
+Read-only table metadata checks use the existing reader pool. SQLite can read
+schema metadata from its WAL snapshot while the single writer handles messages.
+The initial writer ping still fails a probe when the writer cannot respond.
+PostgreSQL uses the same connection pool for both roles. Table absence, query
+errors, and the shared probe deadline retain their existing failure behavior.
+
 One probe error makes aggregate persistence unhealthy. A later successful probe restores runtime health without a restart.
 
 Initialization errors remain fatal and cannot recover inside the same process. The process exits through the existing startup error path.

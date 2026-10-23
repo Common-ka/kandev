@@ -167,7 +167,7 @@ func (h *Health) pingObserved(ctx context.Context) (*probeFailureDiagnostic, err
 
 func (h *Health) probeTables(ctx context.Context, descriptor Descriptor) error {
 	for _, table := range descriptor.RequiredTables {
-		exists, err := db.TableExistsContext(ctx, h.pool.Writer(), table)
+		exists, err := db.TableExistsContext(ctx, h.pool.Reader(), table)
 		if err != nil {
 			return fmt.Errorf("table probe failed: %w", err)
 		}

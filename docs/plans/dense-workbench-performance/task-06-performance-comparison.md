@@ -1,23 +1,27 @@
 ---
 id: "06-performance-comparison"
 title: "Matched comparison and regression evidence"
-status: pending
+status: in_progress
 wave: 6
-depends_on: 
+depends_on:
   - "05-workbench-lifecycle"
 plan: "plan.md"
 requirements:
+  - REQ-PLATFORM-POSTGRES-DOMAIN-STORE-PARITY-007
   - REQ-PLUGINS-PROMPT-HISTORY-HOST-006
   - REQ-UI-SESSION-REFRESH-EFFICIENCY-004
   - REQ-UI-PERSISTENT-STATUS-MOTION-006
   - REQ-PLATFORM-WEB-ASSET-DELIVERY-001
 acceptance_criteria:
+  - AC-PLATFORM-POSTGRES-DOMAIN-STORE-PARITY-007.1
+  - AC-PLATFORM-POSTGRES-DOMAIN-STORE-PARITY-007.4
   - AC-PLUGINS-PROMPT-HISTORY-HOST-006.9
   - AC-UI-SESSION-REFRESH-EFFICIENCY-004.1
   - AC-UI-SESSION-REFRESH-EFFICIENCY-004.3
   - AC-UI-PERSISTENT-STATUS-MOTION-006.1
   - AC-PLATFORM-WEB-ASSET-DELIVERY-001.1
 system_design:
+  - ../../specs/platform/system-design/postgres-domain-store-parity.md
   - ../../specs/plugins/system-design/conversation-source-reconciliation.md
   - ../../specs/ui/system-design/session-refresh-efficiency.md
   - ../../specs/ui/system-design/persistent-status-motion.md
@@ -91,5 +95,48 @@ A faster run with missing updates or fewer panels is not an optimization. Avoid 
 
 ## Results
 
-Pending. No implementation or performance result is claimed.
+The short canonical-stream transport comparison is complete; see [results.md](results.md).
+Dense reference timing remains in progress. The first full grid run failed in baseline
+post-stream stored-history verification with HTTP 503. No complete pair was saved;
+its timings are excluded. The harness now checkpoints completed observation windows
+and preserves backend logs. Verification retries only transient HTTP 503 responses,
+after timing, and records each error. Runtime health thresholds are unchanged.
+The dense navigation reference comparison is running separately.
 
+### Measured availability follow-up
+
+Repeated dense runs report `table_probe` deadlines while the single SQLite
+writer is occupied. The health implementation currently reads table metadata
+through the writer for each required table. Investigate using the existing
+reader pool for those read-only schema checks. Preserve both initial writer
+and reader pings, the two-second deadline, missing-table failure, maintenance
+admission, startup strictness, and the existing unhealthy/recovery behavior.
+PostgreSQL shares the same pool for readers and writers. Add a factory-created
+SQLite regression with the writer held, plus missing-table and writer-failure
+checks. Run the required-store and DB tests, race checks, scoped Go lint, and
+fresh browser streaming checks before comparing dense availability again.
+This is a bounded repair of a measured test and page disruption; it does not
+permit masking health failures or extending timeouts to make a benchmark pass.
+
+
+### Health repair validation
+
+The table probe now uses the reader pool. The regression failed before the
+change when a writer transaction was held, then passed with the reader probe.
+The missing-table check still fails, and a blocked writer still fails its
+initial ping and recovers after release. Existing contention tests now use
+factory-created reader and writer connections to the same SQLite file.
+
+Required-store and DB tests passed, required-store race checks passed, and
+scoped Go lint reported zero issues. Fresh desktop canonical streaming,
+conversation gap recovery, and plugin pagination checks passed (3 tests).
+Fresh phone canonical streaming and task navigation checks passed (4 tests).
+
+A matched rehearsal used 1,000 tasks, six columns, 120 primary messages per
+column, and 1,800 scheduled canonical updates. Both arms verified all updates
+with zero HTTP or verification errors. Streaming CPU was 60,390 ms before
+and 60,354 ms after; frame-gap p95 was 116.7 ms in both. This is neutral CPU
+evidence. Since neither arm reproduced the intermittent availability failure,
+it does not establish an availability improvement rate. Raw evidence:
+`.kandev/diagnostics/dense-workbench-performance/matched-dense-1792765209649.json`;
+summary: `health-first-pair-summary.json` in the same directory.

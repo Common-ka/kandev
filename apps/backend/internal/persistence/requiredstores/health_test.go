@@ -234,19 +234,9 @@ func TestRuntimeHealthProbeFailureLogsBoundedStageAndRecovers(t *testing.T) {
 		{name: "reader ping", stage: "reader_ping", blockedDB: "reader"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			writer, err := sqlx.Open("sqlite3", ":memory:")
-			if err != nil {
-				t.Fatalf("open writer: %v", err)
-			}
-			writer.SetMaxOpenConns(1)
-			reader, err := sqlx.Open("sqlite3", ":memory:")
-			if err != nil {
-				_ = writer.Close()
-				t.Fatalf("open reader: %v", err)
-			}
+			pool := openSQLiteHealthPool(t)
+			writer, reader := pool.Writer(), pool.Reader()
 			reader.SetMaxOpenConns(1)
-			pool := db.NewPool(writer, reader)
-			t.Cleanup(func() { _ = pool.Close() })
 			for _, table := range []string{"first", "second"} {
 				if _, err := writer.Exec("CREATE TABLE " + table + " (id TEXT PRIMARY KEY)"); err != nil {
 					t.Fatalf("create %s table: %v", table, err)
