@@ -257,3 +257,70 @@ Raw: `matched-dense-1792770884505.json`; summary:
 `markdown-stable-child-two-pair-summary.json`; host load:
 `markdown-stable-child-host-load.jsonl`. Remaining CPU attribution and the full
 reference series remain open.
+
+
+### Scoped transcript row lookup
+
+A separate CPU attribution run (`matched-dense-1792772023381.json`, excluded
+from timing comparisons) identified `findMessageRow` and its row enumeration
+in the streaming path. The helper collected every matching transcript row
+and then read each ID until it found the requested row. A dense regression
+reproduced 1,000 unrelated ID reads for one lookup.
+
+The first experiment used an exact attribute query for normal generated IDs
+within the supplied scroll container. IDs outside the simple generated alphabet retain the old
+exact-string path, including quotes and backslashes; duplicate IDs in other
+panels cannot satisfy the lookup. The dense regression now records zero
+unrelated ID reads. All 105 native-scroll and panel-restoration tests pass,
+as do typecheck and scoped lint. The fresh production build passed 11 desktop
+prompt-navigation and panel-switch checks and three phone prompt/draft checks.
+Matched timing remains pending.
+
+The first long-history attempt timed out during baseline setup before any
+measurement (`matched-dense-1792773117724.json`). It is excluded from timing.
+A diagnostic retry failed to bind its backend port (`matched-dense-1792773555858.json`),
+so later runs use an explicit separate port offset. With setup progress
+instrumentation, both versions reached all 300 seeded messages in a one-chat
+probe (`matched-dense-1792773665497.json`) and in all six chats
+(`matched-dense-1792773918217.json`). Their one-second windows are diagnostic
+only and cannot support performance claims. The larger setup bound is now six
+minutes; loaded counts, pagination state, and elapsed setup time are retained.
+The 60-second timed stream and oldest-message correctness gate are unchanged.
+The 1,000-message retry also failed in baseline setup before timing
+(`matched-dense-1792774416275.json`). After 361 seconds, five chats had 901
+loaded messages and one had 861; none had reached the oldest seeded message.
+The counts advanced throughout, so this records slow long-history setup,
+not a complete A/B result or a proven pagination failure. No candidate sample
+ran. The limit will not be raised again for this experiment. Retain the host
+load record and failed run, and continue the lookup comparison on the existing
+newest-window workload. Full long-history performance remains unresolved.
+
+
+The attribute-query experiment completed two matched newest-window pairs
+(`matched-dense-1792775033729.json`). Stream CPU was 60,999 versus 61,230 ms
+and 60,389 versus 60,889 ms. Frame-gap p95 was 133.3 versus 116.7 ms, then
+116.7 versus 116.6 ms. All updates verified with zero HTTP or verification
+errors. This does not establish a repeatable CPU or frame-gap gain; retain
+`row-lookup-attribute.patch` and `row-lookup-attribute-two-pair-summary.json`.
+
+Inspection of Chromium 149's `SelectorQuery::ExecuteWithId` confirms a distinct
+indexed ID path, including a scoped check for duplicate IDs. The second experiment
+used that path for generated alphanumeric, underscore, and hyphen IDs. Other
+IDs retain exact-string matching. The regression checks that the helper does
+not collect all transcript rows, and covers ordinary duplicate IDs plus
+selector punctuation. All 106 related unit tests pass. Fresh browser checks
+and matched timing remain pending. Source reference:
+https://chromium.googlesource.com/chromium/src/+/refs/tags/149.0.7827.55/third_party/blink/renderer/core/css/selector_query.cc
+
+
+The indexed-ID experiment is also rejected. Its two pairs completed all
+updates with zero HTTP or stored-content errors (`matched-dense-1792776438660.json`).
+Stream CPU was 61,162 versus 60,373 ms and 62,774 versus 61,588 ms, only
+1.3–1.9% lower. Frame-gap p95 increased from 100.1 to 116.6 ms in the first
+pair, then decreased from 150.0 to 133.3 ms in the reversed pair. Median frame
+gaps were unchanged at 50 ms in pair one and 100 versus 66.6 ms in pair two.
+This mixed result does not justify a second production lookup path. The code
+and tests are restored to HEAD; retain `rejected-row-id-lookup.patch` and
+`row-id-two-pair-summary.json`. The indexed version had passed 106 units,
+typecheck, scoped lint, 11 fresh desktop and three phone checks before timing.
+Only the harness progress diagnostics and this experiment record remain.

@@ -251,3 +251,27 @@ or a measured M2 improvement. Raw: `matched-dense-1792770884505.json`; summary:
 `markdown-stable-child-two-pair-summary.json`, under the diagnostic directory.
 The earlier inline-render attempt is retained as an unsuccessful experiment
 in `matched-dense-1792769340783.json`; it repeated parsing during render retry.
+
+
+### Rejected row-lookup experiments and long-history limit
+
+Two alternatives to transcript-row enumeration were tested: a scoped attribute
+query, then an indexed ID query for generated IDs. Neither gave a clear,
+repeatable rendering gain across two alternating pairs. Attribute-query stream
+CPU was 60,999→61,230 ms and 60,389→60,889 ms. Indexed-ID CPU was
+61,162→60,373 ms and 62,774→61,588 ms, but frame-gap p95 changed direction
+between pairs (100.1→116.6 ms, then 150.0→133.3 ms). All samples verified all
+updates without HTTP failures. Both production experiments are removed; exact
+patches and raw records remain under the diagnostic directory.
+
+The long-history stress arm did not produce a timed A/B sample. Baseline setup
+continued loading but reached only 861–901 messages per chat after 361 seconds,
+short of the required 1,000. This is an unresolved setup/performance limit, not
+a candidate speed result. Smaller one-chat and six-chat probes loaded all 300
+seeded messages in both builds. Their one-second stream windows are diagnostic
+only. The harness now retains per-chat loading counts, pagination metadata,
+and loading time separately from timed streaming.
+
+Raw records: `matched-dense-1792775033729.json` (attribute queries),
+`matched-dense-1792776438660.json` (indexed IDs), and
+`matched-dense-1792774416275.json` (long-history setup failure).

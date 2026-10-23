@@ -93,8 +93,16 @@ export async function runDenseSample(options: {
     };
     options.checkpoint?.({ cold });
     const historyMode = process.env.KANDEV_DENSE_HISTORY === "all" ? "all" : "newest-window";
+    let historyLoadMs = 0;
     if (historyMode === "all") {
-      await loadDenseHistory(page, threads);
+      const historyStart = performance.now();
+      await loadDenseHistory(page, threads, (historyLoading) =>
+        options.checkpoint?.({
+          historyLoading,
+          historyLoadingElapsedMs: performance.now() - historyStart,
+        }),
+      );
+      historyLoadMs = performance.now() - historyStart;
       for (const thread of threads)
         await expect(
           page
@@ -104,6 +112,7 @@ export async function runDenseSample(options: {
         ).toBeVisible();
     }
     const initialLoadedHistory = await loadedDenseHistory(page, threads);
+    options.checkpoint?.({ historyMode, historyLoadMs, initialLoadedHistory });
     const runs = [];
     const scenarios = denseScenarios(historyMode, options.profilePath);
     for (const scenario of scenarios) {
@@ -146,6 +155,7 @@ export async function runDenseSample(options: {
     return {
       sample,
       historyMode,
+      historyLoadMs,
       initialLoadedHistory,
       cpuRate,
       browser: browser.version(),
