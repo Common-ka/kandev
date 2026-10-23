@@ -231,3 +231,23 @@ in each arm and no HTTP or verification errors. Streaming CPU was 60,390 versus
 not establish a reduction in intermittent 503 errors, since the control had none.
 Raw: `matched-dense-1792765209649.json`; summary: `health-first-pair-summary.json`.
 The repair was committed and pushed as `bf3b89bf22e`, with normal hooks passing.
+
+
+### Markdown content stability
+
+The static and animated Markdown paths previously changed the React component
+boundary. An append and its later span compaction remounted unchanged code
+blocks and paragraphs. A stable child now preserves those nodes. A second
+regression prevents parsing twice during the parent motion state adjustment.
+All 168 related unit tests, typecheck, scoped lint, seven fresh desktop checks,
+and six phone checks pass. No default appearance or motion duration changes.
+
+Two alternating rehearsal pairs (1,000 tasks, six visible chats, 120 primary
+messages per column) completed all 1,800 updates per sample. Stream CPU was
+60,374 versus 61,077 ms and 60,265 versus 60,232 ms: effectively unchanged.
+Frame-gap p95 was 133.3 versus 116.5 ms and 116.7 versus 100.1 ms. This is a
+modest frame-gap reduction across two pairs, not the six-pair reference result
+or a measured M2 improvement. Raw: `matched-dense-1792770884505.json`; summary:
+`markdown-stable-child-two-pair-summary.json`, under the diagnostic directory.
+The earlier inline-render attempt is retained as an unsuccessful experiment
+in `matched-dense-1792769340783.json`; it repeated parsing during render retry.

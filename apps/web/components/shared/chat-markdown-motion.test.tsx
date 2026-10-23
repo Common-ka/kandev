@@ -1,7 +1,7 @@
 import { act, cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createContext } from "react";
-const customSpanFixture = vi.hoisted(() => ({ enabled: false }));
+const customSpanFixture = vi.hoisted(() => ({ enabled: false, parses: 0 }));
 
 import { MemoizedMarkdown } from "./memoized-markdown";
 vi.mock("@/components/shared/markdown-components", () => ({
@@ -11,6 +11,7 @@ vi.mock("@/components/shared/markdown-components", () => ({
   rehypePlugins: [],
   remarkPlugins: [
     () => (tree: { children: { data?: object }[] }) => {
+      customSpanFixture.parses++;
       if (customSpanFixture.enabled) tree.children[0].data = { hName: "span" };
     },
   ],
@@ -21,13 +22,43 @@ const motionSelector = "[data-chat-text-motion]";
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
+  vi.useRealTimers();
   customSpanFixture.enabled = false;
+  customSpanFixture.parses = 0;
   if (originalAnimate) Object.defineProperty(Element.prototype, "animate", originalAnimate);
   else Reflect.deleteProperty(Element.prototype, "animate");
 });
 
 // @covers AC-UI-CHAT-MOTION-001.1, AC-UI-CHAT-MOTION-001.4
 describe("chat Markdown reveals", () => {
+  it("parses an appended snapshot once while updating its motion state", () => {
+    const view = render(<MemoizedMarkdown content="Single parse baseline" animateText />);
+    customSpanFixture.parses = 0;
+    view.rerender(<MemoizedMarkdown content="Single parse baseline appended" animateText />);
+    expect(customSpanFixture.parses).toBe(1);
+  });
+
+  it("keeps existing Markdown nodes mounted through reveal and compaction", () => {
+    vi.useFakeTimers();
+    const content = "```typescript\nconst stable = true;\n```\n\nExisting text";
+    const view = render(<MemoizedMarkdown content={content} animateText />);
+    const code = view.container.querySelector("code");
+    const paragraph = view.container.querySelector("p");
+    expect(code).not.toBeNull();
+    expect(paragraph).not.toBeNull();
+
+    view.rerender(<MemoizedMarkdown content={`${content} and new text`} animateText />);
+    expect(view.container.querySelector("code")).toBe(code);
+    expect(view.container.querySelector("p")).toBe(paragraph);
+    expect(view.container.querySelector(motionSelector)).not.toBeNull();
+
+    act(() => vi.advanceTimersByTime(160));
+    expect(view.container.querySelector(motionSelector)).toBeNull();
+    expect(view.container.querySelector("code")).toBe(code);
+    expect(view.container.querySelector("p")).toBe(paragraph);
+    expect(paragraph?.textContent).toBe("Existing text and new text");
+  });
+
   it("reveals only new prose while preserving formatting, selection text and code", () => {
     const animate = vi.fn(() => ({ cancel: vi.fn() }));
     Object.defineProperty(Element.prototype, "animate", { value: animate, configurable: true });

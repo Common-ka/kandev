@@ -90,6 +90,10 @@ comment-selection tests must prove span boundaries do not change offsets. Only
 marked motion spans use the motion renderer; unmarked spans retain the caller
 renderer.
 
+Cached static output and animated output use the same synchronous Markdown
+element-tree boundary. Starting a reveal or compacting its completed spans
+preserves unchanged paragraphs, code blocks, and their component state.
+
 Every script animation owner releases its handle with `releaseAnimation` from
 `@kandev/ui/animation-utils`: cancel, then set `effect` to null. This severs the
 handle's effect-to-target relationship for chat entrance and text motion, shared

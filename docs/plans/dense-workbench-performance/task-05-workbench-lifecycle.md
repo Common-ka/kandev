@@ -7,10 +7,12 @@ depends_on:
   - "04-asset-delivery"
 plan: "plan.md"
 requirements:
+  - REQ-UI-CHAT-MOTION-001
   - REQ-UI-SESSION-REFRESH-EFFICIENCY-003
   - REQ-UI-SESSION-REFRESH-EFFICIENCY-004
   - REQ-PLATFORM-VIEWPORT-SESSION-DELIVERY-001
 acceptance_criteria:
+  - AC-UI-CHAT-MOTION-001.4
   - AC-UI-SESSION-REFRESH-EFFICIENCY-003.3
   - AC-UI-SESSION-REFRESH-EFFICIENCY-003.4
   - AC-UI-SESSION-REFRESH-EFFICIENCY-004.1
@@ -18,6 +20,7 @@ acceptance_criteria:
   - AC-UI-SESSION-REFRESH-EFFICIENCY-004.3
   - AC-PLATFORM-VIEWPORT-SESSION-DELIVERY-001.1
 system_design:
+  - ../../specs/ui/system-design/chat-motion.md
   - ../../specs/ui/system-design/session-refresh-efficiency.md
   - ../../specs/platform/system-design/viewport-bounded-session-delivery.md
 ---
@@ -183,3 +186,74 @@ use stayed near one full core. These timings do not establish a clean gain.
 The three source repairs have direct regression evidence for removed scans,
 coalesced geometry reads, and stable historical actions. They preserve tested
 behavior, but the dense responsiveness acceptance target remains unresolved.
+
+
+### Duplicate snapshot publication
+
+The full-size reference restart used 1,000 tasks and 36,000 messages. Its first
+pair verified all 1,800 updates in both arms, with zero HTTP or verification
+errors. Baseline streaming CPU was 61,644 ms versus 60,332 ms in the candidate,
+but frame-gap p95 increased from 83.3 to 116.7 ms. Transcript publications were
+818 versus 1,719. The series was deliberately interrupted during the next
+candidate sample to investigate the repeated regression. Preserve
+`reference-render-interruption.json` with `matched-dense-1792767336930.json`;
+only the first complete pair is included in `reference-render-first-pair-summary.json`.
+This is exploratory evidence, not the planned six-pair acceptance result.
+
+Source inspection found that all three message actions republished identical
+JSON snapshots. A regression reproduced 100 transcript publications for 100
+identical replays through each action. Updating existing Immer drafts directly
+and retaining equal metadata references removes these publications. A second
+regression alternates canonical and legacy delivery order across two sessions:
+40 changed snapshots publish 40 times. Content and nested metadata changes are
+still accepted even when their timestamps match. The complete session slice,
+message/turn handlers, and transport-client suite passed 493 tests.
+Browser correctness and the matched timing comparison remain pending.
+
+
+The duplicate-snapshot experiment is rejected for this task. Its first matched
+pair had neutral CPU (61,010 versus 61,005 ms); publications were 1,839 versus
+1,719 and frame-gap p95 was 133.3 versus 116.7 ms. Both arms verified all updates.
+Inspection of `shouldSuppressCoreConversationNotification` confirms that V2
+already suppresses legacy message events for canonical sessions. Thus the
+hypothesized duplicate delivery does not explain this workload. The second
+pair was interrupted, recorded in `idempotency-interruption.json`. The patch
+and tests are retained in `rejected-idempotency.patch` but removed from the
+working source. Raw: `matched-dense-1792768444864.json`.
+
+### Markdown rendering boundary
+
+Static Markdown returned the library's element tree directly, while animated
+Markdown mounted a `ReactMarkdown` component around that tree. Starting an
+append reveal and later compacting its spans changed that boundary and remounted
+unchanged content. A real-renderer regression fails on the old implementation:
+an unchanged code block loses its DOM identity when prose is appended.
+The first repair returned both synchronous trees inside the parent render.
+Its two matched pairs did not show a repeatable timing gain. Stream CPU was
+61,073 versus 61,944 ms in pair one and 60,267 versus 64,559 ms in pair two.
+Frame-gap p95 was 116.7 versus 83.4 ms, then 116.7 versus 149.9 ms. All four
+samples verified all updates without HTTP errors. Retain
+`matched-dense-1792769340783.json` as an unsuccessful timing experiment.
+
+A second regression found that the inline repair parsed an appended snapshot
+twice while the parent's motion hook adjusted its state during render. Both
+rendering modes now use one stable child component. Parsing occurs after the
+parent's render settles. The regression confirms one parse per append, and
+unchanged code blocks and paragraphs retain identity through reveal and
+compaction. All 168 related Markdown tests pass, including formatting,
+selection, custom renderers, math, cache bounds, and animation cleanup.
+Scoped lint, typecheck, and specification validation pass. The fresh production
+build passed seven desktop and six phone browser checks.
+
+The stable-child repair completed two alternating matched pairs on 1,000 tasks,
+six columns, 120 primary messages per column, and 1,800 updates per sample.
+Streaming main-thread time was 60,374 versus 61,077 ms, then 60,265 versus
+60,232 ms. Frame-gap p95 was 133.3 versus 116.5 ms, then 116.7 versus 100.1 ms.
+All four samples verified all updates with no stored-content verification
+errors. CPU is effectively unchanged; the two frame-gap reductions are modest
+exploratory evidence, below the package's 20% rendering target. The repair is
+retained for proven content identity preservation without duplicate parsing.
+Raw: `matched-dense-1792770884505.json`; summary:
+`markdown-stable-child-two-pair-summary.json`; host load:
+`markdown-stable-child-host-load.jsonl`. Remaining CPU attribution and the full
+reference series remain open.

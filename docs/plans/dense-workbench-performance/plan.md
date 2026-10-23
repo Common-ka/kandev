@@ -2,6 +2,7 @@
 created: 2026-10-22
 status: in_progress
 requirements:
+  - REQ-UI-CHAT-MOTION-001
   - REQ-PLATFORM-POSTGRES-DOMAIN-STORE-PARITY-007
   - REQ-PLUGINS-PROMPT-HISTORY-HOST-006
   - REQ-PLATFORM-SESSION-SUBSCRIPTION-RECOVERY-001
@@ -12,6 +13,7 @@ requirements:
   - REQ-UI-PERSISTENT-STATUS-MOTION-006
   - REQ-PLATFORM-WEB-ASSET-DELIVERY-001
 system_design:
+  - ../../specs/ui/system-design/chat-motion.md
   - ../../specs/platform/system-design/postgres-domain-store-parity.md
   - ../../specs/plugins/system-design/conversation-source-reconciliation.md
   - ../../specs/platform/system-design/session-subscription-recovery.md

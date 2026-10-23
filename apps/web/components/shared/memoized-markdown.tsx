@@ -50,6 +50,26 @@ function renderStaticMarkdown(content: string): ReturnType<typeof ReactMarkdown>
   return result;
 }
 
+function MarkdownContent({
+  content,
+  components,
+  motionPlugins,
+  cacheStatic,
+}: {
+  content: string;
+  components: Components;
+  motionPlugins: ReturnType<typeof useChatMarkdownMotion>;
+  cacheStatic: boolean;
+}) {
+  if (cacheStatic && motionPlugins.length === 0) return renderStaticMarkdown(content);
+  return ReactMarkdown({
+    children: content,
+    remarkPlugins,
+    rehypePlugins: [...rehypePlugins, ...motionPlugins],
+    components,
+  });
+}
+
 /**
  * Markdown renderer behind a `memo` boundary keyed on the `content` string.
  *
@@ -114,17 +134,12 @@ export const MemoizedMarkdown = memo(function MemoizedMarkdown({
   return (
     <MarkdownTaskContext.Provider value={taskId}>
       <MarkdownFileLinkContext.Provider value={fileLinkContext}>
-        {(!components || components === markdownComponents) && motionPlugins.length === 0 ? (
-          renderStaticMarkdown(normalized)
-        ) : (
-          <ReactMarkdown
-            remarkPlugins={remarkPlugins}
-            rehypePlugins={[...rehypePlugins, ...motionPlugins]}
-            components={resolvedComponents}
-          >
-            {normalized}
-          </ReactMarkdown>
-        )}
+        <MarkdownContent
+          content={normalized}
+          components={resolvedComponents}
+          motionPlugins={motionPlugins}
+          cacheStatic={!components || components === markdownComponents}
+        />
       </MarkdownFileLinkContext.Provider>
     </MarkdownTaskContext.Provider>
   );
