@@ -16,6 +16,7 @@ import (
 	settingsmodels "github.com/kandev/kandev/internal/agent/settings/models"
 	"github.com/kandev/kandev/internal/agentctl/types/streams"
 	"github.com/kandev/kandev/internal/agentruntime"
+	"github.com/kandev/kandev/internal/common/launchwrapper"
 	"github.com/kandev/kandev/internal/common/ports"
 	mcpprofile "github.com/kandev/kandev/internal/mcp/profile"
 	"github.com/kandev/kandev/internal/repoclone"
@@ -106,6 +107,7 @@ type AgentExecution struct {
 	DeliveryReplayCursor uint64
 	AgentCommand         string               // Command to start the agent subprocess
 	ContinueCommand      string               // Command for follow-up prompts (one-shot agents)
+	LaunchWrapper        launchwrapper.Spec   `json:"-"`
 	AgentArgs            []string             // Structured argv for AgentCommand
 	ContinueArgs         []string             // Structured argv for ContinueCommand
 	RuntimeName          agentruntime.Runtime // Name of the runtime used (e.g., "docker", "standalone")

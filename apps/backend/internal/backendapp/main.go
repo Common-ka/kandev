@@ -1224,6 +1224,7 @@ func startGatewayAndServe(
 		return ok
 	})
 	hostUtilityMgr.SetProfileResolver(pluginProfileResolver)
+	hostUtilityMgr.SetProfileEnvironmentResolver(lifecycleMgr.ResolveUtilityProfileEnvironment)
 	hostUtilityMgr.SetProviderGatewayAuthResolver(lifecycleMgr.ResolveProviderGatewayAuth)
 	hostUtilityMgr.SetManagedRuntimeSelectionStore(services.ManagedRuntimeSelections)
 	// Wire the host utility manager into the settings controller so
