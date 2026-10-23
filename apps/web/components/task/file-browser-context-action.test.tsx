@@ -5,12 +5,14 @@ import type * as FileContextMenu from "./file-context-menu";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+const { useDeleteAction } = vi.hoisted(() => ({ useDeleteAction: vi.fn(() => null) }));
+
 vi.mock("./file-context-menu", async (importOriginal) => {
   const actual = await importOriginal<typeof FileContextMenu>();
   return {
     ...actual,
     FileContextMenu: ({ children }: { children: ReactNode }) => <>{children}</>,
-    useFileDeleteAction: () => null,
+    useFileDeleteAction: useDeleteAction,
     useFileRename: () => ({
       isRenaming: false,
       renameValue: "",
@@ -23,7 +25,13 @@ vi.mock("./file-context-menu", async (importOriginal) => {
   };
 });
 
-import { shouldShowFileTreeTouchActions, TreeNodeItem } from "./file-browser-parts";
+import {
+  FileTreeNodeTouchActions,
+  shouldShowFileTreeTouchActions,
+  TreeNodeItem,
+} from "./file-browser-parts";
+
+const NODE_ACTIONS_TEST_ID = "file-tree-node-actions";
 
 const FILE_NODE: FileTreeNode = { name: "README.md", path: "README.md", is_dir: false, size: 0 };
 const DIRECTORY_NODE: FileTreeNode = { name: "src", path: "src", is_dir: true, size: 0 };
@@ -46,7 +54,10 @@ const DIRECTORY_ROW: FileBrowserRow = {
   isDir: true,
 };
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.clearAllMocks();
+});
 
 describe("TreeNodeItem touch context action", () => {
   it("opens a visible row menu without invoking the row primary action", () => {
@@ -68,7 +79,7 @@ describe("TreeNodeItem touch context action", () => {
       />,
     );
 
-    const actionTrigger = screen.getByTestId("file-tree-node-actions");
+    const actionTrigger = screen.getByTestId(NODE_ACTIONS_TEST_ID);
     expect(actionTrigger).toBeTruthy();
     fireEvent.pointerDown(actionTrigger);
 
@@ -93,7 +104,7 @@ describe("TreeNodeItem touch context action", () => {
       />,
     );
 
-    expect(screen.queryByTestId("file-tree-node-actions")).toBeNull();
+    expect(screen.queryByTestId(NODE_ACTIONS_TEST_ID)).toBeNull();
   });
 
   it("passes directory nodes through the touch context action", () => {
@@ -113,10 +124,42 @@ describe("TreeNodeItem touch context action", () => {
       />,
     );
 
-    fireEvent.pointerDown(screen.getByTestId("file-tree-node-actions"));
+    fireEvent.pointerDown(screen.getByTestId(NODE_ACTIONS_TEST_ID));
     fireEvent.click(screen.getByTestId("file-tree-touch-add-to-chat"));
 
     expect(onAddToChatContext).toHaveBeenCalledWith(DIRECTORY_NODE);
+  });
+});
+
+describe("FileBrowser touch action lifecycle", () => {
+  it("does not mount action consumers until the touch surface is visible", () => {
+    const onAddToChatContext = vi.fn();
+    const view = render(
+      <FileTreeNodeTouchActions
+        node={FILE_NODE}
+        showTouchActions={false}
+        onAddToChatContext={onAddToChatContext}
+      />,
+    );
+    expect(useDeleteAction).not.toHaveBeenCalled();
+    view.rerender(
+      <FileTreeNodeTouchActions
+        node={FILE_NODE}
+        showTouchActions
+        onAddToChatContext={onAddToChatContext}
+      />,
+    );
+    expect(useDeleteAction).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId(NODE_ACTIONS_TEST_ID)).toBeTruthy();
+    view.rerender(
+      <FileTreeNodeTouchActions
+        node={FILE_NODE}
+        showTouchActions={false}
+        onAddToChatContext={onAddToChatContext}
+      />,
+    );
+    expect(useDeleteAction).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId(NODE_ACTIONS_TEST_ID)).toBeNull();
   });
 });
 

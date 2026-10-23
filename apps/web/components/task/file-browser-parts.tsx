@@ -136,19 +136,24 @@ function getTreeNodeRowClass(
   );
 }
 
-export function FileTreeNodeTouchActions({
-  node,
-  showTouchActions,
-  onAddToChatContext,
-}: {
+type FileTreeNodeTouchActionsProps = {
   node: FileTreeNode;
   showTouchActions?: boolean;
   onAddToChatContext?: (node: FileTreeNode) => void;
-}) {
+};
+
+export function FileTreeNodeTouchActions(props: FileTreeNodeTouchActionsProps) {
+  return props.showTouchActions ? <VisibleFileTreeNodeTouchActions {...props} /> : null;
+}
+
+function VisibleFileTreeNodeTouchActions({
+  node,
+  onAddToChatContext,
+}: FileTreeNodeTouchActionsProps) {
   const { t } = useTranslation();
   const deleteAction = useFileDeleteAction();
   const deletePendingRef = React.useRef(false);
-  if (!showTouchActions || (!onAddToChatContext && !deleteAction)) return null;
+  if (!onAddToChatContext && !deleteAction) return null;
 
   const stopRowInteraction = (event: React.SyntheticEvent) => event.stopPropagation();
 

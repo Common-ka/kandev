@@ -1,9 +1,9 @@
 ---
 id: "05-workbench-lifecycle"
 title: "Dockview and editor lifecycle"
-status: pending
+status: in_progress
 wave: 5
-depends_on: 
+depends_on:
   - "04-asset-delivery"
 plan: "plan.md"
 requirements:
@@ -88,5 +88,35 @@ Fast-switching an incompatible layout or unmounting a retained composer can lose
 
 ## Results
 
-Pending. No implementation or performance result is claimed.
+2026-10-23: The matched navigation harness now checks the actual 630-file
+inventory. The previous profile seeded those files, then reset the repository
+to an older commit that discarded them. The harness now passes the seeded
+commit into the task setup. Warm tree readiness checks a task-specific visible
+file; it no longer requires a network read for a correctly cached folder.
 
+A small paired rehearsal passed after isolating runtime homes and starting
+prepared sessions separately for each arm. Its timings are excluded from gains.
+The associated CPU profiles are attribution evidence only: database checks
+were running concurrently. In the candidate profile, minified `RAt` in
+`index-Z2Kg8zz8.js` maps to `FileTreeNodeTouchActions`. It calls
+`useTranslation`, the delete-action context hook, and a ref before returning
+null for desktop rows. Its translation-hook work appears in the switch trace
+although the touch controls are hidden.
+
+A focused regression proves that hidden touch actions do not mount their
+consumers, including responsive activation and deactivation. It fails before
+the fix and passes after separating the visible component. The existing
+visibility condition and rendered controls stay unchanged. All 38 related
+unit tests pass, as do frontend type checking and the candidate production
+build. Desktop and phone browser checks pass against the separate candidate
+asset build: file actions remain usable, and A-B-A navigation preserves the
+draft and selected file context. The browser tests verify phone target size
+and absence of horizontal overflow. The first full-size matched pair passed
+with 1,000 tasks and 1,000 messages per switching task. Median switch readiness
+was 1,003 ms baseline and 1,010 ms candidate; p95 was 1,178 ms and 1,121 ms.
+Main-thread time across 40 switches was 40,356 ms and 40,484 ms. This single pair
+shows no clear speed gain. Both arms retained one editor and three panels after
+100 additional switches. The six-pair comparison remains pending.
+
+The earlier visible chat-composer construction attribution remains unresolved;
+this file-tree repair does not close that separate investigation.
