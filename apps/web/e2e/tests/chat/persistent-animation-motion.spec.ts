@@ -6,6 +6,7 @@ import {
 } from "../../helpers/animation-assertions";
 import { waitForActiveSessionForegroundActivity } from "../../helpers/session-store";
 import { SessionPage } from "../../pages/session-page";
+import { waitForSessionDone } from "../../helpers/session";
 
 test("keeps the busy task composer glow animated until the turn settles", async ({
   testPage,
@@ -24,12 +25,19 @@ test("keeps the busy task composer glow animated until the turn settles", async 
       repository_ids: [seedData.repositoryId],
     },
   );
+  if (!task.session_id) throw new Error("Expected a session for the motion check");
+  await waitForSessionDone(
+    apiClient,
+    task.id,
+    task.session_id,
+    "initial motion test turn settled",
+    30_000,
+  );
   await testPage.goto(`/t/${task.id}`);
   const session = new SessionPage(testPage);
   await session.waitForLoad();
   await session.waitForChatIdle({ timeout: 30_000 });
 
-  if (!task.session_id) throw new Error("expected an active session for the animation test");
   await session.sendMessage("/slow 8s");
   await waitForActiveSessionForegroundActivity(testPage, "generating", task.session_id);
   const glow = session.activeChat().getByTestId("chat-input-glow");
@@ -60,7 +68,13 @@ test("keeps the busy task composer glow animated until the turn settles", async 
     (element as HTMLElement).style.display = "none";
   });
 
-  await session.waitForChatIdle({ timeout: 30_000 });
+  await waitForSessionDone(
+    apiClient,
+    task.id,
+    task.session_id,
+    "slow motion test turn settled",
+    30_000,
+  );
   await expect(glow).toHaveCount(0);
 });
 

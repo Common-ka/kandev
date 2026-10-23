@@ -3,6 +3,8 @@ import type { ApiClient } from "../../helpers/api-client";
 import type { SeedData } from "../../fixtures/test-base";
 import { expectReducedStatusMotion } from "../../helpers/animation-assertions";
 import { SessionPage } from "../../pages/session-page";
+import { waitForSessionDone } from "../../helpers/session";
+import { waitForActiveSessionForegroundActivity } from "../../helpers/session-store";
 
 export async function verifyReducedMotionFallback(page: Page, api: ApiClient, seed: SeedData) {
   await page.addInitScript(() => {
@@ -19,11 +21,20 @@ export async function verifyReducedMotionFallback(page: Page, api: ApiClient, se
       repository_ids: [seed.repositoryId],
     },
   );
+  if (!task.session_id) throw new Error("Expected a session for the motion check");
+  await waitForSessionDone(
+    api,
+    task.id,
+    task.session_id,
+    "initial motion test turn settled",
+    30_000,
+  );
   await page.goto(`/t/${task.id}`);
   const session = new SessionPage(page);
   await session.waitForLoad();
   await session.waitForChatIdle({ timeout: 30_000 });
   await session.sendMessageViaButton("/slow 8s");
+  await waitForActiveSessionForegroundActivity(page, "generating", task.session_id);
   const cubes = session.activeChat().locator(".spinner-grid-cube:visible");
   await expect.poll(() => cubes.count()).toBeGreaterThan(0);
   await expect
@@ -51,6 +62,6 @@ export async function verifyReducedMotionFallback(page: Page, api: ApiClient, se
     )
     .toBe(true);
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await session.waitForChatIdle({ timeout: 30_000 });
+  await waitForSessionDone(api, task.id, task.session_id, "slow motion test turn settled", 30_000);
   await expect(session.activeChat().getByTestId("chat-input-glow")).toHaveCount(0);
 }

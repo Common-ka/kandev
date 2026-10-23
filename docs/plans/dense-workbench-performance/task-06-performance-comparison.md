@@ -143,3 +143,34 @@ evidence. Since neither arm reproduced the intermittent availability failure,
 it does not establish an availability improvement rate. Raw evidence:
 `.kandev/diagnostics/dense-workbench-performance/matched-dense-1792765209649.json`;
 summary: `health-first-pair-summary.json` in the same directory.
+
+
+### Retained-build correctness pass
+
+The rebuilt retained version passed 20 of 21 desktop checks in
+`/tmp/kandev-run.e2e.OYHUJQBr.log`: chat motion/selection, native busy motion,
+saved split layouts and active-session ownership, canonical stream delivery,
+core/plugin gap recovery and paging, sessionless panel cleanup, Files
+restoration/retry, shared optional reads, task navigation, and grid viewport
+bounds. The CSS fallback motion check failed while its slow agent turn was
+still running. Its screenshot showed the busy status at four seconds of an
+eight-second turn; the final assertion had started too early after a UI idle
+placeholder wait.
+
+The motion checks now await the initial session's completion, observe the same
+session generating after submit, and await that session's completion before
+asserting removal of the busy glow. No production code, timeout, or animation
+assertion changed. Both desktop motion cases passed three repetitions (six
+checks, `/tmp/kandev-run.e2e.kCANCo2j.log`, 2.1 minutes). Typecheck and scoped
+lint pass. Failure artifacts remain in `final-desktop-motion-failure/` under
+the diagnostic directory. The broader phone pass completed all 22 checks
+(`/tmp/kandev-run.e2e.npscGzkq.log`, 4.3 minutes), including motion and text
+selection, canonical delivery, managed plugin conversations, Files retry,
+task-switch enrichment, short-phone required questions, A-B-A drafts, touch
+controls, native session selection, and saved-view drawers.
+
+The navigation request-count follow-up found that the roughly 22 tree reads
+match one root read plus the fixture's expanded directories. The restore
+loader bounds concurrency and already shares equivalent pending paths within
+its owner. These counts alone do not establish redundant reads. No folder
+freshness check is removed on that evidence.
