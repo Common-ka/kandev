@@ -344,3 +344,26 @@ plus three phone checks. The browser regression selects text and appends a
 message in the same script, then verifies the selected text and static tail.
 The diagnostic helper has three tests for duplicate ticks, empty streams,
 scripted user prompts, and failed reads; the summary helper has four tests.
+
+
+### Composer subscription experiment: rejected
+
+The three targeted render/callback regressions and browser correctness checks
+passed, but the browser timing gain did not repeat. With the same 1,000 tasks,
+six chats, 120 seeded messages per chat, and 1,800 verified updates, streaming
+main-thread work was 62,169 to 60,294 ms in pair 1 and 62,168 to 63,570 ms in
+pair 2. Frame-gap p95 was 150.0 to 133.4 ms, then 133.4 to 150.1 ms. Normal
+idle work increased in both pairs: 17,073 to 17,676 ms and 15,619 to 23,575 ms.
+The second candidate idle window also increased frame-gap p95 to 33.3 ms.
+All four samples had zero HTTP and stored-content verification errors.
+The increased timings have no established cause; they are not dismissed as
+host variation. This experiment is removed from production and test files.
+
+Raw: `matched-dense-1792786343231.json`; summary:
+`composer-stability-two-pair-summary.json`; host observations:
+`composer-stability-host-load.jsonl`; rejected source/tests:
+`rejected-composer-stability.patch`, all in the diagnostic directory.
+Log: `/tmp/kandev-run.e2e.4mOH5oEZ.log` (16.4 minutes). The frozen retained
+control is `/tmp/kandev-dense-before-composer-5936a872`. Its selection fix
+remains in the branch. The candidate's passing unit and browser checks are
+recorded above as experiment evidence, not evidence of a retained speed gain.
