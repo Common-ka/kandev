@@ -1,7 +1,7 @@
 ---
 id: "02-conversation-repair"
 title: "Incremental conversation repair"
-status: pending
+status: in_progress
 wave: 2
 depends_on: 
   - "01-dense-baseline"
@@ -89,5 +89,16 @@ A suppressed reset can conceal lost data. Preserve coverage validation, bounded 
 
 ## Results
 
-Pending. No implementation or performance result is claimed.
+2026-10-23: The JSON event transport loses nested mutation receipts in
+`conversationReceiptFromData`: the recursive map branch expects another
+envelope instead of decoding the receipt map. A writer-shaped event serialized
+through `bus.Event` reproduces a reset at the first contiguous revision.
+The minimal correction preserves map receipt decoding. The regression then
+passes 100 contiguous updates through the broadcaster for both typed and JSON
+transport. `go test -race ./internal/gateway/websocket -count=1` passes.
+
+This is one confirmed transport defect, not proof that the observed live
+instance uses NATS. Durable canonical streaming also publishes receiptless
+message events in `publishCanonicalMessageEvent`; transaction-bound receipts
+for that path and the controlled browser comparison remain pending.
 

@@ -1,7 +1,7 @@
 ---
 id: "01-dense-baseline"
 title: "Dense fixture and baseline"
-status: pending
+status: in_progress
 wave: 1
 depends_on: []
 plan: "plan.md"
@@ -81,5 +81,28 @@ Seeding only frontend state can bypass the receipt bug. Changed stream rates or 
 
 ## Results
 
-Pending. No implementation or performance result is claimed.
+2026-10-23: A gated dense fixture now seeds exact task/session/message counts,
+checks message content hashes, and records idle/streaming CDP and WS metrics.
+The small smoke fixture (10 tasks, two columns, ten messages per session,
+two-second windows) passed Chromium. The full pilot also passed: 1,000 tasks,
+30 eligible primary sessions, 60 sibling sessions, and 36,000 messages.
+Frontend type checking passed with an 8 GiB Node heap; the default 4 GiB
+heap ran out of memory. The pilot artifact is stored locally at
+`.kandev/diagnostics/dense-workbench-performance/baseline-memory-1792747326488.json`.
+These initial runs validate the harness; they are not the final paired timing
+series. The final series must exclude concurrent build and validation work.
+
+The baseline production assets and binary were copied before product edits
+into `/tmp/kandev-dense-baseline-595df36`, a detached checkout of the frozen
+baseline with locked dependencies installed. The backend SHA-256 is
+`1f6f55de2c497a8ee8a8ac6e019125134cd15aa4aa595076f3614ef90df21716`.
+
+The host requires Nix Chromium library paths and clearing inherited
+`KANDEV_INTERNAL_CONFIG_FILE`, `KANDEV_INTERNAL_CONFIG_HOME_FILE`, and
+`KANDEV_INTERNAL_AGENTCTL_STARTUP_CONFIG` for isolated E2E runs. The first
+fixture startup failed before browser measurement because it inherited the
+host bind address. That attempt is excluded. Existing navigation profiling
+also exposed a fixture assertion that requires every cached folder to issue
+a fresh request; this must be corrected to verify visible restored state
+before using its timings. No application regression is inferred from it.
 
