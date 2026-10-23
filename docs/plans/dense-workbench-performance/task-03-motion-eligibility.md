@@ -1,7 +1,7 @@
 ---
 id: "03-motion-eligibility"
 title: "Persistent motion eligibility"
-status: done
+status: in_progress
 wave: 3
 depends_on: 
   - "01-dense-baseline"
@@ -114,3 +114,76 @@ The user-facing animation guide documents the static status behavior. Dense
 A/B timing remains owned by work order 06. No CPU improvement is inferred from
 an animation count alone.
 
+## Threads header follow-up
+
+The completed six-pair reference still had six running animations in reduced
+motion. An attribution-only run (`matched-dense-1792795035161.json`) identified
+all six as `thread-status-working` SVG elements with the one-second CSS `spin`
+animation. Both arms used the same retained build and reproduced the same
+owners. The summary tool excludes this short diagnostic from timing results.
+
+The shared `ThreadSessionStatusIcon` also owns the phone header, session picker,
+and mobile thread picker. A real browser regression failed before the change:
+one SVG animation remained while reduced motion was active.
+
+### Rejected shared-wrapper experiment
+
+The first candidate moved starting/working icons into `CompositorSpin`.
+Four desktop checks and nine phone checks passed, including both animation
+engines, runtime preference changes, hide/show, settlement, and existing
+Threads layout/navigation. Typecheck, scoped lint, and five summary-tool tests
+passed. These checks establish correctness, not a performance gain.
+
+Two alternating pairs completed with 1,000 tasks, six chats, 120 seeded primary
+messages per chat, and 1,800 ordered stream updates per sample. All four samples
+passed, with no HTTP or verification errors. Raw report:
+`matched-dense-1792795466229.json`; summary:
+`thread-motion-wrapper-two-pair-summary.json`; log:
+`thread-motion-benchmark-logs/kandev-run.e2e.jNfjBXVf.log` (15.8 minutes).
+
+Normal idle main-thread CPU rose from 14,523 to 16,262 ms in pair 0 and from
+15,321 to 15,795 ms in pair 1 (12.0% and 3.1% higher). Streaming CPU fell by
+2.0% and 4.3%, with essentially unchanged frame-gap p95. Reduced-motion idle
+CPU fell from 9,807 to 7,373 ms and from 8,682 to 6,833 ms (24.8% and 21.3%
+lower). Reduced-motion running animations fell from six to zero.
+
+The wrapper was removed because normal idle was slower in both pairs. Its
+patch is retained as `rejected-thread-motion-wrapper.patch`. This does not
+establish that all shared-spinner uses are slow; it is a result for this
+fixture and this migration. Backend hashes were identical. Control assets:
+`4ff1054df16bebc5e35a9fd75f94484f45f03fb2b063cf1d219a6346b67c77ee`;
+rejected candidate assets:
+`8cc45afce4d9359868d0bc6b731f77931546d516702f2b6f3230754574230468`.
+
+### Narrow reduced-motion candidate
+
+Apply `motion-reduce:animate-none` to the existing icon. This candidate changes
+only the reduced-motion path and implements requirement 006; it leaves the
+existing normal rotation target unchanged. Efficient rotation under requirement
+001 and offscreen motion ownership remain unresolved for this legacy target.
+The regression retains initial/runtime reduced motion, normal one-second CSS
+rotation, unchanged label/14px geometry, and task settlement on desktop and
+phone. The CSS-only path has one test per device rather than duplicate cases
+for an unused Web Animations branch. Fresh-build checks passed: the desktop regression (14.6 seconds), phone
+regression (21.3 seconds), typecheck, scoped lint, and documentation validation.
+Matched timing completed in 16.7 minutes. All four samples verified 1,800
+ordered updates, with no HTTP or verification errors. Reduced-motion idle
+main-thread CPU fell from 8,968 to 5,271 ms and from 9,245 to 5,986 ms (41.2%
+and 35.3% lower; median paired reduction 38.2%). Running animations fell from
+six to zero. Normal idle CPU was 4.8% and 1.3% lower, but the normal production
+path is unchanged and no default-idle gain is claimed. Streaming CPU was 8.3%
+higher in pair 0 and 4.1% lower in pair 1; no streaming gain is claimed.
+
+Raw report: `matched-dense-1792796710483.json`; summary:
+`thread-motion-css-two-pair-summary.json`; log:
+`thread-motion-css-benchmark-logs/kandev-run.e2e.3QbnqMv5.log`.
+[Committed evidence](evidence/threads-reduced-motion-1x.json) contains every
+paired result, build hashes, fixture details, and verification counts.
+Candidate assets:
+`01e8b16fd50096caa2f324e177e53e555e9475578006facde9a2962ba1aef39e`.
+The backend and control assets match the rejected wrapper experiment.
+
+Keep the narrow CSS correction. Offscreen motion ownership for this legacy
+SVG remains open; this work order is not marked complete. The public animation
+guide already documents the reduced-motion contract, so no new product copy or
+public documentation change is required.

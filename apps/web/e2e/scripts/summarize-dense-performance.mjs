@@ -84,8 +84,8 @@ function windowMetrics(run) {
 }
 
 export function summarizeReport(report) {
-  if (report.measurementKind === "cpu-attribution")
-    throw new Error("CPU attribution runs are excluded from timing comparisons");
+  if (["cpu-attribution", "animation-attribution"].includes(report.measurementKind))
+    throw new Error("Diagnostic attribution runs are excluded from timing comparisons");
   if (report.error) throw new Error(`input report contains an error: ${report.error}`);
   const records = [];
   for (const sample of report.samples) {

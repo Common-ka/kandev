@@ -57,6 +57,42 @@ its backend log, `reference-six-pair-grid-1x-summary.json`, and
 `reference-six-pair-grid-1x-host-load.jsonl`. Runner log:
 `/tmp/kandev-run.e2e.7RtV7dhF.log`.
 
+## Kept Threads reduced-motion correction
+
+The Threads working-status SVGs now stop rotating when reduced motion is
+requested. Their existing normal-motion path, size, color, and label remain
+unchanged. Initial and runtime preference changes and task settlement passed
+fresh desktop and phone browser tests; typecheck and scoped lint passed.
+
+Two alternating pairs against the retained candidate used 1,000 tasks, six
+visible chats, 120 seeded primary messages per chat, and 1,800 ordered updates
+per sample. Reduced-motion idle main-thread CPU fell from 8,968 to 5,271 ms and
+from 9,245 to 5,986 ms: 41.2% and 35.3% lower, with a 38.2% median paired
+reduction. Running animations fell from six to zero. All four samples passed
+ordered-update verification with no HTTP or verification errors.
+
+Normal idle CPU was 4.8% and 1.3% lower in this round. Streaming CPU was 8.3%
+higher in one pair and 4.1% lower in the other. No normal-idle or streaming
+speed gain is claimed for this reduced-motion-only change. These two pairs
+compare with the retained candidate, not the original baseline or an M2 Air.
+See [all paired metrics and provenance](evidence/threads-reduced-motion-1x.json)
+and [work order 03](task-03-motion-eligibility.md#narrow-reduced-motion-candidate).
+
+## Rejected Threads spinner wrapper
+
+Attribution identified the six remaining reduced-motion animations as Threads
+working-status SVGs. A shared `CompositorSpin` migration passed four desktop
+and nine phone checks, but two alternating dense pairs showed 12.0% and 3.1%
+more normal-idle main-thread CPU. Reduced-motion idle improved by 24.8% and
+21.3%; streaming CPU improved by 2.0% and 4.3%, with essentially unchanged
+frame-gap p95. All four samples verified 1,800 ordered updates without HTTP or
+verification errors. The wrapper was removed. The narrower reduced-motion CSS
+correction above was retained after its separate comparison.
+
+Raw report: `matched-dense-1792795466229.json`. See
+[work order 03](task-03-motion-eligibility.md#threads-header-follow-up) for
+attribution, hashes, checks, and the rejected patch.
+
 ## Rejected containment follow-up
 
 The later CSS containment experiment was rejected and removed. In two matched

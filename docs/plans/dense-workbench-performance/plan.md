@@ -149,7 +149,7 @@ absolute timing assertions in CI.
 
 - [ ] [01: Dense fixture and baseline](task-01-dense-baseline.md)
 - [x] [02: Incremental conversation repair](task-02-conversation-repair.md)
-- [x] [03: Persistent motion eligibility](task-03-motion-eligibility.md)
+- [ ] [03: Persistent motion eligibility](task-03-motion-eligibility.md) (reopened: reduced-motion correction verified; legacy Threads SVG offscreen ownership remains open)
 - [x] [04: Asset delivery and import boundaries](task-04-asset-delivery.md)
 - [ ] [05: Dockview and editor lifecycle](task-05-workbench-lifecycle.md)
 - [ ] [06: Matched comparison and regression evidence](task-06-performance-comparison.md)

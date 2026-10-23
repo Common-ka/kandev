@@ -9,6 +9,13 @@ test("rejects CPU attribution runs as timing comparisons", () => {
   );
 });
 
+test("rejects animation attribution runs as timing comparisons", () => {
+  assert.throws(
+    () => summarizeReport({ measurementKind: "animation-attribution", samples: [] }),
+    /attribution/,
+  );
+});
+
 test("matches pair identity before computing changes and retains regressions", () => {
   const rows = [
     { arm: "candidate", pair: 1, cpuRate: 1, value: 240 },

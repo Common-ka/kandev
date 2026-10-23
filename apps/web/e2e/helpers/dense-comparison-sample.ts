@@ -13,6 +13,7 @@ import {
   endDenseWindow,
 } from "./dense-measurement";
 import { dwell } from "./causal-waits";
+import { inspectDenseAnimations } from "./dense-animation-diagnostics";
 
 async function startDenseProfile(cdp: CDPSession, profilePath?: string) {
   if (!profilePath) return;
@@ -191,8 +192,10 @@ export async function runDenseSample(options: {
       }
     }
     const history = await loadedDenseHistory(page, threads);
+    const animationDiagnostics = await inspectDenseAnimations(page);
     return {
       sample,
+      animationDiagnostics,
       historyMode,
       historyLoadMs,
       initialLoadedHistory,

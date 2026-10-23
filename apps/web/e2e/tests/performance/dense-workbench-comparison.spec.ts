@@ -65,6 +65,8 @@ test("compares frozen builds on identical dense conversation snapshots", async (
   const output = path.join(directory, `matched-dense-${Date.now()}.json`);
   let measurementKind = process.env.KANDEV_DENSE_TASKS ? "harness-rehearsal" : "reference-workload";
   if (process.env.KANDEV_DENSE_PROFILE === "1") measurementKind = "cpu-attribution";
+  if (process.env.KANDEV_DENSE_ANIMATION_DIAGNOSTICS === "1")
+    measurementKind = "animation-attribution";
   const report = {
     machine: profileMachine(),
     sourceRevision: execFileSync("git", ["rev-parse", "HEAD"], {

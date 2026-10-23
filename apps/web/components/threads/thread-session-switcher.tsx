@@ -107,7 +107,7 @@ export function ThreadSessionStatusIcon({
       return (
         <IconLoader2
           {...iconProps}
-          className={`${iconProps.className} animate-spin text-blue-500`}
+          className={`${iconProps.className} animate-spin motion-reduce:animate-none text-blue-500`}
         />
       );
     case "failed":
