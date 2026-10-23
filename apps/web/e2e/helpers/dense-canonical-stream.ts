@@ -6,6 +6,7 @@ import type { SeedData } from "../fixtures/test-base";
 import type { ApiClient } from "./api-client";
 import { DENSE_WORKLOAD, type DenseThread } from "./dense-workbench-fixture";
 import { waitForAgentMessage, waitForSessionDone } from "./session";
+import { inspectDenseStreamProgress } from "./dense-stream-progress";
 
 export async function prepareDenseStream(
   api: ApiClient,
@@ -48,6 +49,7 @@ export async function prepareDenseStream(
     lastMarker,
     scheduledUpdates: updatesPerSession * threads.length,
     release: () => fs.writeFileSync(release, "start"),
+    inspect: (page: Page) => inspectDenseStreamProgress(page, api, threads),
     async waitForVisible(page: Page) {
       for (const thread of threads) {
         await expect(

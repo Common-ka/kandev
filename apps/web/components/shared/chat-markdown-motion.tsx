@@ -33,7 +33,13 @@ export function ChatMotionSpan({
 }
 
 function hasTextSelection(): boolean {
-  return typeof window !== "undefined" && window.getSelection()?.isCollapsed === false;
+  if (typeof window === "undefined") return false;
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return false;
+  // A live range preserves synchronous selection checks without the extra
+  // layout flush that Chromium performs for Selection.isCollapsed.
+  if (selection.rangeCount === 1) return !selection.getRangeAt(0).collapsed;
+  return !selection.isCollapsed;
 }
 
 function useChatTextRuns(content: string, enabled: boolean) {

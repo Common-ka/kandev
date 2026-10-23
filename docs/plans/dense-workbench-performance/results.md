@@ -304,3 +304,43 @@ checks had passed. The production and test changes are restored to HEAD;
 are retained, not attributed to an established cause. The summary is
 `tree-identity-navigation-two-pair-summary.json`; the log is
 `/tmp/kandev-run.e2e.2vm17ekT.log` (9.2 minutes).
+
+
+### Focused-composer selection check: retained
+
+The candidate uses the current single selection range's `collapsed` value
+instead of `Selection.isCollapsed`. It keeps synchronous selection checks and
+the browser's multiple-range behavior. Chromium 149 forces style/layout work
+in `Selection.isCollapsed` even when a cached range exists. The passive-grid
+diagnostic had no range, so this change is not credited with improving that
+workload. The matched experiment focuses the first of six native composers in
+both builds; the other five retain normal auto-hide behavior.
+
+Two alternating pairs completed with 1,000 tasks, six chats, 120 seeded messages
+per chat, and 1,800 scheduled updates per sample. Every sample verified all
+stored updates and had zero HTTP or verification errors. Control/candidate
+streaming main-thread work was 81,076/60,718 ms and 79,053/59,742 ms: a 24.77%
+median paired reduction. Observation through the final visible update fell
+from 82,115/80,934 ms to 61,817/61,341 ms (24.46% median paired reduction).
+Frame-gap p95 fell from 183.3/166.6 ms to 133.4/133.4 ms (23.58%).
+Normal idle work was neutral across pairs; reduced-motion idle main-thread
+work increased by 3.46%. Cold-ready results were mixed. These are Linux
+Chromium results with a focused composer, not M2, INP, or battery measurements.
+
+Two earlier baseline attempts exceeded the unchanged final-marker timeout and
+are retained as failures, not included in the completed-pair percentage.
+The second failure snapshot showed all 300 ticks stored in each chat; five
+chats displayed 300 and one displayed 299 after timeout. It does not establish
+when storage finished. The completed run started with the candidate and
+reversed order for the second pair; this order is recorded in the manifest.
+
+Raw: `matched-dense-1792784736352.json`; summary:
+`selection-focused-two-pair-summary.json`; host observations:
+`selection-candidate-first-host-load.jsonl`, all under the diagnostic directory.
+Log: `/tmp/kandev-run.e2e.CcqON1o6.log` (16.9 minutes). The frozen control is
+`/tmp/kandev-dense-before-tree-identity-5936a872` (retained production code).
+The selection change passed 26 focused unit checks and three fresh desktop
+plus three phone checks. The browser regression selects text and appends a
+message in the same script, then verifies the selected text and static tail.
+The diagnostic helper has three tests for duplicate ticks, empty streams,
+scripted user prompts, and failed reads; the summary helper has four tests.

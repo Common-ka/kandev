@@ -203,6 +203,32 @@ export function chatMotionScenarios(mobile: boolean) {
     await expect(session.activeChat().locator("code [data-chat-text-motion]")).toHaveCount(0);
     await expect(session.activeChat().locator("[data-chat-text-motion]")).toHaveCount(0);
 
+    await session
+      .activeChat()
+      .getByText("new suffix", { exact: true })
+      .evaluate((node, sessionId) => {
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        const selection = window.getSelection()!;
+        selection.removeAllRanges();
+        selection.addRange(range);
+        const state = (window as MotionWindow).__KANDEV_E2E_STORE__!.getState();
+        const message = state.messages.bySession[sessionId].find((item) =>
+          item.content.startsWith("MOTION-PROSE 1"),
+        )!;
+        state.updateMessage({
+          ...message,
+          content: message.content + " selection-safe tail",
+          updated_at: new Date().toISOString(),
+        });
+      }, task.session_id);
+    await expect(
+      session.activeChat().getByText("selection-safe tail", { exact: false }),
+    ).toBeVisible();
+    expect(await testPage.evaluate(() => window.getSelection()?.toString())).toBe("new suffix");
+    await expect(session.activeChat().locator("[data-chat-text-motion]")).toHaveCount(0);
+    await testPage.evaluate(() => window.getSelection()?.removeAllRanges());
+
     await testPage.emulateMedia({ reducedMotion: "reduce" });
     await expect
       .poll(() =>

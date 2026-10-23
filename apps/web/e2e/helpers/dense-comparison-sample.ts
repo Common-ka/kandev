@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import { expect, type Browser, type CDPSession, type Page } from "@playwright/test";
+import { expect, type Browser, type CDPSession, type Locator, type Page } from "@playwright/test";
 import type { BackendContext } from "../fixtures/backend";
 import type { SeedData } from "../fixtures/test-base";
 import type { ApiClient } from "./api-client";
@@ -30,6 +30,35 @@ function denseScenarios(historyMode: string, profilePath?: string) {
   return historyMode === "all" || profilePath
     ? (["streaming"] as const)
     : (["idle", "streaming", "reduced-motion-idle"] as const);
+}
+
+async function checkComposerFocus(editor?: Locator) {
+  if (editor) await expect(editor).toBeFocused();
+}
+
+async function prepareFocusedComposer(page: Page, taskId: string) {
+  if (process.env.KANDEV_DENSE_FOCUS_COMPOSER !== "1") return;
+  const tile = page.getByTestId(`thread-column-${taskId}`);
+  const editor = tile.locator('.tiptap.ProseMirror[contenteditable="true"]');
+  await tile.hover();
+  await editor.click();
+  await checkComposerFocus(editor);
+  return editor;
+}
+
+async function waitForDenseStream(
+  scenario: string,
+  stream: Awaited<ReturnType<typeof prepareDenseStream>>,
+  page: Page,
+  checkpoint?: (evidence: Record<string, unknown>) => void,
+) {
+  if (scenario !== "streaming") return;
+  try {
+    await stream.waitForVisible(page);
+  } catch (error) {
+    checkpoint?.({ streamFailure: await stream.inspect(page) });
+    throw error;
+  }
 }
 
 export async function runDenseSample(options: {
@@ -112,12 +141,20 @@ export async function runDenseSample(options: {
         ).toBeVisible();
     }
     const initialLoadedHistory = await loadedDenseHistory(page, threads);
-    options.checkpoint?.({ historyMode, historyLoadMs, initialLoadedHistory });
+    const editor = await prepareFocusedComposer(page, threads[0].taskId);
+    const focusComposer = Boolean(editor);
+    options.checkpoint?.({ historyMode, historyLoadMs, initialLoadedHistory, focusComposer });
     const runs = [];
     const scenarios = denseScenarios(historyMode, options.profilePath);
     for (const scenario of scenarios) {
       if (scenario === "reduced-motion-idle") await page.emulateMedia({ reducedMotion: "reduce" });
       traffic.reset();
+      const selectionBefore = await page.evaluate(() => ({
+        rangeCount: window.getSelection()?.rangeCount ?? 0,
+        activeElementTag: document.activeElement?.tagName ?? null,
+        activeElementEditable:
+          document.activeElement instanceof HTMLElement && document.activeElement.isContentEditable,
+      }));
       await startDenseProfile(cdp, options.profilePath);
       const before = await beginDenseWindow(page, cdp);
       if (scenario === "streaming") stream.release();
@@ -131,11 +168,13 @@ export async function runDenseSample(options: {
         metrics: await cdp.send("Performance.getMetrics"),
         delivery: traffic.snapshot(),
       };
-      if (scenario === "streaming") await stream.waitForVisible(page);
+      options.checkpoint?.({ observing: scenario, deadline, selectionBefore });
+      await waitForDenseStream(scenario, stream, page, options.checkpoint);
       const measured = await endDenseWindow(page, cdp, before);
       await saveDenseProfile(cdp, options.profilePath);
+      await checkComposerFocus(editor);
       const delivery = traffic.snapshot();
-      runs.push({ scenario, deadline, ...measured, delivery });
+      runs.push({ scenario, selectionBefore, deadline, ...measured, delivery });
       options.checkpoint?.({ cold, runs, historyMode, initialLoadedHistory });
       if (scenario === "streaming") {
         try {
@@ -157,6 +196,7 @@ export async function runDenseSample(options: {
       historyMode,
       historyLoadMs,
       initialLoadedHistory,
+      focusComposer,
       cpuRate,
       browser: browser.version(),
       viewport: { width: 1470, height: 956, scale: 2 },

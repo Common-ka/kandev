@@ -74,6 +74,7 @@ test("compares frozen builds on identical dense conversation snapshots", async (
     sourceFiles,
     lockfileSha256,
     measurementKind,
+    candidateFirst: process.env.KANDEV_DENSE_CANDIDATE_FIRST === "1",
     builds,
     fixture,
     databaseSha256: sha256File(snapshot),
@@ -98,10 +99,10 @@ test("compares frozen builds on identical dense conversation snapshots", async (
   try {
     for (const cpuRate of rates)
       for (let pair = 0; pair < pairs; pair++) {
-        const order =
-          pair % 2 === 0
-            ? (["baseline", "candidate"] as const)
-            : (["candidate", "baseline"] as const);
+        const baselineFirst = (pair % 2 === 0) !== report.candidateFirst;
+        const order = baselineFirst
+          ? (["baseline", "candidate"] as const)
+          : (["candidate", "baseline"] as const);
         for (const arm of order) {
           const sample = `${arm}-${cpuRate}x-${pair}`;
           const database = path.join(backend.tmpDir, `${sample}.db`);

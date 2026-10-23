@@ -358,3 +358,102 @@ checks had passed. The production and test changes are restored to HEAD;
 are retained, not attributed to an established cause. The summary is
 `tree-identity-navigation-two-pair-summary.json`; the log is
 `/tmp/kandev-run.e2e.2vm17ekT.log` (9.2 minutes).
+
+
+### Synchronous selection-range experiment
+
+The separate streaming CPU profile attributed several seconds to the text
+motion selection guard. Chromium 149's `DOMSelection::isCollapsed` always calls
+`UpdateStyleAndLayout`, even when a cached document range exists. The candidate
+reads the current single range's `collapsed` property and retains the browser's
+`isCollapsed` result for multiple ranges. Empty selections still require the
+browser's `rangeCount` check; this is not a claim that every selection read is
+free of layout. No asynchronous selection cache is introduced.
+
+Source: [Chromium 149 DOMSelection](https://chromium.googlesource.com/chromium/src/+/refs/tags/149.0.7827.55/third_party/blink/renderer/core/editing/dom_selection.cc).
+The three single/empty-range regression cases failed first; all 26 focused
+Markdown and motion tests pass after the change. The desktop/phone shared
+browser check now selects text and updates the message in the same script,
+then checks selected text and static appended content. The timing harness
+records selection range count and focused-element kind before each window,
+outside timing, to distinguish cached-range and empty-selection workloads.
+Browser checks and matched timing are pending.
+
+
+The unfocused one-second diagnostic completed in both arms
+(`matched-dense-1792782969406.json`, log `/tmp/kandev-run.e2e.bqmfah9R.log`).
+Every window began with `rangeCount: 0` and BODY focus. These windows establish
+selection state only; their timings are not performance evidence. The next
+comparison uses `KANDEV_DENSE_FOCUS_COMPOSER=1`: hover and click the first
+visible tile's native composer, then verify focus after every measured window.
+The other five composers retain their normal auto-hide behavior. Both arms use
+the same focused-composer workload, and the report records this mode explicitly.
+The production candidate passed three fresh desktop and three phone checks,
+including synchronous selection preservation during an append (logs
+`/tmp/kandev-run.e2e.JYIqwnEC.log` and `/tmp/kandev-run.e2e.gipJzfRf.log`).
+
+
+The first focused-composer timing attempt failed in the baseline before a
+complete sample (`matched-dense-1792783361998.json`, log
+`/tmp/kandev-run.e2e.vxW1rAdk.log`, 4.9 minutes). The first idle window confirmed
+one range in the focused editable DIV. The final streaming marker did not
+appear within the unchanged 30-second post-window visibility bound. The failure
+screenshot shows all six tiles still mounted and near ticks 286–289 of 299.
+The fixture had removed its database before inspection, so stored progress is
+unknown; this is not proof of lost delivery. No candidate sample ran.
+The copied browser artifacts are in `selection-focused-failure/`.
+
+The harness now saves each fixed-window deadline before waiting for the final
+marker. On a failed stream gate, it records browser and API tick counts before
+cleanup. Agent-message filtering excludes the scripted user prompt; failed API
+reads remain errors, never zero counts. The workload and timeout are unchanged.
+
+
+The focused retry also failed in the baseline before a complete sample
+(`matched-dense-1792784039112.json`, log `/tmp/kandev-run.e2e.Z9pdjVJe.log`).
+The failure snapshot recorded all 300 unique ticks in storage for all six
+sessions. Five visible chats showed all 300 ticks; one showed 299. These reads
+occurred after the visibility timeout, so they do not establish when storage
+finished. No candidate sample ran. The next attempt reverses the alternating
+order with `KANDEV_DENSE_CANDIDATE_FIRST=1`, recorded in the report. The workload
+and visibility bound remain unchanged.
+
+
+### Focused-composer selection check: retained
+
+The candidate uses the current single selection range's `collapsed` value
+instead of `Selection.isCollapsed`. It keeps synchronous selection checks and
+the browser's multiple-range behavior. Chromium 149 forces style/layout work
+in `Selection.isCollapsed` even when a cached range exists. The passive-grid
+diagnostic had no range, so this change is not credited with improving that
+workload. The matched experiment focuses the first of six native composers in
+both builds; the other five retain normal auto-hide behavior.
+
+Two alternating pairs completed with 1,000 tasks, six chats, 120 seeded messages
+per chat, and 1,800 scheduled updates per sample. Every sample verified all
+stored updates and had zero HTTP or verification errors. Control/candidate
+streaming main-thread work was 81,076/60,718 ms and 79,053/59,742 ms: a 24.77%
+median paired reduction. Observation through the final visible update fell
+from 82,115/80,934 ms to 61,817/61,341 ms (24.46% median paired reduction).
+Frame-gap p95 fell from 183.3/166.6 ms to 133.4/133.4 ms (23.58%).
+Normal idle work was neutral across pairs; reduced-motion idle main-thread
+work increased by 3.46%. Cold-ready results were mixed. These are Linux
+Chromium results with a focused composer, not M2, INP, or battery measurements.
+
+Two earlier baseline attempts exceeded the unchanged final-marker timeout and
+are retained as failures, not included in the completed-pair percentage.
+The second failure snapshot showed all 300 ticks stored in each chat; five
+chats displayed 300 and one displayed 299 after timeout. It does not establish
+when storage finished. The completed run started with the candidate and
+reversed order for the second pair; this order is recorded in the manifest.
+
+Raw: `matched-dense-1792784736352.json`; summary:
+`selection-focused-two-pair-summary.json`; host observations:
+`selection-candidate-first-host-load.jsonl`, all under the diagnostic directory.
+Log: `/tmp/kandev-run.e2e.CcqON1o6.log` (16.9 minutes). The frozen control is
+`/tmp/kandev-dense-before-tree-identity-5936a872` (retained production code).
+The selection change passed 26 focused unit checks and three fresh desktop
+plus three phone checks. The browser regression selects text and appends a
+message in the same script, then verifies the selected text and static tail.
+The diagnostic helper has three tests for duplicate ticks, empty streams,
+scripted user prompts, and failed reads; the summary helper has four tests.
