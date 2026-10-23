@@ -27,9 +27,12 @@ User-confirmed scope: whole application; both native and VS Code imports.
 Package operations retain existing instance-admin permissions and installation-wide
 inventory; choosing an installed variant remains browser-local.
 
-Implementation authorized on 2026-10-22. Complete five work orders sequentially,
-then deliver the seeded Tailscale instance. Tasks 01 and 02 are done; Task 03 is in progress. External
-publication and subagents are not authorized.
+The original five work orders record the implementation authorized on
+2026-10-22. The [PR remediation package](../theme-pr-remediation/plan.md) records
+the subsequent update-admission, VS Code default-rule, Pierre-option and
+Appearance-fixture repairs and final passing verification. PR #4731 remains a
+draft for remote CI and review. All implementation stayed in the primary
+session; subagents were not authorized.
 
 ## Scope
 

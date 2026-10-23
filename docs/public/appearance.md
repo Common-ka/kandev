@@ -16,6 +16,9 @@ An instance administrator can choose **Import theme** in Appearance or
 **Settings → Plugins → Themes**. Upload a native theme `.tar.gz` package or a
 standalone VS Code `.json` / `.jsonc` color theme. JSON comments and trailing
 commas are accepted. If the file has no declared type, select Light or Dark.
+Unscoped token foreground and background defaults fill missing editor colors;
+explicit `colors.editor.*` values take precedence. Unscoped font styles appear
+as unsupported in the compatibility report.
 
 Choose **Review theme** to inspect variants, samples and compatibility findings,
 then **Install themes**. Installation does not change anyone's selected theme.
@@ -31,7 +34,10 @@ install another copy.
 The Plugins page's **Themes** tab searches theme listings from the configured
 marketplace sources. Administrators can review and install a listing. Manage
 sources in the existing plugin marketplace. Use the **Installed** tab to enable,
-disable or remove a theme package, just like other packages.
+disable, update or remove a theme package, just like other packages. Manual and
+automatic theme updates verify the selected release's kind, package ID, version
+and SHA-256 digest before installation. A rejected update keeps the installed
+version available.
 
 If a saved theme becomes unavailable, Kandev uses its base appearance and keeps
 the saved reference. Re-enable or reinstall the package to restore it, or select

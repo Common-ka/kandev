@@ -1,8 +1,27 @@
 # Theme support delivery
 
-Implemented on 2026-10-22 in the task checkout based on
-`8ba5b6909139ec2e9e14b0e2eb2f96a4e342e88b`. Changes are uncommitted. The running
-instance uses frozen copies of the built backend, helpers and frontend assets.
+Initial implementation on 2026-10-22 was committed in draft PR #4731 at
+`3df5376052aab41851df584802dcafb68d7db46e`, based on
+`8ba5b6909139ec2e9e14b0e2eb2f96a4e342e88b`. The original demonstration and
+validation notes below describe that earlier frozen build.
+
+## PR remediation on 2026-10-23
+
+The [remediation package](../theme-pr-remediation/plan.md) supersedes the original
+validation claims for the four reported blockers. Theme updates now bind kind,
+ID, version and digest before installation; manual updates use prepare/commit.
+Unscoped VS Code defaults import with explicit-color precedence. Pierre palette
+changes preserve all other diff render options. Representative auth/theme
+fixtures restore all 18 existing Appearance regression cases.
+
+Final local evidence: 89 frontend tests across 15 files; full plugin/package CLI
+suites; focused theme update/review/lifecycle race tests; boot/gateway theme
+checks; 28 registry tests; web typecheck with an 8 GiB Node heap; changed-file
+ESLint/Go lint; documentation checks; and 3 desktop plus 2 phone E2E scenarios
+passed. The browser flows cover catalog installation/update and VS Code import,
+selection, save/reload and unavailable-theme recovery. No new demo instance was
+published for this remediation. The PR remains draft pending remote checks and
+review; local results alone do not assert merge readiness.
 
 ## Try it
 

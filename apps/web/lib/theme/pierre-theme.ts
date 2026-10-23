@@ -18,7 +18,7 @@ export function registerPierreTheme(theme: EffectiveTheme): string | undefined {
   }
   return name;
 }
-type Pool = Pick<WorkerPoolManager, "setRenderOptions">;
+type Pool = Pick<WorkerPoolManager, "setRenderOptions" | "getDiffRenderOptions">;
 const updates = new WeakMap<Pool, { revision: number; pending: Promise<void> }>();
 export function updatePierreTheme(pool: Pool, theme: EffectiveTheme): Promise<void> {
   let state = updates.get(pool);
@@ -33,7 +33,7 @@ export function updatePierreTheme(pool: Pool, theme: EffectiveTheme): Promise<vo
     .catch(() => {})
     .then(async () => {
       if (current.revision !== revision) return;
-      await pool.setRenderOptions({ theme: name ?? PIERRE_THEME });
+      await pool.setRenderOptions({ ...pool.getDiffRenderOptions(), theme: name ?? PIERRE_THEME });
     });
   return current.pending;
 }

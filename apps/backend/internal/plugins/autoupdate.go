@@ -183,7 +183,7 @@ func (s *Service) applyAutoUpdates(ctx context.Context, entries []marketplace.Ca
 			continue
 		}
 		from := entry.InstalledVersion
-		if _, err := s.InstallFromURL(ctx, entry.PackageURL); err != nil {
+		if _, err := s.installMarketplaceUpdate(ctx, entry); err != nil {
 			outcome.Failed = append(outcome.Failed, AutoUpdateFailure{ID: entry.ID, To: entry.Version, Error: err.Error()})
 			s.log.Warn("plugins: auto-update failed",
 				zap.String("plugin_id", entry.ID), zap.String("from", from),

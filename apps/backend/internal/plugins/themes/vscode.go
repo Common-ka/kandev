@@ -43,10 +43,10 @@ func ConvertVSCode(data []byte, base string) (*Import, error) {
 	if len(result.Name) > 128 {
 		return nil, fmt.Errorf("theme_name: maximum 128 bytes")
 	}
-	if err = convertColors(root["colors"], result); err != nil {
+	if err = convertTokens(root["tokenColors"], result); err != nil {
 		return nil, err
 	}
-	if err = convertTokens(root["tokenColors"], result); err != nil {
+	if err = convertColors(root["colors"], result); err != nil {
 		return nil, err
 	}
 	if err = convertSemantic(root["semanticTokenColors"], result); err != nil {
@@ -174,27 +174,41 @@ func convertTokens(value any, result *Import) error {
 		if err = validateTokenSettings(rule["settings"]); err != nil {
 			return err
 		}
-		scopes, err := tokenScopes(rule["scope"])
+		scope, scoped := rule["scope"]
+		if text, ok := scope.(string); ok && strings.TrimSpace(text) == "" {
+			scoped = false
+		}
+		if !scoped {
+			if err := convertTokenDefaults(style, result); err != nil {
+				return err
+			}
+			continue
+		}
+		scopes, err := tokenScopes(scope)
 		if err != nil {
 			return err
 		}
-		result.Definition.Textmate = append(result.Definition.Textmate, TokenRule{Scope: scopes, Settings: style})
-		for _, scope := range scopes {
-			mapped := false
-			for alias, role := range scopeAliases {
-				if scope == alias || strings.HasPrefix(scope, alias+".") {
-					result.Definition.Syntax[role] = style
-					mapped = true
-				}
-			}
-			if mapped {
-				result.Report.add("mapped", scope, "Portable syntax approximation; TextMate rule retained")
-			} else {
-				result.Report.add("approximate", scope, "TextMate retained; Monaco and CodeMirror use portable fallback")
-			}
-		}
+		convertScopedToken(scopes, style, result)
 	}
 	return nil
+}
+
+func convertScopedToken(scopes []string, style Style, result *Import) {
+	result.Definition.Textmate = append(result.Definition.Textmate, TokenRule{Scope: scopes, Settings: style})
+	for _, scope := range scopes {
+		mapped := false
+		for alias, role := range scopeAliases {
+			if scope == alias || strings.HasPrefix(scope, alias+".") {
+				result.Definition.Syntax[role] = style
+				mapped = true
+			}
+		}
+		if mapped {
+			result.Report.add("mapped", scope, "Portable syntax approximation; TextMate rule retained")
+		} else {
+			result.Report.add("approximate", scope, "TextMate retained; Monaco and CodeMirror use portable fallback")
+		}
+	}
 }
 
 func validateTokenSettings(value any) error {
@@ -206,6 +220,37 @@ func validateTokenSettings(value any) error {
 		if key != "foreground" && key != "background" && key != "fontStyle" {
 			return fmt.Errorf("theme_tokens: unsupported setting %s", key)
 		}
+	}
+	probe, err := json.Marshal(map[string]any{"schema_version": 1, "textmate": []any{map[string]any{"scope": "comment", "settings": value}}})
+	if err != nil {
+		return err
+	}
+	_, err = Parse(probe, BaseDark)
+	return err
+}
+
+func convertTokenDefaults(style Style, result *Import) error {
+	colors := map[string]string{}
+	if style.Foreground != "" {
+		colors["foreground"] = style.Foreground
+	}
+	if style.Background != "" {
+		colors["background"] = style.Background
+	}
+	probe, err := json.Marshal(Definition{SchemaVersion: 1, Editor: colors})
+	if err != nil {
+		return err
+	}
+	if _, err = Parse(probe, result.Definition.Base); err != nil {
+		return err
+	}
+	for _, role := range sortedKeys(colors) {
+		color := colors[role]
+		result.Definition.Editor[role] = color
+		result.Report.add("mapped", "tokenColors.defaults."+role, "Mapped default editor color")
+	}
+	if style.FontStyle != "" {
+		result.Report.add("ignored", "tokenColors.defaults.fontStyle", "Unscoped font style is unsupported")
 	}
 	return nil
 }

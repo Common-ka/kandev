@@ -1,8 +1,6 @@
 package plugins
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -67,7 +65,7 @@ func (c *Controller) themeUpload(ctx *gin.Context) ([]byte, string, *themeURLReq
 		if err := ctx.ShouldBindJSON(&request); err != nil {
 			return nil, "", nil, err
 		}
-		data, err := c.svc.downloadTheme(ctx, request)
+		data, err := c.svc.downloadTheme(ctx.Request.Context(), themeRelease(request))
 		return data, "", &request, err
 	}
 	file, _, err := ctx.Request.FormFile("package")
@@ -83,48 +81,6 @@ func (c *Controller) themeUpload(ctx *gin.Context) ([]byte, string, *themeURLReq
 		return nil, "", nil, fmt.Errorf("theme_size: package limit exceeded")
 	}
 	return data, ctx.PostForm("base"), nil, err
-}
-
-func (s *Service) downloadTheme(ctx *gin.Context, request themeURLRequest) ([]byte, error) {
-	if err := validateInstallURL(request.URL); err != nil {
-		return nil, err
-	}
-	digest, err := hex.DecodeString(request.Digest)
-	if err != nil || len(digest) != sha256.Size || request.ID == "" || request.Version == "" {
-		return nil, fmt.Errorf("theme_identity: release id, version and sha256 required")
-	}
-	client := *s.httpClient
-	client.Timeout = downloadTimeout
-	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-		if len(via) >= 5 {
-			return fmt.Errorf("theme_download: too many redirects")
-		}
-		return validateInstallURL(req.URL.String())
-	}
-	req, err := http.NewRequestWithContext(ctx.Request.Context(), http.MethodGet, request.URL, nil)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = resp.Body.Close() }()
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("theme_download: HTTP %d", resp.StatusCode)
-	}
-	data, err := io.ReadAll(io.LimitReader(resp.Body, pkgtar.MaxThemePackageBytes+1))
-	if err != nil {
-		return nil, err
-	}
-	if len(data) > pkgtar.MaxThemePackageBytes {
-		return nil, fmt.Errorf("theme_size: package limit exceeded")
-	}
-	sum := sha256.Sum256(data)
-	if hex.EncodeToString(sum[:]) != strings.ToLower(request.Digest) {
-		return nil, fmt.Errorf("theme_digest: release checksum mismatch")
-	}
-	return data, nil
 }
 
 func (c *Controller) commitTheme(ctx *gin.Context) {

@@ -10,6 +10,7 @@ export const monokaiFixture = {
     "terminal.ansiGreen": "#a6e22e",
   },
   tokenColors: [
+    { settings: { foreground: "#eeeeee", background: "#222222", fontStyle: "italic" } },
     { scope: ["keyword", "storage.type"], settings: { foreground: "#f92672" } },
     { scope: "string", settings: { foreground: "#e6db74" } },
   ],

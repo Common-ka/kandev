@@ -85,3 +85,12 @@ test("installs a verified theme from a real registry source", async ({ testPage,
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+import { updateThemeFromMarketplace } from "./theme-marketplace-update-flow";
+
+test("updates a theme from Installed with verified release identity", async ({
+  testPage,
+  apiClient,
+}) => {
+  await updateThemeFromMarketplace(testPage, apiClient);
+});

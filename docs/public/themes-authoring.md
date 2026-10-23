@@ -106,3 +106,7 @@ The index builder verifies the actual archive's kind, identity, version, license
 and digest. Existing source precedence and update checks apply. See
 [Marketplace contributions](plugins-marketplace.md) for source configuration and
 curation. Publishing a listing is separate from importing it into your instance.
+
+Theme updates must retain the theme package kind and match the selected listing's
+ID, version and SHA-256 digest. A theme listing cannot replace an installed theme
+with an executable plugin, including a package with a different ID.

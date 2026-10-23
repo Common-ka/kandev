@@ -44,7 +44,7 @@ export function PluginsSettings() {
   const updates = usePluginUpdates();
   const installedIds = useMemo(() => new Set(list.items.map((p) => p.id)), [list.items]);
   const updateAction = usePluginUpdateAction(
-    actions.marketplaceInstall,
+    actions.marketplaceUpdate,
     updates.reload,
     installedIds,
     updates.markUpdated,

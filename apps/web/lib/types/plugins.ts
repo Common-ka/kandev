@@ -70,6 +70,7 @@ export interface PluginUISection {
  * /api/plugins/{id}/bundle regardless of that path.
  */
 export interface PluginRecord {
+  distribution?: { schema_version: number; kind: "theme" | "canvas" };
   id: string;
   api_version: number;
   version: string;
