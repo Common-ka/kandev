@@ -120,3 +120,66 @@ shows no clear speed gain. Both arms retained one editor and three panels after
 
 The earlier visible chat-composer construction attribution remains unresolved;
 this file-tree repair does not close that separate investigation.
+
+### Canonical streaming publication follow-up
+
+The first dense grid pair removed reset-driven reads but increased streaming
+frame-gap p95 from 83.3 to 150 ms. Inspection found that canonical upserts for
+existing agent messages take the synchronous add-message path. A new regression
+reproduces 600 immediate store writes for 600 upserts across two sessions.
+The fix reuses the existing frame scheduler for these existing agent rows.
+New rows and user-prompt upserts retain immediate ordering barriers.
+
+The two new tests fail before the change and pass afterward. The focused
+message/turn/client suite passes 72 tests; the related session-store and agent
+handler suite passes 154 tests. Type checking passes. Fresh desktop browser
+checks pass for canonical streaming, core gap recovery, and navigation drafts.
+The plugin paging check observed all five seeded prompts where its assertion
+expected four. The frozen pre-batching build reproduced that count failure in
+one of three runs. The test now pages to completion and checks all five exact
+IDs, including uniqueness. An initial DOM identity assertion was removed:
+the fixture replaces its rendered DOM while showing its loading state, which
+is not proof of a React remount. One diagnostic repeat also reached the plugin
+Retry state; that occurrence is retained and is not claimed fixed. The corrected
+pagination test passed three consecutive candidate runs. The new batching
+change still has no measured rendering-performance claim.
+
+The completed batching rehearsal did not establish a rendering gain: publications
+fell from 1,501 to 659, but CPU was 61,370 versus 62,085 ms and frame-gap p95 was
+133.4 versus 166.6 ms. The batching production change was removed. Its exact
+patch and both profiles remain in the ignored diagnostics directory.
+
+Separate CPU attribution identified status candidate scans and prompt-edge
+geometry. The next candidate caches status selectors by immutable source
+references and coalesces edge measurements in a cancellable animation frame.
+The status test reproduces 301,000 reads before caching and 1,000 afterward for
+300 unrelated publications, while checking each status source and task identity.
+The geometry test fails before deferral and passes after frame coalescing and
+unmount cancellation. The related transcript/status run passed 197 tests; the
+broader status run passed 31 tests. Typecheck and scoped lint pass. A fresh
+production build passed 12 desktop browser checks, including all last-prompt
+scroll cases, live status updates, and A-B-A draft/context preservation. Four phone checks also pass, including native prompt navigation, live status,
+and draft/context preservation. The new A/B measurement is running.
+
+The status/geometry pair passed final-content verification but showed only modest
+changes: streaming CPU 62,721 to 61,225 ms and frame-gap p95 149.9 to 133.4 ms.
+It is exploratory and remains below the rendering target. Further tracing found
+that `useInitialPlacementLatches` returned a new object on every transcript
+render. It changed every historical message's navigation callback. A memoized
+history-action regression reproduced 20 unnecessary renders for 20 streaming
+updates. Memoizing the placement result removes them while session changes
+still refresh ownership. The combined unit run passed 198 tests; the native
+scroll file passed 98 tests after harness cleanup. Typecheck and scoped lint
+passed. The fresh desktop browser run passed all 11 affected scroll and
+navigation checks. Phone and matched timing checks are in progress.
+
+The callback candidate passed all 11 desktop and three phone browser checks,
+plus the final typecheck and scoped lint. Its paired rehearsal is retained as
+overload evidence (`matched-dense-1792763973626.json`): both arms completed the
+stream and final stored-content checks, but streaming HTTP failures numbered
+24 in the control and 42 in the candidate, followed by nine candidate history
+verification retries. Frame-gap p95 was 149.9 versus 100 ms, while main-thread
+use stayed near one full core. These timings do not establish a clean gain.
+The three source repairs have direct regression evidence for removed scans,
+coalesced geometry reads, and stable historical actions. They preserve tested
+behavior, but the dense responsiveness acceptance target remains unresolved.

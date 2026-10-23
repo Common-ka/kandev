@@ -1,6 +1,6 @@
 /* eslint-disable max-lines -- native scroll behavior and regression cases share one harness. */
-import { useLayoutEffect, useRef, type Ref } from "react";
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { memo, useLayoutEffect, useRef, type Ref } from "react";
+import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Message } from "@/lib/types/http";
 import type { RenderItem } from "@/hooks/use-processed-messages";
@@ -391,11 +391,15 @@ function NativeScrollHarnessContent({
   sentinelRef,
   sessionId,
   dividerBeforeItemKey,
+  onScroll,
+  onRender,
 }: {
   scrollRef: Ref<HTMLDivElement>;
   sentinelRef: Ref<HTMLDivElement>;
   sessionId: string | null;
   dividerBeforeItemKey: string | null;
+  onScroll: (messageId: string) => boolean;
+  onRender?: () => void;
 }) {
   return (
     <div
@@ -408,9 +412,22 @@ function NativeScrollHarnessContent({
       <div ref={sentinelRef} />
       {dividerBeforeItemKey ? <div id={`msg-${dividerBeforeItemKey}`} /> : null}
       <div id="msg-navigation-target" />
+      <MemoizedHistoryAction onScroll={onScroll} onRender={onRender} />
     </div>
   );
 }
+
+const MemoizedHistoryAction = memo(function MemoizedHistoryAction({
+  onScroll,
+  onRender,
+}: {
+  onScroll: (messageId: string) => boolean;
+  onRender?: () => void;
+}) {
+  if (!onRender) return null;
+  onRender();
+  return <button onClick={() => onScroll(NATIVE_NAVIGATION_TARGET)}>History</button>;
+});
 
 function NativeScrollManagementHarness({
   items,
@@ -434,6 +451,7 @@ function NativeScrollManagementHarness({
   dividerBeforeItemKey = null,
   motionEnabled = false,
   readerClaimRef,
+  onHistoryActionRender,
 }: {
   items: RenderItem[];
   messages?: Message[];
@@ -458,6 +476,7 @@ function NativeScrollManagementHarness({
   dividerBeforeItemKey?: string | null;
   motionEnabled?: boolean;
   readerClaimRef?: { current: (() => void) | null };
+  onHistoryActionRender?: () => void;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   useNativeScrollMetrics(scrollRef, metrics);
@@ -506,8 +525,24 @@ function NativeScrollManagementHarness({
   setOptionalRef(recoveryRef, showRecovery);
   setOptionalRef(readerClaimRef, claimReaderPosition);
   const contentProps = { scrollRef, sentinelRef, sessionId, dividerBeforeItemKey };
-  return <NativeScrollHarnessContent {...contentProps} />;
+  const actionProps = { onScroll: handleScrollToMessage, onRender: onHistoryActionRender };
+  return <NativeScrollHarnessContent {...contentProps} {...actionProps} />;
 }
+
+it("keeps historical message actions stable while another message streams", () => {
+  const onRender = vi.fn();
+  const items = [transcriptMessage(NATIVE_NAVIGATION_TARGET)];
+  const props = { items, sessionId: "stable-history", onHistoryActionRender: onRender };
+  const view = render(<NativeScrollManagementHarness {...props} />);
+  const initialRenders = onRender.mock.calls.length;
+  for (let index = 0; index < 20; index++) {
+    const message = { ...TEST_MESSAGES[0], content: `Streaming ${index}` };
+    view.rerender(<NativeScrollManagementHarness {...props} messages={[message]} />);
+  }
+  expect(onRender).toHaveBeenCalledTimes(initialRenders);
+  view.rerender(<NativeScrollManagementHarness {...props} sessionId="next-history" />);
+  expect(onRender.mock.calls.length).toBeGreaterThan(initialRenders);
+});
 
 function retainedStartFixture(motionEnabled = false) {
   const frames: FrameRequestCallback[] = [];
@@ -3409,17 +3444,51 @@ describe("unloaded prompt edge tracking", () => {
   });
   afterEach(() => vi.unstubAllGlobals());
 
-  it("reclassifies one-sided windows when rendered items arrive or change", () => {
+  it("coalesces geometry reads and cancels obsolete frame work", () => {
+    const frames = new Map<number, FrameRequestCallback>();
+    let frameId = 0;
+    vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+      frames.set(++frameId, callback);
+      return frameId;
+    });
+    vi.stubGlobal("cancelAnimationFrame", (id: number) => frames.delete(id));
     const onEdge = vi.fn();
-    const view = render(<EdgeHarness items={[]} unloaded onEdge={onEdge} />);
-    expect(onEdge).toHaveBeenLastCalledWith("visible");
-    view.rerender(<EdgeHarness items={[EDGE_NEWER]} unloaded onEdge={onEdge} />);
-    expect(onEdge).toHaveBeenLastCalledWith("above");
-    view.rerender(<EdgeHarness items={[EDGE_OLDER]} unloaded onEdge={onEdge} />);
-    expect(onEdge).toHaveBeenLastCalledWith("below");
+    const item: RenderItem = { type: "message", message: EDGE_PROMPT };
+    const view = render(<EdgeHarness items={[item]} unloaded={false} onEdge={onEdge} />);
+    const root = screen.getByTestId("edge-root");
+    const bounds = vi.fn(() => createRect(40, 160));
+    root.getBoundingClientRect = bounds;
+    expect(onEdge).not.toHaveBeenCalled();
+    act(() => {
+      root.dispatchEvent(new Event("scroll"));
+      root.dispatchEvent(new Event("scroll"));
+    });
+    expect(bounds).not.toHaveBeenCalled();
+    expect(frames.size).toBe(1);
+    act(() => {
+      const callbacks = [...frames.values()];
+      frames.clear();
+      callbacks.forEach((callback) => callback(16));
+    });
+    expect(bounds).toHaveBeenCalledTimes(1);
+    expect(onEdge).toHaveBeenCalledTimes(1);
+    act(() => root.dispatchEvent(new Event("scroll")));
+    expect(frames.size).toBe(1);
+    view.unmount();
+    expect(frames.size).toBe(0);
   });
 
-  it("ignores another transcript's duplicate neighbor row and measures a grouped row", () => {
+  it("reclassifies one-sided windows when rendered items arrive or change", async () => {
+    const onEdge = vi.fn();
+    const view = render(<EdgeHarness items={[]} unloaded onEdge={onEdge} />);
+    await waitFor(() => expect(onEdge).toHaveBeenLastCalledWith("visible"));
+    view.rerender(<EdgeHarness items={[EDGE_NEWER]} unloaded onEdge={onEdge} />);
+    await waitFor(() => expect(onEdge).toHaveBeenLastCalledWith("above"));
+    view.rerender(<EdgeHarness items={[EDGE_OLDER]} unloaded onEdge={onEdge} />);
+    await waitFor(() => expect(onEdge).toHaveBeenLastCalledWith("below"));
+  });
+
+  it("ignores another transcript's duplicate neighbor row and measures a grouped row", async () => {
     const onEdge = vi.fn();
     const group: RenderItem = {
       type: "turn_group",
@@ -3438,7 +3507,7 @@ describe("unloaded prompt edge tracking", () => {
     root.querySelector<HTMLElement>("#msg-group-edge")!.getBoundingClientRect = () =>
       createRect(10, 20);
     act(() => root.dispatchEvent(new Event("scroll")));
-    expect(onEdge).toHaveBeenLastCalledWith("above");
+    await waitFor(() => expect(onEdge).toHaveBeenLastCalledWith("above"));
     view.unmount();
   });
 });
@@ -3455,27 +3524,27 @@ describe("missing prompt row scope", () => {
   });
   afterEach(() => vi.unstubAllGlobals());
 
-  it("keeps cached-but-unrendered and unresolved prompts neutral", () => {
+  it("keeps cached-but-unrendered and unresolved prompts neutral", async () => {
     const onEdge = vi.fn();
     const view = render(<EdgeHarness items={[EDGE_NEWER]} unloaded={false} onEdge={onEdge} />);
-    expect(onEdge).toHaveBeenLastCalledWith("visible");
+    await waitFor(() => expect(onEdge).toHaveBeenLastCalledWith("visible"));
     view.rerender(<EdgeHarness items={[EDGE_NEWER]} prompt={null} unloaded onEdge={onEdge} />);
-    expect(onEdge).toHaveBeenLastCalledWith("visible");
+    await waitFor(() => expect(onEdge).toHaveBeenLastCalledWith("visible"));
   });
 
-  it("keeps an incomplete unordered neighborhood neutral until ordering becomes conclusive", () => {
+  it("keeps an incomplete unordered neighborhood neutral until ordering becomes conclusive", async () => {
     const onEdge = vi.fn();
     const malformed: RenderItem = {
       type: "message",
       message: { id: "malformed-edge", created_at: "bad" } as Message,
     };
     const view = render(<EdgeHarness items={[malformed, EDGE_NEWER]} unloaded onEdge={onEdge} />);
-    expect(onEdge).toHaveBeenLastCalledWith("visible");
+    await waitFor(() => expect(onEdge).toHaveBeenLastCalledWith("visible"));
     view.rerender(<EdgeHarness items={[EDGE_NEWER]} unloaded onEdge={onEdge} />);
-    expect(onEdge).toHaveBeenLastCalledWith("above");
+    await waitFor(() => expect(onEdge).toHaveBeenLastCalledWith("above"));
   });
 
-  it("classifies its own loaded prompt row instead of another transcript's duplicate", () => {
+  it("classifies its own loaded prompt row instead of another transcript's duplicate", async () => {
     const onEdge = vi.fn();
     const item: RenderItem = { type: "message", message: EDGE_PROMPT };
     const view = render(
@@ -3489,11 +3558,11 @@ describe("missing prompt row scope", () => {
     root.querySelector<HTMLElement>("#msg-unloaded-prompt")!.getBoundingClientRect = () =>
       createRect(230, 20);
     act(() => root.dispatchEvent(new Event("scroll")));
-    expect(onEdge).toHaveBeenLastCalledWith("below");
+    await waitFor(() => expect(onEdge).toHaveBeenLastCalledWith("below"));
     view.unmount();
   });
 
-  it("does not measure a duplicate prompt row mounted outside its scroll container", () => {
+  it("does not measure a duplicate prompt row mounted outside its scroll container", async () => {
     const onEdge = vi.fn();
     const view = render(
       <>
@@ -3501,7 +3570,7 @@ describe("missing prompt row scope", () => {
         <EdgeHarness items={[EDGE_NEWER]} unloaded onEdge={onEdge} />
       </>,
     );
-    expect(onEdge).toHaveBeenLastCalledWith("above");
+    await waitFor(() => expect(onEdge).toHaveBeenLastCalledWith("above"));
     view.unmount();
   });
 });

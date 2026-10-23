@@ -39,14 +39,35 @@ export function collectTaskStatusSummaryCandidates(
   return candidates;
 }
 
+export function createTaskStatusSummarySelector(taskId: string | null | undefined) {
+  let previous: unknown[] | undefined;
+  let selected: TaskStatusSummary | null | undefined;
+  return (state: TaskStatusSummaryState) => {
+    if (!taskId) return null;
+    // Retain only status sources. Message publications do not invalidate them.
+    const sources = [
+      state.taskOverview.byId[taskId],
+      state.kanban.tasks,
+      state.kanbanMulti.snapshots,
+      state.sidebarArchivedTasks.itemsByWorkspaceId,
+    ];
+    if (!previous || sources.some((source, index) => source !== previous?.[index])) {
+      selected = selectTaskStatusSummary(
+        undefined,
+        collectTaskStatusSummaryCandidates(state, taskId),
+      );
+      previous = sources;
+    }
+    return selected;
+  };
+}
+
 export function useTaskStatusSummary(
   taskId: string | null | undefined,
   detail: TaskStatusSummary | null | undefined,
 ): TaskStatusSummary | null | undefined {
-  const live = useOptionalAppStore((state) => {
-    if (!taskId) return null;
-    return selectTaskStatusSummary(undefined, collectTaskStatusSummaryCandidates(state, taskId));
-  }, null);
+  const select = useMemo(() => createTaskStatusSummarySelector(taskId), [taskId]);
+  const live = useOptionalAppStore(select, null);
 
   return useMemo(() => selectTaskStatusSummary(detail, [live]), [detail, live]);
 }

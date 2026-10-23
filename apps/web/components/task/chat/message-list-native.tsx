@@ -133,15 +133,24 @@ export function useTranscriptEdgeTracking(
         }),
       );
     };
-    update();
-    container.addEventListener("scroll", update, { passive: true });
-    const resizeObserver = new ResizeObserver(update);
+    let frame: number | null = null;
+    const scheduleUpdate = () => {
+      if (frame !== null) return;
+      frame = requestAnimationFrame(() => {
+        frame = null;
+        update();
+      });
+    };
+    scheduleUpdate();
+    container.addEventListener("scroll", scheduleUpdate, { passive: true });
+    const resizeObserver = new ResizeObserver(scheduleUpdate);
     resizeObserver.observe(container);
     const content = container.querySelector<HTMLElement>("[data-chat-content]");
     if (content) resizeObserver.observe(content);
     observeTrackedRows(resizeObserver, lastTarget, olderRow, newerRow, firstTarget);
     return () => {
-      container.removeEventListener("scroll", update);
+      if (frame !== null) cancelAnimationFrame(frame);
+      container.removeEventListener("scroll", scheduleUpdate);
       resizeObserver.disconnect();
     };
   }, [

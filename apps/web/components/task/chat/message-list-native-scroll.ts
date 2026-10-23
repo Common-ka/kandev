@@ -2,7 +2,7 @@
 
 import { cancelChatScrollMotion } from "./chat-scroll-motion";
 import { useChatScrollMotion } from "./use-chat-scroll-motion";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useDockviewStore, type PendingChatScrollRestore } from "@/lib/state/dockview-store";
 import { useAppStoreApi } from "@/components/state-provider";
 import { getStoredAutoScrollTop } from "@/lib/local-storage";
@@ -1701,16 +1701,19 @@ function useInitialPlacementLatches(
     didInitialScroll.current = true;
     setCompletedVisitId(visitId);
   }, [isCurrentVisit, visitId]);
-  return {
-    didInitialScroll,
-    readerPositionClaimed,
-    startAlignedTargetRef,
-    provisionalAppliedRef,
-    deferredLayoutRestoreTokenRef,
-    isCurrentVisit,
-    completeInitialPlacement,
-    initialPlacementPending: completedVisitId !== visitId,
-  };
+  return useMemo(
+    () => ({
+      didInitialScroll,
+      readerPositionClaimed,
+      startAlignedTargetRef,
+      provisionalAppliedRef,
+      deferredLayoutRestoreTokenRef,
+      isCurrentVisit,
+      completeInitialPlacement,
+      initialPlacementPending: completedVisitId !== visitId,
+    }),
+    [completeInitialPlacement, completedVisitId, isCurrentVisit, visitId],
+  );
 }
 
 type InitialPlacementLatches = ReturnType<typeof useInitialPlacementLatches>;
