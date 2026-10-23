@@ -216,3 +216,36 @@ On 2026-10-21 the user authorized committing and pushing this package on the
 existing PR branch. The user also requested an isolated Tailscale evaluation
 instance and a [manual testing guide](manual-testing.md). The earlier delivery
 statements describe the implementation checkpoint before that authorization.
+
+## Browser compatibility correction (2026-10-21)
+
+The completed results above describe the earlier capability-limited package.
+The user requires rendered Edit across browsers. Source fallback does not meet
+that requirement. The [browser parity package](../markdown-browser-parity/plan.md)
+supersedes the browser exclusion and capability-only acceptance. Earlier test
+counts remain historical Chromium evidence, not cross-browser acceptance.
+
+## PR fixup (2026-10-23)
+
+The user authorized CI and review remediation on the existing PR branch.
+The integration includes the browser input, walkthrough, source-position, and
+button-state packages above. It merges main at
+`d3fab6f5e564dc1d0f09391d2d4e41c5c54b7620`.
+
+The review audit repaired tablet mode defaults and persistence, stabilized
+empty adapter props, corrected test mocks, and repaired a design reference.
+CI remediation updates phone tests for the mode menu and preserves typed
+workspace recovery guidance after a failed manual resume. The recovery test
+explicitly expects Source after its injected editor initialization failure.
+
+Current local checks passed: 188 targeted tests in 20 changed files, frontend
+typecheck, translation checks, documentation catalog and specification lint,
+and 204 harness tests. The four original phone CI scenarios passed against
+the rebuilt app. All 15 desktop Markdown cases and all nine phone Markdown
+cases passed across full runs and focused reruns. The multi-repository test
+no longer collapses an already expanded root. Four configuration-chat DOM
+snapshots were updated for the approved shared button classes. Earlier counts
+in this plan remain historical evidence.
+
+The user-requested `TESTING-PR3113.md` remains outside the commit. Native device
+IME and assistive-technology checks remain pending in the browser parity plan.

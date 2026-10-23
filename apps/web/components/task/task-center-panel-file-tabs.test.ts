@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { OpenFileTab } from "@/lib/types/backend";
-import { upsertOpenFileTab } from "./task-center-panel-file-tabs";
+import {
+  installFileEditorTab,
+  toStoredFileTab,
+  upsertOpenFileTab,
+} from "./task-center-panel-file-tabs";
 
 const file: OpenFileTab = {
   path: "README.md",
@@ -90,4 +94,23 @@ it("keeps unsaved tabs when adding a file beyond the clean-tab limit", () => {
   const tabs = [dirty, ...[1, 2, 3].map((index) => ({ ...file, path: `file-${index}.md` }))];
   const result = upsertOpenFileTab(tabs, { ...file, path: "new.md" });
   expect(result.find((tab) => tab.path === dirty.path)?.content).toBe("draft");
+});
+
+describe("new Markdown tab defaults", () => {
+  it("installs Preview for a mode-less new Markdown tab", () => {
+    expect(installFileEditorTab(file).markdownMode).toBe("preview");
+  });
+
+  it("persists the displayed Preview default for a mode-less live tab", () => {
+    expect(toStoredFileTab(file).markdownMode).toBe("preview");
+  });
+
+  it.each(["source", "edit", "preview"] as const)("preserves explicit %s mode", (markdownMode) => {
+    expect(toStoredFileTab({ ...file, markdownMode }).markdownMode).toBe(markdownMode);
+    expect(installFileEditorTab({ ...file, markdownMode }).markdownMode).toBe(markdownMode);
+  });
+
+  it("does not add a Markdown mode to ordinary files", () => {
+    expect(toStoredFileTab({ ...file, path: "plain.txt" }).markdownMode).toBeUndefined();
+  });
 });

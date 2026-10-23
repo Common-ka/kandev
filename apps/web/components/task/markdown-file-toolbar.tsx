@@ -85,7 +85,7 @@ export function MarkdownFileActions({
           <>
             <IconDeviceFloppy className="h-3.5 w-3.5" />
             {t("common:save")}
-            <span className="text-xs text-muted-foreground">({SAVE_SHORTCUT}+S)</span>
+            <span className="text-xs">({SAVE_SHORTCUT}+S)</span>
           </>
         )}
       </Button>

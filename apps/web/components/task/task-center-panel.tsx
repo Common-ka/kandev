@@ -35,13 +35,14 @@ import { useNormalizedTaskReviews } from "./review-panel-provider";
 import { useReviewItemSelection } from "./review-selection";
 import {
   getFileTabKey,
+  installFileEditorTab,
+  toStoredFileTab,
   useCanonicalFileTabs,
   upsertOpenFileTab,
   type FileEditorTab,
 } from "./task-center-panel-file-tabs";
 import { TaskCenterReviewContent } from "./task-center-review-content";
 import { useTaskCenterFileOpen } from "@/hooks/use-task-center-file-open";
-import { getFilePreviewKind } from "@/lib/utils/file-types";
 import type { MarkdownFileMode } from "./markdown-file-mode";
 
 import type { SelectedDiff } from "./task-layout";
@@ -290,16 +291,7 @@ function reviewLabelForReviews(
 function usePersistOpenFileTabs(activeSessionId: string | null, openFileTabs: OpenFileTab[]) {
   useEffect(() => {
     if (!activeSessionId) return;
-    saveOpenFileTabs(
-      activeSessionId,
-      openFileTabs.map(({ path, name, repo, renderedPreview, markdownMode }) => ({
-        path,
-        name,
-        repo,
-        ...(getFilePreviewKind(path) === "markdown" && renderedPreview ? { renderedPreview } : {}),
-        ...(markdownMode ? { markdownMode } : {}),
-      })),
-    );
+    saveOpenFileTabs(activeSessionId, openFileTabs.map(toStoredFileTab));
   }, [activeSessionId, openFileTabs]);
 }
 
@@ -366,7 +358,7 @@ function useCenterPanelState(props: TaskCenterPanelProps) {
     queueMicrotask(async () => {
       const hash = openFileRequest.originalHash || (await calculateHash(openFileRequest.content));
       fileTabOps.addFileTab({
-        ...openFileRequest,
+        ...installFileEditorTab(openFileRequest),
         originalContent: openFileRequest.originalContent || openFileRequest.content,
         originalHash: hash,
         isDirty: openFileRequest.isDirty ?? false,

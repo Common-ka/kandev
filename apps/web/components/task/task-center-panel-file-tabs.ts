@@ -3,10 +3,35 @@ import { useDockviewStore } from "@/lib/state/dockview-store";
 import { buildRepoScopedItemId } from "@/lib/state/dockview-panel-actions";
 import type { OpenFileTab } from "@/lib/types/backend";
 
+import type { StoredFileTab } from "@/lib/local-storage";
+import { getFilePreviewKind } from "@/lib/utils/file-types";
+import { defaultMarkdownFileMode } from "./markdown-file-mode";
+
 export type FileEditorTab = OpenFileTab & { instanceId?: symbol };
 
 export function installFileEditorTab(tab: OpenFileTab): FileEditorTab {
-  return { ...tab, instanceId: Symbol() };
+  return {
+    ...tab,
+    markdownMode: tab.markdownMode ?? defaultMarkdownFileMode(tab.path),
+    instanceId: Symbol(),
+  };
+}
+
+export function toStoredFileTab({
+  path,
+  name,
+  repo,
+  renderedPreview,
+  markdownMode,
+}: OpenFileTab): StoredFileTab {
+  const resolvedMode = markdownMode ?? defaultMarkdownFileMode(path);
+  return {
+    path,
+    name,
+    repo,
+    ...(getFilePreviewKind(path) === "markdown" && renderedPreview ? { renderedPreview } : {}),
+    ...(resolvedMode ? { markdownMode: resolvedMode } : {}),
+  };
 }
 
 export function getFileTabKey(file: Pick<OpenFileTab, "path" | "repo">): string {

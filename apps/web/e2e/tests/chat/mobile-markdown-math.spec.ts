@@ -49,9 +49,9 @@ async function openMarkdownPreview(
   await fileNode.tap();
   const viewer = testPage.getByTestId("mobile-file-viewer-panel");
   await expect(viewer).toBeVisible({ timeout: 10_000 });
-  await expect(viewer.getByTestId("mobile-markdown-mode-preview")).toHaveAttribute(
-    "aria-pressed",
-    "true",
+  await expect(viewer.getByTestId("mobile-markdown-mode-trigger")).toHaveAttribute(
+    "data-mode",
+    "preview",
   );
   await expect(viewer.getByTestId("markdown-preview")).toBeVisible({ timeout: 10_000 });
 }

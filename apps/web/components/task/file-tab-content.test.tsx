@@ -47,7 +47,7 @@ vi.mock("./markdown-file-editor", () => ({
     onOpenLink?: (url: string) => void;
   }) => (
     <div data-testid="markdown-file-editor" data-markdown-mode={mode}>
-      <button type="button" onClick={() => onModeChange("source")}>
+      <button type="button" className="cursor-pointer" onClick={() => onModeChange("source")}>
         Toggle mode
       </button>
       <button type="button" onClick={onSourceFallback}>

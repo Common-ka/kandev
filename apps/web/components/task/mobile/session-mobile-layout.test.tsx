@@ -29,6 +29,7 @@ vi.mock("@/lib/ws/connection", () => ({
 }));
 
 vi.mock("@/lib/ws/workspace-files", () => ({
+  updateFileContent: vi.fn(),
   requestFileContent: (...args: unknown[]) => requestFileContentMock(...args),
 }));
 
@@ -847,4 +848,34 @@ it("keeps a replacement draft when an older same-path discard is confirmed", () 
   );
   act(() => hook.result.current.confirmPendingNavigation());
   expect(hook.result.current.selectedFile?.content).toBe("replacement draft");
+});
+
+// @covers AC-UI-MARKDOWN-FILE-EDITING-002.19
+it("retains the selected dirty Markdown mode and draft during same-file walkthrough navigation", () => {
+  const { result, handlePanelChange } = renderHandlers();
+  act(() =>
+    result.current.handleOpenFile({ ...MOCK_FILE, path: "README.md", markdownMode: "edit" }),
+  );
+  act(() => result.current.handleSelectedFileChange("# dirty"));
+  fetchAndOpenFileMock.mockClear();
+  act(() => result.current.handleOpenWalkthroughFile("README.md"));
+  const open = fetchAndOpenFileMock.mock.calls[0]?.[2] as ((file: OpenFileTab) => void) | undefined;
+  if (open) act(() => open({ ...MOCK_FILE, path: "README.md" }));
+  expect(result.current.pendingNavigation).toBeNull();
+  expect(result.current.selectedFileMode).toBe("edit");
+  expect(result.current.selectedFile?.content).toBe("# dirty");
+  expect(handlePanelChange).toHaveBeenLastCalledWith("files");
+});
+
+it("opens a new walkthrough Markdown file in Preview while chat keeps explicit Source semantics", () => {
+  const { result } = renderHandlers();
+  fetchAndOpenFileMock.mockClear();
+  act(() => result.current.handleOpenWalkthroughFile("README.md", REPO));
+  const open = fetchAndOpenFileMock.mock.calls[0][2] as (file: OpenFileTab) => void;
+  act(() => open({ ...MOCK_FILE, path: "README.md", repo: REPO }));
+  expect(result.current.selectedFileMode).toBe("preview");
+  act(() => result.current.handleOpenFileFromChat("README.md", REPO));
+  const chatOpen = fetchAndOpenFileMock.mock.calls[1][2] as (file: OpenFileTab) => void;
+  act(() => chatOpen({ ...MOCK_FILE, path: "README.md", repo: REPO }));
+  expect(result.current.selectedFileMode).toBe("source");
 });

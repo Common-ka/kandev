@@ -1,4 +1,15 @@
+import {
+  expectNeutralDisabledButton,
+  expectInheritedButtonForeground,
+  setButtonTheme,
+  holdFileSaveResponse,
+} from "../../helpers/button-state-colors";
 import fs from "node:fs";
+import {
+  seedMarkdownWalkthrough,
+  openMarkdownWalkthrough,
+  expectMarkdownWalkthroughRange,
+} from "../../helpers/markdown-walkthrough";
 import path from "node:path";
 import { expect, type Locator, type Page } from "@playwright/test";
 import { test } from "../../fixtures/test-base";
@@ -7,6 +18,8 @@ import type { ApiClient } from "../../helpers/api-client";
 import { dwell, watchWs, type WsWatcher } from "../../helpers/causal-waits";
 import { GitHelper, makeGitEnv } from "../../helpers/git-helper";
 import { SessionPage } from "../../pages/session-page";
+import { markdownDocumentEnd, codeMirrorDocumentEnd } from "../../helpers/markdown-keyboard";
+import { selectMobileMarkdownMode as selectMobileMode } from "../../helpers/markdown-preview";
 
 const MOBILE_MARKDOWN_CONTENT = `# Mobile Markdown
 
@@ -41,7 +54,7 @@ async function seedMobileMarkdownSession({
   seedData: SeedData;
   backend: { tmpDir: string };
   fileName: string;
-}): Promise<{ session: SessionPage; filePath: string; gateway: WsWatcher }> {
+}): Promise<{ session: SessionPage; filePath: string; gateway: WsWatcher; taskId: string }> {
   const repoDir = path.join(backend.tmpDir, "repos", "e2e-repo");
   const git = new GitHelper(repoDir, makeGitEnv(backend.tmpDir));
   const originalSha = git.getCurrentSha();
@@ -66,14 +79,7 @@ async function seedMobileMarkdownSession({
   const session = new SessionPage(testPage);
   await session.waitForLoad();
   await session.waitForChatIdle({ timeout: 45_000 });
-  return { session, filePath: path.join(repoDir, fileName), gateway };
-}
-
-async function selectMobileMode(page: Page, viewer: Locator, mode: "preview" | "edit" | "source") {
-  await expect(page.getByTestId("mobile-markdown-mode-menu")).toBeHidden();
-  await viewer.getByTestId("mobile-markdown-mode-trigger").tap();
-  await page.getByTestId(`mobile-markdown-mode-${mode}`).tap();
-  await expect(page.getByTestId("mobile-markdown-mode-menu")).toBeHidden();
+  return { session, filePath: path.join(repoDir, fileName), gateway, taskId: task.id };
 }
 
 async function appendToMobileSource(page: Page, viewer: Locator, marker: string) {
@@ -102,7 +108,7 @@ async function appendToMobileSource(page: Page, viewer: Locator, marker: string)
     });
   await source.click();
   await expect.poll(async () => (await read()).text).toBe(MOBILE_MARKDOWN_CONTENT);
-  await page.keyboard.press("Control+End");
+  await page.keyboard.press(await codeMirrorDocumentEnd(page));
   await expect.poll(read).toMatchObject({
     anchor: MOBILE_MARKDOWN_CONTENT.length,
     head: MOBILE_MARKDOWN_CONTENT.length,
@@ -113,7 +119,7 @@ async function appendToMobileSource(page: Page, viewer: Locator, marker: string)
     anchor: MOBILE_MARKDOWN_CONTENT.length + 1,
     head: MOBILE_MARKDOWN_CONTENT.length + 1,
   });
-  await page.keyboard.insertText(marker);
+  await page.keyboard.type(marker);
   await expect.poll(async () => (await read()).text).toBe(`${MOBILE_MARKDOWN_CONTENT}\n${marker}`);
 }
 
@@ -123,7 +129,7 @@ async function appendToHybrid(testPage: Page, viewer: Locator, marker: string): 
   const paragraph = editor.locator(".md-paragraph").last();
   await expect(paragraph).toBeVisible({ timeout: 15_000 });
   await paragraph.tap();
-  await testPage.keyboard.press("Control+End");
+  await testPage.keyboard.press(await markdownDocumentEnd(testPage));
   await testPage.keyboard.insertText(`\n\n${marker}`);
   await expect(editor).toContainText(marker);
 }
@@ -133,6 +139,41 @@ async function dragTouch(page: Page, target: Locator, deltaX: number): Promise<v
   expect(box).not.toBeNull();
   const x = box!.x + box!.width / 2;
   const y = box!.y + box!.height / 2;
+  if (page.context().browser()?.browserType().name() !== "chromium") {
+    // WebKit exposes no CDP touch drag. Test its touch-pointer handlers; real iOS gestures remain manual.
+    await target.dispatchEvent("pointerdown", {
+      pointerType: "touch",
+      pointerId: 1,
+      clientX: x,
+      clientY: y,
+      button: 0,
+      buttons: 1,
+    });
+    await page.evaluate(
+      ({ x, y }) => {
+        window.dispatchEvent(
+          new PointerEvent("pointermove", {
+            pointerType: "touch",
+            pointerId: 1,
+            clientX: x,
+            clientY: y,
+            buttons: 1,
+          }),
+        );
+        window.dispatchEvent(
+          new PointerEvent("pointerup", {
+            pointerType: "touch",
+            pointerId: 1,
+            clientX: x,
+            clientY: y,
+            buttons: 0,
+          }),
+        );
+      },
+      { x: x + deltaX, y },
+    );
+    return;
+  }
   const client = await page.context().newCDPSession(page);
   try {
     await client.send("Input.dispatchTouchEvent", {
@@ -167,6 +208,151 @@ test.describe("Mobile Markdown file editing", () => {
   test.afterEach(() => {
     restoreMobileRepository?.();
     restoreMobileRepository = undefined;
+  });
+
+  // @covers AC-UI-MARKDOWN-FILE-EDITING-002.16, AC-UI-MARKDOWN-FILE-EDITING-002.19
+  test("button colors preserve phone Save states in both themes", async ({
+    testPage,
+    apiClient,
+    seedData,
+    backend,
+  }, testInfo) => {
+    const hold = await holdFileSaveResponse(testPage);
+    const fileName = `mobile-button-colors-${Date.now()}.md`;
+    const { session, filePath } = await seedMobileMarkdownSession({
+      testPage,
+      apiClient,
+      seedData,
+      backend,
+      fileName,
+    });
+    await testPage
+      .getByTestId("session-mobile-bottom-nav")
+      .getByRole("button", { name: "Files", exact: true })
+      .tap();
+    await (await session.fileTree.waitForFileTreeNode(fileName)).tap();
+    const viewer = testPage.getByTestId("mobile-file-viewer-panel");
+    await expect(viewer).toBeVisible();
+    await selectMobileMode(testPage, viewer, "edit");
+    const save = viewer.getByTestId("mobile-file-save");
+    let expected = MOBILE_MARKDOWN_CONTENT;
+    for (const dark of [false, true]) {
+      await setButtonTheme(testPage, dark);
+      await expectNeutralDisabledButton(save);
+      const marker = `Phone ${dark ? "dark" : "light"} colors`;
+      await appendToHybrid(testPage, viewer, marker);
+      expected += `\n\n${marker}`;
+      await expect(save).toBeEnabled();
+      await expectInheritedButtonForeground(save);
+      await save.tap();
+      await expect.poll(hold.isHeld).toBe(true);
+      try {
+        await expectNeutralDisabledButton(save);
+        await expect(save).toContainText("Saving");
+      } finally {
+        hold.release();
+      }
+      await expect(save).toContainText("Save");
+      await expectNeutralDisabledButton(save);
+      expect(fs.readFileSync(filePath, "utf8")).toBe(expected);
+      const box = await save.boundingBox();
+      expect(box!.height).toBeGreaterThanOrEqual(44);
+      expect(box!.width).toBeGreaterThanOrEqual(44);
+      await save.screenshot({
+        path: testInfo.outputPath(`phone-save-${dark ? "dark" : "light"}.png`),
+      });
+    }
+    for (const width of [767, 768]) {
+      await testPage.setViewportSize({ width, height: 900 });
+      if (width === 768) {
+        const tablet = testPage.getByTestId("tablet-task-layout");
+        await expect(tablet).toBeVisible();
+        await tablet
+          .locator(`[data-testid="file-tree-node"][data-path=${JSON.stringify(fileName)}]:visible`)
+          .tap();
+      }
+      const activeSave = testPage.locator(
+        '[data-testid="mobile-file-save"]:visible, [data-testid="markdown-file-save"]:visible',
+      );
+      await expect(activeSave).toHaveCount(1);
+      await expectNeutralDisabledButton(activeSave);
+      const bounds = await activeSave.boundingBox();
+      expect(bounds!.x).toBeGreaterThanOrEqual(0);
+      expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width);
+    }
+  });
+
+  test("walkthrough outlines remain in mobile rendered Markdown with the bottom sheet", async ({
+    testPage,
+    apiClient,
+    seedData,
+    backend,
+    prCapture,
+  }) => {
+    const fileName = `phone-walkthrough-${Date.now()}.md`;
+    const { taskId, filePath } = await seedMobileMarkdownSession({
+      testPage,
+      apiClient,
+      seedData,
+      backend,
+      fileName,
+    });
+    const ranges = await seedMarkdownWalkthrough(
+      backend.tmpDir,
+      taskId,
+      fileName,
+      MOBILE_MARKDOWN_CONTENT,
+    );
+    const card = await openMarkdownWalkthrough(testPage);
+    const viewer = testPage.getByTestId("mobile-file-viewer-panel");
+    await expect(card).toHaveAttribute("data-mobile-variant", "bottom-sheet");
+    await expect(viewer.getByTestId("mobile-markdown-mode-trigger")).toContainText("Preview");
+    await expectMarkdownWalkthroughRange(viewer, ranges[0], viewer.locator("table"));
+    await card.getByTestId("walkthrough-close").tap();
+    await selectMobileMode(testPage, viewer, "edit");
+    await testPage.getByTestId("walkthrough-launcher").tap();
+    const hybrid = viewer.getByTestId("hybrid-markdown-editor");
+    await expectMarkdownWalkthroughRange(hybrid, ranges[0], hybrid.locator("table"));
+    await card.getByTestId("walkthrough-next").tap();
+    const paragraph = hybrid.locator(".md-paragraph", {
+      hasText: "Long mobile paragraph 45 keeps the editor content below the fold.",
+    });
+    await expectMarkdownWalkthroughRange(hybrid, ranges[1], paragraph);
+    const cardBounds = await card.boundingBox();
+    expect(cardBounds).not.toBeNull();
+    await paragraph.evaluate((element, targetY) => {
+      const scroller = element.closest('[data-testid="hybrid-markdown-editor"]') as HTMLElement;
+      const rect = element.getBoundingClientRect();
+      scroller.scrollTop += rect.top + rect.height / 2 - targetY;
+    }, cardBounds!.y + 60);
+    await expect
+      .poll(async () =>
+        paragraph.evaluate((element) => {
+          const rect = element.getBoundingClientRect();
+          const hit = document.elementFromPoint(
+            rect.left + rect.width / 2,
+            rect.top + rect.height / 2,
+          );
+          return !!hit?.closest('[data-testid="walkthrough-floating"]');
+        }),
+      )
+      .toBe(true);
+    await expectMarkdownWalkthroughRange(hybrid, ranges[1], paragraph);
+    await expect(testPage.getByTestId("walkthrough-connector")).toHaveCount(0);
+    await card.getByTestId("walkthrough-next").tap();
+    await expectMarkdownWalkthroughRange(hybrid, ranges[2], paragraph);
+    await expect(viewer.locator('[data-testid="walkthrough-editor-range"]:visible')).toHaveCount(1);
+    await prCapture.screenshot("mobile-markdown-walkthrough-range", {
+      caption: "Phone Markdown retains its section indicator beside the walkthrough sheet",
+    });
+    expect(
+      await testPage.evaluate(
+        () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,
+      ),
+    ).toBe(true);
+    await card.getByTestId("walkthrough-close").tap();
+    await expect(viewer.getByTestId("walkthrough-editor-range")).toHaveCount(0);
+    expect(fs.readFileSync(filePath, "utf8")).toBe(MOBILE_MARKDOWN_CONTENT);
   });
 
   // @covers AC-UI-MARKDOWN-FILE-EDITING-001.5, AC-UI-MARKDOWN-FILE-EDITING-002.4
@@ -216,6 +402,8 @@ test.describe("Mobile Markdown file editing", () => {
     await expect
       .poll(() =>
         viewer.locator(".md-editor").evaluate((element) => {
+          const input = element.shadowRoot?.querySelector("textarea");
+          if (input) return input.value.slice(input.selectionStart, input.selectionEnd);
           const context = (
             element as HTMLElement & {
               editContext: { text: string; selectionStart: number; selectionEnd: number };
@@ -233,7 +421,7 @@ test.describe("Mobile Markdown file editing", () => {
     ).toBeInViewport();
     await selectMobileMode(testPage, viewer, "source");
     await viewer.locator(".cm-content").focus();
-    await testPage.keyboard.insertText("Selected");
+    await testPage.keyboard.type("Selected");
     const saved = gateway.waitForResponse("workspace.file.update");
     await viewer.getByTestId("mobile-file-save").tap();
     await saved;
@@ -329,12 +517,17 @@ test.describe("Mobile Markdown file editing", () => {
       await tablet
         .locator(`[data-testid="file-tree-node"][data-path=${JSON.stringify(fileName)}]:visible`)
         .tap();
+      await tablet.getByTestId("markdown-mode-source").tap();
       const tabletSave = tablet.getByRole("button", {
         name: locale === "en" ? /^Save/ : /^Guardar/,
       });
-      await expect(tabletSave).toBeVisible();
-      const tabletBounds = await tabletSave.boundingBox();
-      expect(tabletBounds!.x + tabletBounds!.width).toBeLessThanOrEqual(768);
+      await expect(tabletSave).toBeDisabled();
+      await expect(async () => {
+        const tabletBounds = await tabletSave.boundingBox();
+        expect(tabletBounds).not.toBeNull();
+        expect(tabletBounds!.x).toBeGreaterThanOrEqual(0);
+        expect(tabletBounds!.x + tabletBounds!.width).toBeLessThanOrEqual(768);
+      }).toPass();
     });
   }
 
@@ -346,21 +539,19 @@ test.describe("Mobile Markdown file editing", () => {
     backend,
   }) => {
     await testPage.addInitScript(() => {
-      const nativeEditContext = Reflect.get(window, "EditContext");
+      const replaceChildren = Element.prototype.replaceChildren;
       let failed = false;
-      Reflect.set(
-        window,
-        "EditContext",
-        new Proxy(nativeEditContext, {
-          construct(target, args, newTarget) {
-            if (!failed && document.querySelector('[data-testid="hybrid-markdown-editor"]')) {
-              failed = true;
-              throw new Error("Expected phone editor initialization failure");
-            }
-            return Reflect.construct(target, args, newTarget);
-          },
-        }),
-      );
+      Element.prototype.replaceChildren = function (...nodes) {
+        if (
+          !failed &&
+          nodes.length > 0 &&
+          this.getAttribute("data-testid") === "hybrid-markdown-editor"
+        ) {
+          failed = true;
+          throw new Error("Expected Markdown initialization failure");
+        }
+        return replaceChildren.apply(this, nodes);
+      };
     });
     const fileName = `phone-retry-${Date.now()}.md`;
     const { session, filePath, gateway } = await seedMobileMarkdownSession({
@@ -379,7 +570,7 @@ test.describe("Mobile Markdown file editing", () => {
     await selectMobileMode(testPage, viewer, "source");
     const marker = "\nPhone retry retains this draft";
     await appendToMobileSource(testPage, viewer, marker.slice(1));
-    await selectMobileMode(testPage, viewer, "edit");
+    await selectMobileMode(testPage, viewer, "edit", "source");
     await expect(viewer.getByTestId("mobile-markdown-mode-trigger")).toHaveAttribute(
       "data-mode",
       "source",
@@ -393,7 +584,7 @@ test.describe("Mobile Markdown file editing", () => {
   });
 
   // @covers AC-UI-MARKDOWN-FILE-EDITING-001.10
-  test("review regression: hybrid recovery keeps the phone draft editable without EditContext", async ({
+  test("browser parity: phone rendered Edit works without EditContext", async ({
     testPage,
     apiClient,
     seedData,
@@ -414,20 +605,15 @@ test.describe("Mobile Markdown file editing", () => {
       .tap();
     await (await session.fileTree.waitForFileTreeNode(fileName)).tap();
     const viewer = testPage.getByTestId("mobile-file-viewer-panel");
-    await viewer.getByTestId("mobile-markdown-mode-trigger").tap();
-    await expect(testPage.getByTestId("mobile-markdown-mode-edit")).toHaveAttribute(
-      "aria-disabled",
-      "true",
-    );
-    await testPage.keyboard.press("Escape");
-    await selectMobileMode(testPage, viewer, "source");
-    const marker = "\nPhone source works without EditContext";
-    await appendToMobileSource(testPage, viewer, marker.slice(1));
+    await selectMobileMode(testPage, viewer, "edit");
+    const marker = "Phone rendered editing without EditContext";
+    await appendToHybrid(testPage, viewer, marker);
     const saved = gateway.waitForResponse("workspace.file.update");
     await viewer.getByTestId("mobile-file-save").tap();
     await saved;
-    expect(fs.readFileSync(filePath, "utf8")).toBe(`${MOBILE_MARKDOWN_CONTENT}${marker}`);
-    await expect(viewer.getByTestId("hybrid-markdown-editor")).toHaveCount(0);
+    expect(fs.readFileSync(filePath, "utf8")).toBe(`${MOBILE_MARKDOWN_CONTENT}\n\n${marker}`);
+    await selectMobileMode(testPage, viewer, "preview");
+    await expect(viewer.getByTestId("markdown-preview")).toContainText(marker);
   });
 
   // @covers AC-UI-MARKDOWN-FILE-EDITING-003.8
@@ -465,11 +651,22 @@ test.describe("Mobile Markdown file editing", () => {
       .tap();
     const editor = tablet.getByTestId("markdown-file-editor");
     await expect(editor).toBeVisible();
-    await editor.getByRole("textbox", { name: "Editor content" }).focus();
-    await testPage.keyboard.press("Control+End");
-    await expect(editor.locator(".view-lines")).toContainText(marker);
+    const source = editor.getByRole("textbox", { name: "Editor content" });
+    // Monaco virtualizes visible lines. Check its actual model before saving through the tablet UI.
+    await expect
+      .poll(() =>
+        source.evaluate((element) => {
+          const monaco = (window as Window & { monaco?: typeof import("monaco-editor") }).monaco;
+          return monaco?.editor
+            .getEditors()
+            .find((candidate) => candidate.getDomNode()?.contains(element))
+            ?.getModel()
+            ?.getValue();
+        }),
+      )
+      .toContain(marker);
     const saved = gateway.waitForResponse("workspace.file.update");
-    await testPage.keyboard.press("Control+s");
+    await editor.getByRole("button", { name: /^Save/ }).tap();
     await saved;
     expect(fs.readFileSync(filePath, "utf8")).toBe(`${MOBILE_MARKDOWN_CONTENT}\n${marker}`);
 
@@ -657,7 +854,8 @@ test.describe("Mobile Markdown file editing", () => {
     });
     await expect(viewer.getByTestId("hybrid-markdown-editor")).toBeVisible({ timeout: 15_000 });
     await selectMobileMode(testPage, viewer, "preview");
-    await expect(preview.getByText(marker, { exact: true })).toBeInViewport();
+    // Mode handoff preserves the visible source region, rather than a pixel-exact bottom anchor.
+    await expect(preview.getByText(/Long mobile paragraph 56 /)).toBeInViewport();
 
     await selectMobileMode(testPage, viewer, "edit");
     const discardedMarker = `mobile discarded marker ${Date.now()}`;

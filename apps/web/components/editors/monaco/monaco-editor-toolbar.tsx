@@ -63,7 +63,7 @@ function SaveButton({
         <>
           <IconDeviceFloppy className="h-4 w-4" />
           {t("common:save")}
-          <span className="text-xs text-muted-foreground">({SAVE_SHORTCUT}+S)</span>
+          <span className="text-xs">({SAVE_SHORTCUT}+S)</span>
         </>
       )}
     </Button>

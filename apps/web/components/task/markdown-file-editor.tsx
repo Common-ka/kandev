@@ -22,6 +22,8 @@ import {
 import { MarkdownFileActions, MarkdownEditToolbar } from "./markdown-file-toolbar";
 import { MarkdownHybridRecoveryStatus } from "./markdown-hybrid-recovery-status";
 import { useMarkdownEditorCommentState } from "./markdown-editor-comment-bridge";
+import { useMarkdownWalkthroughRange } from "./use-markdown-walkthrough-range";
+import type { MarkdownWalkthroughTarget } from "@/lib/markdown/walkthrough-range";
 import { useTranslation } from "react-i18next";
 
 export {
@@ -31,6 +33,7 @@ export {
 } from "./markdown-editor-comment-bridge";
 
 export type MarkdownFileEditorProps = {
+  walkthroughTarget?: MarkdownWalkthroughTarget | null;
   draftIdentity?: symbol;
   path: string;
   content: string;
@@ -102,6 +105,7 @@ export function MarkdownFileEditor({
   onError,
   onSourceFallback,
 }: MarkdownFileEditorProps) {
+  const walkthroughTarget = useMarkdownWalkthroughRange({ path, repo, sessionId, taskId });
   const presentation = useMarkdownFilePresentation({ path, mode, onModeChange, onSourceFallback });
   const position = useMarkdownSourcePosition({
     identity: JSON.stringify([sessionId, repo, path]),
@@ -129,6 +133,7 @@ export function MarkdownFileEditor({
 
   return (
     <MarkdownFileEditorLayout
+      walkthroughTarget={walkthroughTarget}
       path={path}
       content={content}
       originalContent={originalContent}
@@ -184,6 +189,7 @@ type MarkdownFileEditorLayoutProps = Omit<MarkdownFileEditorProps, "mode" | "com
 };
 
 function MarkdownFileEditorLayout({
+  walkthroughTarget,
   path,
   content,
   originalContent,
@@ -225,6 +231,7 @@ function MarkdownFileEditorLayout({
       onKeyDown={onKeyDown}
     >
       <MarkdownFilePresentation
+        walkthroughTarget={walkthroughTarget}
         sourcePositionHandles={sourcePositionHandles}
         mode={mode}
         path={path}
@@ -264,6 +271,7 @@ function MarkdownFileEditorLayout({
 
 type MarkdownFilePresentationProps = { sourcePositionHandles: MarkdownSourcePositionPorts } & Pick<
   MarkdownFileEditorProps,
+  | "walkthroughTarget"
   | "path"
   | "content"
   | "originalContent"
@@ -338,6 +346,7 @@ function MarkdownFilePresentation(props: MarkdownFilePresentationProps) {
 }
 
 function MarkdownEditSurface({
+  walkthroughTarget,
   mode,
   keepHybridMounted,
   path,
@@ -379,6 +388,7 @@ function MarkdownEditSurface({
       )}
       <div className="min-h-0 flex-1 overflow-hidden">
         <HybridMarkdownEditor
+          walkthroughTarget={walkthroughTarget}
           content={content}
           readOnly={false}
           gutterMarkers={gutterMarkers}
@@ -397,6 +407,7 @@ function MarkdownEditSurface({
 }
 
 function MarkdownPreviewSurface({
+  walkthroughTarget,
   mode,
   keepPreviewMounted,
   path,
@@ -421,6 +432,7 @@ function MarkdownPreviewSurface({
       data-testid="markdown-preview-host"
     >
       <MarkdownPreviewContent
+        walkthroughTarget={walkthroughTarget}
         path={path}
         content={content}
         worktreePath={worktreePath}

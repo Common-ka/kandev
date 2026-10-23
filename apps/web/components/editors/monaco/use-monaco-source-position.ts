@@ -8,6 +8,8 @@ import {
 } from "@/components/task/markdown-source-position";
 import type { SourcePositionHandle, SourcePositionProps } from "../source-position";
 
+const IMMEDIATE_SCROLL: editor.ScrollType = 1;
+
 type MonacoSourcePositionOptions = SourcePositionProps & {
   editor: editor.IStandaloneCodeEditor | null;
   content: string;
@@ -80,10 +82,10 @@ function createHandle(
         );
         instance.setSelection(range);
         if (target.selection.anchor === target.selection.active)
-          instance.revealLineInCenter(target.nearestLine);
-        else instance.revealRangeInCenterIfOutsideViewport(range);
+          instance.revealLineInCenter(target.nearestLine, IMMEDIATE_SCROLL);
+        else instance.revealRangeInCenterIfOutsideViewport(range, IMMEDIATE_SCROLL);
       } else {
-        instance.revealLineInCenter(target.nearestLine);
+        instance.revealLineInCenter(target.nearestLine, IMMEDIATE_SCROLL);
       }
       instance.focus();
     },

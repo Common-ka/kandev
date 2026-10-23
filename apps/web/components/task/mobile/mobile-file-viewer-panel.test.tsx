@@ -60,8 +60,7 @@ function selectMode(mode: "edit" | "preview" | "source") {
   fireEvent.keyDown(screen.getByTestId(MODE_TRIGGER_TEST_ID), { key: "Enter" });
   fireEvent.click(screen.getByTestId(`mobile-markdown-mode-${mode}`));
 }
-const TRUE_VALUE = true;
-const SELECTED_ATTRIBUTE = String(TRUE_VALUE);
+const SELECTED_ATTRIBUTE = "true";
 const EDITABLE_ATTRIBUTE = "data-editable";
 
 const htmlPreview = vi.hoisted(() => ({
@@ -104,6 +103,7 @@ const REPORT_PATH = "reports/index.html";
 const FILE_CONTENT_TEST_ID = "file-content";
 
 vi.mock("@/components/state-provider", () => ({
+  useOptionalAppStore: (_selector: unknown, fallback: unknown) => fallback,
   useAppStore: (selector: (value: typeof state) => unknown) => selector(state),
   useAppStoreApi: () => storeApi,
 }));
@@ -150,7 +150,7 @@ vi.mock("../file-viewer-content", () => ({
     editable?: boolean;
     onChange?: (content: string) => void;
   }) => (
-    <div data-testid="file-content" data-editable={String(editable)}>
+    <div data-testid={FILE_CONTENT_TEST_ID} data-editable={String(editable)}>
       <PositionBoundary
         mode="source"
         onSourcePositionHandle={onSourcePositionHandle}
@@ -275,7 +275,7 @@ describe("MobileFileViewerPanel workspace path", () => {
           originalContent: "",
           originalHash: "hash",
           isDirty: false,
-          isBinary: TRUE_VALUE,
+          isBinary: true,
         }}
         sessionId="session-1"
         onClose={vi.fn()}
@@ -443,7 +443,7 @@ describe("MobileFileViewerPanel Markdown editing", () => {
   it("saves the canonical mobile buffer and clears the dirty state", async () => {
     updateFileContentMock.mockResolvedValue({
       path: MOBILE_MARKDOWN_PATH,
-      success: TRUE_VALUE,
+      success: true,
       new_hash: SAVED_HASH,
     });
     const onFileSaved = vi.fn();
@@ -479,9 +479,7 @@ describe("MobileFileViewerPanel Markdown editing", () => {
       ),
     );
     await waitFor(() =>
-      expect((screen.getByTestId(MOBILE_SAVE_TEST_ID) as HTMLButtonElement).disabled).toBe(
-        TRUE_VALUE,
-      ),
+      expect((screen.getByTestId(MOBILE_SAVE_TEST_ID) as HTMLButtonElement).disabled).toBe(true),
     );
     expect(onFileSaved).toHaveBeenCalledWith({
       path: MOBILE_MARKDOWN_PATH,
@@ -548,7 +546,7 @@ describe("MobileFileViewerPanel Markdown editing", () => {
   it("saves an editable mobile buffer from the platform keyboard shortcut", async () => {
     updateFileContentMock.mockResolvedValue({
       path: MOBILE_MARKDOWN_PATH,
-      success: TRUE_VALUE,
+      success: true,
       new_hash: SAVED_HASH,
     });
     render(

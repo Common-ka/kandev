@@ -5,7 +5,7 @@ import {
   sourceLineAtOffset,
   sourceOffsetAtLine,
 } from "@/components/task/markdown-source-position";
-import type { SourcePositionHandle, SourcePositionProps } from "../source-position";
+import type { SourcePosition, SourcePositionHandle, SourcePositionProps } from "../source-position";
 
 export type HybridSourcePositionLifecycle = {
   active: boolean;
@@ -38,11 +38,20 @@ function createHandle(
   root: HTMLElement,
   isLive: () => boolean,
 ): SourcePositionHandle {
+  let pendingPosition: SourcePosition | undefined;
+  let pendingSource: string | undefined;
   return {
     capture: () => {
       if (!isLive()) return null;
       const source = lifecycle.model.sourceText.get().value;
       const selection = lifecycle.model.selection.get();
+      if (
+        pendingPosition &&
+        pendingSource === source &&
+        pendingPosition.selection?.anchor === selection?.anchor &&
+        pendingPosition.selection?.active === selection?.active
+      )
+        return pendingPosition;
       const nearest =
         selection && !selection.isCollapsed
           ? selection.active
@@ -66,10 +75,35 @@ function createHandle(
           : Math.min(anchor, active);
       const end = anchor === active ? start : Math.max(anchor, active);
       lifecycle.view.focus();
-      lifecycle.sourcePositionReveal = lifecycle.view.revealRangeInCenterIfOutsideViewport(
+      const reveal = lifecycle.view.revealRangeInCenterIfOutsideViewport(
         new OffsetRange(start, end),
         "instant",
       );
+      const requestedPosition = { ...target, selection: { anchor, active } };
+      pendingPosition = requestedPosition;
+      pendingSource = source;
+      const clearPending = () => {
+        if (pendingPosition === requestedPosition) {
+          pendingPosition = undefined;
+          pendingSource = undefined;
+        }
+        root.removeEventListener("scroll", onScroll);
+      };
+      const onScroll = () => {
+        cancelAnimationFrame(frame);
+        reveal.dispose();
+        clearPending();
+      };
+      root.addEventListener("scroll", onScroll, { once: true });
+      // The engine registers its reveal frame before this completion frame.
+      const frame = requestAnimationFrame(clearPending);
+      lifecycle.sourcePositionReveal = {
+        dispose: () => {
+          cancelAnimationFrame(frame);
+          clearPending();
+          reveal.dispose();
+        },
+      };
     },
   };
 }

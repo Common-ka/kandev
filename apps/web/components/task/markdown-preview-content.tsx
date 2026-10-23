@@ -51,6 +51,8 @@ import {
 } from "@/components/editors/external-vcs-file-link";
 import { useTranslation } from "react-i18next";
 import type { SourcePositionProps } from "@/components/editors/source-position";
+import type { MarkdownWalkthroughTarget } from "@/lib/markdown/walkthrough-range";
+import { useMarkdownPreviewWalkthroughRange } from "./use-markdown-preview-walkthrough-range";
 import { useMarkdownPreviewSourcePosition } from "./use-markdown-preview-source-position";
 
 interface MarkdownPreviewToolbarProps {
@@ -146,6 +148,7 @@ function MarkdownPreviewToolbar({
 }
 
 interface MarkdownPreviewContentProps extends SourcePositionProps {
+  walkthroughTarget?: MarkdownWalkthroughTarget | null;
   path: string;
   isSymlink?: boolean;
   content: string;
@@ -451,6 +454,7 @@ export const MarkdownPreviewContent = memo(function MarkdownPreviewContent({
   toolbarActions,
   showToolbar = true,
   onSourcePositionHandle,
+  walkthroughTarget,
   isActive,
 }: MarkdownPreviewContentProps) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -462,6 +466,13 @@ export const MarkdownPreviewContent = memo(function MarkdownPreviewContent({
     scrollRef,
     isActive,
     onSourcePositionHandle,
+  });
+  useMarkdownPreviewWalkthroughRange({
+    target: walkthroughTarget,
+    isActive,
+    content,
+    rootRef,
+    scrollRef,
   });
   const [overlayRoot, setOverlayRoot] = useState<HTMLElement | null>(null);
   const commentsEnabled = enableComments && !!sessionId;
@@ -522,7 +533,7 @@ export const MarkdownPreviewContent = memo(function MarkdownPreviewContent({
       )}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-auto px-4 py-6"
+        className="relative flex-1 overflow-auto px-4 py-6"
         data-testid="markdown-preview-scroll-container"
       >
         <div ref={rootRef} className="markdown-body max-w-3xl" tabIndex={commentsEnabled ? 0 : -1}>

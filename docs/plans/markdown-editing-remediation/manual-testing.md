@@ -1,5 +1,11 @@
 # Markdown editing evaluation
 
+> Browser correction, 2026-10-21: this checklist records the earlier limited
+> browser build. The user requires rendered Edit in Firefox/Zen and Safari.
+> Treat unavailable Edit as a failure against that requirement. See the
+> [browser parity correction](../markdown-browser-parity/plan.md). Earlier
+> Chromium checks do not establish cross-browser acceptance.
+
 Allow about 12 minutes. Use a current Chrome or Edge browser for hybrid Edit.
 Use the isolated evaluation URL supplied with this guide.
 

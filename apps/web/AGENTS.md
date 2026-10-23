@@ -254,7 +254,7 @@ Guide: [`docs/i18n.md`](../../docs/i18n.md); spec
 Any renderer that enables embedded raw HTML must pair `rehype-raw` immediately with `rehype-sanitize`, and enable that combination only on the intended surface. Do not broaden raw-HTML support to chat, comments, or other renderers without a separate security decision.
 Add regression coverage for permitted README markup and for stripping executable HTML and unsafe URLs.
 
-Markdown modes, retry, comments, and source-position lifetimes follow the [Markdown file editing design](../../docs/specs/ui/system-design/markdown-file-editing.md).
+Markdown modes, retry, comments, and source-position lifetimes follow the [Markdown file editing design](../../docs/specs/ui/system-design/markdown-file-editing.md). The exact-pinned engine patch injects scoped native input under `components/editors/markdown/input/`; keep browser globals unchanged and preserve canonical bytes through textarea offset mapping. The pinned Monaco patch preserves backward native selections and input deltas; retain its real-package regressions on upgrades.
 
 ## Code-quality limits
 

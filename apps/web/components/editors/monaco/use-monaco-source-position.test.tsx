@@ -14,24 +14,47 @@ function fakeEditor() {
   };
   const getModel = vi.fn(() => model);
   const listeners = new Set<() => void>();
+  let visibleLine = 1;
+  let selection = {
+    selectionStartLineNumber: 2,
+    selectionStartColumn: 3,
+    positionLineNumber: 1,
+    positionColumn: 2,
+  };
   const instance = {
     getModel,
-    getSelection: () => ({
-      selectionStartLineNumber: 2,
-      selectionStartColumn: 3,
-      positionLineNumber: 1,
-      positionColumn: 2,
+    getSelection: () => selection,
+    getVisibleRanges: () => [{ startLineNumber: visibleLine }],
+    setSelection: vi.fn((next: typeof selection) => {
+      selection = next;
     }),
-    setSelection: vi.fn(),
-    revealRangeInCenterIfOutsideViewport: vi.fn(),
-    revealLineInCenter: vi.fn(),
+    revealRangeInCenterIfOutsideViewport: vi.fn(
+      (range: { startLineNumber: number }, scrollType?: editor.ScrollType) => {
+        if (scrollType === 1) visibleLine = range.startLineNumber;
+      },
+    ),
+    revealLineInCenter: vi.fn((line: number, scrollType?: editor.ScrollType) => {
+      if (scrollType === 1) visibleLine = line;
+    }),
     focus: vi.fn(),
     onDidChangeModel: (listener: () => void) => {
       listeners.add(listener);
       return { dispose: () => listeners.delete(listener) };
     },
   } as unknown as editor.IStandaloneCodeEditor;
-  return { instance, getModel, changeModel: () => listeners.forEach((listener) => listener()) };
+  return {
+    instance,
+    getModel,
+    collapseSelection: () => {
+      selection = {
+        selectionStartLineNumber: 2,
+        selectionStartColumn: 3,
+        positionLineNumber: 2,
+        positionColumn: 3,
+      };
+    },
+    changeModel: () => listeners.forEach((listener) => listener()),
+  };
 }
 
 describe("Monaco source position handoff (AC-UI-MARKDOWN-FILE-EDITING-002.4)", () => {
@@ -59,6 +82,27 @@ describe("Monaco source position handoff (AC-UI-MARKDOWN-FILE-EDITING-002.4)", (
     expect(instance.revealRangeInCenterIfOutsideViewport).toHaveBeenCalled();
   });
 
+  it.each([
+    { anchor: 5, active: 5 },
+    { anchor: 5, active: 6 },
+  ])("immediately recaptures the restored viewport after selection collapses: %j", (selection) => {
+    const { instance, collapseSelection } = fakeEditor();
+    const callback = vi.fn();
+    const { unmount } = renderHook(() =>
+      useMonacoSourcePosition({
+        editor: instance,
+        content: "one\ntwo",
+        onSourcePositionHandle: callback,
+      }),
+    );
+    const handle = callback.mock.lastCall![0] as SourcePositionHandle;
+    handle.restore({ selection, nearestLine: 2 });
+    // A first edit collapses the range before a smooth reveal would reach its destination.
+    collapseSelection();
+    expect(handle.capture()).toEqual({ selection: { anchor: 6, active: 6 }, nearestLine: 2 });
+    unmount();
+  });
+
   it("waits for a model and rejects a stale hidden or disposed handle", () => {
     const fake = fakeEditor();
     const model = fake.getModel();
@@ -79,7 +123,7 @@ describe("Monaco source position handoff (AC-UI-MARKDOWN-FILE-EDITING-002.4)", (
     act(fake.changeModel);
     const handle = callback.mock.lastCall![0] as SourcePositionHandle;
     handle.restore({ nearestLine: 2 });
-    expect(fake.instance.revealLineInCenter).toHaveBeenCalledWith(2);
+    expect(fake.instance.revealLineInCenter).toHaveBeenCalledWith(2, 1);
     rerender({ active: false });
     vi.mocked(fake.instance.setSelection).mockClear();
     handle.restore({ selection: { anchor: 0, active: 0 }, nearestLine: 1 });

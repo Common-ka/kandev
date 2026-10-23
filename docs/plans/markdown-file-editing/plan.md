@@ -166,3 +166,11 @@ remains outside this package.
 - DOM geometry can drift while the upstream editor rerenders an active table.
   The edge layer must reconcile through one observer without feedback loops or
   stale resize handles.
+
+## Browser compatibility correction (2026-10-21)
+
+The completed results above describe the earlier capability-limited package.
+The user requires rendered Edit across browsers. Source fallback does not meet
+that requirement. The [browser parity package](../markdown-browser-parity/plan.md)
+supersedes the browser exclusion and capability-only acceptance. Earlier test
+counts remain historical Chromium evidence, not cross-browser acceptance.

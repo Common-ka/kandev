@@ -7,6 +7,7 @@ import {
 } from "@/components/editors/markdown/hybrid-markdown-editor";
 import type { OpenFileTab } from "@/lib/types/backend";
 import { isMarkdownFile } from "@/lib/utils/file-types";
+import { useMarkdownWalkthroughRange } from "../use-markdown-walkthrough-range";
 import { FileBinaryViewer } from "../file-binary-viewer";
 import { FileImageViewer } from "../file-image-viewer";
 import { FileViewerContent } from "../file-viewer-content";
@@ -125,6 +126,25 @@ export function MobileViewerBody({
   );
 }
 
+type MobileMarkdownSurfaceProps = {
+  file: OpenFileTab;
+  markdownMode?: MarkdownFileMode;
+  keepHybridMounted: boolean;
+  keepPreviewMounted: boolean;
+  worktreePath?: string;
+  sessionId: string | null;
+  taskId: string | null;
+  repositoryId?: string;
+  draftContent: string;
+  comments: readonly MarkdownComment[];
+  onChange: (content: string) => void;
+  onComment: (comment: MarkdownCommentSubmission) => void;
+  onSourceFallback?: () => void;
+  onOpenFile?: (path: string) => void;
+  onOpenLink?: (url: string) => boolean | void;
+  sourcePositionHandles?: MarkdownSourcePositionPorts;
+};
+
 function MobileMarkdownSurface({
   file,
   markdownMode,
@@ -142,24 +162,13 @@ function MobileMarkdownSurface({
   onOpenFile,
   onOpenLink,
   sourcePositionHandles,
-}: {
-  file: OpenFileTab;
-  markdownMode?: MarkdownFileMode;
-  keepHybridMounted: boolean;
-  keepPreviewMounted: boolean;
-  worktreePath?: string;
-  sessionId: string | null;
-  taskId: string | null;
-  repositoryId?: string;
-  draftContent: string;
-  comments: readonly MarkdownComment[];
-  onChange: (content: string) => void;
-  onComment: (comment: MarkdownCommentSubmission) => void;
-  onSourceFallback?: () => void;
-  onOpenFile?: (path: string) => void;
-  onOpenLink?: (url: string) => boolean | void;
-  sourcePositionHandles?: MarkdownSourcePositionPorts;
-}) {
+}: MobileMarkdownSurfaceProps) {
+  const walkthroughTarget = useMarkdownWalkthroughRange({
+    path: file.path,
+    repo: file.repo,
+    sessionId,
+    taskId,
+  });
   return (
     <>
       {keepPreviewMounted && (
@@ -169,6 +178,7 @@ function MobileMarkdownSurface({
           data-testid="mobile-markdown-preview-host"
         >
           <MarkdownPreviewContent
+            walkthroughTarget={walkthroughTarget}
             path={file.path}
             content={draftContent}
             worktreePath={worktreePath}
@@ -193,6 +203,7 @@ function MobileMarkdownSurface({
           data-testid="mobile-markdown-hybrid-editor-host"
         >
           <HybridMarkdownEditor
+            walkthroughTarget={walkthroughTarget}
             content={draftContent}
             readOnly={false}
             comments={comments}

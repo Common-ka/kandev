@@ -18,15 +18,13 @@ import { MobileSessionsPicker } from "./mobile-sessions-section";
 import { SessionPanelContent } from "@kandev/ui/pannel-session";
 import { useSessionLayoutState } from "@/hooks/use-session-layout-state";
 import { useVisualViewportOffset } from "@/hooks/use-visual-viewport-offset";
-import { useToast } from "@/components/toast-provider";
 import { DiscardLocalChangesDialog } from "@/components/discard-local-changes-dialog";
 import { useAppStatusDrawer } from "@/components/app-status-bar/app-status-surface-provider";
-import { fetchAndOpenFile } from "../file-browser-hooks";
 import { MobileReviewPanel } from "./mobile-review-panel";
 import type { MobileSessionPanel } from "@/lib/state/slices/ui/types";
 import type { OpenFileTab } from "@/lib/types/backend";
 import type { MarkdownFileMode } from "@/lib/types/workspace-files";
-import { isMarkdownFile } from "@/lib/utils/file-types";
+import { useMobileFileOpenHandlers } from "./use-mobile-file-open-handlers";
 import { defaultMarkdownFileMode } from "../markdown-file-mode";
 import {
   getMobileFileIdentity,
@@ -749,7 +747,6 @@ export function useMobilePanelHandlers({
   effectiveSessionId: string | null;
   handlePanelChange: (panel: MobileSessionPanel) => void;
 }) {
-  const { toast } = useToast();
   const [selectedFile, setSelectedFile] = useCanonicalMobileFile(effectiveSessionId);
   const [selectedFileMode, setSelectedFileMode] = useState<MarkdownFileMode | undefined>(undefined);
   const selectedFileRef = useRef<OpenFileTab | null>(selectedFile);
@@ -769,34 +766,14 @@ export function useMobilePanelHandlers({
     openFileAbortRef,
   });
 
-  const handleOpenFileFromChat = useCallback(
-    (path: string, repo?: string, preview = false) => {
-      if (!effectiveSessionId) return;
-      const requestId = (latestRequestIdRef.current += 1);
-      openFileAbortRef.current?.abort();
-      const controller = new AbortController();
-      openFileAbortRef.current = controller;
-      void Promise.resolve(
-        fetchAndOpenFile(
-          effectiveSessionId,
-          path,
-          (file) => {
-            if (requestId !== latestRequestIdRef.current || controller.signal.aborted) return;
-            let markdownMode: MarkdownFileMode | undefined;
-            if (isMarkdownFile(file.path)) markdownMode = preview ? "preview" : "source";
-            navigation.requestFileOpen(file, markdownMode);
-          },
-          toast,
-          { repo, signal: controller.signal },
-        ),
-      ).finally(() => {
-        if (openFileAbortRef.current === controller) {
-          openFileAbortRef.current = null;
-        }
-      });
-    },
-    [effectiveSessionId, latestRequestIdRef, navigation.requestFileOpen, openFileAbortRef, toast],
-  );
+  const { handleOpenFileFromChat, handleOpenWalkthroughFile } = useMobileFileOpenHandlers({
+    effectiveSessionId,
+    selectedFileRef,
+    handlePanelChange,
+    requestFileOpen: navigation.requestFileOpen,
+    latestRequestIdRef,
+    openFileAbortRef,
+  });
 
   const handleOpenFile = useCallback(
     (file: OpenFileTab) => {
@@ -820,6 +797,7 @@ export function useMobilePanelHandlers({
     selectedFile,
     selectedFileMode,
     handleOpenFileFromChat,
+    handleOpenWalkthroughFile,
     handleOpenFile,
     handleSelectedFileChange,
     handleSelectedFileSaved,
@@ -935,6 +913,7 @@ export const SessionMobileLayout = memo(function SessionMobileLayout(
     selectedFile,
     selectedFileMode,
     handleOpenFileFromChat,
+    handleOpenWalkthroughFile,
     handleOpenFile,
     handleSelectedFileChange,
     handleSelectedFileSaved,
@@ -1088,6 +1067,7 @@ export const SessionMobileLayout = memo(function SessionMobileLayout(
         sessionId={effectiveSessionId}
         taskId={activeTaskId}
         onOpenFile={handleOpenFileFromChat}
+        onOpenWalkthroughFile={handleOpenWalkthroughFile}
       />
       <DiscardLocalChangesDialog
         open={pendingNavigation !== null}

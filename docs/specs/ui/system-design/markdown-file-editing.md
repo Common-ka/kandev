@@ -66,7 +66,7 @@ Primary references:
 | Requirement                        | Design section                                                                                                                   |
 | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | `REQ-UI-MARKDOWN-FILE-EDITING-001` | [Mode model](#mode-model), [Hybrid editor adapter](#hybrid-editor-adapter)                                                       |
-| `REQ-UI-MARKDOWN-FILE-EDITING-002` | [Buffer and file lifecycle](#buffer-and-file-lifecycle), [Preview and integration contracts](#preview-and-integration-contracts) |
+| `REQ-UI-MARKDOWN-FILE-EDITING-002` | [Data and contracts](#data-and-contracts), [Control flow](#control-flow), [Preview and integration contracts](#preview-and-integration-contracts) |
 | `REQ-UI-MARKDOWN-FILE-EDITING-003` | [Responsive interaction contract](#responsive-interaction-contract), [Validation strategy](#validation-strategy)                 |
 
 ## Components and responsibilities
@@ -159,8 +159,8 @@ Preview <-> Edit <-> Source
 ```
 
 All modes read the same canonical source. Only Edit and Source can update it.
-Preview is always read-only. `.md` supports all three modes when the browser
-provides the hybrid engine's required capabilities. `.mdx` supports
+Preview is always read-only. `.md` supports all three modes across current
+Chromium, Firefox/Zen, and Safari browsers. `.mdx` supports
 Preview and Source because embedded JSX cannot round-trip through the hybrid
 parser safely.
 
@@ -171,15 +171,89 @@ Desktop and tablet retain the existing toolbar and its overflow menu for narrow
 Source panels. Mode controls use visible labels. Phone uses the same names in
 a compact selector. Source remains available for normal editing and recovery.
 
-Capability detection belongs at the adapter boundary. The pinned engine
-requires a constructible `EditContext`. Check that capability before allocating
-the engine, without browser-name detection or a new polyfill. Constructor
-failure still follows the normal failure path.
+Input transport selection belongs at the adapter boundary. Use native
+EditContext when available, and the scoped native-textarea transport otherwise.
+A missing or unusable EditContext constructor does not disable Edit. Do not
+identify browsers by name or change a stored mode preference. Source recovery
+is reserved for actual editor initialization or runtime failures.
 
-An unavailable Edit control keeps its accessible explanation. A restored Edit
-preference uses Source as its effective mode on an unsupported browser.
-Deriving that fallback must not overwrite the saved preference. Initialization
-and runtime failures use the recovery contract below.
+### Browser input transport
+
+Retain the pinned engine's model, controller, rendering, history, and source
+selection. Add an input-transport factory through a maintained pnpm patch to
+`@vscode/markdown-editor@0.0.2-84`. Patch its runtime and declarations together.
+Keep the patch limited to transport creation, attachment, focus, suspension,
+geometry, and disposal. Do not fork its Markdown parser or table rendering.
+
+`EditorView` currently constructs one EditContext and assigns it at two sites.
+Its controller consumes text updates and synchronizes source text and selection.
+The transport exposes that context contract plus `attach`, `focus`,
+`setSuspended`, `syncState`, and `dispose`. Its factory receives `getCaretRect`
+and `onSelection`. Selection callbacks carry canonical anchor/active offsets
+and instance/source revision. Native EditContext retains upstream behavior. The textarea implementation is owned below
+`components/editors/markdown/input/`, not installed on browser globals.
+
+Mount one stable native textarea in a shadow root attached to the editor host.
+Native keyboard and clipboard events retarget to the host, which preserves the
+controller's existing root-target checks. The engine retains geometric pointer
+selection and source-offset mapping. Do not synthesize a second DOM selection
+model or patch Selection, document focus, execCommand, or other editors.
+
+The transport context retains exact canonical source. A textarea normalizes
+line endings, so keep a native-input projection and a bidirectional offset map.
+Translate each native replacement into a source-range edit. Preserve untouched
+CRLF, LF, mixed endings, BOM, whitespace, and non-BMP text. New line endings use
+the edited line's style, then the document's prevailing style, then LF. Never
+publish the complete textarea value as canonical source. Existing engine history
+owns inverse edits and exact undo/redo bytes.
+
+Native selection changes from touch handles or assistive technology use the
+selection callback, not `textupdate`. The pinned controller treats textupdate
+as insertion and ignores its selection endpoints. Apply accepted callbacks
+directly to `model.selection` with `selectionSource: "user"`. Preserve direction
+and read-only selection. Do not emit a source edit, dirty callback, or history
+entry. Reject stale instance/revision notifications and suppress selection
+echoes. For native text input, accept the source edit before applying its mapped
+selection. Defer or settle selection changes that conflict with composition.
+
+Synchronize textarea selection after engine pointer and keyboard selection, before
+composition starts. During composition, retain the input node and native value,
+selection, and replacement span. A matching model echo must not reset native
+composition. Apply each native delta once, including cancelled composition and
+sequential compositions. Settle composition through native focus/input events
+before hiding or suspending the editor. A mode transition or outside replacement
+must wait for settlement rather than replacing composing text. The adapter's
+`runWhenSettled` queues the newest callback per owner, independently for source
+and read-only updates. Keep existing canonical draft and stale-instance guards.
+
+Keyboard navigation remains controller-owned. Typing and composition update the
+transport context. Clipboard and history commands have one owner: preserve the
+engine's synchronous clipboard strategy and history. Prevent native defaults
+only after the owning command handles them. Native cut/paste, beforeinput history,
+and keyboard shortcuts must not produce duplicate edits or a separate textarea
+undo stack. Clipboard permissions and secure-context-only APIs are not required.
+
+Map the public engine caret rectangle into client coordinates after selection,
+layout, and scroll changes. Position the input near the caret so mobile keyboards
+and IME candidates follow the active text. Keep the input stable while table
+controls, Find, or comment controls temporarily suspend editor input. Resume only
+when the same editor instance still owns focus. Disposal removes its input and
+listeners once after controller teardown.
+
+Provide a named native editing control for the textarea path. Expose current
+text and selection to assistive technology. Avoid duplicate editor announcements
+by excluding only the decorative rendering subtree, not the native input or
+interactive controls. Do not apply an aria-hidden ancestor to the input. Validate
+native EditContext accessibility separately. Host textbox semantics alone do not
+establish accessible native selection or screen-reader editing.
+
+This is an owned compatibility layer, not a claim that an unmodified polyfill
+provides parity. The published EditContext polyfill installs global selection,
+focus, and legacy command changes and documents composition gaps. It can inform
+input translation, but it is not installed wholesale. Any reused source requires
+an exact revision, retained license, and tests through this engine. See the
+[browser-input decision](../../../decisions/2026-10-21-scoped-markdown-browser-input.md).
+
 
 ## Data and contracts
 
@@ -271,8 +345,13 @@ Capture synchronously before the explicit transition. Restore once the target
 is ready and visible, scoped to the current draft instance and transition.
 Clamp offsets after authoritative replacement. Preview uses existing
 source-line attributes and scrolls only its own container. The hybrid adapter
-uses its model selection and public range-reveal API. Cancel pending reveal
-work on exit or failure. Source providers use their native selection APIs.
+uses its model selection and public range-reveal API. Until deferred reveal
+runs, capture retains the requested position. User scrolling, source changes,
+exit, or failure cancels pending intent/reveal. Source providers use native
+selection APIs. Source retains Monaco. Its exact-version pnpm patch normalizes
+native backward range bounds/direction and input-delta endpoints while keeping
+model direction. Restoring Source uses immediate scrolling so a rapid handoff
+captures its restored region. Real package tests and browser replacement guard upgrades.
 
 Do not restore on each keystroke, reveal a hidden editor, or route selection
 through the global pending-cursor registry. That registry handles point
@@ -288,6 +367,9 @@ For a dirty buffer, the existing remote-update state remains visible. The
 adapter keeps local content until the user chooses the existing reload action.
 
 ## Preview and integration contracts
+
+Walkthrough range geometry and navigation follow the
+[Markdown walkthrough design](markdown-walkthrough-ranges.md).
 
 Preview remains the high-fidelity reading surface. Edit mode favors immediate
 editing context and exact source preservation. Visual results can differ for
@@ -337,7 +419,7 @@ and unqualified paths that do not match a known checkout root.
 The pinned engine exposes its comment input only in read-only mode. Editable
 hybrid selection therefore uses Kandev's existing `EditorCommentPopover`.
 Observe the engine selection and caret position, and capture the source range
-before opening the popover. Keep its native textarea outside the EditContext
+before opening the popover. Keep its native textarea outside the editor input
 host. Submit through the same repository-qualified bridge without changing
 read-only state or source content. Dispose selection subscriptions with the
 editor instance.
@@ -417,8 +499,8 @@ to retain undo history and transient widths. Teardown has one owner and is
 idempotent across initialization, update failure, and React cleanup.
 
 Each failure produces one localized recovery message and one content-free
-diagnostic. An unsupported browser gets a capability explanation rather than
-repeated initialization attempts. Neither path saves or rewrites content.
+diagnostic. A missing EditContext uses native textarea input instead of this failure path.
+Neither recovery nor transport selection saves or rewrites content.
 
 An unsupported construct does not count as an editor failure. The adapter
 shows source for that construct. If an upgrade changes source bytes without a
@@ -489,15 +571,30 @@ editor, then compare the canonical bytes before and after undo, mode changes,
 and authoritative replacement. Remove the unused `applyMarkdownSourceEdit`
 helper if it remains outside the production path.
 
-Browser tests cover capability absence before mount and failed initialization
-followed by explicit retry. Chromium with the capability removed proves the
-host's fallback branch, not native Safari or Firefox compatibility.
-Native non-Chromium smoke results must be recorded separately.
+Browser tests run rendered paragraph and table-cell editing through real
+Chromium, Firefox, and WebKit. Missing EditContext must select native text input
+and keep Edit available. Retain runtime failure and explicit retry tests.
+Chromium with the API removed tests transport selection only. It does not prove
+Firefox or Safari compatibility.
+
+Each engine must cover selection replacement, deletion, Enter/Tab, clipboard,
+undo/redo, comments, mode handoff, save/reload, and exact-byte source preservation.
+Include composition after pointer and keyboard selection, sequential composition,
+blur, mode changes, and outside replacement. Check two hybrid instances and a
+Monaco/CodeMirror editor together to prove event and focus containment.
+
+Record real Zen/macOS, Safari/macOS, Android keyboard, and iOS Safari keyboard
+results separately from Playwright automation. WebKit emulation does not prove
+OS candidate windows, autocorrect, selection handles, or virtual keyboards.
+NVDA/Firefox and VoiceOver/Safari checks must prove reading, selection, editing,
+and focus return. Missing device or assistive-technology evidence remains an
+open acceptance item, not an automatic pass.
 
 ## Implementation plans
 
 - [Original Markdown editing package](../../../plans/markdown-file-editing/plan.md).
 - [Review remediation package](../../../plans/markdown-editing-remediation/plan.md).
+- [Browser parity correction](../../../plans/markdown-browser-parity/plan.md).
 
 ## Related decisions
 

@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { MarkdownWalkthroughTarget } from "@/lib/markdown/walkthrough-range";
+import { useHybridWalkthroughRange } from "./use-hybrid-walkthrough-range";
+import { createMarkdownInput, type MarkdownScopedInput } from "./input/markdown-input";
 import {
   CommentModeController,
   CommentsModel,
@@ -31,15 +35,16 @@ import {
   cancelHybridSourcePositionReveal,
 } from "./use-hybrid-source-position";
 
+const NO_GUTTER_MARKERS: readonly MarkdownGutterMarker[] = Object.freeze([]);
+const NO_COMMENTS: readonly MarkdownComment[] = Object.freeze([]);
+
+const contentReplacementOwner = Symbol();
+const readOnlyUpdateOwner = Symbol();
+
 export function isHybridMarkdownSupported(): boolean {
-  const capability = (globalThis as { EditContext?: unknown }).EditContext;
-  if (typeof capability !== "function") return false;
-  try {
-    Reflect.construct(Object, [], capability);
-    return true;
-  } catch {
-    return false;
-  }
+  return (
+    typeof document !== "undefined" && typeof HTMLElement.prototype.attachShadow === "function"
+  );
 }
 
 export type MarkdownSourceRange = {
@@ -60,6 +65,7 @@ export type MarkdownComment = MarkdownSourceRange & {
 
 export type HybridMarkdownEditorProps = SourcePositionProps & {
   content: string;
+  walkthroughTarget?: MarkdownWalkthroughTarget | null;
   readOnly?: boolean;
   baseline?: string;
   gutterMarkers?: readonly MarkdownGutterMarker[];
@@ -79,6 +85,7 @@ export type MarkdownCommentSubmission = {
 };
 
 type EditorLifecycle = {
+  input?: MarkdownScopedInput;
   active: boolean;
   selectionSubscription?: { dispose: () => void };
   sourcePositionReveal?: { dispose: () => void };
@@ -105,10 +112,11 @@ type MutableRef<T> = { current: T };
 
 export function HybridMarkdownEditor({
   content,
+  walkthroughTarget,
   readOnly = false,
   baseline,
-  gutterMarkers = [],
-  comments = [],
+  gutterMarkers = NO_GUTTER_MARKERS,
+  comments = NO_COMMENTS,
   className,
   onChange,
   onOpenLink,
@@ -118,6 +126,8 @@ export function HybridMarkdownEditor({
   onSourcePositionHandle,
   isActive = true,
 }: HybridMarkdownEditorProps) {
+  const { t } = useTranslation("task");
+  const inputLabel = t("contentMarkdownSupported");
   const rootRef = useRef<HTMLDivElement>(null);
   const lifecycleRef = useRef<EditorLifecycle | null>(null);
   const canonicalContentRef = useRef(content);
@@ -145,6 +155,7 @@ export function HybridMarkdownEditor({
     baseline,
     gutterMarkers,
     comments,
+    inputLabel,
   });
   useHybridEditorContentSync({ lifecycleRef, canonicalContentRef, callbackRefs, content });
   useHybridEditorOptionsSync({
@@ -162,6 +173,13 @@ export function HybridMarkdownEditor({
     isActive,
     onSourcePositionHandle,
     onError: (error) => reportEditorFailure(lifecycleRef, callbackRefs, error),
+  });
+  useHybridWalkthroughRange({
+    lifecycle: editorLifecycle,
+    rootRef,
+    target: walkthroughTarget,
+    content,
+    isActive,
   });
   const tableControlsHost = useActiveTableControlsHost(rootRef, !readOnly, lifecycleRef);
 
@@ -192,6 +210,7 @@ export function HybridMarkdownEditor({
 }
 
 type LifecycleHookOptions = {
+  inputLabel: string;
   rootRef: MutableRef<HTMLDivElement | null>;
   lifecycleRef: MutableRef<EditorLifecycle | null>;
   canonicalContentRef: MutableRef<string>;
@@ -213,6 +232,7 @@ function useHybridEditorLifecycle({
   baseline,
   gutterMarkers,
   comments,
+  inputLabel,
 }: LifecycleHookOptions): EditorLifecycle | null {
   const [currentLifecycle, setCurrentLifecycle] = useState<EditorLifecycle | null>(null);
   useEffect(() => {
@@ -242,6 +262,7 @@ function useHybridEditorLifecycle({
     try {
       lifecycle = createEditorLifecycle({
         root,
+        inputLabel,
         content,
         readOnly,
         baseline,
@@ -297,24 +318,30 @@ function useHybridEditorContentSync({
 }: ContentSyncOptions): void {
   useEffect(() => {
     const lifecycle = lifecycleRef.current;
-    if (!lifecycle || canonicalContentRef.current === content) return;
+    if (!lifecycle) return;
 
-    try {
-      const selection = lifecycle.model.selection.get();
-      cancelHybridSourcePositionReveal(lifecycle);
-      lifecycle.model.replaceSourceText(new StringValue(content));
-      if (selection)
-        setObservable(
-          lifecycle.model.selection,
-          new Selection(
-            Math.max(0, Math.min(content.length, selection.anchor)),
-            Math.max(0, Math.min(content.length, selection.active)),
-          ),
-        );
-      canonicalContentRef.current = content;
-    } catch (error) {
-      reportEditorFailure(lifecycleRef, callbackRefs, error);
-    }
+    const replaceContent = () => {
+      try {
+        if (!lifecycle.active || canonicalContentRef.current === content) return;
+        const selection = lifecycle.model.selection.get();
+        cancelHybridSourcePositionReveal(lifecycle);
+        lifecycle.model.replaceSourceText(new StringValue(content));
+        if (selection)
+          setObservable(
+            lifecycle.model.selection,
+            new Selection(
+              Math.max(0, Math.min(content.length, selection.anchor)),
+              Math.max(0, Math.min(content.length, selection.active)),
+            ),
+          );
+        canonicalContentRef.current = content;
+      } catch (error) {
+        reportEditorFailure(lifecycleRef, callbackRefs, error);
+      }
+    };
+    if (lifecycle.input?.runWhenSettled)
+      lifecycle.input.runWhenSettled(replaceContent, contentReplacementOwner);
+    else replaceContent();
   }, [callbackRefs, canonicalContentRef, content, lifecycleRef]);
 }
 
@@ -336,7 +363,12 @@ function useHybridEditorOptionsSync({
     if (!lifecycle) return;
 
     try {
-      setObservable(lifecycle.model.readonlyMode, readOnly);
+      const updateReadOnly = () => {
+        if (lifecycle.active) setObservable(lifecycle.model.readonlyMode, readOnly);
+      };
+      if (lifecycle.input?.runWhenSettled)
+        lifecycle.input.runWhenSettled(updateReadOnly, readOnlyUpdateOwner);
+      else updateReadOnly();
       setObservable(
         lifecycle.model.baseline,
         baseline === undefined ? undefined : new StringValue(baseline),
@@ -350,6 +382,7 @@ function useHybridEditorOptionsSync({
 }
 
 type CreateEditorLifecycleOptions = {
+  inputLabel: string;
   root: HTMLDivElement;
   content: string;
   readOnly: boolean;
@@ -363,6 +396,7 @@ type CreateEditorLifecycleOptions = {
 
 function createEditorLifecycle({
   root,
+  inputLabel,
   content,
   readOnly,
   baseline,
@@ -372,6 +406,7 @@ function createEditorLifecycle({
   onComment,
   onSourceEdit,
 }: CreateEditorLifecycleOptions): EditorLifecycle {
+  let input: MarkdownScopedInput | undefined;
   let model: EditorModel | undefined;
   let view: EditorView | undefined;
   let controller: EditorController | undefined;
@@ -391,6 +426,10 @@ function createEditorLifecycle({
     syntaxHighlighter = createMarkdownSyntaxHighlighter();
 
     const viewOptions: EditorViewOptions = {
+      inputFactory: (options) => {
+        input = createMarkdownInput(options, inputLabel);
+        return input;
+      },
       classNames: ["kandev-hybrid-markdown-editor"],
       showReadonlyToggle: false,
       onOpenLink,
@@ -412,6 +451,7 @@ function createEditorLifecycle({
 
     return {
       active: true,
+      input,
       model,
       view,
       controller,

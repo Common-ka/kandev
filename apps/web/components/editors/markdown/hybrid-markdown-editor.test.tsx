@@ -78,6 +78,9 @@ describe("HybridMarkdownEditor lifecycle", () => {
     expect(model.dispose).toHaveBeenCalledOnce();
     expect(view.dispose).toHaveBeenCalledOnce();
     expect(controller.dispose).toHaveBeenCalledOnce();
+    expect(controller.dispose.mock.invocationCallOrder[0]).toBeLessThan(
+      view.dispose.mock.invocationCallOrder[0],
+    );
     expect(model.sourceEditSubscription.dispose).toHaveBeenCalledOnce();
     expect(upstream.state.syntaxHighlighters[0].dispose).toHaveBeenCalledOnce();
   });
@@ -354,7 +357,7 @@ describe("HybridMarkdownEditor table edge pointer lifecycle", () => {
 // @covers AC-UI-MARKDOWN-FILE-EDITING-001.10
 describe("HybridMarkdownEditor recovery boundary", () => {
   it.each([undefined, () => {}])(
-    "does not allocate the engine when EditContext is unavailable or nonconstructible: %s",
+    "mounts the engine when EditContext is unavailable or nonconstructible: %s",
     (capability) => {
       vi.stubGlobal("EditContext", capability);
       const onSourceFallback = vi.fn();
@@ -365,8 +368,8 @@ describe("HybridMarkdownEditor recovery boundary", () => {
           onSourceFallback={onSourceFallback}
         />,
       );
-      expect(upstream.state.models).toHaveLength(0);
-      expect(onSourceFallback).toHaveBeenCalledOnce();
+      expect(upstream.state.models).toHaveLength(1);
+      expect(onSourceFallback).not.toHaveBeenCalled();
     },
   );
 

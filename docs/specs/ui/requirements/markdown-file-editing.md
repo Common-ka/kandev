@@ -72,10 +72,18 @@ change.
 - **AC-UI-MARKDOWN-FILE-EDITING-001.9:** Edit mode shall apply theme-aware
   syntax highlighting to supported fenced code blocks while keeping code
   fences and code content in canonical Markdown source.
-- **AC-UI-MARKDOWN-FILE-EDITING-001.10:** When the browser cannot support
-  hybrid editing, the system shall keep Preview and Source available.
-  The Edit control shall explain its unavailable state without changing the
-  source or the saved mode preference.
+- **AC-UI-MARKDOWN-FILE-EDITING-001.10:** Edit mode shall provide rendered
+  Markdown editing in current Chromium, Firefox, and Safari browsers, including
+  Zen on Firefox. A missing optional browser API shall not disable Edit mode
+  or substitute Source mode.
+- **AC-UI-MARKDOWN-FILE-EDITING-001.11:** Edit mode shall support typing,
+  selection replacement, deletion, clipboard actions, undo, redo, and IME
+  composition in each supported browser. These actions shall apply once at
+  the selected source range and preserve unrelated source bytes.
+- **AC-UI-MARKDOWN-FILE-EDITING-001.12:** Keyboard and screen-reader users
+  shall be able to read, select, and edit the current Markdown content in Edit
+  mode. Auxiliary input controls shall not trap focus or duplicate text
+  announcements.
 
 ### REQ-UI-MARKDOWN-FILE-EDITING-002: Safe file workflow integration
 
@@ -136,6 +144,24 @@ workflow, so that switching presentation does not risk my work.
   Edit again shall either start a usable editor or return to Source with an
   accessible failure message. The system shall preserve unsaved content and
   shall not show an empty editor surface.
+- **AC-UI-MARKDOWN-FILE-EDITING-002.16:** When an active walkthrough targets
+  a Markdown file, Preview, Edit, and Source shall reveal the target section
+  and show the existing blue range indicator without changing the chosen mode.
+  New Markdown files shall retain their normal Preview default. Each step
+  change shall update the indicator, including changes within the same file.
+- **AC-UI-MARKDOWN-FILE-EDITING-002.17:** The indicator shall follow the
+  target's rendered geometry through scrolling, resizing, and content layout
+  changes. It shall identify the inclusive source-line range in the matching
+  repository. Hidden presentations and unrelated files shall not show an
+  indicator or supply its connector position.
+- **AC-UI-MARKDOWN-FILE-EDITING-002.18:** Walkthrough decoration in Preview
+  and Edit shall preserve source bytes, dirty state, undo history, and editing
+  selection. Closing the walkthrough or changing its target shall remove stale
+  decoration. A later mode change shall not replay an obsolete walkthrough jump.
+- **AC-UI-MARKDOWN-FILE-EDITING-002.19:** On phones, the Markdown indicator
+  shall remain rendered when the walkthrough sheet covers its target. The
+  obscured connector shall disappear. Walkthrough controls shall retain their
+  existing touch targets and shall not cause page-level horizontal overflow.
 
 ### REQ-UI-MARKDOWN-FILE-EDITING-003: Responsive and accessible editing
 
@@ -177,10 +203,17 @@ the Files surface, so that I can complete the same task without a desktop.
   available. Reload and mode choices shall remain reachable with translated
   labels, without page-level horizontal scrolling.
 
+- **AC-UI-MARKDOWN-FILE-EDITING-003.11:** Browser verification shall cover
+  actual Chromium, Firefox, and WebKit engines. Phone verification shall cover
+  Android and iOS editing with native virtual keyboards. Viewport emulation or
+  a removed browser API alone shall not establish native browser compatibility.
+
 ## Implementation plans
 
 - [Original Markdown editing package](../../../plans/markdown-file-editing/plan.md).
 - [Review remediation package](../../../plans/markdown-editing-remediation/plan.md).
+- [Browser parity correction](../../../plans/markdown-browser-parity/plan.md).
+- [Markdown walkthrough ranges](../../../plans/markdown-walkthrough-ranges/plan.md).
 
 ## Out of scope
 
@@ -193,3 +226,6 @@ the Files surface, so that I can complete the same task without a desktop.
 - Creating tables, merging cells, or adding Confluence-specific header,
   numbered-column, chart, and macro semantics.
 - Adding collaborative multi-cursor editing or a new backend file API.
+
+Current browser releases are the compatibility target. Historical browser
+versions and hybrid MDX editing remain outside this package.

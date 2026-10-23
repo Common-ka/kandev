@@ -1,4 +1,15 @@
+import {
+  expectNeutralDisabledButton,
+  expectInheritedButtonForeground,
+  setButtonTheme,
+  holdFileSaveResponse,
+} from "../../helpers/button-state-colors";
 import fs from "node:fs";
+import {
+  seedMarkdownWalkthrough,
+  openMarkdownWalkthrough,
+  expectMarkdownWalkthroughRange,
+} from "../../helpers/markdown-walkthrough";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { expect, type Locator, type Page } from "@playwright/test";
@@ -7,6 +18,11 @@ import type { SeedData } from "../../fixtures/test-base";
 import type { ApiClient } from "../../helpers/api-client";
 import { GitHelper, makeGitEnv } from "../../helpers/git-helper";
 import { SessionPage } from "../../pages/session-page";
+import {
+  markdownModifier,
+  markdownDocumentEnd,
+  typeMarkdownSource,
+} from "../../helpers/markdown-keyboard";
 import { watchWs, type WsWatcher } from "../../helpers/causal-waits";
 
 const MARKDOWN_CONTENT = `# Markdown lifecycle
@@ -89,7 +105,13 @@ async function seedMarkdownSession({
   fileName: string;
   content: string;
   taskTitle: string;
-}): Promise<{ session: SessionPage; filePath: string; sessionId: string; gateway: WsWatcher }> {
+}): Promise<{
+  session: SessionPage;
+  filePath: string;
+  sessionId: string;
+  gateway: WsWatcher;
+  taskId: string;
+}> {
   const repoDir = path.join(backend.tmpDir, "repos", "e2e-repo");
   const git = new GitHelper(repoDir, makeGitEnv(backend.tmpDir));
   const originalSha = git.getCurrentSha();
@@ -118,6 +140,7 @@ async function seedMarkdownSession({
     session,
     filePath: path.join(repoDir, fileName),
     sessionId: task.session_id,
+    taskId: task.id,
     gateway,
   };
 }
@@ -136,7 +159,7 @@ async function appendToHybrid(testPage: Page, marker: string): Promise<void> {
   const paragraph = editor.locator(".md-paragraph").last();
   await expect(paragraph).toBeVisible({ timeout: 15_000 });
   await paragraph.click();
-  await testPage.keyboard.press(process.platform === "darwin" ? "Meta+End" : "Control+End");
+  await testPage.keyboard.press(await markdownDocumentEnd(testPage));
   await testPage.keyboard.insertText(`\n\n${marker}`);
   await expect(editor).toContainText(marker);
 }
@@ -284,11 +307,146 @@ async function expectSingleCompactToolbar(testPage: Page) {
   }
 }
 
+async function selectedSourceText(source: Locator): Promise<string | null | undefined> {
+  return source.evaluate((element) => {
+    const monaco = (window as Window & { monaco?: typeof import("monaco-editor") }).monaco;
+    const editor = monaco?.editor
+      .getEditors()
+      .find((candidate) => candidate.getDomNode()?.contains(element));
+    const selection = editor?.getSelection();
+    return selection ? editor?.getModel()?.getValueInRange(selection) : null;
+  });
+}
+
 test.describe("Markdown file editing", () => {
   test.describe.configure({ retries: 0, timeout: 120_000 });
   test.afterEach(() => {
     restoreMarkdownRepository?.();
     restoreMarkdownRepository = undefined;
+  });
+
+  // @covers AC-UI-MARKDOWN-FILE-EDITING-002.16, AC-UI-MARKDOWN-FILE-EDITING-002.17, AC-UI-MARKDOWN-FILE-EDITING-002.18
+  test("button colors preserve clean, dirty, and pending Save states", async ({
+    testPage,
+    apiClient,
+    seedData,
+    backend,
+  }, testInfo) => {
+    const hold = await holdFileSaveResponse(testPage);
+    const fileName = `button-colors-${Date.now()}.md`;
+    const content = "# Button colors\n\nEditable paragraph.";
+    const { session, filePath } = await seedMarkdownSession({
+      testPage,
+      apiClient,
+      seedData,
+      backend,
+      fileName,
+      content,
+      taskTitle: "Button colors",
+    });
+    await openFile(session, testPage, fileName);
+    const editor = testPage.getByTestId("markdown-file-editor");
+    const save = editor.getByTestId("markdown-file-save");
+    await editor.getByTestId("markdown-mode-edit").click();
+    let expected = content;
+    for (const dark of [false, true]) {
+      await setButtonTheme(testPage, dark);
+      await expectNeutralDisabledButton(save);
+      const cleanBox = await save.boundingBox();
+      const marker = `Saved ${dark ? "dark" : "light"} colors`;
+      await appendToHybrid(testPage, marker);
+      expected += `\n\n${marker}`;
+      await expect(save).toBeEnabled();
+      await expectInheritedButtonForeground(save);
+      await save.screenshot({
+        path: testInfo.outputPath(`save-${dark ? "dark" : "light"}-enabled.png`),
+      });
+      await save.click();
+      await expect.poll(hold.isHeld).toBe(true);
+      try {
+        await expectNeutralDisabledButton(save);
+        await expect(save).toContainText("Saving");
+      } finally {
+        hold.release();
+      }
+      await expect(save).toContainText("Save");
+      await expectNeutralDisabledButton(save);
+      expect(fs.readFileSync(filePath, "utf8")).toBe(expected);
+      expect((await save.boundingBox())?.height).toBe(cleanBox?.height);
+      await save.screenshot({
+        path: testInfo.outputPath(`save-${dark ? "dark" : "light"}-disabled.png`),
+      });
+    }
+  });
+
+  test("walkthrough outlines follow rendered Markdown sections across modes", async ({
+    testPage,
+    apiClient,
+    seedData,
+    backend,
+    prCapture,
+  }) => {
+    const fileName = `walkthrough-markdown-${Date.now()}.md`;
+    const { taskId, filePath } = await seedMarkdownSession({
+      testPage,
+      apiClient,
+      seedData,
+      backend,
+      fileName,
+      content: MARKDOWN_CONTENT,
+      taskTitle: "Markdown walkthrough ranges",
+    });
+    const ranges = await seedMarkdownWalkthrough(
+      backend.tmpDir,
+      taskId,
+      fileName,
+      MARKDOWN_CONTENT,
+    );
+    const card = await openMarkdownWalkthrough(testPage);
+    const file = testPage.getByTestId("markdown-file-editor");
+    const preview = file.getByTestId("markdown-preview-host");
+    await expect(file.getByTestId("markdown-mode-preview")).toHaveAttribute("aria-pressed", "true");
+    await expectMarkdownWalkthroughRange(preview, ranges[0], preview.locator("table"));
+    await card.getByTestId("walkthrough-next").click();
+    const paragraph = preview.getByText("Long desktop paragraph 45 keeps the preview scrollable.", {
+      exact: true,
+    });
+    await expect(paragraph).toBeInViewport();
+    await expectMarkdownWalkthroughRange(preview, ranges[1], paragraph);
+    await card.getByTestId("walkthrough-next").click();
+    await expectMarkdownWalkthroughRange(preview, ranges[2], paragraph);
+    await file.getByTestId("markdown-mode-edit").click();
+    const hybrid = file.getByTestId("hybrid-markdown-editor");
+    const rendered = hybrid.locator(".md-paragraph", {
+      hasText: "Long desktop paragraph 45 keeps the preview scrollable.",
+    });
+    await expectMarkdownWalkthroughRange(hybrid, ranges[2], rendered);
+    await expect(file.locator('[data-testid="walkthrough-editor-range"]:visible')).toHaveCount(1);
+    await card.getByTestId("walkthrough-prev").click();
+    await expectMarkdownWalkthroughRange(hybrid, ranges[1], rendered);
+    await testPage.setViewportSize({ width: 1600, height: 1000 });
+    await expectMarkdownWalkthroughRange(hybrid, ranges[1], rendered);
+    await hybrid.evaluate((element) => {
+      element.scrollTop -= 40;
+    });
+    await expectMarkdownWalkthroughRange(hybrid, ranges[1], rendered);
+    await prCapture.screenshot("desktop-markdown-walkthrough-range", {
+      caption: "Rendered Markdown keeps the walkthrough section indicator",
+    });
+    await file.getByTestId("markdown-mode-source").click();
+    await expect(file.getByTestId("walkthrough-editor-range")).toHaveAttribute(
+      "data-line-range",
+      `${ranges[1].line}-${ranges[1].line_end}`,
+    );
+    await file.getByTestId("markdown-mode-preview").click();
+    await card.getByTestId("walkthrough-close").click();
+    await expect(file.getByTestId("walkthrough-editor-range")).toHaveCount(0);
+    await preview.getByRole("heading", { name: "Markdown lifecycle" }).scrollIntoViewIfNeeded();
+    await file.getByTestId("markdown-mode-source").click();
+    await expect(file.locator(".monaco-editor:visible .view-lines")).toContainText(
+      "# Markdown lifecycle",
+    );
+    expect(fs.readFileSync(filePath, "utf8")).toBe(MARKDOWN_CONTENT);
   });
 
   // @covers AC-UI-MARKDOWN-FILE-EDITING-001.5, AC-UI-MARKDOWN-FILE-EDITING-002.4
@@ -326,9 +484,24 @@ test.describe("Markdown file editing", () => {
     await editor.getByTestId("markdown-mode-source").click();
     const source = testPage.getByRole("textbox", { name: "Editor content" });
     await source.focus();
-    await testPage.keyboard.insertText("Selected");
+    await expect.poll(() => selectedSourceText(source)).toBe("Long");
+    await testPage.keyboard.press("Shift+KeyS");
+    await expect
+      .poll(() =>
+        source.evaluate((element) => {
+          const monaco = (window as Window & { monaco?: typeof import("monaco-editor") }).monaco;
+          return monaco?.editor
+            .getEditors()
+            .find((candidate) => candidate.getDomNode()?.contains(element))
+            ?.getModel()
+            ?.getValue();
+        }),
+      )
+      .toBe(MARKDOWN_CONTENT.replace("Long desktop paragraph 40 ", "S desktop paragraph 40 "));
+    await testPage.keyboard.type("elected");
+    await expect(editor.getByRole("button", { name: /^Save/ })).toBeEnabled();
     const saved = gateway.waitForResponse("workspace.file.update");
-    await testPage.keyboard.press(process.platform === "darwin" ? "Meta+s" : "Control+s");
+    await testPage.keyboard.press(`${await markdownModifier(testPage)}+s`);
     await saved;
     expect(fs.readFileSync(filePath, "utf8")).toBe(
       MARKDOWN_CONTENT.replace("Long desktop paragraph 40 ", "Selected desktop paragraph 40 "),
@@ -341,15 +514,25 @@ test.describe("Markdown file editing", () => {
     ).toBeInViewport();
   });
 
-  for (const newline of ["\n", "\r\n"]) {
-    test(`preserves the real engine source corpus with ${newline === "\n" ? "LF" : "CRLF"} through edits, undo, modes, and save`, async ({
+  for (const [newline, label] of [
+    ["\n", "LF"],
+    ["\r\n", "CRLF"],
+    ["mixed", "mixed line endings"],
+  ]) {
+    test(`preserves the real engine source corpus with ${label} through edits, undo, modes, and save`, async ({
       testPage,
       apiClient,
       seedData,
       backend,
     }) => {
       const fileName = `markdown-corpus-${Date.now()}.md`;
-      const content = PRESERVATION_LINES.join(newline);
+      const content =
+        newline === "mixed"
+          ? PRESERVATION_LINES.map((line, index) => {
+              if (index === PRESERVATION_LINES.length - 1) return line;
+              return line + (index % 2 ? "\n" : "\r\n");
+            }).join("")
+          : PRESERVATION_LINES.join(newline);
       const { session, filePath, gateway } = await seedMarkdownSession({
         testPage,
         apiClient,
@@ -375,7 +558,7 @@ test.describe("Markdown file editing", () => {
       await clickAfterText(testPage, paragraph, "Target");
       await testPage.keyboard.insertText("!");
       await expect(paragraph).toContainText("Target! paragraph stays unchanged.");
-      const modifier = process.platform === "darwin" ? "Meta" : "Control";
+      const modifier = await markdownModifier(testPage);
       await testPage.keyboard.press(`${modifier}+z`);
       await expect(paragraph).toContainText("Target paragraph stays unchanged.");
       await expect(editor.getByTestId("markdown-file-save")).toBeDisabled();
@@ -410,7 +593,7 @@ test.describe("Markdown file editing", () => {
     primaryGit.commit("seed primary Markdown");
     execFileSync("git", ["init", "-b", "main"], { cwd: repoDir, env: gitEnv });
     const git = new GitHelper(repoDir, gitEnv);
-    const content = "# Secondary repository\n\nSelect this paragraph to comment.\n";
+    const content = `# Secondary repository\n\nSelect this paragraph to comment.\n\n${MARKDOWN_CONTENT}`;
     git.createFile("README.md", content);
     git.stageAll();
     git.commit("seed secondary Markdown");
@@ -463,7 +646,7 @@ test.describe("Markdown file editing", () => {
       await commentTrigger.click();
       const marker = "Review this secondary repository paragraph";
       await testPage.getByPlaceholder("Add your comment or instruction...").fill(marker);
-      await testPage.keyboard.press(process.platform === "darwin" ? "Meta+Enter" : "Control+Enter");
+      await testPage.keyboard.press(`${await markdownModifier(testPage)}+Enter`);
       await expect
         .poll(() =>
           testPage.evaluate(
@@ -496,7 +679,36 @@ test.describe("Markdown file editing", () => {
       await expect(hybrid).not.toContainText(marker);
       await session.clickTab("Files");
       await (await session.fileTree.waitForFileTreeNode(`${secondaryName}/README.md`)).dblclick();
+      await editor.getByTestId("markdown-mode-edit").click();
+      await expect(hybrid).toBeVisible();
       await expect(hybrid).toContainText(marker);
+      const ranges = seedMarkdownWalkthrough(
+        backend.tmpDir,
+        task.id,
+        "README.md",
+        content,
+        secondaryName,
+      );
+      const card = await openMarkdownWalkthrough(testPage);
+      await expect(editor).toBeVisible();
+      await expect(editor.getByTestId("markdown-mode-edit")).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      await expectMarkdownWalkthroughRange(hybrid, ranges[0], hybrid.locator("table"));
+      await session.clickTab("Files");
+      await (
+        await session.fileTree.waitForFileTreeNode(path.posix.join(primaryRoot, "README.md"))
+      ).dblclick();
+      await expect(editor.getByTestId("walkthrough-editor-range")).toHaveCount(0);
+      await card.getByTestId("walkthrough-step-file").click();
+      const reopenedPreview = editor.getByTestId("markdown-preview-host");
+      await expectMarkdownWalkthroughRange(
+        reopenedPreview,
+        ranges[0],
+        reopenedPreview.locator("table"),
+      );
+      await card.getByTestId("walkthrough-close").click();
     } finally {
       if (task) {
         if (!testPage.isClosed()) {
@@ -519,21 +731,19 @@ test.describe("Markdown file editing", () => {
     backend,
   }) => {
     await testPage.addInitScript(() => {
-      const nativeEditContext = Reflect.get(window, "EditContext");
-      let attempts = 0;
-      Reflect.set(
-        window,
-        "EditContext",
-        new Proxy(nativeEditContext, {
-          construct(target, args, newTarget) {
-            if (document.querySelector('[data-testid="hybrid-markdown-editor"]')) {
-              attempts += 1;
-              if (attempts === 1) throw new Error("Expected Markdown initialization failure");
-            }
-            return Reflect.construct(target, args, newTarget);
-          },
-        }),
-      );
+      const replaceChildren = Element.prototype.replaceChildren;
+      let failed = false;
+      Element.prototype.replaceChildren = function (...nodes) {
+        if (
+          !failed &&
+          nodes.length > 0 &&
+          this.getAttribute("data-testid") === "hybrid-markdown-editor"
+        ) {
+          failed = true;
+          throw new Error("Expected Markdown initialization failure");
+        }
+        return replaceChildren.apply(this, nodes);
+      };
     });
     const fileName = `markdown-retry-${Date.now()}.md`;
     const content = "# Retry preserves source\n\nOriginal paragraph.\n";
@@ -553,8 +763,9 @@ test.describe("Markdown file editing", () => {
     const source = testPage.getByRole("textbox", { name: "Editor content" });
     await expect(source).toBeAttached();
     await source.focus();
-    await testPage.keyboard.press(process.platform === "darwin" ? "Meta+A" : "Control+A");
-    await testPage.keyboard.insertText(draft);
+    await testPage.keyboard.press(`${await markdownModifier(testPage)}+A`);
+    await expect.poll(() => selectedSourceText(source)).toBe(content);
+    await typeMarkdownSource(testPage, draft);
     await editor.getByTestId("markdown-mode-edit").click();
     await expect(editor.getByTestId("markdown-mode-source")).toHaveAttribute(
       "aria-pressed",
@@ -571,7 +782,7 @@ test.describe("Markdown file editing", () => {
   });
 
   // @covers AC-UI-MARKDOWN-FILE-EDITING-001.10
-  test("review regression: hybrid recovery keeps Source usable without EditContext", async ({
+  test("browser parity: rendered Edit works without EditContext", async ({
     testPage,
     apiClient,
     seedData,
@@ -579,7 +790,7 @@ test.describe("Markdown file editing", () => {
   }) => {
     await testPage.addInitScript(() => Reflect.deleteProperty(window, "EditContext"));
     const fileName = `markdown-capability-${Date.now()}.md`;
-    const content = "# Source fallback\n\nExact content.\n";
+    const content = "# Browser parity\n\nExact content.\n";
     const { session, filePath, gateway } = await seedMarkdownSession({
       testPage,
       apiClient,
@@ -587,23 +798,193 @@ test.describe("Markdown file editing", () => {
       backend,
       fileName,
       content,
-      taskTitle: "Markdown browser fallback",
+      taskTitle: "Markdown browser parity",
     });
     await openFile(session, testPage, fileName);
     const editor = testPage.getByTestId("markdown-file-editor");
-    await expect(editor.getByTestId("markdown-mode-edit")).toBeDisabled();
-    await editor.getByTestId("markdown-mode-source").click();
-    const source = testPage.getByRole("textbox", { name: "Editor content" });
-    await expect(source).toBeAttached();
-    await source.focus();
-    await testPage.keyboard.press(process.platform === "darwin" ? "Meta+A" : "Control+A");
-    const edited = `${content}\nSaved without hybrid editing.`;
-    await testPage.keyboard.insertText(edited);
+    await expect(editor.getByTestId("markdown-mode-edit")).toBeEnabled();
+    await editor.getByTestId("markdown-mode-edit").click();
+    const hybrid = editor.getByTestId("hybrid-markdown-editor");
+    const paragraph = hybrid.locator(".md-paragraph", { hasText: "Exact content." });
+    await expect(paragraph).toBeVisible();
+    await clickAfterText(testPage, paragraph, "Exact content.");
+    await testPage.keyboard.type(" Native input.");
+    await expect(paragraph).toContainText("Exact content. Native input.");
     const saved = gateway.waitForResponse("workspace.file.update");
-    await testPage.keyboard.press(process.platform === "darwin" ? "Meta+s" : "Control+s");
+    await editor.getByTestId("markdown-file-save").click();
+    await saved;
+    expect(fs.readFileSync(filePath, "utf8")).toBe(
+      content.replace("Exact content.", "Exact content. Native input."),
+    );
+    await editor.getByTestId("markdown-mode-preview").click();
+    await expect(editor.getByTestId("markdown-preview")).toContainText(
+      "Exact content. Native input.",
+    );
+    await editor.getByTestId("markdown-mode-edit").click();
+    await expect(hybrid).toBeVisible();
+  });
+
+  // @covers AC-UI-MARKDOWN-FILE-EDITING-001.11, AC-UI-MARKDOWN-FILE-EDITING-001.12
+  test("native input: backward selection drives copy, paste, and shared undo", async ({
+    testPage,
+    apiClient,
+    seedData,
+    backend,
+  }) => {
+    await testPage.addInitScript(() => Reflect.deleteProperty(window, "EditContext"));
+    const content = "# Native selection\n\nRead this phrase.\n";
+    const { session, filePath, gateway } = await seedMarkdownSession({
+      testPage,
+      apiClient,
+      seedData,
+      backend,
+      content,
+      fileName: `native-selection-${Date.now()}.md`,
+      taskTitle: "Native Markdown selection",
+    });
+    await openFile(session, testPage, path.basename(filePath));
+    const editor = testPage.getByTestId("markdown-file-editor");
+    await editor.getByTestId("markdown-mode-edit").click();
+    const hybrid = editor.getByTestId("hybrid-markdown-editor");
+    const input = hybrid.getByRole("textbox", {
+      name: "Content (markdown supported)",
+      exact: true,
+    });
+    await expect(input).toHaveAccessibleName("Content (markdown supported)");
+    await input.focus();
+    await input.evaluate((element) => {
+      const textarea = element as HTMLTextAreaElement;
+      const start = textarea.value.indexOf("phrase");
+      textarea.setSelectionRange(start, start + "phrase".length, "backward");
+      textarea.dispatchEvent(new Event("select", { bubbles: true, composed: true }));
+    });
+    await expect
+      .poll(() => input.evaluate((element) => (element as HTMLTextAreaElement).selectionDirection))
+      .toBe("backward");
+    await expect(editor.getByTestId("markdown-file-save")).toBeDisabled();
+    const modifier = await markdownModifier(testPage);
+    await testPage.keyboard.press(`${modifier}+c`);
+    await expect(editor.getByTestId("markdown-file-save")).toBeDisabled();
+    await input.evaluate((element) => {
+      const textarea = element as HTMLTextAreaElement;
+      const end = textarea.value.indexOf("phrase.") + "phrase.".length;
+      textarea.setSelectionRange(end, end);
+      textarea.dispatchEvent(new Event("select", { bubbles: true, composed: true }));
+    });
+    await testPage.keyboard.press(`${modifier}+v`);
+    const edited = content.replace("phrase.", "phrase.phrase");
+    await expect(input).toHaveValue(edited);
+    await testPage.keyboard.press(`${modifier}+z`);
+    await expect(input).toHaveValue(content);
+    await testPage.keyboard.press(`${modifier}+Shift+z`);
+    await expect(input).toHaveValue(edited);
+    const saved = gateway.waitForResponse("workspace.file.update");
+    await editor.getByTestId("markdown-file-save").click();
     await saved;
     expect(fs.readFileSync(filePath, "utf8")).toBe(edited);
-    await expect(editor.getByTestId("hybrid-markdown-editor")).toHaveCount(0);
+  });
+
+  // Synthetic composition proves event translation, not OS IME or candidate-window behavior.
+  // @covers AC-UI-MARKDOWN-FILE-EDITING-001.3, AC-UI-MARKDOWN-FILE-EDITING-001.11
+  test("native input: sequential composition preserves exact source and mode handoff", async ({
+    testPage,
+    apiClient,
+    seedData,
+    backend,
+  }) => {
+    await testPage.addInitScript(() => Reflect.deleteProperty(window, "EditContext"));
+    const content = "\uFEFF# Native composition\r\n\r\nReplace phrase.\nTail.\r\n";
+    const { session, filePath, gateway } = await seedMarkdownSession({
+      testPage,
+      apiClient,
+      seedData,
+      backend,
+      content,
+      fileName: `native-composition-${Date.now()}.md`,
+      taskTitle: "Native Markdown composition",
+    });
+    await openFile(session, testPage, path.basename(filePath));
+    const editor = testPage.getByTestId("markdown-file-editor");
+    await editor.getByTestId("markdown-mode-edit").click();
+    const input = editor
+      .getByTestId("hybrid-markdown-editor")
+      .getByRole("textbox", { name: "Content (markdown supported)", exact: true });
+    await input.focus();
+    await input.evaluate((element) => {
+      const textarea = element as HTMLTextAreaElement;
+      const start = textarea.value.indexOf("phrase");
+      textarea.setSelectionRange(start, start + "phrase".length);
+      textarea.dispatchEvent(new Event("select", { bubbles: true, composed: true }));
+      textarea.dispatchEvent(
+        new CompositionEvent("compositionstart", { bubbles: true, composed: true }),
+      );
+      textarea.setRangeText("に", start, start + "phrase".length, "end");
+      textarea.dispatchEvent(
+        new InputEvent("input", {
+          inputType: "insertCompositionText",
+          data: "に",
+          isComposing: true,
+          bubbles: true,
+          composed: true,
+        }),
+      );
+      textarea.setRangeText("日本", start, start + 1, "end");
+      textarea.dispatchEvent(
+        new InputEvent("input", {
+          inputType: "insertCompositionText",
+          data: "日本",
+          isComposing: true,
+          bubbles: true,
+          composed: true,
+        }),
+      );
+      textarea.dispatchEvent(
+        new CompositionEvent("compositionend", { data: "日本", bubbles: true, composed: true }),
+      );
+    });
+    await expect(input).toHaveValue(content.replace("phrase", "日本").replace(/\r\n/g, "\n"));
+    await testPage.keyboard.type("!");
+    await input.evaluate((element) => {
+      const textarea = element as HTMLTextAreaElement;
+      const start = textarea.value.indexOf("Tail");
+      textarea.setSelectionRange(start, start + "Tail".length);
+      textarea.dispatchEvent(new Event("select", { bubbles: true, composed: true }));
+      textarea.dispatchEvent(
+        new CompositionEvent("compositionstart", { bubbles: true, composed: true }),
+      );
+      textarea.setRangeText("한", start, start + "Tail".length, "end");
+      textarea.dispatchEvent(
+        new InputEvent("input", {
+          inputType: "insertCompositionText",
+          data: "한",
+          isComposing: true,
+          bubbles: true,
+          composed: true,
+        }),
+      );
+      textarea.setRangeText("한국", start, start + 1, "end");
+      textarea.dispatchEvent(
+        new InputEvent("input", {
+          inputType: "insertCompositionText",
+          data: "한국",
+          isComposing: true,
+          bubbles: true,
+          composed: true,
+        }),
+      );
+      textarea.dispatchEvent(
+        new CompositionEvent("compositionend", { data: "한국", bubbles: true, composed: true }),
+      );
+    });
+    const edited = content.replace("phrase", "日本!").replace("Tail", "한국");
+    await editor.getByTestId("markdown-mode-preview").click();
+    await expect(editor.getByTestId("markdown-preview")).toContainText("Replace 日本!.");
+    const saved = gateway.waitForResponse("workspace.file.update");
+    await editor.getByTestId("markdown-file-save").click();
+    await saved;
+    expect(fs.readFileSync(filePath, "utf8")).toBe(edited);
+    await editor.getByTestId("markdown-mode-edit").click();
+    await expect(input).toHaveValue(edited.replace(/\r\n/g, "\n"));
   });
 
   test("opens in Preview, edits the rendered hybrid buffer, saves, and restores Edit mode", async ({
@@ -728,8 +1109,12 @@ test.describe("Markdown file editing", () => {
     const sourceInput = testPage.getByRole("textbox", { name: "Editor content" });
     await expect(sourceInput).toBeAttached({ timeout: 15_000 });
     await sourceInput.focus();
-    await testPage.keyboard.press(process.platform === "darwin" ? "Meta+A" : "Control+A");
-    await testPage.keyboard.insertText(
+    await testPage.keyboard.press(`${await markdownModifier(testPage)}+A`);
+    await expect
+      .poll(() => selectedSourceText(sourceInput))
+      .toBe(`# Direction\n\n${LONG_EDIT_PARAGRAPH}\n\n#### Existing subheader\n`);
+    await typeMarkdownSource(
+      testPage,
       `# Direction\n\n${LONG_EDIT_PARAGRAPH.replace("quiet", "quiet!abcde")}\n\n#### Existing subheader\n`,
     );
     await editor.getByTestId("markdown-mode-edit").click();
