@@ -1,7 +1,7 @@
 ---
 id: "05-author-migration"
 title: "Document author and maintainer migration"
-status: in_progress
+status: done
 wave: 5
 depends_on:
   - 04-stable-publication
@@ -148,4 +148,13 @@ Validation: 63 public-doc validator tests passed; 48 public pages validate.
 Harness and specification validator tests passed. All 204 harness files,
 386 decisions, and 1626 specifications validate. README and screenshot catalog
 inspection found no additional stale SDK import requiring edits.
-Final exact-head CI and delivery status remain separate from these local checks.
+Implementation CI and all review dispositions now pass. Cleanup validation also
+passes 63 public-doc tests and 54 pages; see the plan for the final catalog counts.
+
+## Completion
+
+Completed on 2026-10-23 after local acceptance checks and implementation CI
+passed. The [plan's cleanup record](plan.md#validation-and-review-cleanup)
+contains the validation evidence and review dispositions. Public publication,
+registry configuration, external repository migration, and author notices
+remain separate follow-up work; completion here does not certify those actions.

@@ -1,7 +1,7 @@
 ---
 id: "02-frontend-package"
 title: "Package standalone frontend SDK"
-status: in_progress
+status: done
 wave: 2
 depends_on:
   - 01-go-module
@@ -123,7 +123,7 @@ record drift, tool mismatch, unexpected files, application imports, runtime
 dependencies, and modified archive bytes. The local Go/npm smoke passed.
 Package contract tests, package typecheck, and web typecheck passed. The web
 check required `NODE_OPTIONS=--max-old-space-size=8192` after the default heap
-limit was exceeded. Final CI remains pending; the earlier Docker builder passed.
+limit was exceeded. Implementation CI now passes, including the packed consumer and Docker builder.
 CI exposed inherited `GOFLAGS` in the scoped npm-configuration test. Its fixture
 now supplies clean Go inputs so the test reaches the npm boundary. Production
 public-trust rejection remains unchanged.
@@ -133,3 +133,11 @@ and OIDC dist-tag operations under the current
 [trusted-publisher requirements](https://docs.npmjs.com/trusted-publishers/).
 The package remains unpublished. Resolved host metadata and compatibility
 checks are added by WO03; these tests do not certify a draft record for release.
+
+## Completion
+
+Completed on 2026-10-23 after local acceptance checks and implementation CI
+passed. The [plan's cleanup record](plan.md#validation-and-review-cleanup)
+contains the validation evidence and review dispositions. Public publication,
+registry configuration, external repository migration, and author notices
+remain separate follow-up work; completion here does not certify those actions.

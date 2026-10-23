@@ -1,6 +1,6 @@
 ---
 created: 2026-10-09
-status: draft
+status: implemented
 requirements:
   - REQ-PLUGINS-SDK-DISTRIBUTION-001
   - REQ-PLUGINS-SDK-DISTRIBUTION-002
@@ -36,9 +36,9 @@ remain accepted. The first host numbers and registry ownership/setup remain
 release-time dependencies. External template adoption remains a separate handoff.
 The design reconciliation changed documentation only. Implementation was
 authorized on 2026-10-19. All five work orders now have implementation and
-documentation changes. Local acceptance and final delivery validation are in
-progress; exact-head CI remains a separate gate. Docker CI passed on the Go
-extraction head. Public publication and external template migration have not run.
+documentation changes. Local acceptance and implementation CI
+passed. All six design-review threads have verified replies and resolutions.
+Public publication and external template migration have not run.
 
 ## Overview
 
@@ -50,8 +50,9 @@ installable second, add compatibility validation third, wire Stable publication
 fourth, and finish author/release migration guidance fifth.
 
 The user selected a shared independent SDK version, initially `0.1.0`, and an
-SDK-wide minimum Kandev version. Requirements and design remain draft for this
-design-package handoff. Execution is sequential in the primary conversation, authorized on 2026-10-19.
+SDK-wide minimum Kandev version. Requirements are active and the design is
+current. Execution was sequential in the primary conversation, authorized on
+2026-10-19 and completed on 2026-10-23.
 
 ## Scope
 
@@ -157,11 +158,11 @@ fails the author check rather than defaulting to the current SDK version.
 
 ## Tests
 
-All new test paths below are planned outputs of the named work order. Existing
-SDK tests move with their source. Use TDD for new logic and meaningful failure
+The test paths below are implemented outputs of the named work orders. Existing
+SDK tests moved with their source. Use TDD for new logic and meaningful failure
 cases; import-only migration relies on compile/runtime evidence.
 
-| Acceptance criteria | Test boundary and planned evidence |
+| Acceptance criteria | Test boundary and evidence |
 | --- | --- |
 | `001.1`, `001.3` | WO01: `scripts/pluginsdk/consumer-smoke.test.mjs`, fresh Go archive/proxy consumer; narrow checksum exception; missing archive cannot fall back; graph excludes backend |
 | `001.2`, `001.3` | WO02: `apps/packages/plugin-sdk/test/packed-consumer.node.mjs`, install the same hashed archive outside checkout, validate file allowlist/tool pins, typecheck both resolution modes |
@@ -199,11 +200,11 @@ new Playwright suite is applicable.
 
 ## Work orders
 
-- [ ] [Task 01: Extract Go SDK and preserve host execution](task-01-go-module.md) (implemented; final CI validation in progress)
-- [ ] [Task 02: Package standalone frontend SDK](task-02-frontend-package.md) (implemented; final CI validation in progress)
-- [ ] [Task 03: Enforce consumer compatibility](task-03-compatibility-check.md) (implemented; final CI validation in progress)
-- [ ] [Task 04: Publish SDKs through Stable releases](task-04-stable-publication.md)
-- [ ] [Task 05: Document author and maintainer migration](task-05-author-migration.md)
+- [x] [Task 01: Extract Go SDK and preserve host execution](task-01-go-module.md)
+- [x] [Task 02: Package standalone frontend SDK](task-02-frontend-package.md)
+- [x] [Task 03: Enforce consumer compatibility](task-03-compatibility-check.md)
+- [x] [Task 04: Publish SDKs through Stable releases](task-04-stable-publication.md)
+- [x] [Task 05: Document author and maintainer migration](task-05-author-migration.md)
 
 Dependency order: **01 -> 02 -> 03 -> 04 -> 05**. All work orders are sequential
 because the module, canonical record, package metadata, and release contract are
@@ -214,16 +215,16 @@ shared. This sequence does not authorize subagents.
 Each work order contains its exact command block rooted at the repository root.
 The principal checks are SDK Go race/vet, focused Host package tests and compile,
 isolated packed npm typechecks, checker tests, mocked release tests, workflow
-security contracts, and spec/public/harness validators. Future scripts named in
-those blocks must be implemented in the work order that introduces them.
+security contracts, and spec/public/harness validators. The scripts named in
+those blocks are implemented by their owning work orders.
 
 Use the repo's PR-documentation `validateCoverage` function against this package
 to validate work-order frontmatter, requirement/AC ownership, plan backlinks,
 and design coverage. Do not stage files merely to make a diff-based check see
 new files; include untracked package files in the local adapter.
 
-After implementation, promote the paired requirement to `active`, the design
-to `current`, and this plan to `implemented` only when every work order passes.
+The paired requirement is `active`, the design is `current`, and this plan is
+`implemented` after all five work orders passed their implementation gates.
 Public package availability is recorded separately after authorized release.
 
 ## Verification results
@@ -256,8 +257,9 @@ CI/cache/test-selection helpers. WO01 includes those integration boundaries.
 Official npm trusted-publisher and Go module guidance were rechecked. Registry
 ownership and first-release availability were not established.
 
-Product and release tests were not run in this planning turn. All work-order
-results remain pending. Public Go/npm availability has not been established.
+Product and release tests were not run in that planning turn, so all work-order
+results were pending at that checkpoint. Later implementation validation is
+recorded below. Public Go/npm availability has not been established.
 
 ## Risks and delivery dependencies
 
@@ -289,10 +291,10 @@ Two upstream housekeeping tests now import the extracted SDK module.
 The branch incorporates current main, including its fix for fake process IDs
 colliding with the test process in the orphan-reap test. Six review threads
 refer to amendments reconciled before implementation. Their current contract
-and test evidence is being verified for disposition.
+and test evidence was verified, and every thread received a reply and resolution.
 
-Local remediation checks and exact-head CI are tracked separately. The work
-orders remain in progress until the final CI and review gates pass. Registry
+Local remediation checks and exact-head CI are tracked separately. All five
+work orders passed their implementation and review gates. Registry
 configuration, first publication, external template changes, and author notices
 remain separate release or repository handoffs.
 
@@ -311,5 +313,17 @@ Focused cleanup validation:
   historical-only edit was removed. Catalog: 401 decisions and 1724 specs.
   Specification and harness checks passed; 204 harness files validated.
 
-These are local results. Final-head CI, review resolution, and lifecycle status
-promotion remain pending until the remote checks complete.
+Implementation CI passed at `f4fd54c00be5fc1d1d915f16555fe8134952f8e9` against
+main `144e9e503f82001bb4d1440b603f7c33b932dd0a`: 92 successful checks, 16 skipped,
+zero failures, and zero pending checks. The waiter returned success after two
+matching terminal snapshots. All six review threads were resolved; a fresh
+thread list was empty. The worktree was clean and local/remote heads matched.
+The backend workflow, including static checks, all test shards, packed SDK
+consumer, and Docker builder, passed in run `39991576328`.
+
+Public-doc validation passed 63 tests and all 54 pages. Normal pre-commit and
+commit-message hooks passed without bypass. A shared lint-lock conflict was
+resolved by serializing the retry, and lint used the verified current base.
+The requirement/design/work-order lifecycle is now complete for implementation.
+Subsequent documentation-only commits must pass their own exact-head checks.
+No release was dispatched and no SDK was published.

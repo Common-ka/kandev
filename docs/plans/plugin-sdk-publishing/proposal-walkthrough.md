@@ -135,7 +135,7 @@ dry-run flows do not publish Stable SDK versions.
 The issue requires tagged and published SDK releases. The retained archive,
 bootstrap state, and recovery rules make that requirement operational. These
 are the corrections from the design review, now reconciled into the canonical
-draft and WO04. Signing and npm publication use separate protected jobs.
+design and WO04. Signing and npm publication use separate protected jobs.
 The release workflow is implemented; public availability still requires an
 authorized Stable release and its public consumer checks.
 
@@ -259,7 +259,6 @@ recommendation, and delivery still needs explicit authorization.
    ecosystem claims need representative plugin smoke tests and author feedback.
 
 The 29-repository dependency inventory is not a compatibility certification.
-All five work orders have implementation and documentation changes. Local
-checks pass; final delivery and exact-head CI remain in progress. The legacy
-subprocess test passed, and extraction Docker CI passed. The
+All five work orders are complete. Local checks, implementation CI, and review
+cleanup passed. The legacy subprocess and Docker builder checks passed. The
 [template handoff](template-migration.md) remains separate, as does public publication.

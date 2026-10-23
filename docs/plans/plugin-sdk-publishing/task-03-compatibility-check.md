@@ -1,7 +1,7 @@
 ---
 id: "03-compatibility-check"
 title: "Enforce consumer compatibility"
-status: in_progress
+status: done
 wave: 3
 depends_on:
   - 02-frontend-package
@@ -116,4 +116,12 @@ request. Checker runs leave the consumer go.mod unchanged.
 
 Canonical host values remain null. Only disposable local archive copies resolve
 them for these tests. CI now requires the checker in backend and combined
-consumers. Exact-head CI and final delivery remain pending.
+consumers. Implementation CI and review cleanup now pass.
+
+## Completion
+
+Completed on 2026-10-23 after local acceptance checks and implementation CI
+passed. The [plan's cleanup record](plan.md#validation-and-review-cleanup)
+contains the validation evidence and review dispositions. Public publication,
+registry configuration, external repository migration, and author notices
+remain separate follow-up work; completion here does not certify those actions.

@@ -1,7 +1,7 @@
 ---
 id: "01-go-module"
 title: "Extract Go SDK and preserve host execution"
-status: in_progress
+status: done
 wave: 1
 depends_on: []
 plan: "plan.md"
@@ -173,7 +173,8 @@ Validation completed locally:
 
 Docker is unavailable locally. The required build-stage check runs in the
 `Plugin SDK Docker builder` CI job, included in the backend gate. This work
-order remains `in_progress` until final CI validates all remediation below.
+order was left `in_progress` until CI validated the remediation below. The
+completion record now confirms that gate passed.
 
 CI follow-up: the shrink-only deprecation baseline cannot accept a renamed path.
 The existing `Task.Labels` deprecation now has an explicit compatibility-ledger
@@ -190,3 +191,11 @@ Docker builder and preview checks, but exposed SDK lint and legacy-checkout
 issues. Final remediation adds release history to runtime shards, retains the
 existing adapter-only file-length exemption at the new path, and documents the
 deprecated labels read required for API v1 compatibility.
+
+## Completion
+
+Completed on 2026-10-23 after local acceptance checks and implementation CI
+passed. The [plan's cleanup record](plan.md#validation-and-review-cleanup)
+contains the validation evidence and review dispositions. Public publication,
+registry configuration, external repository migration, and author notices
+remain separate follow-up work; completion here does not certify those actions.

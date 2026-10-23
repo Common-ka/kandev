@@ -1,7 +1,7 @@
 ---
 id: "04-stable-publication"
 title: "Publish SDKs through Stable releases"
-status: in_progress
+status: done
 wave: 4
 depends_on:
   - 03-compatibility-check
@@ -210,6 +210,14 @@ Local evidence:
   (18 informational, 3 low, 8 medium, 11 high; 228 suppressed and 2 ignored).
   No finding points to the new SDK release jobs or changed SDK consumer steps.
 
-Exact-head CI is pending. No release was dispatched, no SDK tag was pushed,
+Implementation CI passes. No release was dispatched, no SDK tag was pushed,
 and no registry package was published. Public availability and protected npm
 ownership/publisher setup remain release-time prerequisites.
+
+## Completion
+
+Completed on 2026-10-23 after local acceptance checks and implementation CI
+passed. The [plan's cleanup record](plan.md#validation-and-review-cleanup)
+contains the validation evidence and review dispositions. Public publication,
+registry configuration, external repository migration, and author notices
+remain separate follow-up work; completion here does not certify those actions.
