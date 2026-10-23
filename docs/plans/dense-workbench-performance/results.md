@@ -63,11 +63,26 @@ is excluded from paired comparisons. These are exploratory results.
 Source inspection found that canonical upserts are projected through the
 `session.message.added` action, including updates to an existing agent row.
 That path bypassed the frame scheduler. A regression test reproduced 600
-immediate store writes for 600 upserts. The pending repair uses the existing
-frame scheduler for existing agent rows; new rows and user-prompt upserts remain
-immediate ordering barriers. Both new tests failed before the change. Afterward,
-226 focused message, turn, client, and session-store tests passed. This is
-mechanism evidence; the rendering gain must still be measured.
+immediate store writes for 600 upserts. An experiment scheduled existing agent
+rows while keeping new rows and user prompts immediate. Although 226 focused
+tests passed, the timed comparison regressed. The experiment was removed;
+see "Batching mechanism rehearsal" below.
+
+### Completed navigation reference series
+
+The unthrottled six-pair series completed on candidate `39c0b5de256` against the
+original frozen baseline. `matched-navigation-1792778736500.json` contains all
+12 samples; `navigation-isolated-six-pair-1x-summary.json` contains paired results.
+Median paired changes were **7.54% slower switch p50, 10.25% slower switch p95,
+and 9.17% more main-thread time**. This series establishes no switching gain.
+Both versions retained one editor and three Dockview panels after the separate
+100-switch check. Both issued about 22 file-tree reads per switch.
+
+The preceding attempt stopped after one pair because backend restart could not
+bind port 18107. Its partial results remain in `matched-navigation-1792777809096.json`
+and are excluded from the completed series. Subsequent runs use a separate
+Linux user/network namespace with loopback enabled to isolate fixture ports.
+CPU resources remain shared; network isolation does not remove host-load variation.
 
 ## Correctness and remaining work
 
@@ -275,3 +290,17 @@ and loading time separately from timed streaming.
 Raw records: `matched-dense-1792775033729.json` (attribute queries),
 `matched-dense-1792776438660.json` (indexed IDs), and
 `matched-dense-1792774416275.json` (long-history setup failure).
+
+
+The corrected tree-identity experiment is rejected. Both alternating pairs
+regressed (`matched-navigation-1792782036354.json`): driver-to-file-marker
+p50 was 974 versus 1,162 ms and 1,008 versus 1,080 ms; p95 was 1,160 versus
+2,724 ms and 1,146 versus 2,974 ms. Main-thread time rose from 40,999 to
+53,420 ms and from 41,324 to 50,417 ms. These are 40-switch runs with the
+same 1,000-task workload; the separate 100-switch retention loop was omitted.
+All 95 unit tests, typecheck, lint, six fresh desktop checks, and two phone
+checks had passed. The production and test changes are restored to HEAD;
+`rejected-tree-identity.patch` preserves the experiment. The increased timings
+are retained, not attributed to an established cause. The summary is
+`tree-identity-navigation-two-pair-summary.json`; the log is
+`/tmp/kandev-run.e2e.2vm17ekT.log` (9.2 minutes).

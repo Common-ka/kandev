@@ -324,3 +324,37 @@ and tests are restored to HEAD; retain `rejected-row-id-lookup.patch` and
 `row-id-two-pair-summary.json`. The indexed version had passed 106 units,
 typecheck, scoped lint, 11 fresh desktop and three phone checks before timing.
 Only the harness progress diagnostics and this experiment record remain.
+
+
+### File-tree identity experiment
+
+The six-pair unthrottled navigation reference (`matched-navigation-1792778736500.json`)
+completed, but candidate switch p95 regressed by a median paired 10.25%.
+Both arms issue about 22 file-tree reads per switch. Source inspection found
+that unchanged folder responses replace the tree and its state snapshot.
+The candidate preserves unchanged node identities and skips identical snapshots,
+while still applying each progressive folder response and ownership guard.
+
+The initial regression reproduced 22 cache writes for 22 identity updates.
+Unchanged-tree and sibling-identity checks also failed before implementation.
+A follow-up test exposed stale optional file metadata when a symlink becomes a
+regular file. The experiment now retains the original authoritative file
+replacement semantics and reuses files only when every own field matches.
+All 95 focused tests pass, including freshness and progressive restoration.
+The first timing attempt was interrupted to fix this candidate issue after
+one baseline sample. `tree-identity-first-attempt-interruption.json` records
+its exclusion; no gain is inferred from that incomplete comparison.
+
+
+The corrected tree-identity experiment is rejected. Both alternating pairs
+regressed (`matched-navigation-1792782036354.json`): driver-to-file-marker
+p50 was 974 versus 1,162 ms and 1,008 versus 1,080 ms; p95 was 1,160 versus
+2,724 ms and 1,146 versus 2,974 ms. Main-thread time rose from 40,999 to
+53,420 ms and from 41,324 to 50,417 ms. These are 40-switch runs with the
+same 1,000-task workload; the separate 100-switch retention loop was omitted.
+All 95 unit tests, typecheck, lint, six fresh desktop checks, and two phone
+checks had passed. The production and test changes are restored to HEAD;
+`rejected-tree-identity.patch` preserves the experiment. The increased timings
+are retained, not attributed to an established cause. The summary is
+`tree-identity-navigation-two-pair-summary.json`; the log is
+`/tmp/kandev-run.e2e.2vm17ekT.log` (9.2 minutes).
