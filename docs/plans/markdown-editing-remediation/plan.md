@@ -273,3 +273,18 @@ passed all nine executions across three fresh-fixture repetitions. All runs
 used one worker and disabled retries. Browser coverage contract tests and
 changed-file formatting/lint also pass. Application source is unchanged in
 this follow-up, so the published UI captures still describe its rendered UI.
+
+The next CI run isolated two native-browser test failures. The Firefox corpus
+check used an absolute page click while mode restoration could move the editor.
+It now clicks the trailing half of the final glyph relative to its paragraph
+and verifies the native caret before insertion. The exact saved-source checks
+remain unchanged.
+
+WebKit reproduced a missing newline before editor recovery began. Per-command
+model checks and a captured visible suggestion widget showed that Enter accepted
+a Monaco completion instead of inserting a newline. The source typing helper
+now dismisses suggestions with Escape, verifies dismissal, and checks the exact
+model after each command. Five fresh WebKit recovery runs passed with retries
+disabled. No application source changed in this follow-up.
+The final test repairs passed all 15 Firefox and all 15 WebKit Markdown cases,
+with one worker and retries disabled. Changed-file ESLint and formatting passed.

@@ -198,7 +198,13 @@ async function editExistingHybridParagraph(testPage: Page): Promise<void> {
   ).toHaveCount(0);
 }
 
-async function clickAfterText(testPage: Page, block: Locator, target: string) {
+async function clickAfterText(
+  testPage: Page,
+  block: Locator,
+  target: string,
+  verifyNativeCaret = false,
+) {
+  await block.scrollIntoViewIfNeeded();
   const point = await block.evaluate((element, text) => {
     const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
     while (walker.nextNode()) {
@@ -206,15 +212,36 @@ async function clickAfterText(testPage: Page, block: Locator, target: string) {
       const offset = node.textContent?.indexOf(text) ?? -1;
       if (offset < 0) continue;
       const range = document.createRange();
-      range.setStart(node, offset);
+      range.setStart(node, offset + text.length - 1);
       range.setEnd(node, offset + text.length);
       const rect = range.getBoundingClientRect();
-      return { x: rect.right - 1, y: rect.top + rect.height / 2 };
+      const blockRect = element.getBoundingClientRect();
+      return {
+        x: rect.left + rect.width * 0.8 - blockRect.left,
+        y: rect.top + rect.height / 2 - blockRect.top,
+      };
     }
     return null;
   }, target);
   expect(point).not.toBeNull();
-  await testPage.mouse.click(point!.x, point!.y);
+  await block.click({ position: point! });
+  const input = testPage
+    .getByTestId("hybrid-markdown-editor")
+    .locator('textarea[aria-label="Content (markdown supported)"]');
+  if (verifyNativeCaret && (await input.count())) {
+    await expect
+      .poll(() =>
+        input.evaluate((element, text) => {
+          const textarea = element as HTMLTextAreaElement;
+          const expected = textarea.value.indexOf(text) + text.length;
+          return {
+            start: textarea.selectionStart - expected,
+            end: textarea.selectionEnd - expected,
+          };
+        }, target),
+      )
+      .toEqual({ start: 0, end: 0 });
+  }
 }
 
 async function hybridPalette(testPage: Page) {
@@ -571,13 +598,13 @@ test.describe("Markdown file editing", () => {
       const paragraph = hybrid.locator(".md-paragraph", {
         hasText: "paragraph stays unchanged.",
       });
-      await clickAfterText(testPage, paragraph, "Target");
+      await clickAfterText(testPage, paragraph, "Target", true);
       await editor.getByTestId("markdown-mode-preview").click();
       await editor.getByTestId("markdown-mode-source").click();
       await editor.getByTestId("markdown-mode-edit").click();
       await expect(editor.getByTestId("markdown-file-save")).toBeDisabled();
       expect(fs.readFileSync(filePath, "utf8")).toBe(content);
-      await clickAfterText(testPage, paragraph, "Target");
+      await clickAfterText(testPage, paragraph, "Target", true);
       await testPage.keyboard.insertText("!");
       await expect(paragraph).toContainText("Target! paragraph stays unchanged.");
       const modifier = await markdownModifier(testPage);
@@ -782,6 +809,8 @@ test.describe("Markdown file editing", () => {
     await testPage.keyboard.press(`${await markdownModifier(testPage)}+A`);
     await expect.poll(() => selectedSourceText(source)).toBe(content);
     await typeMarkdownSource(testPage, draft);
+    await testPage.keyboard.press(`${await markdownModifier(testPage)}+A`);
+    await expect.poll(() => selectedSourceText(source)).toBe(draft);
     await editor.getByTestId("markdown-mode-edit").click();
     await expect(editor.getByTestId("markdown-mode-source")).toHaveAttribute(
       "aria-pressed",
