@@ -185,7 +185,7 @@ messages. Motion eligibility is implemented with passing component and
 browser checks. See each work order for exact evidence and remaining work.
 The six-pair unthrottled grid comparison is complete. Cold encoded asset bytes
 fell 77.62%, streaming history requests fell 90.85%, and reduced-motion idle
-main-thread work fell 42.93% by median paired change. Normal streaming CPU did
+main-thread work fell 42.93% by median paired change. Normal streaming main-thread task time did
 not improve, and frame-gap p95 increased 59.93%. All twelve samples passed final
 content checks. The existing six-pair navigation comparison also establishes
 no switching gain. Rendering follow-up, 4x stress, and the remaining scenario

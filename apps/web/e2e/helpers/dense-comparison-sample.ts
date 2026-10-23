@@ -91,7 +91,7 @@ export async function runDenseSample(options: {
   }, String(backend.port));
   const traffic = captureDenseTraffic(page);
   const cdp = await context.newCDPSession(page);
-  await cdp.send("Performance.enable");
+  await cdp.send("Performance.enable", { timeDomain: "timeTicks" });
   await cdp.send("Emulation.setCPUThrottlingRate", { rate: cpuRate });
   try {
     const coldStart = performance.now();

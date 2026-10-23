@@ -59,6 +59,8 @@ function windowMetrics(run) {
     elapsedMs: run.elapsedMs,
     mainThreadMs: 1000 * run.metrics.TaskDuration,
     mainThreadMsPerSecond: (1_000_000 * run.metrics.TaskDuration) / run.elapsedMs,
+    mainThreadCpuMs: 1000 * run.metrics.ThreadTime,
+    rendererCpuMs: 1000 * run.metrics.ProcessTime,
     scriptMs: 1000 * run.metrics.ScriptDuration,
     styleMs: 1000 * run.metrics.RecalcStyleDuration,
     layoutMs: 1000 * run.metrics.LayoutDuration,
@@ -141,6 +143,8 @@ export function summarizeReport(report) {
     sampleCount: report.samples.length,
     comparisons,
     notes: [
+      "mainThreadMs and mainThreadMsPerSecond use TaskDuration with timeTicks: elapsed time in main-thread tasks, not thread CPU time. Script, style, and layout durations use the same elapsed-time domain.",
+      "mainThreadCpuMs uses ThreadTime (renderer main-thread CPU). rendererCpuMs uses ProcessTime (renderer-process CPU); it excludes separate browser, GPU, and backend processes.",
       "Positive reduction means a lower candidate value. Counts such as mounted editors are observations, not optimization scores.",
       "Streaming duration includes the wait for final visible content. Fixed-deadline traffic is retained in the raw report.",
       "Frame gaps and driver DOM readiness are not INP. Linux CPU throttling is not an M2 Air simulation.",

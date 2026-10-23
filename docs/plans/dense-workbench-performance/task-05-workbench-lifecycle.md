@@ -56,8 +56,8 @@ The two alternating matched pairs completed in 16.1 minutes. Both arms used the
 same backend binary, 1,000 tasks, six chats with 120 seeded primary messages and
 100 loaded messages each, and 1,800 updates per sample. All four samples passed
 the exact ordered-update check with zero HTTP or verification errors. Normal
-idle main-thread time fell 10.89% and 6.28%; reduced-motion idle fell 11.39% and
-11.73%. Streaming main-thread time increased 3.00% and 3.37%. Frame-gap p95 was
+idle main-thread task time fell 10.89% and 6.28%; reduced-motion idle fell 11.39% and
+11.73%. Streaming main-thread task time increased 3.00% and 3.37%. Frame-gap p95 was
 133.3 → 133.4 ms in pair 1 and 83.4 → 150 ms in pair 2. The experiment was
 removed because the idle gain came with worse streaming results.
 
@@ -188,7 +188,7 @@ pagination test passed three consecutive candidate runs. The new batching
 change still has no measured rendering-performance claim.
 
 The completed batching rehearsal did not establish a rendering gain: publications
-fell from 1,501 to 659, but CPU was 61,370 versus 62,085 ms and frame-gap p95 was
+fell from 1,501 to 659, but main-thread task time was 61,370 versus 62,085 ms and frame-gap p95 was
 133.4 versus 166.6 ms. The batching production change was removed. Its exact
 patch and both profiles remain in the ignored diagnostics directory.
 
@@ -205,7 +205,7 @@ scroll cases, live status updates, and A-B-A draft/context preservation. Four ph
 and draft/context preservation. The new A/B measurement is running.
 
 The status/geometry pair passed final-content verification but showed only modest
-changes: streaming CPU 62,721 to 61,225 ms and frame-gap p95 149.9 to 133.4 ms.
+changes: streaming main-thread task time 62,721 to 61,225 ms and frame-gap p95 149.9 to 133.4 ms.
 It is exploratory and remains below the rendering target. Further tracing found
 that `useInitialPlacementLatches` returned a new object on every transcript
 render. It changed every historical message's navigation callback. A memoized
@@ -232,7 +232,7 @@ behavior, but the dense responsiveness acceptance target remains unresolved.
 
 The full-size reference restart used 1,000 tasks and 36,000 messages. Its first
 pair verified all 1,800 updates in both arms, with zero HTTP or verification
-errors. Baseline streaming CPU was 61,644 ms versus 60,332 ms in the candidate,
+errors. Baseline streaming main-thread task time was 61,644 ms versus 60,332 ms in the candidate,
 but frame-gap p95 increased from 83.3 to 116.7 ms. Transcript publications were
 818 versus 1,719. The series was deliberately interrupted during the next
 candidate sample to investigate the repeated regression. Preserve
@@ -252,7 +252,7 @@ Browser correctness and the matched timing comparison remain pending.
 
 
 The duplicate-snapshot experiment is rejected for this task. Its first matched
-pair had neutral CPU (61,010 versus 61,005 ms); publications were 1,839 versus
+pair had neutral main-thread task time (61,010 versus 61,005 ms); publications were 1,839 versus
 1,719 and frame-gap p95 was 133.3 versus 116.7 ms. Both arms verified all updates.
 Inspection of `shouldSuppressCoreConversationNotification` confirms that V2
 already suppresses legacy message events for canonical sessions. Thus the
@@ -269,7 +269,7 @@ append reveal and later compacting its spans changed that boundary and remounted
 unchanged content. A real-renderer regression fails on the old implementation:
 an unchanged code block loses its DOM identity when prose is appended.
 The first repair returned both synchronous trees inside the parent render.
-Its two matched pairs did not show a repeatable timing gain. Stream CPU was
+Its two matched pairs did not show a repeatable timing gain. Stream main-thread task time was
 61,073 versus 61,944 ms in pair one and 60,267 versus 64,559 ms in pair two.
 Frame-gap p95 was 116.7 versus 83.4 ms, then 116.7 versus 149.9 ms. All four
 samples verified all updates without HTTP errors. Retain
@@ -287,10 +287,10 @@ build passed seven desktop and six phone browser checks.
 
 The stable-child repair completed two alternating matched pairs on 1,000 tasks,
 six columns, 120 primary messages per column, and 1,800 updates per sample.
-Streaming main-thread time was 60,374 versus 61,077 ms, then 60,265 versus
+Streaming main-thread task time was 60,374 versus 61,077 ms, then 60,265 versus
 60,232 ms. Frame-gap p95 was 133.3 versus 116.5 ms, then 116.7 versus 100.1 ms.
 All four samples verified all updates with no stored-content verification
-errors. CPU is effectively unchanged; the two frame-gap reductions are modest
+errors. Main-thread task time is effectively unchanged; the two frame-gap reductions are modest
 exploratory evidence, below the package's 20% rendering target. The repair is
 retained for proven content identity preservation without duplicate parsing.
 Raw: `matched-dense-1792770884505.json`; summary:
@@ -337,10 +337,10 @@ newest-window workload. Full long-history performance remains unresolved.
 
 
 The attribute-query experiment completed two matched newest-window pairs
-(`matched-dense-1792775033729.json`). Stream CPU was 60,999 versus 61,230 ms
+(`matched-dense-1792775033729.json`). Stream main-thread task time was 60,999 versus 61,230 ms
 and 60,389 versus 60,889 ms. Frame-gap p95 was 133.3 versus 116.7 ms, then
 116.7 versus 116.6 ms. All updates verified with zero HTTP or verification
-errors. This does not establish a repeatable CPU or frame-gap gain; retain
+errors. This does not establish a repeatable task-time or frame-gap gain; retain
 `row-lookup-attribute.patch` and `row-lookup-attribute-two-pair-summary.json`.
 
 Inspection of Chromium 149's `SelectorQuery::ExecuteWithId` confirms a distinct
@@ -355,7 +355,7 @@ https://chromium.googlesource.com/chromium/src/+/refs/tags/149.0.7827.55/third_p
 
 The indexed-ID experiment is also rejected. Its two pairs completed all
 updates with zero HTTP or stored-content errors (`matched-dense-1792776438660.json`).
-Stream CPU was 61,162 versus 60,373 ms and 62,774 versus 61,588 ms, only
+Stream main-thread task time was 61,162 versus 60,373 ms and 62,774 versus 61,588 ms, only
 1.3–1.9% lower. Frame-gap p95 increased from 100.1 to 116.6 ms in the first
 pair, then decreased from 150.0 to 133.3 ms in the reversed pair. Median frame
 gaps were unchanged at 50 ms in pair one and 100 versus 66.6 ms in pair two.

@@ -374,6 +374,70 @@
     },
     {
       "group": "1x/idle",
+      "metric": "mainThreadCpuMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 15618.8495,
+        "min": 15210.512,
+        "max": 16027.187000000002,
+        "values": [
+          16027.187000000002,
+          15210.512
+        ]
+      },
+      "candidate": {
+        "median": 15126.081999999999,
+        "min": 15021.947999999999,
+        "max": 15230.215999999999,
+        "values": [
+          15230.215999999999,
+          15021.947999999999
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        796.9710000000032,
+        188.56400000000212
+      ],
+      "pairedPercentReduction": [
+        4.972619337379686,
+        1.2396952844191051
+      ],
+      "medianPairedPercentReduction": 3.1061573108993956
+    },
+    {
+      "group": "1x/idle",
+      "metric": "rendererCpuMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 23035,
+        "min": 22890,
+        "max": 23180,
+        "values": [
+          23180,
+          22890
+        ]
+      },
+      "candidate": {
+        "median": 22975.000000000004,
+        "min": 22840.000000000004,
+        "max": 23110.000000000004,
+        "values": [
+          22840.000000000004,
+          23110.000000000004
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        339.99999999999636,
+        -220.00000000000364
+      ],
+      "pairedPercentReduction": [
+        1.4667817083692682,
+        -0.9611183923110688
+      ],
+      "medianPairedPercentReduction": 0.25283165802909974
+    },
+    {
+      "group": "1x/idle",
       "metric": "scriptMs",
       "pairs": 2,
       "baseline": {
@@ -1011,6 +1075,70 @@
         -0.610595907294696
       ],
       "medianPairedPercentReduction": -0.49719931230859893
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "mainThreadCpuMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 62522.2895,
+        "min": 62188.168,
+        "max": 62856.411,
+        "values": [
+          62188.168,
+          62856.411
+        ]
+      },
+      "candidate": {
+        "median": 63933.3375,
+        "min": 60329.308000000005,
+        "max": 67537.367,
+        "values": [
+          67537.367,
+          60329.308000000005
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -5349.1990000000005,
+        2527.1029999999955
+      ],
+      "pairedPercentReduction": [
+        -8.601634638923597,
+        4.020437947053636
+      ],
+      "medianPairedPercentReduction": -2.290598345934981
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "rendererCpuMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 77890,
+        "min": 77440,
+        "max": 78340,
+        "values": [
+          77440,
+          78340
+        ]
+      },
+      "candidate": {
+        "median": 79470,
+        "min": 75179.99999999999,
+        "max": 83760,
+        "values": [
+          83760,
+          75179.99999999999
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -6320,
+        3160.0000000000146
+      ],
+      "pairedPercentReduction": [
+        -8.161157024793388,
+        4.033699259637496
+      ],
+      "medianPairedPercentReduction": -2.063728882577946
     },
     {
       "group": "1x/streaming",
@@ -1654,6 +1782,70 @@
     },
     {
       "group": "1x/reduced-motion-idle",
+      "metric": "mainThreadCpuMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 9458.174500000005,
+        "min": 9310.604000000012,
+        "max": 9605.744999999999,
+        "values": [
+          9310.604000000012,
+          9605.744999999999
+        ]
+      },
+      "candidate": {
+        "median": 5931.8150000000005,
+        "min": 5570.211999999998,
+        "max": 6293.418000000002,
+        "values": [
+          5570.211999999998,
+          6293.418000000002
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        3740.3920000000144,
+        3312.3269999999966
+      ],
+      "pairedPercentReduction": [
+        40.173462430579264,
+        34.482770467048596
+      ],
+      "medianPairedPercentReduction": 37.32811644881393
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "rendererCpuMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 16659.99999999999,
+        "min": 16449.99999999999,
+        "max": 16869.99999999999,
+        "values": [
+          16449.99999999999,
+          16869.99999999999
+        ]
+      },
+      "candidate": {
+        "median": 10325.000000000004,
+        "min": 9810.000000000002,
+        "max": 10840.000000000004,
+        "values": [
+          9810.000000000002,
+          10840.000000000004
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        6639.999999999987,
+        6029.999999999985
+      ],
+      "pairedPercentReduction": [
+        40.36474164133733,
+        35.7439241256668
+      ],
+      "medianPairedPercentReduction": 38.05433288350207
+    },
+    {
+      "group": "1x/reduced-motion-idle",
       "metric": "scriptMs",
       "pairs": 2,
       "baseline": {
@@ -2198,13 +2390,11 @@
     }
   ],
   "notes": [
+    "mainThreadMs and mainThreadMsPerSecond use TaskDuration with timeTicks: elapsed time in main-thread tasks, not thread CPU time. Script, style, and layout durations use the same elapsed-time domain.",
+    "mainThreadCpuMs uses ThreadTime (renderer main-thread CPU). rendererCpuMs uses ProcessTime (renderer-process CPU); it excludes separate browser, GPU, and backend processes.",
     "Positive reduction means a lower candidate value. Counts such as mounted editors are observations, not optimization scores.",
     "Streaming duration includes the wait for final visible content. Fixed-deadline traffic is retained in the raw report.",
     "Frame gaps and driver DOM readiness are not INP. Linux CPU throttling is not an M2 Air simulation.",
-    "History decoded bytes include captured requests and responses. They are not compressed network transfer.",
-    "All four samples passed exact ordered stream verification with no HTTP or verification errors.",
-    "Normal-motion production behavior is unchanged. No default-idle or streaming speed gain is claimed from this two-pair round.",
-    "Reduced-motion running animations fell from six to zero in both pairs.",
-    "This Linux Chromium workload does not establish M2 Air performance, INP, battery use, or a leak result."
+    "History decoded bytes include captured requests and responses. They are not compressed network transfer."
   ]
 }

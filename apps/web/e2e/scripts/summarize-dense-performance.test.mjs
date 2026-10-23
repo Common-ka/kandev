@@ -2,6 +2,39 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { summarizePairs, summarizeReport } from "./summarize-dense-performance.mjs";
 
+test("keeps task elapsed time separate from thread and renderer CPU time", () => {
+  const samples = ["baseline", "candidate"].map((arm, index) => ({
+    arm,
+    pair: 0,
+    cpuRate: 1,
+    selections: [{ paintOpportunityMs: 100, counts: {} }],
+    measured: {
+      elapsedMs: 10_000,
+      metrics: {
+        TaskDuration: index ? 5 : 8,
+        ThreadTime: index ? 3 : 4,
+        ProcessTime: index ? 9 : 10,
+        ScriptDuration: 1,
+        RecalcStyleDuration: 1,
+        LayoutDuration: 1,
+        RecalcStyleCount: 1,
+        LayoutCount: 1,
+      },
+      browser: { frameGapsMs: [], longTasksMs: [], domNodes: 1, editors: 1, animations: {} },
+    },
+  }));
+  const report = summarizeReport({ samples });
+  const metric = (name) => report.comparisons.find((entry) => entry.metric === name);
+  assert.equal(metric("mainThreadMs").baseline.median, 8_000);
+  assert.equal(metric("mainThreadMs").medianPairedPercentReduction, 37.5);
+  assert.equal(metric("mainThreadCpuMs")?.baseline.median, 4_000);
+  assert.equal(metric("mainThreadCpuMs")?.medianPairedPercentReduction, 25);
+  assert.equal(metric("rendererCpuMs")?.baseline.median, 10_000);
+  assert.equal(metric("rendererCpuMs")?.medianPairedPercentReduction, 10);
+  delete samples[0].measured.metrics.ThreadTime;
+  assert.throws(() => summarizeReport({ samples }), /finite/);
+});
+
 test("rejects CPU attribution runs as timing comparisons", () => {
   assert.throws(
     () => summarizeReport({ measurementKind: "cpu-attribution", samples: [] }),

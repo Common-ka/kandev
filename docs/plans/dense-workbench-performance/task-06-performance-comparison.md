@@ -137,8 +137,8 @@ Fresh phone canonical streaming and task navigation checks passed (4 tests).
 
 A matched rehearsal used 1,000 tasks, six columns, 120 primary messages per
 column, and 1,800 scheduled canonical updates. Both arms verified all updates
-with zero HTTP or verification errors. Streaming CPU was 60,390 ms before
-and 60,354 ms after; frame-gap p95 was 116.7 ms in both. This is neutral CPU
+with zero HTTP or verification errors. Streaming main-thread task time was 60,390 ms before
+and 60,354 ms after; frame-gap p95 was 116.7 ms in both. This is neutral main-thread task time
 evidence. Since neither arm reproduced the intermittent availability failure,
 it does not establish an availability improvement rate. Raw evidence:
 `.kandev/diagnostics/dense-workbench-performance/matched-dense-1792765209649.json`;
@@ -187,7 +187,7 @@ total; all samples remain included.
 
 Median paired reductions were 77.62% for cold encoded JS/CSS bytes, 90.85% for
 streaming history requests, 90.83% for decoded history bytes, and 42.93% for
-reduced-motion idle main-thread time. Normal idle was mixed and streaming CPU
+reduced-motion idle main-thread task time. Normal idle was mixed and streaming main-thread task time
 was neutral. Streaming frame-gap p95 regressed in every pair, with a median
 paired increase of 59.93%. One candidate sample took 85.5 seconds through final
 visible content and remains included. These results do not establish overall

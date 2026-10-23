@@ -96,6 +96,16 @@ counts. Do not sum nested trace event durations as independent CPU cost.
 Use separate attribution runs for CPU profiles, React mounts, and stack capture;
 do not include profiler startup or its overhead in timed results.
 
+Set the CDP performance time domain explicitly to `timeTicks`. `TaskDuration`,
+`ScriptDuration`, `RecalcStyleDuration`, and `LayoutDuration` then measure elapsed
+time, not CPU time. Report `TaskDuration` as main-thread task time. Report
+`ThreadTime` separately as renderer main-thread CPU time and `ProcessTime` as
+renderer-process CPU time. The latter excludes separate browser, GPU, and backend
+processes. Preserve all three counters in raw evidence. Existing summary fields
+`mainThreadMs` and `mainThreadMsPerSecond` refer to task time; `mainThreadCpuMs`
+and `rendererCpuMs` refer to CPU time. Missing CPU counters must fail summary
+validation rather than silently substitute task time or zero.
+
 Record each `message.list` and conversation-source read with scope, limit,
 cursor presence, and reason: initial, pagination, scheduled backfill, turn
 settle, foreground, or revision recovery. Temporary reason instrumentation
@@ -142,7 +152,7 @@ is allowed and must be counted explicitly. Compression must decode exactly.
 
 Experiment targets: at least 80% fewer unnecessary recovery reads if that
 baseline defect reproduces; at least 50% fewer encoded JS/CSS bytes on a cold
-gzip load; at least 20% lower streaming main-thread time or warm-switch p95
+gzip load; at least 20% lower streaming main-thread task time or warm-switch p95
 where a rendering fix is attributed. These are targets, not measured gains or
 hardware-independent product promises. Keep all primary scenarios in the
 report, including neutral or slower results. An unexplained regression above

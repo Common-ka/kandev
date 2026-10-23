@@ -367,6 +367,102 @@
     },
     {
       "group": "1x/idle",
+      "metric": "mainThreadCpuMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 15867.267000000002,
+        "min": 15639.889000000001,
+        "max": 18733.637000000002,
+        "values": [
+          18733.637000000002,
+          16009.493999999997,
+          15821.908000000003,
+          15639.889000000001,
+          15760.726,
+          15912.626
+        ]
+      },
+      "candidate": {
+        "median": 15829.406500000001,
+        "min": 15168.539,
+        "max": 16759.861,
+        "values": [
+          15346.584,
+          15816.408000000001,
+          15842.405,
+          15168.539,
+          16759.861,
+          16742.563000000002
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        3387.0530000000017,
+        193.0859999999957,
+        -20.49699999999757,
+        471.35000000000036,
+        -999.1350000000002,
+        -829.9370000000017
+      ],
+      "pairedPercentReduction": [
+        18.080061015381055,
+        1.2060718471176899,
+        -0.12954821883680254,
+        3.01376819234459,
+        -6.339397055694009,
+        -5.215587923702862
+      ],
+      "medianPairedPercentReduction": 0.5382618141404437
+    },
+    {
+      "group": "1x/idle",
+      "metric": "rendererCpuMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 24155,
+        "min": 23400,
+        "max": 26510,
+        "values": [
+          26510,
+          24500.000000000004,
+          23910,
+          23400,
+          23759.999999999996,
+          24400
+        ]
+      },
+      "candidate": {
+        "median": 23745,
+        "min": 21900.000000000004,
+        "max": 25270,
+        "values": [
+          23570,
+          23919.999999999996,
+          23040.000000000004,
+          21900.000000000004,
+          25270,
+          25259.999999999996
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        2940,
+        580.0000000000073,
+        869.9999999999964,
+        1499.9999999999964,
+        -1510.0000000000036,
+        -859.9999999999964
+      ],
+      "pairedPercentReduction": [
+        11.090154658619388,
+        2.3673469387755395,
+        3.6386449184441503,
+        6.4102564102563955,
+        -6.355218855218871,
+        -3.5245901639344113
+      ],
+      "medianPairedPercentReduction": 3.002995928609845
+    },
+    {
+      "group": "1x/idle",
       "metric": "scriptMs",
       "pairs": 6,
       "baseline": {
@@ -1324,6 +1420,102 @@
         -3.219517492899151
       ],
       "medianPairedPercentReduction": -3.2564033163123707
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "mainThreadCpuMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 63856.1645,
+        "min": 63395.199,
+        "max": 65547.17099999999,
+        "values": [
+          64057.172999999995,
+          65273.69999999999,
+          63532.501000000004,
+          63395.199,
+          63655.156,
+          65547.17099999999
+        ]
+      },
+      "candidate": {
+        "median": 61892.2285,
+        "min": 60293.19,
+        "max": 83430.11099999999,
+        "values": [
+          61944.69,
+          66687.27000000002,
+          83430.11099999999,
+          61839.76699999999,
+          60477.598,
+          60293.19
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        2112.482999999993,
+        -1413.5700000000288,
+        -19897.609999999986,
+        1555.432000000008,
+        3177.5580000000045,
+        5253.980999999985
+      ],
+      "pairedPercentReduction": [
+        3.297808662271114,
+        -2.1656042173188115,
+        -31.318789102919126,
+        2.4535485723453725,
+        4.99183129800201,
+        8.015572479855745
+      ],
+      "medianPairedPercentReduction": 2.8756786173082434
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "rendererCpuMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 78305,
+        "min": 77830,
+        "max": 80420,
+        "values": [
+          78370,
+          80420,
+          78240.00000000001,
+          77830,
+          77910,
+          79460.00000000001
+        ]
+      },
+      "candidate": {
+        "median": 77095,
+        "min": 74460,
+        "max": 103910,
+        "values": [
+          76880,
+          82720,
+          103910,
+          77310,
+          75000,
+          74460
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        1490,
+        -2300,
+        -25669.999999999985,
+        520,
+        2910,
+        5000.000000000015
+      ],
+      "pairedPercentReduction": [
+        1.9012377185147378,
+        -2.8599850783387217,
+        -32.80930470347646,
+        0.6681228318129256,
+        3.7350789372352713,
+        6.292474200855794
+      ],
+      "medianPairedPercentReduction": 1.2846802751638318
     },
     {
       "group": "1x/streaming",
@@ -2287,6 +2479,102 @@
     },
     {
       "group": "1x/reduced-motion-idle",
+      "metric": "mainThreadCpuMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 16203.084500000004,
+        "min": 14936.606999999995,
+        "max": 17398.566000000003,
+        "values": [
+          16567.229,
+          14936.606999999995,
+          17398.566000000003,
+          15412.829000000002,
+          16963.449999999993,
+          15838.940000000008
+        ]
+      },
+      "candidate": {
+        "median": 9129.274000000001,
+        "min": 8140.618000000003,
+        "max": 10114.462000000003,
+        "values": [
+          8140.618000000003,
+          9066.911000000004,
+          10114.462000000003,
+          9191.637,
+          9840.259000000004,
+          8903.925999999998
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        8426.610999999997,
+        5869.695999999991,
+        7284.103999999999,
+        6221.192000000001,
+        7123.19099999999,
+        6935.01400000001
+      ],
+      "pairedPercentReduction": [
+        50.86312864993897,
+        39.29738527632141,
+        41.86611701217214,
+        40.36372556913465,
+        41.9914050502698,
+        43.78458406938853
+      ],
+      "medianPairedPercentReduction": 41.92876103122097
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "rendererCpuMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 24300.000000000004,
+        "min": 22360.000000000015,
+        "max": 26180.000000000007,
+        "values": [
+          23959.999999999993,
+          22360.000000000015,
+          26180.000000000007,
+          24640.000000000015,
+          25140.000000000015,
+          23470
+        ]
+      },
+      "candidate": {
+        "median": 15610,
+        "min": 13969.999999999998,
+        "max": 16700.000000000004,
+        "values": [
+          13969.999999999998,
+          15600.00000000001,
+          15349.999999999995,
+          16270.000000000011,
+          16700.000000000004,
+          15619.99999999999
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        9989.999999999995,
+        6760.0000000000055,
+        10830.000000000013,
+        8370.000000000004,
+        8440.000000000011,
+        7850.000000000009
+      ],
+      "pairedPercentReduction": [
+        41.69449081803004,
+        30.23255813953489,
+        41.36745607333846,
+        33.969155844155836,
+        33.57199681782023,
+        33.446953557733316
+      ],
+      "medianPairedPercentReduction": 33.770576330988035
+    },
+    {
+      "group": "1x/reduced-motion-idle",
       "metric": "scriptMs",
       "pairs": 6,
       "baseline": {
@@ -2475,7 +2763,7 @@
         0.0277623542476402,
         -0.027770063871146902
       ],
-      "medianPairedPercentReduction": -3.854811753351353e-06
+      "medianPairedPercentReduction": -0.000003854811753351353
     },
     {
       "group": "1x/reduced-motion-idle",
@@ -3103,13 +3391,12 @@
     }
   ],
   "notes": [
+    "mainThreadMs and mainThreadMsPerSecond use TaskDuration with timeTicks: elapsed time in main-thread tasks, not thread CPU time. Script, style, and layout durations use the same elapsed-time domain.",
+    "mainThreadCpuMs uses ThreadTime (renderer main-thread CPU). rendererCpuMs uses ProcessTime (renderer-process CPU); it excludes separate browser, GPU, and backend processes.",
     "Positive reduction means a lower candidate value. Counts such as mounted editors are observations, not optimization scores.",
     "Streaming duration includes the wait for final visible content. Fixed-deadline traffic is retained in the raw report.",
     "Frame gaps and driver DOM readiness are not INP. Linux CPU throttling is not an M2 Air simulation.",
-    "History decoded bytes include captured requests and responses. They are not compressed network transfer.",
-    "All twelve samples passed final visible-marker and stored tick-count checks. Two baseline streaming samples had 59 HTTP 503 errors in total and needed ten post-window verification retries. These samples remain in every paired summary.",
-    "The candidate streamed more incremental store updates. Counts alone do not establish the cause of the frame-gap regression.",
-    "Cold readiness varied in both directions. One candidate streaming sample took 85.5 seconds through final visible content; it remains included."
+    "History decoded bytes include captured requests and responses. They are not compressed network transfer."
   ],
   "provenance": {
     "baselineRevision": "595df36ed5c1cf02fd90cb972b623ad6edc53df8",

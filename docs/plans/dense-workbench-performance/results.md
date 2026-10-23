@@ -5,6 +5,24 @@ and the remaining stress/scenario matrix are in progress. The branch is
 `feature/evaluate-live-thread-bc0`; the frozen baseline is
 `595df36ed5c1cf02fd90cb972b623ad6edc53df8`.
 
+## Measurement correction
+
+Earlier reports called CDP `TaskDuration` CPU time. With the default `timeTicks`
+clock, it measures elapsed time spent in main-thread tasks. The task-time values
+below are unchanged; their labels are corrected. `mainThreadMs` and
+`mainThreadMsPerSecond` retain their existing JSON names with this definition.
+The raw reports also captured `ThreadTime` and `ProcessTime`. The summary now
+reports these separately as `mainThreadCpuMs` and `rendererCpuMs`. Renderer CPU
+excludes separate browser, GPU, and backend processes. These definitions follow
+the [Chromium 149 implementation](https://chromium.googlesource.com/chromium/src/+/refs/tags/149.0.7827.55/third_party/blink/renderer/core/inspector/inspector_performance_agent.cc).
+
+For the six-pair original-baseline grid comparison, median paired main-thread
+CPU reductions were 0.54% at normal idle, 2.88% during streaming, and 41.93%
+at reduced-motion idle. Renderer CPU reductions were 3.00%, 1.28%, and 33.77%,
+respectively. These small normal-motion changes do not resolve the measured
+frame-gap regression. Both committed evidence files now include the CPU
+counters, with every previous paired value and its provenance preserved.
+
 ## Completed grid reference: six alternating pairs
 
 Candidate `1207817a957afab0e25aaee5b794c5c3e54ec5b2` completed all twelve
@@ -24,10 +42,10 @@ of the six paired changes, not the percentage difference between the medians.
 | Cold chat readiness, ms | 18,203 (15,589–24,408) | 16,432 (14,290–26,650) | 7.31% lower; mixed |
 | Streaming history requests | 792 (652–826) | 72.5 (72–76) | 90.85% fewer |
 | Streaming decoded history bytes | 145,658,902 (119,682,683–151,882,268) | 13,355,280 (12,374,478–14,005,129) | 90.83% lower |
-| Normal idle main-thread time, ms | 15,543 (15,290–18,466) | 15,497 (14,844–16,436) | 0.58% lower; mixed |
-| Streaming main-thread time, ms | 61,989 (61,551–63,699) | 61,900 (60,295–84,271) | 0.05% higher; no gain |
+| Normal idle main-thread task time, ms | 15,543 (15,290–18,466) | 15,497 (14,844–16,436) | 0.58% lower; mixed |
+| Streaming main-thread task time, ms | 61,989 (61,551–63,699) | 61,900 (60,295–84,271) | 0.05% higher; no gain |
 | Streaming frame-gap p95, ms | 83.4 (83.3–100.1) | 141.7 (116.7–183.3) | 59.93% higher; regression |
-| Reduced-motion idle main-thread time, ms | 15,885 (14,592–17,299) | 8,747 (7,780–9,917) | 42.93% lower |
+| Reduced-motion idle main-thread task time, ms | 15,885 (14,592–17,299) | 8,747 (7,780–9,917) | 42.93% lower |
 
 The candidate had zero reset notifications during every streaming window;
 baseline had 1,572–1,738 per window. Baseline streaming had 59 HTTP 503 errors
@@ -37,7 +55,7 @@ including the affected baseline samples and the candidate's 85.5-second
 stream-to-final-content sample, remain in the results.
 
 Rendering remains unresolved. Frame-gap p95 regressed in every pair, including
-the four pairs without HTTP errors. Streaming main-thread utilization increased
+the four pairs without HTTP errors. Streaming main-thread task time per second increased
 from about 954 to 986 ms per second. Long-task duration was lower in five pairs
 but much higher in the slower candidate sample. The candidate applied more
 incremental store updates; that observation does not establish the cause of
@@ -57,6 +75,24 @@ its backend log, `reference-six-pair-grid-1x-summary.json`, and
 `reference-six-pair-grid-1x-host-load.jsonl`. Runner log:
 `/tmp/kandev-run.e2e.7RtV7dhF.log`.
 
+## Four-times slowdown: setup failure
+
+The first full-density 4x attempt (`matched-dense-1792798953962.json`) failed
+before any timed sample completed. The original baseline did not display one
+required warmup message within 60 seconds. Its screenshot shows two of six
+conversations unavailable; the other four displayed warmup content. The
+screenshot timestamp is 2026-10-23 23:44:13 UTC. A backend table-probe deadline
+was logged at 23:44:39 UTC, after that screenshot. That later failure does not
+establish the cause of the cold-load errors. The run took 21.2 minutes, including
+about 18.8 minutes of fixture setup. It produced no paired performance result.
+
+The failure screenshot and context are retained in `reference-grid-4x-failure/`;
+the raw report, backend log, launch receipt, and host-load log remain in the
+same diagnostic directory as the completed reference. Both builds and the
+36,000-message fixture retain recorded hashes. The next run must capture
+cold-failure browser state and traffic before teardown. Keep the existing
+warmup and final-stream correctness gates.
+
 ## Kept Threads reduced-motion correction
 
 The Threads working-status SVGs now stop rotating when reduced motion is
@@ -66,12 +102,17 @@ fresh desktop and phone browser tests; typecheck and scoped lint passed.
 
 Two alternating pairs against the retained candidate used 1,000 tasks, six
 visible chats, 120 seeded primary messages per chat, and 1,800 ordered updates
-per sample. Reduced-motion idle main-thread CPU fell from 8,968 to 5,271 ms and
+per sample. Reduced-motion idle main-thread task time fell from 8,968 to 5,271 ms and
 from 9,245 to 5,986 ms: 41.2% and 35.3% lower, with a 38.2% median paired
 reduction. Running animations fell from six to zero. All four samples passed
 ordered-update verification with no HTTP or verification errors.
 
-Normal idle CPU was 4.8% and 1.3% lower in this round. Streaming CPU was 8.3%
+The separate CPU counters support the reduced-motion result: main-thread CPU
+fell 40.17% and 34.48% (37.33% median paired reduction), and renderer CPU fell
+40.36% and 35.74% (38.05% median paired reduction). Normal-idle renderer CPU was
+essentially neutral (0.25% median paired reduction); streaming CPU was mixed.
+
+Normal idle main-thread task time was 4.8% and 1.3% lower in this round. Streaming main-thread task time was 8.3%
 higher in one pair and 4.1% lower in the other. No normal-idle or streaming
 speed gain is claimed for this reduced-motion-only change. These two pairs
 compare with the retained candidate, not the original baseline or an M2 Air.
@@ -83,8 +124,8 @@ and [work order 03](task-03-motion-eligibility.md#narrow-reduced-motion-candidat
 Attribution identified the six remaining reduced-motion animations as Threads
 working-status SVGs. A shared `CompositorSpin` migration passed four desktop
 and nine phone checks, but two alternating dense pairs showed 12.0% and 3.1%
-more normal-idle main-thread CPU. Reduced-motion idle improved by 24.8% and
-21.3%; streaming CPU improved by 2.0% and 4.3%, with essentially unchanged
+more normal-idle main-thread task time. Reduced-motion idle improved by 24.8% and
+21.3%; streaming task time improved by 2.0% and 4.3%, with essentially unchanged
 frame-gap p95. All four samples verified 1,800 ordered updates without HTTP or
 verification errors. The wrapper was removed. The narrower reduced-motion CSS
 correction above was retained after its separate comparison.
@@ -97,7 +138,7 @@ attribution, hashes, checks, and the rejected patch.
 
 The later CSS containment experiment was rejected and removed. In two matched
 pairs against the retained build, normal idle work fell 6.28–10.89% and
-reduced-motion idle work fell 11.39–11.73%, but streaming main-thread time
+reduced-motion idle work fell 11.39–11.73%, but streaming main-thread task time
 increased 3.00–3.37%. Streaming frame-gap p95 was unchanged in one pair and rose
 from 83.4 to 150 ms in the other. All four samples verified the exact ordered
 1,800-update sequence with zero errors. Desktop and phone correctness passed,
@@ -154,10 +195,10 @@ pair without HTTP verification errors. Both arms loaded 100 messages per visible
 chat and verified every scheduled stream tick. Encoded JS/CSS bytes fell from
 18,607,703 to 4,164,645. Streaming history requests fell from 834 to 78; decoded
 history bytes fell from 152,760,977 to 14,011,779. Reset notifications fell from
-1,730 to zero. Normal idle CPU was essentially unchanged. Reduced-motion idle
-main-thread time fell from 17,130 to 10,226 ms over 60 seconds.
+1,730 to zero. Normal idle main-thread task time was essentially unchanged. Reduced-motion idle
+main-thread task time fell from 17,130 to 10,226 ms over 60 seconds.
 
-Streaming rendering did not improve: main-thread time was 62,845 ms baseline
+Streaming rendering did not improve: main-thread task time was 62,845 ms baseline
 and 64,003 ms candidate; frame-gap p95 increased from 83.3 to 150 ms. A partial
 candidate repeat also showed a high p95 (133.4 ms). Cold readiness was 16,125 ms
 and 16,840 ms; smaller downloads did not produce a readiness gain on this local
@@ -180,7 +221,7 @@ The unthrottled six-pair series completed on candidate `39c0b5de256` against the
 original frozen baseline. `matched-navigation-1792778736500.json` contains all
 12 samples; `navigation-isolated-six-pair-1x-summary.json` contains paired results.
 Median paired changes were **7.54% slower switch p50, 10.25% slower switch p95,
-and 9.17% more main-thread time**. This series establishes no switching gain.
+and 9.17% more main-thread task time**. This series establishes no switching gain.
 Both versions retained one editor and three Dockview panels after the separate
 100-switch check. Both issued about 22 file-tree reads per switch.
 
@@ -291,7 +332,7 @@ its cause. Logs: `/tmp/kandev-run.e2e.LdNxLE2b.log` (four passed, one failed) an
 visible chats, 120 primary messages per chat, and 60-second windows. It compares
 the frozen pre-batching core candidate with the new batching candidate. Both arms
 verified all 1,800 scheduled ticks with no post-measurement HTTP errors.
-Message-store publications fell from 1,501 to 659. Streaming main-thread time
+Message-store publications fell from 1,501 to 659. Streaming main-thread task time
 was 61,370 ms before and 62,085 ms after; frame-gap p95 was 133.4 and 166.6 ms.
 History reads were 73 in each arm. Total observed long-task time increased from
 2,400 to 45,177 ms. This single pair does not establish a responsiveness gain.
@@ -316,8 +357,8 @@ Logs: `/tmp/kandev-run.e2e.G4bA2mdM.log` and
 `/tmp/kandev-run.e2e.ZISXP4QX.log`. The timing-only A/B comparison is in progress.
 
 The status/geometry rehearsal completed (`matched-dense-1792762925234.json`):
-streaming main-thread time fell from 62,721 to 61,225 ms (2.4%), and frame-gap p95
-fell from 149.9 to 133.4 ms. Normal idle CPU was 15,911 versus 16,330 ms;
+streaming main-thread task time fell from 62,721 to 61,225 ms (2.4%), and frame-gap p95
+fell from 149.9 to 133.4 ms. Normal idle main-thread task time was 15,911 versus 16,330 ms;
 reduced-motion idle was 10,764 versus 10,714 ms. Both arms verified final content.
 These single-pair changes remain below the rendering target and do not establish
 repeatable gains. `status-geometry-first-pair-summary.json` retains all metrics.
@@ -334,8 +375,8 @@ The timing comparison against the frozen status/geometry build follows below.
 The callback-only rehearsal (`matched-dense-1792763973626.json`) completed, but
 both arms had streaming HTTP failures: 24 control and 42 candidate. Candidate
 post-measurement verification retried nine HTTP 503 reads before final content
-passed. Frame-gap p95 was 149.9 versus 100 ms; main-thread time was 66,931 versus
-61,171 ms, with about 985 versus 987 ms of CPU per elapsed second. This is
+passed. Frame-gap p95 was 149.9 versus 100 ms; main-thread task time was 66,931 versus
+61,171 ms, with about 985 versus 987 ms in main-thread tasks per elapsed second. This is
 overload evidence, not a clean responsiveness gain. The source fixes and
 regressions were committed and pushed as `4544d15b977`; performance acceptance
 remains open. Normal hooks passed, and pending harness files were restored with
@@ -355,7 +396,7 @@ The pre-health candidate is frozen at
 `/tmp/kandev-dense-render-before-health-5936a872`, with the executable hash matched
 to the callback rehearsal. Fresh desktop (3 tests) and phone (4 tests) checks
 passed. The matched health rehearsal also passed, with all 1,800 updates verified
-in each arm and no HTTP or verification errors. Streaming CPU was 60,390 versus
+in each arm and no HTTP or verification errors. Streaming main-thread task time was 60,390 versus
 60,354 ms, and frame-gap p95 was 116.7 ms in both arms. This neutral result does
 not establish a reduction in intermittent 503 errors, since the control had none.
 Raw: `matched-dense-1792765209649.json`; summary: `health-first-pair-summary.json`.
@@ -372,7 +413,7 @@ All 168 related unit tests, typecheck, scoped lint, seven fresh desktop checks,
 and six phone checks pass. No default appearance or motion duration changes.
 
 Two alternating rehearsal pairs (1,000 tasks, six visible chats, 120 primary
-messages per column) completed all 1,800 updates per sample. Stream CPU was
+messages per column) completed all 1,800 updates per sample. Stream main-thread task time was
 60,374 versus 61,077 ms and 60,265 versus 60,232 ms: effectively unchanged.
 Frame-gap p95 was 133.3 versus 116.5 ms and 116.7 versus 100.1 ms. This is a
 modest frame-gap reduction across two pairs, not the six-pair reference result
@@ -387,7 +428,7 @@ in `matched-dense-1792769340783.json`; it repeated parsing during render retry.
 Two alternatives to transcript-row enumeration were tested: a scoped attribute
 query, then an indexed ID query for generated IDs. Neither gave a clear,
 repeatable rendering gain across two alternating pairs. Attribute-query stream
-CPU was 60,999→61,230 ms and 60,389→60,889 ms. Indexed-ID CPU was
+task time was 60,999→61,230 ms and 60,389→60,889 ms. Indexed-ID task time was
 61,162→60,373 ms and 62,774→61,588 ms, but frame-gap p95 changed direction
 between pairs (100.1→116.6 ms, then 150.0→133.3 ms). All samples verified all
 updates without HTTP failures. Both production experiments are removed; exact

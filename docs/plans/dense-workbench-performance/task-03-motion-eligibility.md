@@ -141,10 +141,10 @@ passed, with no HTTP or verification errors. Raw report:
 `thread-motion-wrapper-two-pair-summary.json`; log:
 `thread-motion-benchmark-logs/kandev-run.e2e.jNfjBXVf.log` (15.8 minutes).
 
-Normal idle main-thread CPU rose from 14,523 to 16,262 ms in pair 0 and from
-15,321 to 15,795 ms in pair 1 (12.0% and 3.1% higher). Streaming CPU fell by
+Normal idle main-thread task time rose from 14,523 to 16,262 ms in pair 0 and from
+15,321 to 15,795 ms in pair 1 (12.0% and 3.1% higher). Streaming main-thread task time fell by
 2.0% and 4.3%, with essentially unchanged frame-gap p95. Reduced-motion idle
-CPU fell from 9,807 to 7,373 ms and from 8,682 to 6,833 ms (24.8% and 21.3%
+task time fell from 9,807 to 7,373 ms and from 8,682 to 6,833 ms (24.8% and 21.3%
 lower). Reduced-motion running animations fell from six to zero.
 
 The wrapper was removed because normal idle was slower in both pairs. Its
@@ -168,10 +168,10 @@ for an unused Web Animations branch. Fresh-build checks passed: the desktop regr
 regression (21.3 seconds), typecheck, scoped lint, and documentation validation.
 Matched timing completed in 16.7 minutes. All four samples verified 1,800
 ordered updates, with no HTTP or verification errors. Reduced-motion idle
-main-thread CPU fell from 8,968 to 5,271 ms and from 9,245 to 5,986 ms (41.2%
+main-thread task time fell from 8,968 to 5,271 ms and from 9,245 to 5,986 ms (41.2%
 and 35.3% lower; median paired reduction 38.2%). Running animations fell from
-six to zero. Normal idle CPU was 4.8% and 1.3% lower, but the normal production
-path is unchanged and no default-idle gain is claimed. Streaming CPU was 8.3%
+six to zero. Normal idle main-thread task time was 4.8% and 1.3% lower, but the normal production
+path is unchanged and no default-idle gain is claimed. Streaming main-thread task time was 8.3%
 higher in pair 0 and 4.1% lower in pair 1; no streaming gain is claimed.
 
 Raw report: `matched-dense-1792796710483.json`; summary:

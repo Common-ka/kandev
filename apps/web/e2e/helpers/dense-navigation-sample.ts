@@ -76,7 +76,7 @@ export async function runDenseNavigationSample(options: {
     );
     const gate = await routeNavigationResponses(page);
     const cdp = await context.newCDPSession(page);
-    await cdp.send("Performance.enable");
+    await cdp.send("Performance.enable", { timeDomain: "timeTicks" });
     await cdp.send("Emulation.setCPUThrottlingRate", { rate: cpuRate });
     await page.goto(`/t/${items[0].task.id}`);
     await new SessionPage(page).waitForLoad();
