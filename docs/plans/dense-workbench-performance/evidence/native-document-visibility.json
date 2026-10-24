@@ -1,0 +1,301 @@
+{
+  "status": "native document hide/restore verified for core and full-plugin conversation views",
+  "scope": "Correctness and test-harness capability, not a timing or memory-retention comparison",
+  "productionRevision": "7808415cf2e373f85486101c271dc63a121fe1f1",
+  "candidateBuild": {
+    "parentDeliveredRevision": "1c84e0f69dfc72add70e67ac527972d0c3adc7b7",
+    "parentProductionRevision": "f5c8fb8f6ab55417749a6c980095a7570d7300e8",
+    "productionFiles": [
+      {
+        "path": "apps/packages/ui/src/spinner.tsx",
+        "sha256": "2627c864e61521f5da43558d902353fe46457cae61b1fd75d7641ae220d41232"
+      }
+    ],
+    "root": "/tmp/kandev-dense-spinner-motion-5936a872",
+    "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+    "assetsSha256": "9f2b7a961b623e0e4074fdfd0e253b10b65ccf979e110223af6b88b9121dbea8",
+    "agentctlSha256": "6e768aef1a1692630fe109c25e23ac31ab461b691800c2059e6dfdd5cf0b4d0a",
+    "mockAgentSha256": "c69f05ee9f5622cc5bce83405c2e9240b537f3e79a21da65765d9867592288c1",
+    "lockSha256": "9d5a03a9086f28c93752fce491f896047fbcdbc64abfafe3b3aa53261199c554"
+  },
+  "harnessSha256": {
+    "apps/web/e2e/helpers/native-browser.ts": "1d306db86c43ce3d26c8964b9e1b3b15820172493cd3f5064f97cd67550ad594",
+    "apps/web/e2e/tests/chat/native-document-lifecycle.spec.ts": "f4602dabd6d15110db58955e6e07b40001504348cc1b54448621ae50c0aee855"
+  },
+  "nativeBrowser": {
+    "version": "149.0.7827.55",
+    "launch": "Owned external full Chromium in headless mode, disposable profile, local ephemeral CDP port",
+    "connection": "chromium.connectOverCDP(endpoint, { noDefaults: true })",
+    "context": "Existing default browser context. A new context would restore Playwright default overrides.",
+    "visibilityStimulus": "Open and activate another native browser tab, then reactivate the application tab",
+    "propertyOverrides": false,
+    "ownership": "Helper terminates its child before CDP close and removes its disposable profile. Endpoint and process-exit waits are bounded."
+  },
+  "capability": {
+    "defaultOverrideFailure": {
+      "browser": "149.0.7827.55",
+      "display": ":347",
+      "snapshots": [
+        {
+          "step": "initial",
+          "state": "visible",
+          "hidden": false,
+          "timeOrigin": 1792855197855,
+          "events": []
+        },
+        {
+          "step": "second-tab-front",
+          "state": "visible",
+          "hidden": false,
+          "timeOrigin": 1792855197855,
+          "events": []
+        },
+        {
+          "step": "first-tab-restored",
+          "state": "visible",
+          "hidden": false,
+          "timeOrigin": 1792855197855,
+          "events": []
+        }
+      ],
+      "errors": [
+        {
+          "step": "second-tab-front",
+          "error": "TimeoutError: page.waitForFunction: Timeout 3000ms exceeded."
+        }
+      ],
+      "windows": {
+        "first": {
+          "windowId": 1650922065,
+          "bounds": {
+            "left": 10,
+            "top": 10,
+            "width": 1288,
+            "height": 805,
+            "windowState": "normal"
+          }
+        },
+        "second": {
+          "windowId": 1650922065,
+          "bounds": {
+            "left": 10,
+            "top": 10,
+            "width": 1288,
+            "height": 805,
+            "windowState": "normal"
+          }
+        }
+      }
+    },
+    "headedNativePass": {
+      "mode": "external-headed-browser-CDP-noDefaults",
+      "snapshots": [
+        {
+          "step": "initial",
+          "state": "visible",
+          "hidden": false,
+          "timeOrigin": 1792855263457.2,
+          "events": []
+        },
+        {
+          "step": "background",
+          "state": "hidden",
+          "hidden": true,
+          "timeOrigin": 1792855263457.2,
+          "events": [
+            {
+              "state": "hidden",
+              "hidden": true,
+              "at": 135.4000000357628
+            }
+          ]
+        },
+        {
+          "step": "restored",
+          "state": "visible",
+          "hidden": false,
+          "timeOrigin": 1792855263457.2,
+          "events": [
+            {
+              "state": "hidden",
+              "hidden": true,
+              "at": 135.4000000357628
+            },
+            {
+              "state": "visible",
+              "hidden": false,
+              "at": 301.80000001192093
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "browser": "149.0.7827.55"
+    },
+    "headlessNativePass": {
+      "mode": "external-headless-browser-CDP-noDefaults",
+      "snapshots": [
+        {
+          "step": "initial",
+          "state": "visible",
+          "hidden": false,
+          "timeOrigin": 1792855307662.7,
+          "events": []
+        },
+        {
+          "step": "background",
+          "state": "hidden",
+          "hidden": true,
+          "timeOrigin": 1792855307662.7,
+          "events": [
+            {
+              "state": "hidden",
+              "hidden": true,
+              "at": 48.90000003576279
+            }
+          ]
+        },
+        {
+          "step": "restored",
+          "state": "visible",
+          "hidden": false,
+          "timeOrigin": 1792855307662.7,
+          "events": [
+            {
+              "state": "hidden",
+              "hidden": true,
+              "at": 48.90000003576279
+            },
+            {
+              "state": "visible",
+              "hidden": false,
+              "at": 139.5
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "browser": "149.0.7827.55"
+    },
+    "localPrimarySource": "apps/node_modules/.pnpm/playwright-core@1.61.1/node_modules/playwright-core/lib/coreBundle.js:37054 enables focus emulation. types/types.d.ts:23426 documents noDefaults."
+  },
+  "core": {
+    "log": "native-document-lifecycle-fixture-retry-logs/kandev-run.e2e.97OYM6eP.log",
+    "runnerResult": "1 passed (32.8s)",
+    "artifacts": "native-document-lifecycle-core-green-artifacts",
+    "result": {
+      "plugin": false,
+      "mode": "CDP default context with noDefaults",
+      "stage": "lifecycle verified",
+      "version": "149.0.7827.55",
+      "timeOrigin": 1792859286753,
+      "scrollBefore": {
+        "scrollTop": 4618,
+        "scrollHeight": 5845,
+        "clientHeight": 557,
+        "scrollOwnerCount": 1
+      },
+      "events": [
+        {
+          "state": "hidden",
+          "hidden": true
+        },
+        {
+          "state": "visible",
+          "hidden": false
+        }
+      ],
+      "scrollAfter": {
+        "scrollTop": 4618,
+        "scrollHeight": 6175,
+        "clientHeight": 557,
+        "scrollOwnerCount": 1
+      },
+      "readsBeforeHiddenUpdates": 2,
+      "hiddenReadBaseline": 2,
+      "hiddenReadCount": 2,
+      "restoredReadCount": 3,
+      "draftPreserved": true,
+      "orderedTicks": 12
+    }
+  },
+  "plugin": {
+    "log": "native-document-lifecycle-plugin-state-logs/kandev-run.e2e.vZwKjI7y.log",
+    "runnerResult": "1 passed (46.8s)",
+    "artifacts": "native-document-lifecycle-plugin-state-green-artifacts",
+    "result": {
+      "plugin": true,
+      "mode": "CDP default context with noDefaults",
+      "stage": "lifecycle verified",
+      "version": "149.0.7827.55",
+      "timeOrigin": 1792859659781.5,
+      "scrollBefore": {
+        "scrollTop": 8040,
+        "scrollHeight": 9267,
+        "clientHeight": 557,
+        "scrollOwnerCount": 1
+      },
+      "events": [
+        {
+          "state": "hidden",
+          "hidden": true
+        },
+        {
+          "state": "visible",
+          "hidden": false
+        }
+      ],
+      "scrollAfter": {
+        "scrollTop": 8040,
+        "scrollHeight": 9619,
+        "clientHeight": 557,
+        "scrollOwnerCount": 1
+      },
+      "readsBeforeHiddenUpdates": 2,
+      "hiddenReadBaseline": 2,
+      "hiddenReadCount": 2,
+      "restoredReadCount": 3,
+      "draftPreserved": true,
+      "orderedTicks": 12,
+      "expandedPluginPromptPreserved": true
+    }
+  },
+  "intermediatePluginPass": {
+    "log": "native-document-lifecycle-plugin-expanded-logs/kandev-run.e2e.IhKAu14n.log",
+    "runnerResult": "1 passed (35.7s)",
+    "scope": "Before the added plugin-local expanded-state assertion"
+  },
+  "failuresRetained": [
+    {
+      "log": "native-document-lifecycle-initial-logs/kandev-run.e2e.XW7w92oU.log",
+      "artifacts": "native-document-lifecycle-initial-failure",
+      "result": "Two 120-second test timeouts",
+      "observations": "Fixture newTurn:true superseded the captured active mock turn. The initial external-browser cleanup also awaited CDP close before terminating its child. Timeout causes were not separately isolated.",
+      "correction": "Seed the user message in the current turn. Bound owned-process shutdown before CDP close. Preserve stage evidence even if cleanup fails."
+    },
+    {
+      "log": "native-document-lifecycle-plugin-green-logs/kandev-run.e2e.VhzTIRgk.log",
+      "artifacts": "native-document-lifecycle-plugin-paging-failure",
+      "result": "Expected prompt text while the new row was collapsed; received Prompt 3 / Prompt 2 / Prompt 1 labels",
+      "correction": "Locate the exact message ID, expand its row, and assert its detail text. No application change."
+    }
+  ],
+  "checks": {
+    "strictLint": "passed /tmp/kandev-native-document-state-lint.log",
+    "coreSemanticsAfterPluginOnlyChange": "The final spec adds only plugin-branch state assertions. Core behavior and the external-browser helper are unchanged from its passing run."
+  },
+  "verified": [
+    "Actual hidden and visible events in one application document, with unchanged timeOrigin",
+    "Twelve exact ordered real mock-producer ticks per case, plus a committed user-message update",
+    "Draft text and reader scroll offset retained with one transcript scroll owner",
+    "Owned composer motion pauses while hidden and resumes after return",
+    "No additional running backfill read during the separate twelve-second hidden quiet interval; one foreground recovery read remains",
+    "Plugin receives the hidden user message and retains its previously expanded prompt"
+  ],
+  "limits": [
+    "These are Linux Chromium application checks. They do not prove native M2 performance or battery use.",
+    "The external-browser helper changes only this correctness test. Paired timing samples retain their original browser configuration.",
+    "The core and plugin cases ran separately. The final combined correctness gate remains distinct.",
+    "Wire/private owner retention after 100 switches remains a separate check."
+  ]
+}

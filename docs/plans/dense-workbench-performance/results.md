@@ -7,6 +7,18 @@ plugin Dockview series is also complete; core/plugin regressions still need attr
 `feature/evaluate-live-thread-bc0`; the frozen baseline is
 `595df36ed5c1cf02fd90cb972b623ad6edc53df8`.
 
+## Native document visibility verification
+
+Real core and full-plugin hide-and-restore checks now pass. The earlier probe
+used Playwright's default focus emulation, which kept the document visible.
+A disposable external Chromium default context connected with `noDefaults: true`
+emits actual hidden/visible events. Application tests retain the same document,
+twelve ordered updates each, draft text, scroll offset, and plugin expansion.
+Owned motion pauses while hidden; scheduled backfill pauses and one foreground
+read resumes. No document property is overridden. Initial fixture and assertion
+failures are retained in [the evidence](evidence/native-document-visibility.json).
+This is correctness verification, separate from timing and final combined gates.
+
 ## Shared plugin-action loading indicators (isolated comparison)
 
 Six alternating pairs compare the retained `f5c8fb8f6ab` candidate with the same

@@ -536,3 +536,15 @@ by median paired change, while several maximum gaps worsen. These results
 remain included. See [complete evidence](evidence/plugin-spinner-motion-six-pair-1x.json).
 Native application visibility checks and the remaining package matrix are
 separate gates. No original-baseline or M2 result is inferred from this series.
+
+## Native visibility correctness verified
+
+The missing visibility events came from Playwright's default focus emulation.
+The new correctness-only helper uses an owned external Chromium default context
+with `noDefaults: true`; both headed and headless capability probes emit real
+events. Core and plugin application cases now pass with unchanged document
+identity, twelve ordered updates each, retained draft and scroll, paused owned
+motion, foreground refresh, and plugin expansion state. Initial timeouts and
+the collapsed-row assertion failure are preserved, without labeling them product
+regressions. See [evidence](evidence/native-document-visibility.json). Paired timing
+configuration is unchanged; the final combined correctness gate remains open.

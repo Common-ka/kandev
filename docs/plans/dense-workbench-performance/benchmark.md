@@ -488,3 +488,19 @@ on plugin composer buttons. This identifies their owner, not their CPU cost.
 fixture and guarded runner. Record device and power settings with each report.
 Linux CPU throttling does not replace testing on the M2 Air. Native document
 hide/restore remains a separate headed-browser correctness check.
+
+## Native document hide and restore
+
+Playwright normally enables focus emulation. A second tab can therefore leave
+`document.visibilityState` visible even in a headed browser. The native
+correctness helper launches an owned disposable Chromium process and connects
+to its existing default context with `noDefaults: true`. This preserves real
+browser visibility behavior. New contexts would restore the normal overrides.
+No document visibility property or event is replaced.
+
+Core and full-plugin application checks now pass actual hidden/visible events
+in one document. They verify ordered updates, draft and scroll retention, paused
+owned motion, resumed foreground backfill, and retained plugin expansion. The
+paired speed caller does not use this helper. See
+[complete evidence](evidence/native-document-visibility.json), including the
+initial fixture/cleanup timeouts and collapsed-row assertion failure.
