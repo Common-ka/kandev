@@ -1,0 +1,53 @@
+{
+  "measurementKind": "cpu-attribution",
+  "rawReport": "matched-dense-1792811136016.json",
+  "rawSha256": "3a2b7e3e093e4da8da78cde3c252f35024a703aec9f92a70bdbf8ffc65ceac66",
+  "sourceRevision": "9c306aab70770edcc90b937138cf2c437b8b3c34",
+  "builds": {
+    "baseline": {
+      "binary": "/tmp/kandev-dense-timestamp-5936a872/apps/backend/bin/kandev",
+      "assets": "/tmp/kandev-dense-timestamp-5936a872/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "8379f62eb1bf4935c6b18d4616f732191cdefc17159c02367a54c05701f7a160"
+    },
+    "candidate": {
+      "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+      "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "8379f62eb1bf4935c6b18d4616f732191cdefc17159c02367a54c05701f7a160"
+    }
+  },
+  "profiles": [
+    {
+      "file": "matched-dense-1792811136016.json.baseline-1x-0.cpuprofile",
+      "sha256": "5f93f2b2a59aaa604f3fc409b08d334ca07c4eb70ad9835388bd2a8a166beb83",
+      "sampledDurationMs": 79328.621,
+      "ariaSnapshotInclusiveSampledMs": 9240.55,
+      "firstAriaSampleMs": 62118.641,
+      "lastAriaSampleMs": 78142.312
+    },
+    {
+      "file": "matched-dense-1792811136016.json.candidate-1x-0.cpuprofile",
+      "sha256": "4b2ad2095260ada0d0952e4b323a1b5f8717fbbd0cce8000d73247a2d2d2426d",
+      "sampledDurationMs": 88009.129,
+      "ariaSnapshotInclusiveSampledMs": 14828.287,
+      "firstAriaSampleMs": 61018.987,
+      "lastAriaSampleMs": 87295.115
+    }
+  ],
+  "validation": [
+    {
+      "arm": "baseline",
+      "scheduledUpdates": 1800,
+      "verificationErrors": []
+    },
+    {
+      "arm": "candidate",
+      "scheduledUpdates": 1800,
+      "verificationErrors": []
+    }
+  ],
+  "finding": "Playwright locator expectation retries collect full-page accessibility snapshots when the final-marker locator is missing. These stacks appear after the fixed 60-second stream window. Sampled stack duration is not CDP thread CPU time.",
+  "source": "Installed playwright-core@1.61.1/lib/coreBundle.js: expect -> _ariaSnapshotForExpect -> _renderAriaSnapshot(document.body) when the target is missing or not visible.",
+  "correction": "Poll locator.isVisible with the same 30-second deadline; keep full locator assertions after timing. Reports record finalVisibilityProbe and the summary rejects mixed versions. No product speedup is claimed."
+}

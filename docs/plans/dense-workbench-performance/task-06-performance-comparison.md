@@ -42,6 +42,17 @@ See [results](results.md#current-retained-build-navigation-comparison) and
 [paired evidence](evidence/current-navigation-1x.json). Remaining scenario and
 stress work stays open.
 
+## Final-content measurement correction
+
+Fresh current-build profiles identify full-page Playwright ARIA snapshots after
+the stream deadline. The corrected timed gate preserves visibility and timeout
+semantics through boolean polling; full locator assertions run after timing.
+The browser regression, 14 report tests, scoped lint, and full-caller smokes
+pass. Probe-version metadata prevents pooling old and corrected series. See
+[results](results.md#final-visibility-probe-overhead). Corrected dense profiling
+and final comparisons are still pending; no product gain follows from this
+harness repair.
+
 ## Summary
 
 Run the matched baseline/candidate comparison and publish reproducible evidence. Keep neutral results, regressions, and unresolved bottlenecks visible.

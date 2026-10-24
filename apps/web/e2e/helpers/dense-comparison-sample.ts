@@ -1,3 +1,4 @@
+import { DENSE_VISIBILITY_PROBE } from "./dense-visible";
 import fs from "node:fs";
 import { expect, type Browser, type CDPSession, type Locator, type Page } from "@playwright/test";
 import type { BackendContext } from "../fixtures/backend";
@@ -196,6 +197,7 @@ export async function runDenseSample(options: {
         }
       }
     }
+    await stream.assertVisible(page, cold.visibleTaskIds);
     const offscreenCatchup = await verifyDenseOffscreenCatchup(
       page,
       threads.map((thread) => thread.taskId).filter((id) => !cold.visibleTaskIds.includes(id)),
@@ -205,6 +207,7 @@ export async function runDenseSample(options: {
     const animationDiagnostics = await inspectDenseAnimations(page);
     return {
       sample,
+      finalVisibilityProbe: DENSE_VISIBILITY_PROBE,
       layout: DENSE_WORKLOAD.layout,
       offscreenCatchup,
       animationDiagnostics,

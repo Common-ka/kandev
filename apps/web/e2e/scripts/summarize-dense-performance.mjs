@@ -104,12 +104,22 @@ function sampleLayoutPrefix(report, sample) {
   return layout === "columns" ? "columns-" : "";
 }
 
+function checkVisibilityProbe(report, sample) {
+  const probe = report.finalVisibilityProbe ?? "locator-assertion";
+  if (
+    !["boolean-poll", "locator-assertion"].includes(probe) ||
+    (sample.finalVisibilityProbe ?? "locator-assertion") !== probe
+  )
+    throw new Error("Samples must use the report's final visibility probe");
+}
+
 export function summarizeReport(report) {
   if (["cpu-attribution", "animation-attribution"].includes(report.measurementKind))
     throw new Error("Diagnostic attribution runs are excluded from timing comparisons");
   if (report.error) throw new Error(`input report contains an error: ${report.error}`);
   const records = [];
   for (const sample of report.samples) {
+    checkVisibilityProbe(report, sample);
     const throttling = sampleThrottling(report, sample);
     const layoutPrefix = sampleLayoutPrefix(report, sample);
     const identity = { arm: sample.arm, pair: sample.pair, cpuRate: sample.cpuRate };
@@ -160,6 +170,7 @@ export function summarizeReport(report) {
       comparisons.push({ group, metric, ...summarizePairs(rows, (row) => row.values[metric]) });
   return {
     measurementKind: report.measurementKind,
+    finalVisibilityProbe: report.finalVisibilityProbe ?? "locator-assertion",
     layout: report.layout ?? "grid",
     throttleAfterLoad: Boolean(report.throttleAfterLoad),
     machine: report.machine,
@@ -175,6 +186,7 @@ export function summarizeReport(report) {
       "mainThreadMs and mainThreadMsPerSecond use TaskDuration with timeTicks: elapsed time in main-thread tasks, not thread CPU time. Script, style, and layout durations use the same elapsed-time domain.",
       "mainThreadCpuMs uses ThreadTime (renderer main-thread CPU). rendererCpuMs uses ProcessTime (renderer-process CPU); it excludes separate browser, GPU, and backend processes.",
       "Positive reduction means a lower candidate value. Counts such as mounted editors are observations, not optimization scores.",
+      "Final-content probe versions must not be pooled. Locator-assertion retries can collect page-wide ARIA snapshots; boolean polling retains the same visibility gate without those snapshots.",
       "Streaming duration includes the wait for final visible content. Fixed-deadline traffic is retained in the raw report.",
       "Frame gaps and driver DOM readiness are not INP. Linux CPU throttling is not an M2 Air simulation.",
       "History decoded bytes include captured requests and responses. They are not compressed network transfer.",

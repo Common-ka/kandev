@@ -5,6 +5,42 @@ and the remaining stress/scenario matrix are in progress. The branch is
 `feature/evaluate-live-thread-bc0`; the frozen baseline is
 `595df36ed5c1cf02fd90cb972b623ad6edc53df8`.
 
+## Final-visibility probe overhead
+
+A current-build CPU attribution run passed both 1,800-update checks in 6.7
+minutes (`matched-dense-1792811136016.json`,
+`current-stream-cpu-attribution-logs/kandev-run.e2e.UI5WN7qR.log`). Both arms used
+identical validated production assets. The profiles contain 9,241 and 14,828 ms
+of inclusive sampled time under Playwright's `_ariaSnapshotForExpect` stack.
+Those samples occur after the fixed 60-second stream window. These sampled
+stack durations are not CDP thread CPU counters.
+
+The installed Playwright 1.61.1 source confirms that an unsuccessful locator
+expectation renders a full-page ARIA tree when its element is absent or not
+visible. Waiting for the final marker can therefore repeatedly traverse the
+dense page and add rendering pressure. This overhead is part of the older
+completion-inclusive measurements. Their figures remain recorded, but they
+must not be treated as pure application costs or pooled with corrected runs.
+This finding does not invalidate asset byte counts or prove a product speedup.
+
+The corrected timed gate polls `locator.isVisible()` with the same visibility
+semantics and 30-second deadline. The full locator assertion runs after all
+observation windows. Hidden, missing, and display-none content still fail; the
+browser regression failed before implementation and passed afterward (1.4
+seconds). The six-chat full-caller smoke passed both arms in 1.6 minutes
+(`dense-visible-caller-smoke-logs/kandev-run.e2e.TX1uIdTV.log`).
+
+Reports now record `finalVisibilityProbe: boolean-poll`. Older reports default
+to `locator-assertion`, and the summary rejects mixed probe versions. All 14
+summary tests pass, including three new RED/GREEN cases. Strict scoped lint
+passes. A final metadata full-caller smoke passed in 38.5 seconds
+(`matched-dense-1792811987862.json`, `dense-visible-version-smoke-logs/`), and its
+summary confirms the new probe in both arms. These smokes validate the harness;
+the corrected dense profile and A/B measurements remain pending.
+
+[Attribution evidence](evidence/visibility-probe-attribution.json) records
+profile hashes, build identities, stack timing, and verification results.
+
 ## Current retained-build navigation comparison
 
 The retained build at `04cb2eb13179abf1b9cd7b4b2699e9fc6103ce1e` completed six

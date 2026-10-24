@@ -204,3 +204,15 @@ previous motion preference afterward. These style reads and layer-domain calls
 are intrusive attribution; the report remains `animation-attribution` and the
 summary rejects it. A composited layer does not establish a CPU gain or zero
 main-thread cost. Keep this flag off in paired performance runs.
+
+### Final visibility probe version
+
+The timed final-marker gate uses `waitForDenseVisible`: boolean polling of
+`locator.isVisible()` with the existing 30-second deadline and visibility
+semantics. Full locator assertions run after observation windows. Playwright
+1.61.1 collects a page-wide ARIA snapshot on failed locator assertions whose
+target is missing, which added significant work after the stream deadline in
+the recorded profiles. Do not put those assertions back inside measured windows.
+Reports and samples record `finalVisibilityProbe: boolean-poll`. Missing metadata
+means the historical `locator-assertion` probe. Do not pool the two series; the
+summary rejects mixed probe versions. See the [attribution record](evidence/visibility-probe-attribution.json).
