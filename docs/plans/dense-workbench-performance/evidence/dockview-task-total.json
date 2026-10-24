@@ -1,0 +1,44 @@
+{
+  "scope": "Test-fixture count correction. Production code and assets are unchanged.",
+  "reason": "Workspace task listing returns a bounded page (50 by default) and a separate authoritative total. The fixture incorrectly compared page length with full task count.",
+  "red": {
+    "log": "final-dockview-core-six-pair-logs/kandev-run.e2e.FYG5dZan.log",
+    "durationMinutes": 17.5,
+    "expectedTasks": 1000,
+    "receivedPageLength": 50,
+    "measuredSamples": 0,
+    "reportCreated": false,
+    "artifacts": "dockview-full-task-count-failure/",
+    "hostLoad": "final-dockview-core-six-pair-host-load.jsonl"
+  },
+  "fix": "Expose total in the existing ApiClient response type and assert that total equals DENSE_WORKLOAD.tasks. Preserve normal bounded task-list behavior.",
+  "green": {
+    "log": "dockview-full-task-count-green-logs/kandev-run.e2e.E6ZRRu1S.log",
+    "durationSeconds": 23.8,
+    "tasks": 61,
+    "eligibleTasks": 6,
+    "selectedHistoryMessages": 10,
+    "seededMessages": 180,
+    "panels": 7,
+    "build": {
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "d83bd02b59785cf6c806178f3f0e15d0443dbac7f104998347cb6580371a9f94"
+    },
+    "capture": "dockview-task-total-green-captures/performance-dense-dockview-132eb-l-Dockview-sibling-sessions-chromium/dense-dockview-layout.json"
+  },
+  "lint": {
+    "status": "passed with zero warnings",
+    "log": "/tmp/kandev-navigation-owner-retention-lint-final.log"
+  },
+  "sourceFiles": [
+    {
+      "path": "apps/web/e2e/helpers/api-client.ts",
+      "sha256": "186a55c3324ea6512449fb5b78ed2cf9efd724960f484fe9645b5a72020e6e77"
+    },
+    {
+      "path": "apps/web/e2e/helpers/dense-dockview-fixture.ts",
+      "sha256": "dfa055a80c8940b94c1b961e4906e22aabffe392df701c673ecdb6e68cf71066"
+    }
+  ],
+  "remaining": "Retry the six-pair full-reference core Dockview comparison, then the separate plugin series. No performance conclusion follows from this setup failure or small validation."
+}

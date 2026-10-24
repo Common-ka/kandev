@@ -2851,6 +2851,7 @@ export class ApiClient {
   }
 
   async listTasks(workspaceId: string): Promise<{
+    total: number;
     tasks: Array<{
       id: string;
       title: string;

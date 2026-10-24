@@ -418,3 +418,10 @@ The final streaming duration includes the unchanged boolean visibility wait.
 DOM progress reads do not fetch history. Stored-history verification occurs
 after measurement. Plugin HTTP paths and status counts remain raw evidence;
 core `historyRequests` counts do not include them.
+
+Workspace task counts use the task-list response's `total`, not the current
+page length. The endpoint returns 50 tasks by default even when the workspace
+contains 1,000. A 61-task fixture validates this boundary. The first full
+Dockview attempt stopped on this fixture assertion before timing; preserve it
+as a setup failure, not a product performance result.
+See [the count correction](evidence/dockview-task-total.json).

@@ -400,3 +400,12 @@ result. The 29 summary/progress tests and scoped strict lint pass. The summary
 rejects mismatched panes, visible session IDs, and plugin hashes.
 See [the caller evidence](evidence/dockview-timed-caller.json).
 Six full-reference pairs per core/plugin series remain pending.
+
+The first full-reference Dockview attempt stopped after 17.5 minutes of setup:
+the fixture compared the task-list page length (50) with the full workspace
+count (1,000). It produced no measured samples. The fixture now checks the
+response's authoritative `total`; a 61-task browser check passes in 23.8 seconds
+and scoped strict lint passes. Production code and assets are unchanged.
+The failure, captures, and correction are preserved in
+[the task-count evidence](evidence/dockview-task-total.json). The full comparison
+still needs to run.

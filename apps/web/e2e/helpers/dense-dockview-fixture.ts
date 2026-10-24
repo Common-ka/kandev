@@ -59,8 +59,8 @@ export async function seedDenseDockviewFixture(
     prepareFirstSiblings: true,
     firstSiblingMessages: DENSE_WORKLOAD.messages,
   });
-  const { tasks } = await api.listTasks(seed.workspaceId);
-  expect(tasks).toHaveLength(DENSE_WORKLOAD.tasks);
+  const { total: taskCount } = await api.listTasks(seed.workspaceId);
+  expect(taskCount).toBe(DENSE_WORKLOAD.tasks);
   const first = fixture.threads[0];
   const { sessions } = await api.listTaskSessions(first.taskId);
   const environmentId = sessions.find(
@@ -91,7 +91,7 @@ export async function seedDenseDockviewFixture(
     ...fixture,
     dockview: {
       taskId: first.taskId,
-      taskCount: tasks.length,
+      taskCount,
       seededMessages: fixture.manifest.reduce(
         (sum, row) =>
           sum + row.messages + row.siblingMessages.reduce((count, value) => count + value, 0),
