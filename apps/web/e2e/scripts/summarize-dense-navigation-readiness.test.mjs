@@ -2,6 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { summarizeReport } from "./summarize-dense-performance.mjs";
 
+const SESSION_TABS = "session-tabs";
+
 function navigationSample(arm, navigationScenario = "task-switch") {
   return {
     arm,
@@ -60,6 +62,19 @@ function navigationReport(navigationScenario = "task-switch") {
       });
     }
   }
+  if (navigationScenario === SESSION_TABS) {
+    for (const sample of samples) {
+      sample.selections.push(structuredClone(sample.selections[0]));
+      sample.selections.forEach((selection, index) => {
+        selection.browserEventReadiness.sessionId = `session-${index}`;
+        selection.session = {
+          taskId: "task-a",
+          sessionId: `session-${index}`,
+          environmentId: "shared-env",
+        };
+      });
+    }
+  }
   return {
     navigationScenario,
     navigationReadiness: "pointerdown-raf-v1",
@@ -82,13 +97,13 @@ test("keeps native browser readiness separate from driver-clock readiness", () =
 });
 
 test("separates incompatible layout and same-environment session switches", () => {
-  for (const scenario of ["incompatible-layout", "session-tabs"]) {
+  for (const scenario of ["incompatible-layout", SESSION_TABS]) {
     const result = summarizeReport(navigationReport(scenario));
     assert.equal(result.navigationScenario, scenario);
     assert.ok(result.comparisons.every((row) => row.group.endsWith(scenario)));
   }
   const mixed = navigationReport();
-  mixed.samples[1].navigationScenario = "session-tabs";
+  mixed.samples[1].navigationScenario = SESSION_TABS;
   assert.throws(() => summarizeReport(mixed), /navigation scenario/);
 });
 
@@ -134,5 +149,29 @@ test("rejects missing, unchanged, or wrongly owned incompatible layouts", () => 
     const report = navigationReport("incompatible-layout");
     mutate(report.samples[1].selections[0]);
     assert.throws(() => summarizeReport(report), /layout/);
+  }
+});
+
+test("rejects session-tab samples without two sessions in one real environment", () => {
+  for (const mutate of [
+    (selection) => {
+      delete selection.session;
+    },
+    (selection) => {
+      selection.session.environmentId = "";
+    },
+    (selection) => {
+      selection.session.environmentId = "different-env";
+    },
+    (selection) => {
+      selection.session.taskId = "different-task";
+    },
+    (selection) => {
+      selection.session.sessionId = "session-1";
+    },
+  ]) {
+    const report = navigationReport(SESSION_TABS);
+    mutate(report.samples[1].selections[0]);
+    assert.throws(() => summarizeReport(report), /session/);
   }
 });

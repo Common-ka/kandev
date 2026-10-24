@@ -6,12 +6,8 @@ import { hashAssetTree, sha256File, snapshotDatabase } from "../../helpers/dense
 import { readNavigationScenario } from "../../helpers/navigation-layout";
 import { BROWSER_READINESS_VERSION } from "../../helpers/navigation-browser-readiness";
 import { runDenseNavigationSample } from "../../helpers/dense-navigation-sample";
-import { exposeNavigationStore } from "../task/task-navigation-helpers";
-import {
-  prepareProfileTask,
-  profileMachine,
-  seedProfile,
-} from "../task/task-navigation-profile-helpers";
+import { prepareDenseNavigationItems } from "../../helpers/dense-navigation-fixture";
+import { profileMachine } from "../task/task-navigation-profile-helpers";
 
 test.skip(process.env.KANDEV_DENSE_NAVIGATION !== "1", "opt-in matched navigation benchmark");
 
@@ -45,19 +41,7 @@ test("compares dense task switches and retained Dockview owners", async ({
       ];
     }),
   );
-  const tasks = await seedProfile(api, seed, backend, {
-    backgroundTasks: Number(process.env.KANDEV_DENSE_NAV_TASKS ?? 1000) - 2,
-    prepareOnly: true,
-  });
-  await exposeNavigationStore(testPage);
-  const items = [];
-  for (let i = 0; i < tasks.length; i++)
-    items.push(
-      await prepareProfileTask(testPage, api, tasks[i], backend, {
-        first: i === 0,
-        historyCount: Number(process.env.KANDEV_DENSE_NAV_MESSAGES ?? 1000),
-      }),
-    );
+  const items = await prepareDenseNavigationItems(testPage, api, seed, backend, navigationScenario);
   const storageState = await testPage.context().storageState();
   const sessionStorageState = await testPage.evaluate(() =>
     Object.fromEntries(Object.entries(sessionStorage)),

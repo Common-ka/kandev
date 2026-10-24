@@ -1,0 +1,240 @@
+{
+  "purpose": "Validate trusted native session-tab measurements in one real task environment; these short caller runs establish correctness, not speed gains.",
+  "productionChanged": false,
+  "productionRevision": "90a440a9747179629f507b8bb2f24bf5f0f3b8f0",
+  "files": [
+    {
+      "path": "apps/web/e2e/helpers/navigation-browser-readiness.ts",
+      "sha256": "902e0b455c59d55641ae7de8c5abf99e726ce10286bce7d67374ce06a312988b"
+    },
+    {
+      "path": "apps/web/e2e/helpers/navigation-session-tabs.ts",
+      "sha256": "bbd16f7054da3812a73226cb7522ac1bd708904a28971e49e6d95d55af05585e"
+    },
+    {
+      "path": "apps/web/e2e/helpers/navigation-layout.ts",
+      "sha256": "22299a51f77eaa5c465204d5a85c682f85575bb608683dd89b389405d8e9b0b0"
+    },
+    {
+      "path": "apps/web/e2e/helpers/dense-navigation-sample.ts",
+      "sha256": "27bc78e98c78f0b315abb8b8f2bca2d37231cb374fe35b59077d4c9ca236c3ef"
+    },
+    {
+      "path": "apps/web/e2e/helpers/dense-navigation-fixture.ts",
+      "sha256": "7c42d4c7c145364de890cdda908cccfe17b99baf6ebf7fb65a18f814660e63b7"
+    },
+    {
+      "path": "apps/web/e2e/tests/task/task-navigation-profile-helpers.ts",
+      "sha256": "871d95ac6c85d4e0afb81c8ffb9f63bf69abf5b5fe5f84e56a2602545579b871"
+    },
+    {
+      "path": "apps/web/e2e/tests/performance/dense-navigation-comparison.spec.ts",
+      "sha256": "dc73727190285d092faa60a232ec07aaf3bbff1a2058ae9316f745baf6e64f60"
+    },
+    {
+      "path": "apps/web/e2e/tests/performance/dense-navigation-session-tabs.spec.ts",
+      "sha256": "8ef8f50f17eca2f63f71e88cb44621d69b17e6d3d579f777a3be822d888c9bdb"
+    },
+    {
+      "path": "apps/web/e2e/scripts/summarize-dense-performance.mjs",
+      "sha256": "27142bf3d84627406a3edcbdaa071487cf28fb0a6b897c0e67df8a9c2421a387"
+    },
+    {
+      "path": "apps/web/e2e/scripts/summarize-dense-navigation-readiness.test.mjs",
+      "sha256": "41bc398032addc00268a607f2512d0221a4198ddd12f08d756785dc7c7585ac5"
+    }
+  ],
+  "validation": {
+    "browserRed": "navigation-session-tabs-red-logs/kandev-run.e2e.4pfKwlYB.log: readiness timeout because session-tab selection was not implemented",
+    "browserGreen": "navigation-session-tabs-green-logs/kandev-run.e2e.bfWgAtgH.log: passed, 24.6 seconds; four trusted selections, one detailed chat, retained draft",
+    "summaryRed": "/tmp/kandev-navigation-session-summary-red.log: missing shared-environment rejection",
+    "summaryGreen": "/tmp/kandev-navigation-session-summary-final.log: 22 passed",
+    "strictLint": "/tmp/kandev-navigation-session-lint-final.log: passed",
+    "firstCaller": "navigation-session-caller-smoke-logs/kandev-run.e2e.Q2Y0OMCE.log: passed, 47.3 seconds",
+    "finalCaller": "navigation-session-final-caller-smoke-logs/kandev-run.e2e.uUS8w9pF.log: passed, 48.2 seconds",
+    "existingScenarios": "navigation-scenarios-regression-logs: 3 passed, 1.3 minutes; default driver caller, native task recorder, incompatible layout regression"
+  },
+  "reports": [
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/matched-navigation-1792833554081.json",
+      "sha256": "00ab297cdfc8af23d14f8c67d2b85e305f1867c79bb76d396bd2aea01db21cb9",
+      "measurementKind": "harness-rehearsal",
+      "navigationScenario": "session-tabs",
+      "navigationReadiness": "pointerdown-raf-v1",
+      "builds": {
+        "baseline": {
+          "binary": "/tmp/kandev-dense-owned-motion-5936a872/apps/backend/bin/kandev",
+          "assets": "/tmp/kandev-dense-owned-motion-5936a872/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "085df3998be95fbe3df28366479b06bdcec1f2edc18925e8fcfb01164b215041"
+        },
+        "candidate": {
+          "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+          "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "131a69e7d91ef0781e6dc3b612aedc69f7f2a3f51cceeca427e053a398a39a12"
+        }
+      },
+      "samples": [
+        {
+          "arm": "baseline",
+          "selections": [
+            {
+              "session": {
+                "taskId": "14a7ac27-a948-47e2-89fd-4939b594a2f9",
+                "sessionId": "436f638d-b2fd-4687-9e4b-9d842e0ee095",
+                "environmentId": "9d4c81bb-8079-4605-afdf-2dfca359600a"
+              },
+              "trusted": true
+            },
+            {
+              "session": {
+                "taskId": "14a7ac27-a948-47e2-89fd-4939b594a2f9",
+                "sessionId": "d37044a2-5448-42f3-88a4-6793909905d8",
+                "environmentId": "9d4c81bb-8079-4605-afdf-2dfca359600a"
+              },
+              "trusted": true
+            }
+          ]
+        },
+        {
+          "arm": "candidate",
+          "selections": [
+            {
+              "session": {
+                "taskId": "14a7ac27-a948-47e2-89fd-4939b594a2f9",
+                "sessionId": "436f638d-b2fd-4687-9e4b-9d842e0ee095",
+                "environmentId": "9d4c81bb-8079-4605-afdf-2dfca359600a"
+              },
+              "trusted": true
+            },
+            {
+              "session": {
+                "taskId": "14a7ac27-a948-47e2-89fd-4939b594a2f9",
+                "sessionId": "d37044a2-5448-42f3-88a4-6793909905d8",
+                "environmentId": "9d4c81bb-8079-4605-afdf-2dfca359600a"
+              },
+              "trusted": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/matched-navigation-1792833616263.json",
+      "sha256": "49c8144cd318680cee902126a86c0678ded18550dc9a6673e3f9a87316cb3481",
+      "measurementKind": "harness-rehearsal",
+      "navigationScenario": "session-tabs",
+      "navigationReadiness": "pointerdown-raf-v1",
+      "builds": {
+        "baseline": {
+          "binary": "/tmp/kandev-dense-owned-motion-5936a872/apps/backend/bin/kandev",
+          "assets": "/tmp/kandev-dense-owned-motion-5936a872/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "085df3998be95fbe3df28366479b06bdcec1f2edc18925e8fcfb01164b215041"
+        },
+        "candidate": {
+          "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+          "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "131a69e7d91ef0781e6dc3b612aedc69f7f2a3f51cceeca427e053a398a39a12"
+        }
+      },
+      "samples": [
+        {
+          "arm": "baseline",
+          "selections": [
+            {
+              "session": {
+                "taskId": "87b021ef-52cb-44c4-a978-15c5399c58c2",
+                "sessionId": "6d7134b2-4cba-4001-a3c9-9f2f61d0a361",
+                "environmentId": "7968d03c-af45-4ff9-b7c2-893e0803f89c"
+              },
+              "trusted": true
+            },
+            {
+              "session": {
+                "taskId": "87b021ef-52cb-44c4-a978-15c5399c58c2",
+                "sessionId": "3604e90f-06ef-4e03-b9f6-1efa758c3c11",
+                "environmentId": "7968d03c-af45-4ff9-b7c2-893e0803f89c"
+              },
+              "trusted": true
+            }
+          ]
+        },
+        {
+          "arm": "candidate",
+          "selections": [
+            {
+              "session": {
+                "taskId": "87b021ef-52cb-44c4-a978-15c5399c58c2",
+                "sessionId": "6d7134b2-4cba-4001-a3c9-9f2f61d0a361",
+                "environmentId": "7968d03c-af45-4ff9-b7c2-893e0803f89c"
+              },
+              "trusted": true
+            },
+            {
+              "session": {
+                "taskId": "87b021ef-52cb-44c4-a978-15c5399c58c2",
+                "sessionId": "3604e90f-06ef-4e03-b9f6-1efa758c3c11",
+                "environmentId": "7968d03c-af45-4ff9-b7c2-893e0803f89c"
+              },
+              "trusted": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/matched-navigation-1792833676437.json",
+      "sha256": "3c15fcf95ddbdbd63cb59073c5e4b228718f79905b59033c8edce16e8f8c5567",
+      "measurementKind": "harness-rehearsal",
+      "navigationScenario": "task-switch",
+      "navigationReadiness": "driver",
+      "builds": {
+        "baseline": {
+          "binary": "/tmp/kandev-dense-owned-motion-5936a872/apps/backend/bin/kandev",
+          "assets": "/tmp/kandev-dense-owned-motion-5936a872/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "085df3998be95fbe3df28366479b06bdcec1f2edc18925e8fcfb01164b215041"
+        },
+        "candidate": {
+          "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+          "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "131a69e7d91ef0781e6dc3b612aedc69f7f2a3f51cceeca427e053a398a39a12"
+        }
+      },
+      "samples": [
+        {
+          "arm": "baseline",
+          "selections": [
+            {
+              "session": null,
+              "trusted": null
+            },
+            {
+              "session": null,
+              "trusted": null
+            }
+          ]
+        },
+        {
+          "arm": "candidate",
+          "selections": [
+            {
+              "session": null,
+              "trusted": null
+            },
+            {
+              "session": null,
+              "trusted": null
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "warmupCorrection": "All scenarios explicitly select A before five alternating warmup selections. Earlier reports had B selected at preload end, so the first warmup selected B again. The first session-tab caller report precedes this correction; final caller and existing-scenario checks use it.",
+  "remaining": "Dense timing comparisons, retained subscription evidence, Dockview stream/idle workload, stress, and final package audit remain open."
+}

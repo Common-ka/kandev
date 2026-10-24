@@ -199,9 +199,32 @@ function validateNavigationLayouts(sample, scenario) {
     throw new Error("Incompatible-layout samples must restore both layouts");
 }
 
+function validateNavigationSessions(sample, scenario) {
+  if (scenario !== "session-tabs") return;
+  const first = sample.selections[0]?.session ?? {};
+  const sessionIds = new Set();
+  for (const selection of sample.selections) {
+    const session = selection.session;
+    const event = selection.browserEventReadiness;
+    if (
+      !session?.environmentId ||
+      !session.taskId ||
+      !session.sessionId ||
+      session.environmentId !== first.environmentId ||
+      session.taskId !== first.taskId ||
+      (event && (event.sessionId !== session.sessionId || event.taskId !== session.taskId))
+    )
+      throw new Error("Invalid or incomplete shared-environment session measurement");
+    sessionIds.add(session.sessionId);
+  }
+  if (sessionIds.size !== 2)
+    throw new Error("Session-tab samples must select two different sessions");
+}
+
 function navigationMetrics(report, sample) {
   const { scenario, readiness } = navigationIdentity(report, sample);
   validateNavigationLayouts(sample, scenario);
+  validateNavigationSessions(sample, scenario);
   return {
     scenario: readiness === "driver" ? scenario : `${readiness}-${scenario}`,
     values: {

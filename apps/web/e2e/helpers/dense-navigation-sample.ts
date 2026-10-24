@@ -1,5 +1,11 @@
 import fs from "node:fs";
-import { expect, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import {
+  expect,
+  type Browser,
+  type BrowserContext,
+  type Page,
+  type CDPSession,
+} from "@playwright/test";
 import type { BackendContext } from "../fixtures/backend";
 import { routeNavigationResponses } from "./navigation-response-hold";
 import { beginDenseWindow, endDenseWindow } from "./dense-measurement";
@@ -11,7 +17,11 @@ import {
 } from "../tests/task/task-navigation-profile-helpers";
 import type { ApiClient } from "./api-client";
 import type { SeedData } from "../fixtures/test-base";
-import { waitForSessionDone } from "./session";
+import {
+  startNavigationSession,
+  waitForNavigationSession,
+  assertSingleVisibleNavigationSession,
+} from "./navigation-session-tabs";
 import { BROWSER_READINESS_VERSION } from "./navigation-browser-readiness";
 import {
   persistNavigationLayout,
@@ -52,26 +62,10 @@ export async function runDenseNavigationSample(options: {
   } = options;
   const selectionOptions = (index: number) => ({
     browserReadiness: navigationReadiness === BROWSER_READINESS_VERSION,
+    sessionTab: navigationScenario === "session-tabs",
     expectedLayoutColumns: navigationScenario === "incompatible-layout" ? 2 + index : undefined,
   });
-  for (const item of items) {
-    await options.api.launchSession({
-      task_id: item.task.id,
-      session_id: item.task.session_id!,
-      agent_profile_id: options.seed.agentProfileId,
-      executor_profile_id: options.seed.worktreeExecutorProfileId,
-      workflow_step_id: options.seed.startStepId,
-      prompt: "/e2e:simple-message",
-      intent: "start_created",
-    });
-    await waitForSessionDone(
-      options.api,
-      item.task.id,
-      item.task.session_id!,
-      "Navigation sample agents settled",
-      60_000,
-    );
-  }
+  for (const item of items) await startNavigationSession(options.api, options.seed, item);
   const context = await browser.newContext({
     baseURL: backend.frontendUrl,
     viewport: { width: 1470, height: 956 },
@@ -99,6 +93,7 @@ export async function runDenseNavigationSample(options: {
     await preloadNavigationFiles(page, items, navigationScenario);
     if (navigationScenario === "incompatible-layout")
       await prepareThreeColumnLayout(page, items[1].task.session_id!);
+    await activateNavigationItem(page, items[0], navigationScenario);
     for (let i = 0; i < 5; i++)
       await measureSelection(page, gate, items[(i + 1) % 2], selectionOptions((i + 1) % 2));
     if (profileTimedSwitches) {
@@ -111,6 +106,7 @@ export async function runDenseNavigationSample(options: {
     for (let i = 0; i < switchCount; i++)
       selections.push(await measureSelection(page, gate, items[i % 2], selectionOptions(i % 2)));
     const measured = await endDenseWindow(page, cdp, before);
+    await verifyFinalNavigationSession(page, items[(switchCount - 1) % 2], navigationScenario);
     if (profileTimedSwitches) {
       const profile = await cdp.send("Profiler.stop");
       fs.writeFileSync(profileFile, JSON.stringify(profile.profile));
@@ -138,13 +134,8 @@ export async function runDenseNavigationSample(options: {
         })),
       };
     }
-    if (!profileTimedSwitches) {
-      await cdp.send("Profiler.enable");
-      await cdp.send("Profiler.start");
-      for (const item of items) await selectNavigationTask(page, item.task.title);
-      const profile = await cdp.send("Profiler.stop");
-      fs.writeFileSync(profileFile, JSON.stringify(profile.profile));
-    }
+    if (!profileTimedSwitches)
+      await profileNavigationSelections(page, cdp, items, navigationScenario, profileFile);
     return {
       cpuRate,
       sample,
@@ -168,16 +159,55 @@ async function preloadNavigationFiles(
   scenario: NavigationScenario,
 ) {
   for (const item of items) {
-    await selectNavigationTask(page, item.task.title);
+    await activateNavigationItem(page, item, scenario);
     const session = new SessionPage(page);
     await session.clickTab("Files");
     await expect(session.fileTreeNode("navigation-available")).toBeVisible();
     await saveExpandedPaths(page, item.task.session_id!, PROFILE_FOLDERS);
     await page.reload();
     await session.waitForLoad();
+    if (scenario === "session-tabs") {
+      await page.getByTestId(`session-tab-${item.task.session_id}`).click();
+      await waitForNavigationSession(page, item);
+    }
     await session.clickTab("Files");
     await expect(session.fileTreeNode(item.marker)).toBeVisible();
     if (scenario === "incompatible-layout")
       await persistNavigationLayout(page, item.task.session_id!, 2);
   }
+}
+
+async function profileNavigationSelections(
+  page: Page,
+  cdp: CDPSession,
+  items: Awaited<ReturnType<typeof prepareProfileTask>>[],
+  scenario: NavigationScenario,
+  profileFile: string,
+) {
+  await cdp.send("Profiler.enable");
+  await cdp.send("Profiler.start");
+  for (const item of items) {
+    await activateNavigationItem(page, item, scenario);
+  }
+  const profile = await cdp.send("Profiler.stop");
+  fs.writeFileSync(profileFile, JSON.stringify(profile.profile));
+}
+
+async function verifyFinalNavigationSession(
+  page: Page,
+  item: Awaited<ReturnType<typeof prepareProfileTask>>,
+  scenario: NavigationScenario,
+) {
+  if (scenario === "session-tabs")
+    await assertSingleVisibleNavigationSession(page, item.task.session_id!);
+}
+
+async function activateNavigationItem(
+  page: Page,
+  item: Awaited<ReturnType<typeof prepareProfileTask>>,
+  scenario: NavigationScenario,
+) {
+  if (scenario === "session-tabs")
+    await page.getByTestId(`session-tab-${item.task.session_id}`).click();
+  else await selectNavigationTask(page, item.task.title);
 }

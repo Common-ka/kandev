@@ -25,7 +25,13 @@ type ProbeWindow = Window & {
 
 export async function armNavigationReadiness(
   page: Page,
-  destination: { taskId: string; sessionId: string; title: string; transcriptMarker: string },
+  destination: {
+    taskId: string;
+    sessionId: string;
+    title: string;
+    transcriptMarker: string;
+    sessionTab?: boolean;
+  },
 ) {
   await page.evaluate((destination) => {
     const win = window as ProbeWindow;
@@ -44,10 +50,17 @@ export async function armNavigationReadiness(
         `[data-testid="session-chat"][data-session-id="${destination.sessionId}"]`,
       );
     }
+    function matchesDestination(target: EventTarget | null) {
+      if (!(target instanceof Element)) return false;
+      if (destination.sessionTab)
+        return Boolean(target.closest(`[data-testid="session-tab-${destination.sessionId}"]`));
+      return (
+        target.closest("[data-task-row-id]")?.getAttribute("data-task-row-id") ===
+        destination.taskId
+      );
+    }
     function onPointerDown(event: PointerEvent) {
-      const row =
-        event.target instanceof Element ? event.target.closest("[data-task-row-id]") : null;
-      if (row?.getAttribute("data-task-row-id") !== destination.taskId) return;
+      if (!matchesDestination(event.target)) return;
       document.removeEventListener("pointerdown", onPointerDown, true);
       const eventAt = event.timeStamp;
       let headerMs: number | undefined;

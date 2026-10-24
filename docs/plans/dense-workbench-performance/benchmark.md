@@ -185,8 +185,8 @@ and 1x CPU. Run both with and without `KANDEV_DENSE_NAV_READINESS=1`. The new
 browser regression and summary regressions must also pass. The initial paired
 smokes pass in both modes; [measurement evidence](evidence/navigation-browser-readiness.json)
 records the source, failures before implementation, and both caller reports.
-They establish correctness only. Same-environment session-tab measurements remain
-open in the [completion audit](completion-audit.md).
+They establish harness correctness only. Dense measurements remain open in
+the [completion audit](completion-audit.md).
 
 ### Incompatible saved layouts
 
@@ -210,6 +210,32 @@ fast path compares structural component counts but ignores their arrangement.
 The initial browser regression reproduced the inherited arrangement even after
 explicit persistence. Those failures are preserved separately; closing the
 terminal creates the intended rebuild workload and does not resolve that issue.
+
+### Same-environment session tabs
+
+Set `KANDEV_DENSE_NAV_SCENARIO=session-tabs` to measure native Dockview tab
+selection between two sessions of one task. The fixture creates the sibling
+through `session.launch` and requires both backend session records to have the
+same nonempty task-environment ID. The default fixture retains 1,000 tasks,
+1,000 seeded primary-session messages, and 100 seeded sibling messages. Set
+`KANDEV_DENSE_NAV_SIBLING_MESSAGES=10` for the small smoke only. The second task
+created by the shared navigation seed remains prepared but is not a measured
+destination and receives no seeded profile history in this scenario.
+
+The browser recorder starts at the selected session tab's trusted pointerdown.
+Readiness requires the destination session's visible chat, seeded transcript,
+and editable composer. The driver gate also checks the active task/session and
+nonempty environment mapping. Every measured selection records those identities;
+the summary requires two sessions sharing one task and environment. After timing,
+the test requires exactly one detailed chat view. The focused regression also
+checks draft retention over four tab selections.
+
+All navigation scenarios first select destination A before their five warmup
+switches, then alternate 40 measured selections. Earlier reports started with B
+already selected, so their first warmup was a repeat selection; preserve their
+original scope. This change affects warmup only. Browser-event spans and driver
+spans remain separate. Session-tab driver spans retain the existing Files marker
+and two-frame opportunity gate; do not describe them as native input latency.
 
 ## Run order and comparison
 

@@ -9,6 +9,7 @@ import type { ApiClient } from "../../helpers/api-client";
 import type { CreateTaskResponse } from "../../../lib/types/http";
 import { GitHelper, makeGitEnv } from "../../helpers/git-helper";
 import { NavigationResponseGate } from "../../helpers/navigation-response-hold";
+import { waitForNavigationSession } from "../../helpers/navigation-session-tabs";
 import { waitForNavigationLayout } from "../../helpers/navigation-layout";
 import { armNavigationReadiness } from "../../helpers/navigation-browser-readiness";
 import { SessionPage } from "../../pages/session-page";
@@ -117,7 +118,11 @@ export async function measureSelection(
   page: Page,
   gate: NavigationResponseGate,
   item: Awaited<ReturnType<typeof prepareProfileTask>>,
-  options: { browserReadiness?: boolean; expectedLayoutColumns?: number } = {},
+  options: {
+    browserReadiness?: boolean;
+    expectedLayoutColumns?: number;
+    sessionTab?: boolean;
+  } = {},
 ) {
   const readiness = options.browserReadiness
     ? await armNavigationReadiness(page, {
@@ -125,13 +130,16 @@ export async function measureSelection(
         sessionId: item.task.session_id!,
         title: item.task.title,
         transcriptMarker: `Profile conversation ${item.task.title}`,
+        sessionTab: options.sessionTab,
       })
     : undefined;
   try {
     const cursor = gate.requests.length;
     const start = performance.now();
-    await selectNavigationTask(page, item.task.title);
-    await expect(page).toHaveURL(new RegExp(`/t/${item.task.id}$`));
+    if (options.sessionTab) await page.getByTestId(`session-tab-${item.task.session_id}`).click();
+    else await selectNavigationTask(page, item.task.title);
+    await expect(page).toHaveURL(new RegExp(`/t/${item.task.id}(?:\\?|$)`));
+    const session = options.sessionTab ? await waitForNavigationSession(page, item) : undefined;
     const selectedMs = performance.now() - start;
     await new SessionPage(page).clickTab("Files");
     await expect(new SessionPage(page).fileTreeNode(item.marker)).toBeVisible();
@@ -169,6 +177,7 @@ export async function measureSelection(
       counts,
       keys,
       ...(layout ? { layout } : {}),
+      ...(session ? { session } : {}),
       ...(browserEventReadiness ? { browserEventReadiness } : {}),
     };
   } finally {

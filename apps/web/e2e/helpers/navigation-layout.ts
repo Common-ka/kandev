@@ -1,13 +1,13 @@
 import { expect, type Page } from "@playwright/test";
 import { snapshotPersistedLayouts } from "./dockview-persistence";
 
-export type NavigationScenario = "task-switch" | "incompatible-layout";
+export type NavigationScenario = "task-switch" | "incompatible-layout" | "session-tabs";
 
 export function readNavigationScenario(
   value = process.env.KANDEV_DENSE_NAV_SCENARIO,
 ): NavigationScenario {
   if (value === undefined || value === "task-switch") return "task-switch";
-  if (value === "incompatible-layout") return value;
+  if (value === "incompatible-layout" || value === "session-tabs") return value;
   throw new Error(`Unsupported navigation scenario: ${value}`);
 }
 
