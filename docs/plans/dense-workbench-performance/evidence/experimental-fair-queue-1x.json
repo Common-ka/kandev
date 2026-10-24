@@ -1,5 +1,5 @@
 {
-  "status": "experimental; idle CPU regressions unresolved",
+  "status": "rejected: repeated idle CPU regressions; warm 4x final-display gate failed",
   "rawReport": "matched-dense-1792802586206.json",
   "rawSha256": "bebd46aef6042e2585ac29031186012388cc7f52f4f02be9357fcab53d9aeefd",
   "sourceRevision": "e431289789675530fdff9fea09b775fc36f01f6e",
@@ -2388,5 +2388,20 @@
       "sha256": "d9379dea89fdd8981fd696025f27867eed84a96a40040ec5095ae9d21bacfbcf",
       "content": "import { describe, expect, it, vi } from \"vitest\";\nimport type { StoreApi } from \"zustand\";\nimport type { AppState } from \"@/lib/state/store\";\nimport { createMessageUpdateScheduler } from \"./messages\";\n\nfunction makePayload(session_id: string, message_id: string, content: string) {\n  return {\n    task_id: \"task\",\n    session_id,\n    message_id,\n    content,\n    author_type: \"agent\" as const,\n    author_id: \"agent\",\n    type: \"message\",\n    created_at: \"2026-08-02T00:00:00Z\",\n  };\n}\n\nfunction makeStore() {\n  const updateMessages = vi.fn();\n  const store = { getState: () => ({ messages: { bySession: {} }, updateMessages }) };\n  return { store: store as unknown as StoreApi<AppState>, updateMessages };\n}\n\nfunction makeFrameScheduler() {\n  let callback: (() => void) | null = null;\n  return {\n    schedule: (next: () => void) => {\n      callback = next;\n      return 1;\n    },\n    cancel: () => {\n      callback = null;\n    },\n    runFrame: () => {\n      const next = callback;\n      callback = null;\n      next?.();\n    },\n  };\n}\n\ndescribe(\"hidden-document message scheduling\", () => {\n  it(\"flushes before frame suspension, publishes while hidden, and removes its listener\", () => {\n    const doc = Object.assign(new EventTarget(), { visibilityState: \"visible\" });\n    const remove = vi.spyOn(doc, \"removeEventListener\");\n    vi.stubGlobal(\"document\", doc);\n    const { store, updateMessages } = makeStore();\n    const frame = makeFrameScheduler();\n    const scheduler = createMessageUpdateScheduler(store, frame);\n    try {\n      scheduler.enqueue(makePayload(\"session-1\", \"message-1\", \"pending\"));\n      doc.visibilityState = \"hidden\";\n      doc.dispatchEvent(new Event(\"visibilitychange\"));\n      expect(updateMessages).toHaveBeenCalledExactlyOnceWith([\n        expect.objectContaining({ content: \"pending\" }),\n      ]);\n      frame.runFrame();\n      expect(updateMessages).toHaveBeenCalledTimes(1);\n      scheduler.enqueue(makePayload(\"session-2\", \"message-2\", \"hidden\"));\n      expect(updateMessages).toHaveBeenCalledTimes(2);\n      doc.visibilityState = \"visible\";\n      doc.dispatchEvent(new Event(\"visibilitychange\"));\n      scheduler.enqueue(makePayload(\"session-1\", \"message-1\", \"foreground\"));\n      expect(updateMessages).toHaveBeenCalledTimes(2);\n      frame.runFrame();\n      expect(updateMessages).toHaveBeenCalledTimes(3);\n      scheduler.dispose();\n      expect(remove).toHaveBeenCalledWith(\"visibilitychange\", expect.any(Function));\n    } finally {\n      scheduler.dispose();\n      vi.unstubAllGlobals();\n    }\n  });\n});\n"
     }
-  ]
+  ],
+  "warmStressFailure": {
+    "rawReport": "matched-dense-1792804645714.json",
+    "completeSamples": 0,
+    "storedTicksPerChat": 300,
+    "displayedTicksPerChat": [
+      245,
+      246,
+      245,
+      245,
+      245,
+      245
+    ],
+    "httpFailuresAtDeadline": 0,
+    "pairedStressGain": null
+  }
 }

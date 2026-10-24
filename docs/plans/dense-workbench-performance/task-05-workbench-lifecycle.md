@@ -67,7 +67,7 @@ Evidence under the diagnostic directory: `matched-dense-1792793604258.json`,
 `containment-benchmark-logs/kandev-run.e2e.qMzO7hcR.log`. The ordered-update
 assertion remains as benchmark validation; no containment production code remains.
 
-## Session-fair publication experiment (in progress)
+## Session-fair publication experiment (rejected)
 
 The candidate-first 4x stress run reproduced a display backlog without HTTP
 failures: all 300 unique ticks were stored per chat, while the browser displayed
@@ -166,6 +166,26 @@ used ten tasks, one chat, ten seeded messages, and one-second windows. It
 verifies mode labels and final content, not performance. The dense warm stress
 comparison is pending; idle regressions and fully throttled cold loading remain
 unresolved.
+
+The warm 4x attempt failed the final-visible gate in its first candidate sample
+(`matched-dense-1792804645714.json`, 4.4 minutes). No complete sample or control
+sample ran, so there is no paired stress comparison. At the five-second progress
+observations, every message-body node stayed connected and every chat advanced.
+At 56.3 seconds, chats displayed ticks 221–222. After the final-display timeout,
+storage inspection found all 300 unique ticks per chat. About 1.9 seconds later,
+the mounted browser chats showed only 245–246 unique ticks. HTTP failures at the
+stream deadline were zero. These observations prove a remaining display backlog;
+they do not establish when the producer finished.
+
+The production queue and its experiment-specific tests are removed. The 1x
+frame-gap gain came with repeated idle CPU regressions, and the queue did not
+resolve the demonstrated stress backlog. The complete source/test patch remains
+in `rejected-session-fair-queue.patch`. Candidate assets are retained at
+`/tmp/kandev-dense-rejected-fair-timestamp-5936a872-dist`; current assets are
+restored exactly from the validated timestamp build. Browser failure artifacts
+are in `fair-queue-warm-4x-failure/`, and the log is
+`fair-queue-warm-4x-logs/kandev-run.e2e.tPkvZVx6.log`. The timestamp correctness
+fix and the validated measurement helpers remain in the branch.
 
 ## Summary
 
