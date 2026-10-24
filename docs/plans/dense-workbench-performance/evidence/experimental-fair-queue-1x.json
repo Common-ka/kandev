@@ -1,0 +1,2392 @@
+{
+  "status": "experimental; idle CPU regressions unresolved",
+  "rawReport": "matched-dense-1792802586206.json",
+  "rawSha256": "bebd46aef6042e2585ac29031186012388cc7f52f4f02be9357fcab53d9aeefd",
+  "sourceRevision": "e431289789675530fdff9fea09b775fc36f01f6e",
+  "builds": {
+    "baseline": {
+      "binary": "/tmp/kandev-dense-css-reduced-5936a872/apps/backend/bin/kandev",
+      "assets": "/tmp/kandev-dense-css-reduced-5936a872/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "01e8b16fd50096caa2f324e177e53e555e9475578006facde9a2962ba1aef39e"
+    },
+    "candidate": {
+      "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+      "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "069cb273e9996ff9beea9e3151d1eabf245f27765f79fd88ef13a4277672c1e5"
+    }
+  },
+  "fixture": {
+    "threads": [
+      {
+        "taskId": "8f8db0f7-7438-4eb3-b205-5a2da39c884d",
+        "sessionId": "64eedf8b-7f92-44c0-948d-0710380cf18a",
+        "title": "Dense task 0000",
+        "messageId": "1cebed0b-89da-433b-a2a0-3d33c7653966",
+        "content": "Dense task 0000 message 0119\n\nDeterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. \n\nMeasured conversation text.",
+        "siblings": [
+          "162d8afe-3a45-482c-ab34-743c414928e3",
+          "4076a9dd-e66f-423d-8eeb-1bce9921b8af"
+        ]
+      },
+      {
+        "taskId": "adb32d27-f169-4c7b-84ef-ca748ceb8f75",
+        "sessionId": "ec4d25db-a7e6-440a-a53d-689cae9ef4fd",
+        "title": "Dense task 0001",
+        "messageId": "678c0cba-9cea-41b9-9ca0-dd542dd01c36",
+        "content": "Dense task 0001 message 0119\n\nDeterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. \n\nMeasured conversation text.",
+        "siblings": [
+          "963a3b14-cab1-4480-9032-6652588feaff",
+          "f21bfb3a-b9ba-4e0e-9bc4-a377500c40ad"
+        ]
+      },
+      {
+        "taskId": "4d070904-792d-4357-b408-8892095fe6bc",
+        "sessionId": "a7635d16-5698-403b-8bf7-0768a32b20c9",
+        "title": "Dense task 0002",
+        "messageId": "70831c4f-0cee-46c5-82c8-c9a771a5576e",
+        "content": "Dense task 0002 message 0119\n\nDeterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. \n\nMeasured conversation text.",
+        "siblings": [
+          "9843f39b-3dfa-4292-a14a-92d2e743e95e",
+          "88cf9266-e7ba-4ccc-ba8d-48c5a0fb00e0"
+        ]
+      },
+      {
+        "taskId": "a7436c26-3e59-41f0-904c-af2d4db105fd",
+        "sessionId": "060a8b87-942b-4315-aed5-5ed8bf04ce7b",
+        "title": "Dense task 0003",
+        "messageId": "310c892b-9205-4677-a5e4-1cc4466d421e",
+        "content": "Dense task 0003 message 0119\n\nDeterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. \n\nMeasured conversation text.",
+        "siblings": [
+          "84781299-14bd-4ed8-9818-9684757cce47",
+          "8ba884f7-4393-45a1-a691-b4fc60305b6c"
+        ]
+      },
+      {
+        "taskId": "b3bd0e6b-1b2b-4aed-ac02-298db5eec2ad",
+        "sessionId": "7b2a6872-1921-4acd-aac7-cb0be8a5ebf8",
+        "title": "Dense task 0004",
+        "messageId": "84dfc570-3134-4bbf-b76a-54449f22b218",
+        "content": "Dense task 0004 message 0119\n\nDeterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. \n\nMeasured conversation text.",
+        "siblings": [
+          "a183b182-85c0-4ab0-b58b-d62a7ddf87e6",
+          "49646e0f-c033-475d-b4c3-8b5003f9a2b3"
+        ]
+      },
+      {
+        "taskId": "0ebb0986-0f17-485b-91a5-926b30273c35",
+        "sessionId": "3fc835b1-b73e-49e4-8e4e-8a01d3908af8",
+        "title": "Dense task 0005",
+        "messageId": "f2702b81-1549-4763-b603-26a6bf065e9a",
+        "content": "Dense task 0005 message 0119\n\nDeterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. Deterministic performance fixture content. \n\nMeasured conversation text.",
+        "siblings": [
+          "825c3b37-2e20-4bf3-8933-4184ea827042",
+          "9a45207d-160b-4ddf-b55d-8c8b1fd6a131"
+        ]
+      }
+    ],
+    "manifest": [
+      {
+        "title": "Dense task 0000",
+        "messages": 120,
+        "siblings": 2
+      },
+      {
+        "title": "Dense task 0001",
+        "messages": 120,
+        "siblings": 2
+      },
+      {
+        "title": "Dense task 0002",
+        "messages": 120,
+        "siblings": 2
+      },
+      {
+        "title": "Dense task 0003",
+        "messages": 120,
+        "siblings": 2
+      },
+      {
+        "title": "Dense task 0004",
+        "messages": 120,
+        "siblings": 2
+      },
+      {
+        "title": "Dense task 0005",
+        "messages": 120,
+        "siblings": 2
+      }
+    ],
+    "workload": {
+      "tasks": 1000,
+      "columns": 6,
+      "messages": 120,
+      "durationMs": 60000
+    }
+  },
+  "sampleCount": 4,
+  "comparisons": [
+    {
+      "group": "1x/cold",
+      "metric": "readyMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 16005.992610000008,
+        "min": 14739.404310000013,
+        "max": 17272.580910000004,
+        "values": [
+          17272.580910000004,
+          14739.404310000013
+        ]
+      },
+      "candidate": {
+        "median": 21293.185728499957,
+        "min": 16363.295576000004,
+        "max": 26223.07588099991,
+        "values": [
+          16363.295576000004,
+          26223.07588099991
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        909.2853340000001,
+        -11483.671570999897
+      ],
+      "pairedPercentReduction": [
+        5.2643281206085835,
+        -77.91136825800179
+      ],
+      "medianPairedPercentReduction": -36.3235200686966
+    },
+    {
+      "group": "1x/cold",
+      "metric": "documentMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 8961.722878500019,
+        "min": 8938.947579000029,
+        "max": 8984.498178000009,
+        "values": [
+          8984.498178000009,
+          8938.947579000029
+        ]
+      },
+      "candidate": {
+        "median": 12204.500433499954,
+        "min": 10278.967701999994,
+        "max": 14130.033164999913,
+        "values": [
+          10278.967701999994,
+          14130.033164999913
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -1294.4695239999855,
+        -5191.085585999885
+      ],
+      "pairedPercentReduction": [
+        -14.407811080308333,
+        -58.07267063737043
+      ],
+      "medianPairedPercentReduction": -36.24024085883938
+    },
+    {
+      "group": "1x/cold",
+      "metric": "assetEncodedBytes",
+      "pairs": 2,
+      "baseline": {
+        "median": 4164984,
+        "min": 4164984,
+        "max": 4164984,
+        "values": [
+          4164984,
+          4164984
+        ]
+      },
+      "candidate": {
+        "median": 4165120,
+        "min": 4165120,
+        "max": 4165120,
+        "values": [
+          4165120,
+          4165120
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -136,
+        -136
+      ],
+      "pairedPercentReduction": [
+        -0.0032653186662901946,
+        -0.0032653186662901946
+      ],
+      "medianPairedPercentReduction": -0.0032653186662901946
+    },
+    {
+      "group": "1x/cold",
+      "metric": "assetDecodedBytes",
+      "pairs": 2,
+      "baseline": {
+        "median": 14686530,
+        "min": 14686530,
+        "max": 14686530,
+        "values": [
+          14686530,
+          14686530
+        ]
+      },
+      "candidate": {
+        "median": 14687211,
+        "min": 14687211,
+        "max": 14687211,
+        "values": [
+          14687211,
+          14687211
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -681,
+        -681
+      ],
+      "pairedPercentReduction": [
+        -0.004636901977526345,
+        -0.004636901977526345
+      ],
+      "medianPairedPercentReduction": -0.004636901977526345
+    },
+    {
+      "group": "1x/idle",
+      "metric": "elapsedMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 60049.516582000026,
+        "min": 60039.861267,
+        "max": 60059.17189700005,
+        "values": [
+          60039.861267,
+          60059.17189700005
+        ]
+      },
+      "candidate": {
+        "median": 60056.685981999995,
+        "min": 60036.290555000014,
+        "max": 60077.08140899998,
+        "values": [
+          60036.290555000014,
+          60077.08140899998
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        3.570711999986088,
+        -17.9095119999256
+      ],
+      "pairedPercentReduction": [
+        0.005947235594211267,
+        -0.029819778452223677
+      ],
+      "medianPairedPercentReduction": -0.011936271429006204
+    },
+    {
+      "group": "1x/idle",
+      "metric": "mainThreadMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 15404.662,
+        "min": 15111.452000000001,
+        "max": 15697.872,
+        "values": [
+          15111.452000000001,
+          15697.872
+        ]
+      },
+      "candidate": {
+        "median": 16665.146500000003,
+        "min": 16359.726999999999,
+        "max": 16970.566000000003,
+        "values": [
+          16359.726999999999,
+          16970.566000000003
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -1248.2749999999978,
+        -1272.6940000000031
+      ],
+      "pairedPercentReduction": [
+        -8.260457036160375,
+        -8.107430102627944
+      ],
+      "medianPairedPercentReduction": -8.18394356939416
+    },
+    {
+      "group": "1x/idle",
+      "metric": "mainThreadMsPerSecond",
+      "pairs": 2,
+      "baseline": {
+        "median": 256.5318778580848,
+        "min": 251.6903217480581,
+        "max": 261.3734339681115,
+        "values": [
+          251.6903217480581,
+          261.3734339681115
+        ]
+      },
+      "candidate": {
+        "median": 277.4885831299033,
+        "min": 272.4972986965716,
+        "max": 282.47986756323496,
+        "values": [
+          272.4972986965716,
+          282.47986756323496
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -20.806976948513494,
+        -21.106433595123463
+      ],
+      "pairedPercentReduction": [
+        -8.266895923531484,
+        -8.075202316735266
+      ],
+      "medianPairedPercentReduction": -8.171049120133375
+    },
+    {
+      "group": "1x/idle",
+      "metric": "mainThreadCpuMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 15730.330999999998,
+        "min": 15439.506,
+        "max": 16021.155999999997,
+        "values": [
+          15439.506,
+          16021.155999999997
+        ]
+      },
+      "candidate": {
+        "median": 17024.314,
+        "min": 16686.439,
+        "max": 17362.189000000002,
+        "values": [
+          16686.439,
+          17362.189000000002
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -1246.932999999999,
+        -1341.033000000005
+      ],
+      "pairedPercentReduction": [
+        -8.076249330775214,
+        -8.37038850380088
+      ],
+      "medianPairedPercentReduction": -8.223318917288047
+    },
+    {
+      "group": "1x/idle",
+      "metric": "rendererCpuMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 24080,
+        "min": 23780,
+        "max": 24380,
+        "values": [
+          23780,
+          24380
+        ]
+      },
+      "candidate": {
+        "median": 24735,
+        "min": 24200,
+        "max": 25270,
+        "values": [
+          25270,
+          24200
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -1490,
+        180
+      ],
+      "pairedPercentReduction": [
+        -6.2657695542472664,
+        0.7383100902379
+      ],
+      "medianPairedPercentReduction": -2.763729732004683
+    },
+    {
+      "group": "1x/idle",
+      "metric": "scriptMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 1765.3305,
+        "min": 1726.4210000000003,
+        "max": 1804.24,
+        "values": [
+          1804.24,
+          1726.4210000000003
+        ]
+      },
+      "candidate": {
+        "median": 2026.6,
+        "min": 1810.164,
+        "max": 2243.036,
+        "values": [
+          1810.164,
+          2243.036
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -5.923999999999978,
+        -516.6149999999998
+      ],
+      "pairedPercentReduction": [
+        -0.3283376934332449,
+        -29.924045177856367
+      ],
+      "medianPairedPercentReduction": -15.126191435644806
+    },
+    {
+      "group": "1x/idle",
+      "metric": "styleMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 2126.5215,
+        "min": 2066.5930000000003,
+        "max": 2186.45,
+        "values": [
+          2066.5930000000003,
+          2186.45
+        ]
+      },
+      "candidate": {
+        "median": 2315.2655,
+        "min": 2302.584,
+        "max": 2327.947,
+        "values": [
+          2302.584,
+          2327.947
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -235.99099999999953,
+        -141.4970000000003
+      ],
+      "pairedPercentReduction": [
+        -11.41932639856999,
+        -6.471540625214403
+      ],
+      "medianPairedPercentReduction": -8.945433511892196
+    },
+    {
+      "group": "1x/idle",
+      "metric": "layoutMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 150.4105,
+        "min": 132.14999999999998,
+        "max": 168.67100000000002,
+        "values": [
+          132.14999999999998,
+          168.67100000000002
+        ]
+      },
+      "candidate": {
+        "median": 153.50799999999998,
+        "min": 152.43799999999996,
+        "max": 154.57800000000003,
+        "values": [
+          154.57800000000003,
+          152.43799999999996
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -22.428000000000054,
+        16.23300000000006
+      ],
+      "pairedPercentReduction": [
+        -16.971623155505153,
+        9.624061041910025
+      ],
+      "medianPairedPercentReduction": -3.673781056797564
+    },
+    {
+      "group": "1x/idle",
+      "metric": "styleRecalculations",
+      "pairs": 2,
+      "baseline": {
+        "median": 3597.5,
+        "min": 3597,
+        "max": 3598,
+        "values": [
+          3597,
+          3598
+        ]
+      },
+      "candidate": {
+        "median": 3599,
+        "min": 3599,
+        "max": 3599,
+        "values": [
+          3599,
+          3599
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -2,
+        -1
+      ],
+      "pairedPercentReduction": [
+        -0.055601890464275786,
+        -0.027793218454697052
+      ],
+      "medianPairedPercentReduction": -0.04169755445948642
+    },
+    {
+      "group": "1x/idle",
+      "metric": "layouts",
+      "pairs": 2,
+      "baseline": {
+        "median": 328.5,
+        "min": 298,
+        "max": 359,
+        "values": [
+          298,
+          359
+        ]
+      },
+      "candidate": {
+        "median": 330,
+        "min": 300,
+        "max": 360,
+        "values": [
+          360,
+          300
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -62,
+        59
+      ],
+      "pairedPercentReduction": [
+        -20.80536912751678,
+        16.434540389972145
+      ],
+      "medianPairedPercentReduction": -2.1854143687723173
+    },
+    {
+      "group": "1x/idle",
+      "metric": "frameGapP95Ms",
+      "pairs": 2,
+      "baseline": {
+        "median": 16.70000000001164,
+        "min": 16.70000000001164,
+        "max": 16.70000000001164,
+        "values": [
+          16.70000000001164,
+          16.70000000001164
+        ]
+      },
+      "candidate": {
+        "median": 16.70000000001164,
+        "min": 16.70000000001164,
+        "max": 16.70000000001164,
+        "values": [
+          16.70000000001164,
+          16.70000000001164
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/idle",
+      "metric": "frameGapMaxMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 50.04999999999927,
+        "min": 50,
+        "max": 50.099999999998545,
+        "values": [
+          50,
+          50.099999999998545
+        ]
+      },
+      "candidate": {
+        "median": 58.399999999999636,
+        "min": 50.099999999998545,
+        "max": 66.70000000000073,
+        "values": [
+          50.099999999998545,
+          66.70000000000073
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -0.09999999999854481,
+        -16.600000000002183
+      ],
+      "pairedPercentReduction": [
+        -0.19999999999708962,
+        -33.13373253493546
+      ],
+      "medianPairedPercentReduction": -16.666866267466276
+    },
+    {
+      "group": "1x/idle",
+      "metric": "longTasks",
+      "pairs": 2,
+      "baseline": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "candidate": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        null,
+        null
+      ],
+      "medianPairedPercentReduction": null
+    },
+    {
+      "group": "1x/idle",
+      "metric": "longTaskMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "candidate": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        null,
+        null
+      ],
+      "medianPairedPercentReduction": null
+    },
+    {
+      "group": "1x/idle",
+      "metric": "domNodes",
+      "pairs": 2,
+      "baseline": {
+        "median": 24541,
+        "min": 24541,
+        "max": 24541,
+        "values": [
+          24541,
+          24541
+        ]
+      },
+      "candidate": {
+        "median": 24541,
+        "min": 24541,
+        "max": 24541,
+        "values": [
+          24541,
+          24541
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/idle",
+      "metric": "mountedEditors",
+      "pairs": 2,
+      "baseline": {
+        "median": 6,
+        "min": 6,
+        "max": 6,
+        "values": [
+          6,
+          6
+        ]
+      },
+      "candidate": {
+        "median": 6,
+        "min": 6,
+        "max": 6,
+        "values": [
+          6,
+          6
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/idle",
+      "metric": "runningAnimations",
+      "pairs": 2,
+      "baseline": {
+        "median": 60,
+        "min": 60,
+        "max": 60,
+        "values": [
+          60,
+          60
+        ]
+      },
+      "candidate": {
+        "median": 60,
+        "min": 60,
+        "max": 60,
+        "values": [
+          60,
+          60
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/idle",
+      "metric": "historyRequests",
+      "pairs": 2,
+      "baseline": {
+        "median": 74,
+        "min": 73,
+        "max": 75,
+        "values": [
+          73,
+          75
+        ]
+      },
+      "candidate": {
+        "median": 74.5,
+        "min": 74,
+        "max": 75,
+        "values": [
+          74,
+          75
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -1,
+        0
+      ],
+      "pairedPercentReduction": [
+        -1.36986301369863,
+        0
+      ],
+      "medianPairedPercentReduction": -0.684931506849315
+    },
+    {
+      "group": "1x/idle",
+      "metric": "historyDecodedBytes",
+      "pairs": 2,
+      "baseline": {
+        "median": 13514439,
+        "min": 13514213,
+        "max": 13514665,
+        "values": [
+          13514213,
+          13514665
+        ]
+      },
+      "candidate": {
+        "median": 13697133,
+        "min": 13697016,
+        "max": 13697250,
+        "values": [
+          13697016,
+          13697250
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -182803,
+        -182585
+      ],
+      "pairedPercentReduction": [
+        -1.3526721829824644,
+        -1.351013880107276
+      ],
+      "medianPairedPercentReduction": -1.3518430315448702
+    },
+    {
+      "group": "1x/idle",
+      "metric": "websocketDecodedBytes",
+      "pairs": 2,
+      "baseline": {
+        "median": 13553638.5,
+        "min": 13552416,
+        "max": 13554861,
+        "values": [
+          13552416,
+          13554861
+        ]
+      },
+      "candidate": {
+        "median": 13736255,
+        "min": 13735458,
+        "max": 13737052,
+        "values": [
+          13737052,
+          13735458
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -184636,
+        -180597
+      ],
+      "pairedPercentReduction": [
+        -1.36238438961732,
+        -1.332341216925795
+      ],
+      "medianPairedPercentReduction": -1.3473628032715577
+    },
+    {
+      "group": "1x/idle",
+      "metric": "resets",
+      "pairs": 2,
+      "baseline": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "candidate": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        null,
+        null
+      ],
+      "medianPairedPercentReduction": null
+    },
+    {
+      "group": "1x/idle",
+      "metric": "changedNotifications",
+      "pairs": 2,
+      "baseline": {
+        "median": 72,
+        "min": 72,
+        "max": 72,
+        "values": [
+          72,
+          72
+        ]
+      },
+      "candidate": {
+        "median": 72,
+        "min": 72,
+        "max": 72,
+        "values": [
+          72,
+          72
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "elapsedMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 65169.019908999995,
+        "min": 61138.959598999994,
+        "max": 69199.080219,
+        "values": [
+          61138.959598999994,
+          69199.080219
+        ]
+      },
+      "candidate": {
+        "median": 62692.338231500005,
+        "min": 62355.17834300001,
+        "max": 63029.498120000004,
+        "values": [
+          62355.17834300001,
+          63029.498120000004
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -1216.2187440000125,
+        6169.582098999992
+      ],
+      "pairedPercentReduction": [
+        -1.989269611352538,
+        8.915699572125252
+      ],
+      "medianPairedPercentReduction": 3.463214980386357
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "mainThreadMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 64253.130999999994,
+        "min": 60221.397999999994,
+        "max": 68284.864,
+        "values": [
+          60221.397999999994,
+          68284.864
+        ]
+      },
+      "candidate": {
+        "median": 61819.7075,
+        "min": 61486.574,
+        "max": 62152.84099999999,
+        "values": [
+          61486.574,
+          62152.84099999999
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -1265.1760000000068,
+        6132.023000000008
+      ],
+      "pairedPercentReduction": [
+        -2.100874509754833,
+        8.98006181867772
+      ],
+      "medianPairedPercentReduction": 3.4395936544614436
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "mainThreadMsPerSecond",
+      "pairs": 2,
+      "baseline": {
+        "median": 985.8904010544916,
+        "min": 984.9921947475369,
+        "max": 986.7886073614461,
+        "values": [
+          984.9921947475369,
+          986.7886073614461
+        ]
+      },
+      "candidate": {
+        "median": 986.0806863909966,
+        "min": 986.0700527833945,
+        "max": 986.0913199985986,
+        "values": [
+          986.0700527833945,
+          986.0913199985986
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -1.0778580358576164,
+        0.6972873628475327
+      ],
+      "pairedPercentReduction": [
+        -0.10942807888278566,
+        0.07066228345623032
+      ],
+      "medianPairedPercentReduction": -0.01938289771327767
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "mainThreadCpuMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 64250.5035,
+        "min": 60280.33499999999,
+        "max": 68220.672,
+        "values": [
+          60280.33499999999,
+          68220.672
+        ]
+      },
+      "candidate": {
+        "median": 61838.212,
+        "min": 61538.33700000001,
+        "max": 62138.087,
+        "values": [
+          61538.33700000001,
+          62138.087
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -1258.002000000015,
+        6082.585000000006
+      ],
+      "pairedPercentReduction": [
+        -2.086919390876005,
+        8.916043805607787
+      ],
+      "medianPairedPercentReduction": 3.414562207365891
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "rendererCpuMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 79775,
+        "min": 75440,
+        "max": 84110,
+        "values": [
+          75440,
+          84110
+        ]
+      },
+      "candidate": {
+        "median": 75335,
+        "min": 74570.00000000001,
+        "max": 76100,
+        "values": [
+          74570.00000000001,
+          76100
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        869.9999999999854,
+        8010
+      ],
+      "pairedPercentReduction": [
+        1.1532343584305216,
+        9.523243371775056
+      ],
+      "medianPairedPercentReduction": 5.338238865102789
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "scriptMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 43090.336500000005,
+        "min": 42549.514,
+        "max": 43631.159,
+        "values": [
+          42549.514,
+          43631.159
+        ]
+      },
+      "candidate": {
+        "median": 37684.5695,
+        "min": 37227.219999999994,
+        "max": 38141.919,
+        "values": [
+          38141.919,
+          37227.219999999994
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        4407.595000000001,
+        6403.939000000006
+      ],
+      "pairedPercentReduction": [
+        10.358743462968816,
+        14.677444163241242
+      ],
+      "medianPairedPercentReduction": 12.518093813105029
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "styleMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 5313.7225,
+        "min": 5272.274,
+        "max": 5355.171,
+        "values": [
+          5272.274,
+          5355.171
+        ]
+      },
+      "candidate": {
+        "median": 5670.352500000001,
+        "min": 5582.425,
+        "max": 5758.280000000001,
+        "values": [
+          5758.280000000001,
+          5582.425
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -486.0060000000003,
+        -227.2539999999999
+      ],
+      "pairedPercentReduction": [
+        -9.21814761524155,
+        -4.243636664450116
+      ],
+      "medianPairedPercentReduction": -6.7308921398458335
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "layoutMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 1152.4535,
+        "min": 1140.923,
+        "max": 1163.9840000000002,
+        "values": [
+          1140.923,
+          1163.9840000000002
+        ]
+      },
+      "candidate": {
+        "median": 955.4575,
+        "min": 926.7940000000001,
+        "max": 984.121,
+        "values": [
+          984.121,
+          926.7940000000001
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        156.80200000000002,
+        237.19000000000005
+      ],
+      "pairedPercentReduction": [
+        13.74343404419054,
+        20.377427868424313
+      ],
+      "medianPairedPercentReduction": 17.060430956307428
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "styleRecalculations",
+      "pairs": 2,
+      "baseline": {
+        "median": 2433,
+        "min": 2371,
+        "max": 2495,
+        "values": [
+          2371,
+          2495
+        ]
+      },
+      "candidate": {
+        "median": 3178,
+        "min": 3119,
+        "max": 3237,
+        "values": [
+          3237,
+          3119
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -866,
+        -624
+      ],
+      "pairedPercentReduction": [
+        -36.52467313369886,
+        -25.01002004008016
+      ],
+      "medianPairedPercentReduction": -30.76734658688951
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "layouts",
+      "pairs": 2,
+      "baseline": {
+        "median": 2306,
+        "min": 2246,
+        "max": 2366,
+        "values": [
+          2246,
+          2366
+        ]
+      },
+      "candidate": {
+        "median": 2564.5,
+        "min": 2455,
+        "max": 2674,
+        "values": [
+          2674,
+          2455
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -428,
+        -89
+      ],
+      "pairedPercentReduction": [
+        -19.056099732858414,
+        -3.761622992392223
+      ],
+      "medianPairedPercentReduction": -11.408861362625318
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "frameGapP95Ms",
+      "pairs": 2,
+      "baseline": {
+        "median": 141.6999999999971,
+        "min": 133.39999999999418,
+        "max": 150,
+        "values": [
+          133.39999999999418,
+          150
+        ]
+      },
+      "candidate": {
+        "median": 66.70000000000437,
+        "min": 66.69999999999709,
+        "max": 66.70000000001164,
+        "values": [
+          66.69999999999709,
+          66.70000000001164
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        66.69999999999709,
+        83.29999999998836
+      ],
+      "pairedPercentReduction": [
+        50,
+        55.53333333332557
+      ],
+      "medianPairedPercentReduction": 52.766666666662786
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "frameGapMaxMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 850,
+        "min": 700,
+        "max": 1000,
+        "values": [
+          700,
+          1000
+        ]
+      },
+      "candidate": {
+        "median": 700,
+        "min": 683.2999999999884,
+        "max": 716.7000000000116,
+        "values": [
+          716.7000000000116,
+          683.2999999999884
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -16.70000000001164,
+        316.70000000001164
+      ],
+      "pairedPercentReduction": [
+        -2.385714285715949,
+        31.670000000001163
+      ],
+      "medianPairedPercentReduction": 14.642142857142607
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "longTasks",
+      "pairs": 2,
+      "baseline": {
+        "median": 7,
+        "min": 2,
+        "max": 12,
+        "values": [
+          2,
+          12
+        ]
+      },
+      "candidate": {
+        "median": 19.5,
+        "min": 13,
+        "max": 26,
+        "values": [
+          13,
+          26
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -11,
+        -14
+      ],
+      "pairedPercentReduction": [
+        -550,
+        -116.66666666666667
+      ],
+      "medianPairedPercentReduction": -333.3333333333333
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "longTaskMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 2970,
+        "min": 657,
+        "max": 5283,
+        "values": [
+          657,
+          5283
+        ]
+      },
+      "candidate": {
+        "median": 2212,
+        "min": 1362,
+        "max": 3062,
+        "values": [
+          1362,
+          3062
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -705,
+        2221
+      ],
+      "pairedPercentReduction": [
+        -107.30593607305936,
+        42.040507287526026
+      ],
+      "medianPairedPercentReduction": -32.632714392766665
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "domNodes",
+      "pairs": 2,
+      "baseline": {
+        "median": 26377,
+        "min": 26377,
+        "max": 26377,
+        "values": [
+          26377,
+          26377
+        ]
+      },
+      "candidate": {
+        "median": 26377,
+        "min": 26377,
+        "max": 26377,
+        "values": [
+          26377,
+          26377
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "mountedEditors",
+      "pairs": 2,
+      "baseline": {
+        "median": 6,
+        "min": 6,
+        "max": 6,
+        "values": [
+          6,
+          6
+        ]
+      },
+      "candidate": {
+        "median": 6,
+        "min": 6,
+        "max": 6,
+        "values": [
+          6,
+          6
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "runningAnimations",
+      "pairs": 2,
+      "baseline": {
+        "median": 60,
+        "min": 60,
+        "max": 60,
+        "values": [
+          60,
+          60
+        ]
+      },
+      "candidate": {
+        "median": 60,
+        "min": 60,
+        "max": 60,
+        "values": [
+          60,
+          60
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "historyRequests",
+      "pairs": 2,
+      "baseline": {
+        "median": 74,
+        "min": 72,
+        "max": 76,
+        "values": [
+          72,
+          76
+        ]
+      },
+      "candidate": {
+        "median": 74,
+        "min": 73,
+        "max": 75,
+        "values": [
+          73,
+          75
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -1,
+        1
+      ],
+      "pairedPercentReduction": [
+        -1.3888888888888888,
+        1.3157894736842106
+      ],
+      "medianPairedPercentReduction": -0.03654970760233911
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "historyDecodedBytes",
+      "pairs": 2,
+      "baseline": {
+        "median": 13630733,
+        "min": 13250929,
+        "max": 14010537,
+        "values": [
+          13250929,
+          14010537
+        ]
+      },
+      "candidate": {
+        "median": 13630888.5,
+        "min": 13446812,
+        "max": 13814965,
+        "values": [
+          13446812,
+          13814965
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -195883,
+        195572
+      ],
+      "pairedPercentReduction": [
+        -1.4782586186976023,
+        1.3958922488124474
+      ],
+      "medianPairedPercentReduction": -0.041183184942577444
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "websocketDecodedBytes",
+      "pairs": 2,
+      "baseline": {
+        "median": 38211844.5,
+        "min": 37776081,
+        "max": 38647608,
+        "values": [
+          38647608,
+          37776081
+        ]
+      },
+      "candidate": {
+        "median": 35961571.5,
+        "min": 33481237,
+        "max": 38441906,
+        "values": [
+          38441906,
+          33481237
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        205702,
+        4294844
+      ],
+      "pairedPercentReduction": [
+        0.5322502753598618,
+        11.36921535084595
+      ],
+      "medianPairedPercentReduction": 5.950732813102906
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "resets",
+      "pairs": 2,
+      "baseline": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "candidate": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        null,
+        null
+      ],
+      "medianPairedPercentReduction": null
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "changedNotifications",
+      "pairs": 2,
+      "baseline": {
+        "median": 1799,
+        "min": 1745,
+        "max": 1853,
+        "values": [
+          1853,
+          1745
+        ]
+      },
+      "candidate": {
+        "median": 1679,
+        "min": 1525,
+        "max": 1833,
+        "values": [
+          1833,
+          1525
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        20,
+        220
+      ],
+      "pairedPercentReduction": [
+        1.0793308148947653,
+        12.607449856733524
+      ],
+      "medianPairedPercentReduction": 6.843390335814145
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "elapsedMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 60049.52781149998,
+        "min": 60029.339954000025,
+        "max": 60069.71566899994,
+        "values": [
+          60029.339954000025,
+          60069.71566899994
+        ]
+      },
+      "candidate": {
+        "median": 60056.22015749998,
+        "min": 60040.35282099998,
+        "max": 60072.08749399998,
+        "values": [
+          60040.35282099998,
+          60072.08749399998
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -11.012866999953985,
+        -2.3718250000383705
+      ],
+      "pairedPercentReduction": [
+        -0.018345807247577686,
+        -0.003948453848371374
+      ],
+      "medianPairedPercentReduction": -0.01114713054797453
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "mainThreadMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 5916.767499999998,
+        "min": 5333.389999999994,
+        "max": 6500.145000000003,
+        "values": [
+          5333.389999999994,
+          6500.145000000003
+        ]
+      },
+      "candidate": {
+        "median": 6994.355499999991,
+        "min": 6984.811999999991,
+        "max": 7003.89899999999,
+        "values": [
+          7003.89899999999,
+          6984.811999999991
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -1670.5089999999964,
+        -484.66699999998764
+      ],
+      "pairedPercentReduction": [
+        -31.321710956821054,
+        -7.456249052905548
+      ],
+      "medianPairedPercentReduction": -19.3889800048633
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "mainThreadMsPerSecond",
+      "pairs": 2,
+      "baseline": {
+        "median": 98.52820264413168,
+        "min": 88.8463875179525,
+        "max": 108.21001777031086,
+        "values": [
+          88.8463875179525,
+          108.21001777031086
+        ]
+      },
+      "candidate": {
+        "median": 116.4635152091472,
+        "min": 116.27383517673888,
+        "max": 116.65319524155552,
+        "values": [
+          116.65319524155552,
+          116.27383517673888
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -27.80680772360303,
+        -8.06381740642803
+      ],
+      "pairedPercentReduction": [
+        -31.297623347920954,
+        -7.45200636002526
+      ],
+      "medianPairedPercentReduction": -19.374814853973106
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "mainThreadCpuMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 6218.816000000004,
+        "min": 5624.1050000000005,
+        "max": 6813.527000000007,
+        "values": [
+          5624.1050000000005,
+          6813.527000000007
+        ]
+      },
+      "candidate": {
+        "median": 7325.297500000005,
+        "min": 7314.051000000007,
+        "max": 7336.5440000000035,
+        "values": [
+          7336.5440000000035,
+          7314.051000000007
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -1712.439000000003,
+        -500.52399999999943
+      ],
+      "pairedPercentReduction": [
+        -30.448204647672885,
+        -7.34603385295162
+      ],
+      "medianPairedPercentReduction": -18.89711925031225
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "rendererCpuMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 10765.000000000007,
+        "min": 9770.000000000011,
+        "max": 11760.000000000005,
+        "values": [
+          9770.000000000011,
+          11760.000000000005
+        ]
+      },
+      "candidate": {
+        "median": 12479.999999999996,
+        "min": 12110,
+        "max": 12849.999999999995,
+        "values": [
+          12110,
+          12849.999999999995
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -2339.999999999989,
+        -1089.999999999989
+      ],
+      "pairedPercentReduction": [
+        -23.950870010235274,
+        -9.2687074829931
+      ],
+      "medianPairedPercentReduction": -16.609788746614186
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "scriptMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 1805.6839999999993,
+        "min": 1695.889000000001,
+        "max": 1915.4789999999978,
+        "values": [
+          1695.889000000001,
+          1915.4789999999978
+        ]
+      },
+      "candidate": {
+        "median": 2027.5359999999978,
+        "min": 2007.522999999999,
+        "max": 2047.5489999999966,
+        "values": [
+          2007.522999999999,
+          2047.5489999999966
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -311.63399999999797,
+        -132.0699999999988
+      ],
+      "pairedPercentReduction": [
+        -18.37584889105347,
+        -6.89488112372931
+      ],
+      "medianPairedPercentReduction": -12.635365007391389
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "styleMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 24.072999999999567,
+        "min": 19.77899999999977,
+        "max": 28.366999999999365,
+        "values": [
+          19.77899999999977,
+          28.366999999999365
+        ]
+      },
+      "candidate": {
+        "median": 18.112499999999976,
+        "min": 16.151000000000693,
+        "max": 20.07399999999926,
+        "values": [
+          20.07399999999926,
+          16.151000000000693
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -0.2949999999994901,
+        12.215999999998672
+      ],
+      "pairedPercentReduction": [
+        -1.4914808635395802,
+        43.064123805827
+      ],
+      "medianPairedPercentReduction": 20.78632147114371
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "layoutMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 133.10900000000004,
+        "min": 108.02899999999993,
+        "max": 158.18900000000014,
+        "values": [
+          108.02899999999993,
+          158.18900000000014
+        ]
+      },
+      "candidate": {
+        "median": 171.54899999999995,
+        "min": 166.48499999999999,
+        "max": 176.61299999999991,
+        "values": [
+          176.61299999999991,
+          166.48499999999999
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -68.58399999999999,
+        -8.29599999999985
+      ],
+      "pairedPercentReduction": [
+        -63.48665636079204,
+        -5.2443595951677064
+      ],
+      "medianPairedPercentReduction": -34.365507977979874
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "styleRecalculations",
+      "pairs": 2,
+      "baseline": {
+        "median": 3.5,
+        "min": 3,
+        "max": 4,
+        "values": [
+          3,
+          4
+        ]
+      },
+      "candidate": {
+        "median": 3,
+        "min": 3,
+        "max": 3,
+        "values": [
+          3,
+          3
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        1
+      ],
+      "pairedPercentReduction": [
+        0,
+        25
+      ],
+      "medianPairedPercentReduction": 12.5
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "layouts",
+      "pairs": 2,
+      "baseline": {
+        "median": 346,
+        "min": 334,
+        "max": 358,
+        "values": [
+          334,
+          358
+        ]
+      },
+      "candidate": {
+        "median": 345.5,
+        "min": 331,
+        "max": 360,
+        "values": [
+          360,
+          331
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -26,
+        27
+      ],
+      "pairedPercentReduction": [
+        -7.7844311377245505,
+        7.5418994413407825
+      ],
+      "medianPairedPercentReduction": -0.12126584819188402
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "frameGapP95Ms",
+      "pairs": 2,
+      "baseline": {
+        "median": 16.70000000001164,
+        "min": 16.70000000001164,
+        "max": 16.70000000001164,
+        "values": [
+          16.70000000001164,
+          16.70000000001164
+        ]
+      },
+      "candidate": {
+        "median": 16.75,
+        "min": 16.70000000001164,
+        "max": 16.79999999998836,
+        "values": [
+          16.70000000001164,
+          16.79999999998836
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        -0.09999999997671694
+      ],
+      "pairedPercentReduction": [
+        0,
+        -0.5988023950697439
+      ],
+      "medianPairedPercentReduction": -0.29940119753487193
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "frameGapMaxMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 58.34999999999127,
+        "min": 50,
+        "max": 66.69999999998254,
+        "values": [
+          66.69999999998254,
+          50
+        ]
+      },
+      "candidate": {
+        "median": 50,
+        "min": 33.39999999999418,
+        "max": 66.60000000000582,
+        "values": [
+          33.39999999999418,
+          66.60000000000582
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        33.29999999998836,
+        -16.60000000000582
+      ],
+      "pairedPercentReduction": [
+        49.92503748125499,
+        -33.20000000001164
+      ],
+      "medianPairedPercentReduction": 8.362518740621674
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "longTasks",
+      "pairs": 2,
+      "baseline": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "candidate": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        null,
+        null
+      ],
+      "medianPairedPercentReduction": null
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "longTaskMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "candidate": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        null,
+        null
+      ],
+      "medianPairedPercentReduction": null
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "domNodes",
+      "pairs": 2,
+      "baseline": {
+        "median": 26377,
+        "min": 26377,
+        "max": 26377,
+        "values": [
+          26377,
+          26377
+        ]
+      },
+      "candidate": {
+        "median": 26377,
+        "min": 26377,
+        "max": 26377,
+        "values": [
+          26377,
+          26377
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "mountedEditors",
+      "pairs": 2,
+      "baseline": {
+        "median": 6,
+        "min": 6,
+        "max": 6,
+        "values": [
+          6,
+          6
+        ]
+      },
+      "candidate": {
+        "median": 6,
+        "min": 6,
+        "max": 6,
+        "values": [
+          6,
+          6
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "runningAnimations",
+      "pairs": 2,
+      "baseline": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "candidate": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        null,
+        null
+      ],
+      "medianPairedPercentReduction": null
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "historyRequests",
+      "pairs": 2,
+      "baseline": {
+        "median": 73,
+        "min": 73,
+        "max": 73,
+        "values": [
+          73,
+          73
+        ]
+      },
+      "candidate": {
+        "median": 73.5,
+        "min": 73,
+        "max": 74,
+        "values": [
+          74,
+          73
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -1,
+        0
+      ],
+      "pairedPercentReduction": [
+        -1.36986301369863,
+        0
+      ],
+      "medianPairedPercentReduction": -0.684931506849315
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "historyDecodedBytes",
+      "pairs": 2,
+      "baseline": {
+        "median": 13715606,
+        "min": 13715552,
+        "max": 13715660,
+        "values": [
+          13715552,
+          13715660
+        ]
+      },
+      "candidate": {
+        "median": 13812065,
+        "min": 13718115,
+        "max": 13906015,
+        "values": [
+          13906015,
+          13718115
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -190463,
+        -2455
+      ],
+      "pairedPercentReduction": [
+        -1.3886644883122459,
+        -0.01789924801285538
+      ],
+      "medianPairedPercentReduction": -0.7032818681625507
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "websocketDecodedBytes",
+      "pairs": 2,
+      "baseline": {
+        "median": 13744003.5,
+        "min": 13743907,
+        "max": 13744100,
+        "values": [
+          13744100,
+          13743907
+        ]
+      },
+      "candidate": {
+        "median": 13840306,
+        "min": 13746350,
+        "max": 13934262,
+        "values": [
+          13934262,
+          13746350
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -190162,
+        -2443
+      ],
+      "pairedPercentReduction": [
+        -1.3835900495485336,
+        -0.017775149380740134
+      ],
+      "medianPairedPercentReduction": -0.7006825994646368
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "resets",
+      "pairs": 2,
+      "baseline": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "candidate": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        null,
+        null
+      ],
+      "medianPairedPercentReduction": null
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "changedNotifications",
+      "pairs": 2,
+      "baseline": {
+        "median": 72,
+        "min": 72,
+        "max": 72,
+        "values": [
+          72,
+          72
+        ]
+      },
+      "candidate": {
+        "median": 72,
+        "min": 72,
+        "max": 72,
+        "values": [
+          72,
+          72
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    }
+  ],
+  "notes": [
+    "mainThreadMs and mainThreadMsPerSecond use TaskDuration with timeTicks: elapsed time in main-thread tasks, not thread CPU time. Script, style, and layout durations use the same elapsed-time domain.",
+    "mainThreadCpuMs uses ThreadTime (renderer main-thread CPU). rendererCpuMs uses ProcessTime (renderer-process CPU); it excludes separate browser, GPU, and backend processes.",
+    "Positive reduction means a lower candidate value. Counts such as mounted editors are observations, not optimization scores.",
+    "Streaming duration includes the wait for final visible content. Fixed-deadline traffic is retained in the raw report.",
+    "Frame gaps and driver DOM readiness are not INP. Linux CPU throttling is not an M2 Air simulation.",
+    "History decoded bytes include captured requests and responses. They are not compressed network transfer."
+  ],
+  "sourcePatchSha256": "d06045a7c7f10583e8fc58fb3bfe688964fc97ffc45f0b1ed081db8e6380c183",
+  "sourceFiles": [
+    {
+      "path": "apps/web/e2e/tests/performance/dense-measurement.spec.ts",
+      "sha256": "d6fa45d946ac38690e889d140f300fc5822d4324e26400d83980169c588d46ff",
+      "content": "import { test, expect } from \"@playwright/test\";\nimport {\n  beginDenseWindow,\n  endDenseWindow,\n  denseStreamObservations,\n} from \"../../helpers/dense-measurement\";\n\ntest(\"records visible stream progress during the measured window\", async ({ page }) => {\n  test.setTimeout(30_000);\n  await page.setContent(\n    '<section data-testid=\"thread-column-one\"><div data-agent-message-body>Dense canonical warmup Dense canonical tick 1</div></section>',\n  );\n  await page.evaluate(() => {\n    (window as Window & { __KANDEV_E2E_STORE__?: unknown }).__KANDEV_E2E_STORE__ = {\n      subscribe: () => () => undefined,\n    };\n  });\n  const cdp = await page.context().newCDPSession(page);\n  await cdp.send(\"Performance.enable\", { timeDomain: \"timeTicks\" });\n  const before = await beginDenseWindow(page, cdp, [\"one\"]);\n  await expect\n    .poll(async () => (await denseStreamObservations(page)).length, { timeout: 8_000 })\n    .toBe(1);\n  await page.locator(\"[data-agent-message-body]\").evaluate((body) => {\n    body.textContent = \"Dense canonical warmup Dense canonical tick 5\";\n  });\n  await expect\n    .poll(async () => (await denseStreamObservations(page)).length, { timeout: 8_000 })\n    .toBe(2);\n  const after = await endDenseWindow(page, cdp, before);\n  expect(after.browser.streamProgress.map((sample) => sample.rows)).toEqual([\n    [{ taskId: \"one\", connected: true, lastTick: 1 }],\n    [{ taskId: \"one\", connected: true, lastTick: 5 }],\n  ]);\n  await expect(beginDenseWindow(page, cdp, [\"missing\"])).rejects.toThrow(\n    \"Missing dense stream body\",\n  );\n});\n"
+    },
+    {
+      "path": "apps/web/lib/ws/handlers/messages-visibility.test.ts",
+      "sha256": "d9379dea89fdd8981fd696025f27867eed84a96a40040ec5095ae9d21bacfbcf",
+      "content": "import { describe, expect, it, vi } from \"vitest\";\nimport type { StoreApi } from \"zustand\";\nimport type { AppState } from \"@/lib/state/store\";\nimport { createMessageUpdateScheduler } from \"./messages\";\n\nfunction makePayload(session_id: string, message_id: string, content: string) {\n  return {\n    task_id: \"task\",\n    session_id,\n    message_id,\n    content,\n    author_type: \"agent\" as const,\n    author_id: \"agent\",\n    type: \"message\",\n    created_at: \"2026-08-02T00:00:00Z\",\n  };\n}\n\nfunction makeStore() {\n  const updateMessages = vi.fn();\n  const store = { getState: () => ({ messages: { bySession: {} }, updateMessages }) };\n  return { store: store as unknown as StoreApi<AppState>, updateMessages };\n}\n\nfunction makeFrameScheduler() {\n  let callback: (() => void) | null = null;\n  return {\n    schedule: (next: () => void) => {\n      callback = next;\n      return 1;\n    },\n    cancel: () => {\n      callback = null;\n    },\n    runFrame: () => {\n      const next = callback;\n      callback = null;\n      next?.();\n    },\n  };\n}\n\ndescribe(\"hidden-document message scheduling\", () => {\n  it(\"flushes before frame suspension, publishes while hidden, and removes its listener\", () => {\n    const doc = Object.assign(new EventTarget(), { visibilityState: \"visible\" });\n    const remove = vi.spyOn(doc, \"removeEventListener\");\n    vi.stubGlobal(\"document\", doc);\n    const { store, updateMessages } = makeStore();\n    const frame = makeFrameScheduler();\n    const scheduler = createMessageUpdateScheduler(store, frame);\n    try {\n      scheduler.enqueue(makePayload(\"session-1\", \"message-1\", \"pending\"));\n      doc.visibilityState = \"hidden\";\n      doc.dispatchEvent(new Event(\"visibilitychange\"));\n      expect(updateMessages).toHaveBeenCalledExactlyOnceWith([\n        expect.objectContaining({ content: \"pending\" }),\n      ]);\n      frame.runFrame();\n      expect(updateMessages).toHaveBeenCalledTimes(1);\n      scheduler.enqueue(makePayload(\"session-2\", \"message-2\", \"hidden\"));\n      expect(updateMessages).toHaveBeenCalledTimes(2);\n      doc.visibilityState = \"visible\";\n      doc.dispatchEvent(new Event(\"visibilitychange\"));\n      scheduler.enqueue(makePayload(\"session-1\", \"message-1\", \"foreground\"));\n      expect(updateMessages).toHaveBeenCalledTimes(2);\n      frame.runFrame();\n      expect(updateMessages).toHaveBeenCalledTimes(3);\n      scheduler.dispose();\n      expect(remove).toHaveBeenCalledWith(\"visibilitychange\", expect.any(Function));\n    } finally {\n      scheduler.dispose();\n      vi.unstubAllGlobals();\n    }\n  });\n});\n"
+    }
+  ]
+}

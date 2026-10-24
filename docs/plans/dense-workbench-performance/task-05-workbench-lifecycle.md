@@ -67,6 +67,68 @@ Evidence under the diagnostic directory: `matched-dense-1792793604258.json`,
 `containment-benchmark-logs/kandev-run.e2e.qMzO7hcR.log`. The ordered-update
 assertion remains as benchmark validation; no containment production code remains.
 
+## Session-fair publication experiment (in progress)
+
+The candidate-first 4x stress run reproduced a display backlog without HTTP
+failures: all 300 unique ticks were stored per chat, while the browser displayed
+only 215–216 ticks about 12.2 seconds after those complete storage reads.
+The final-visible gate failed. See the raw report
+`matched-dense-1792800977298.json` and the results record.
+
+A bounded prototype queues existing plain-agent text snapshots and publishes
+only the oldest pending session per animation frame. Repeated snapshots retain
+that session's queue position; a session that receives more work after being
+published returns to the end. Explicit barriers still flush all pending updates.
+New rows, user rows, permission/tool changes, and action requests remain on the
+immediate path. Turn completion retains its existing flush barrier. Hiding the
+document flushes pending work, and hidden-document updates publish immediately
+because browser animation frames can stop. Disposal removes the visibility
+listener and cancels outstanding work.
+
+This differs from the rejected all-session batch, which combined all active
+chats into one frame and increased long tasks. Nine scheduling tests failed
+before the prototype; the separate hidden-document test then failed before its
+repair. All 92 related unit tests now pass. Typecheck, scoped lint, and the
+production asset build pass. Nine fresh desktop checks pass, including live
+canonical delivery, gap/plugin recovery, motion, progressive task navigation,
+and stream-progress instrumentation. All six fresh phone checks also pass.
+The two-pair unthrottled comparison is starting; stress validation follows only
+if normal-load results support the prototype. No performance gain is claimed yet; remove the prototype if measured
+responsiveness, freshness, or correctness regresses.
+
+The first timing attempt (`matched-dense-1792802093875.json`) failed before a
+complete sample because the new sampler was not imported by its caller. It is
+excluded as a harness error. The import is corrected. A small end-to-end harness
+smoke passed both versions (10 tasks, one chat, ten messages, one-second windows,
+one pair; 29.5 seconds total). Standard web typecheck excludes `e2e`; this smoke
+checks the actual benchmark caller before expensive paired runs. The smoke is
+correctness evidence only. The dense comparison is restarting.
+
+The benchmark now records displayed tick progress every five seconds using
+existing message-body nodes. It performs no history reads or layout queries for
+these samples. Both arms use identical instrumentation. Progress is retained
+at the stream deadline as well as in completed window results, so a final
+catch-up cannot hide an earlier stall.
+
+The corrected two-pair comparison passed in 16.3 minutes
+(`matched-dense-1792802586206.json`, `fair-queue-two-pair-summary.json`,
+`fair-queue-two-pair-retry-host-load.jsonl`). Each of the four samples verified
+all 1,800 ordered updates with zero HTTP or verification errors. Streaming
+frame-gap p95 fell from 133.4/150.0 ms to 66.7/66.7 ms, a 52.77% median paired
+reduction. Main-thread CPU changed by +2.09% and -8.92%; renderer CPU fell by
+1.15% and 9.52%. Normal idle main-thread CPU increased 8.22% across pairs;
+reduced-motion idle main-thread CPU increased 18.90%. These idle regressions
+remain unresolved, and the prototype is not accepted for production.
+
+All sampled message nodes stayed connected, and every chat advanced throughout
+the stream. Near 60.8 seconds, the candidate displayed ticks 297–298 in pair 1
+and 292–298 in pair 2; final visibility completed at 62.4/63.0 seconds. Control
+completion took 61.1/69.2 seconds. Scheduled emission intervals are not proof of
+producer timing, so these observations are not end-to-end latency measurements.
+The next bounded test uses the same six-chat workload with 4x CPU throttling,
+candidate first. A successful stress result does not erase the idle regressions;
+additional normal-load validation is required before retaining the prototype.
+
 ## Summary
 
 Attribute and reduce repeated work during dense Dockview and task switching. Continue the existing session-efficiency Task 05 investigation, with no speculative layout or editor rewrite.

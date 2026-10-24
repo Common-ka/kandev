@@ -1,6 +1,23 @@
 import { type CDPSession, type Page } from "@playwright/test";
 import { attachGatewayTrafficCapture, summarizeGatewayTraffic } from "./ws-traffic";
 
+type DenseStreamObservation = {
+  at: number;
+  elapsedMs: number;
+  rows: Array<{ taskId: string; connected: boolean; lastTick: number | null }>;
+};
+
+export function denseStreamObservations(page: Page) {
+  return page.evaluate(
+    () =>
+      (
+        window as Window & {
+          __denseWindow?: { streamProgress: DenseStreamObservation[] };
+        }
+      ).__denseWindow?.streamProgress ?? [],
+  );
+}
+
 export function captureDenseTraffic(page: Page) {
   const traffic = attachGatewayTrafficCapture(page);
   const httpFailures: Array<{ at: number; path: string; status: number }> = [];
@@ -68,8 +85,18 @@ export function captureDenseTraffic(page: Page) {
   };
 }
 
-export async function beginDenseWindow(page: Page, cdp: CDPSession) {
-  await page.evaluate(() => {
+export async function beginDenseWindow(page: Page, cdp: CDPSession, streamTaskIds: string[] = []) {
+  await page.evaluate((taskIds) => {
+    const targets = taskIds.map((taskId) => {
+      const tile = document.querySelector(`[data-testid="thread-column-${taskId}"]`);
+      const body = Array.from(tile?.querySelectorAll("[data-agent-message-body]") ?? []).find(
+        (element) => element.textContent?.includes("Dense canonical warmup"),
+      );
+      if (!body) throw new Error(`Missing dense stream body for ${taskId}`);
+      return { taskId, body };
+    });
+    const started = performance.now();
+    let lastProgressAt = started;
     const state = {
       frames: [] as number[],
       longTasks: [] as number[],
@@ -78,6 +105,7 @@ export async function beginDenseWindow(page: Page, cdp: CDPSession) {
       raf: 0,
       observer: null as PerformanceObserver | null,
       messageCommits: 0,
+      streamProgress: [] as DenseStreamObservation[],
       unsubscribe: null as (() => void) | null,
     };
     const store = (
@@ -99,6 +127,24 @@ export async function beginDenseWindow(page: Page, cdp: CDPSession) {
     const frame = (now: number) => {
       state.frames.push(now - state.last);
       state.last = now;
+      if (targets.length && now - lastProgressAt >= 5_000) {
+        lastProgressAt = now;
+        const marker = "Dense canonical tick ";
+        state.streamProgress.push({
+          at: Date.now(),
+          elapsedMs: now - started,
+          rows: targets.map(({ taskId, body }) => {
+            const content = body.textContent ?? "";
+            const index = content.lastIndexOf(marker);
+            return {
+              taskId,
+              connected: body.isConnected,
+              lastTick:
+                index < 0 ? null : Number.parseInt(content.slice(index + marker.length), 10),
+            };
+          }),
+        });
+      }
       if (!state.stop) state.raf = requestAnimationFrame(frame);
     };
     state.observer = new PerformanceObserver((list) => {
@@ -107,7 +153,7 @@ export async function beginDenseWindow(page: Page, cdp: CDPSession) {
     state.observer.observe({ type: "longtask" });
     state.raf = requestAnimationFrame(frame);
     (window as Window & { __denseWindow?: typeof state }).__denseWindow = state;
-  });
+  }, streamTaskIds);
   return { metrics: await cdp.send("Performance.getMetrics"), started: performance.now() };
 }
 
@@ -127,6 +173,7 @@ export async function endDenseWindow(
           raf: number;
           observer: PerformanceObserver | null;
           messageCommits: number;
+          streamProgress: DenseStreamObservation[];
           unsubscribe: (() => void) | null;
         };
       }
@@ -140,6 +187,7 @@ export async function endDenseWindow(
       animations[animation.playState] = (animations[animation.playState] ?? 0) + 1;
     return {
       messageCommits: state.messageCommits,
+      streamProgress: state.streamProgress,
       frameGapsMs: state.frames,
       longTasksMs: state.longTasks,
       domNodes: document.querySelectorAll("*").length,

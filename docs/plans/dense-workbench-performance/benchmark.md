@@ -125,6 +125,14 @@ state after warm-up. An increasing single heap sample is not proof of a leak.
 
 ## Run order and comparison
 
+After changing the measurement harness, first run its full caller with a small
+fixture: `KANDEV_DENSE_TASKS=10 KANDEV_DENSE_COLUMNS=1 KANDEV_DENSE_MESSAGES=10
+KANDEV_DENSE_WINDOW_MS=1000 KANDEV_DENSE_PAIRS=1 KANDEV_DENSE_CPU_RATES=1`, plus
+the normal comparison opt-in and frozen baseline path. Require both samples and
+all final-content checks to pass. These short windows validate the harness;
+exclude them from performance conclusions. Web typecheck excludes `e2e`, so it
+cannot substitute for this check.
+
 Run one measured browser and one instance at a time. No builds, parallel test
 suites, or profiling jobs during timing. Exclude warm-up from samples.
 For each primary scenario, run six paired repetitions, alternating AB and BA.

@@ -6,7 +6,12 @@ import type { ApiClient } from "./api-client";
 import { DENSE_WORKLOAD, type DenseThread } from "./dense-workbench-fixture";
 import { loadDenseHistory } from "./dense-history";
 import { prepareDenseStream } from "./dense-canonical-stream";
-import { beginDenseWindow, captureDenseTraffic, endDenseWindow } from "./dense-measurement";
+import {
+  beginDenseWindow,
+  captureDenseTraffic,
+  denseStreamObservations,
+  endDenseWindow,
+} from "./dense-measurement";
 import { dwell } from "./causal-waits";
 import { inspectDenseAnimations } from "./dense-animation-diagnostics";
 import { loadDenseCold } from "./dense-cold-load";
@@ -134,7 +139,11 @@ export async function runDenseSample(options: {
           document.activeElement instanceof HTMLElement && document.activeElement.isContentEditable,
       }));
       await startDenseProfile(cdp, options.profilePath);
-      const before = await beginDenseWindow(page, cdp);
+      const before = await beginDenseWindow(
+        page,
+        cdp,
+        scenario === "streaming" ? threads.map((thread) => thread.taskId) : [],
+      );
       if (scenario === "streaming") stream.release();
       await dwell(
         DENSE_WORKLOAD.durationMs,
@@ -145,6 +154,7 @@ export async function runDenseSample(options: {
         elapsedMs: performance.now() - before.started,
         metrics: await cdp.send("Performance.getMetrics"),
         delivery: traffic.snapshot(),
+        streamProgress: await denseStreamObservations(page),
       };
       options.checkpoint?.({ observing: scenario, deadline, selectionBefore });
       await waitForDenseStream(scenario, stream, page, options.checkpoint);
