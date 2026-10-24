@@ -24,7 +24,7 @@ system_design:
 
 # Task 03: Persistent motion eligibility
 
-## Direct SVG visibility experiment (in progress)
+## Direct SVG visibility experiment (rejected)
 
 The remaining Threads status SVG ignores viewport and document visibility.
 Three component regressions failed before implementation. A fresh browser check
@@ -45,18 +45,36 @@ pause/resume, reduced-motion changes, hidden settlement, existing composer
 motion, and CSS fallback. The unit checks cover hidden-document startup,
 combined visibility conditions, DOM identity, and listener/observer cleanup.
 
-Dense performance validation is pending. The benchmark now distinguishes the
-horizontal columns view from the grid, waits only for intersecting chats, and
-checks offscreen catch-up after timing. A viewport regression and two summary
-regressions failed first; all 16 measurement-helper tests and both standalone
-browser measurement tests now pass. The six-column and eight-column full-caller
-smokes both passed in both versions, with four visible chats and exact catch-up
-in the two offscreen producer chats. The eight-column run also asserted all
-eight headers, proving the grid cap was removed (`matched-dense-1792805980564.json`,
-`columns-eight-smoke-logs/`, 1.2 minutes). The default six-chat grid smoke passed
-both versions too (`matched-dense-1792805870109.json`, `columns-grid-smoke-logs/`,
-1.1 minutes). These small runs validate the harness and are excluded from gains.
-No CPU improvement is inferred from the animation count alone.
+The columns benchmark passed two alternating pairs in 19.9 minutes. Each
+sample had 1,000 tasks, 30 headers, four intersecting chats, six producers, and
+1,800 exact ordered updates. Both offscreen producer chats caught up with all
+300 ordered ticks after timing. There were no verification errors.
+
+Normal idle main-thread CPU changed by +2.82% and -0.45%, with no consistent
+gain. Streaming main-thread CPU increased 0.59% and 1.19%; renderer CPU increased
+1.93% and 2.96%. Streaming frame-gap p95 changed from 50.1 to 66.7 ms in pair 1
+and stayed at 50 ms in pair 2. Running animations fell from 33 to 31, but that
+count did not produce a demonstrated CPU gain. Reduced-motion main-thread CPU
+fell in both pairs; renderer CPU was mixed. Cold readiness was also mixed.
+
+The production candidate and its specific tests are removed. No grid follow-up
+is needed for this rejected candidate. The patch remains in
+`rejected-direct-svg-visibility.patch`; candidate assets remain at
+`/tmp/kandev-dense-rejected-direct-svg-5936a872-dist`. Current assets are restored
+from the validated timestamp build. Offscreen ownership remains unresolved.
+
+[Committed evidence](evidence/rejected-direct-svg-visibility-1x.json) retains
+all paired metrics, source/build hashes, and catch-up results. Raw report:
+`matched-dense-1792806481276.json`; summary: `svg-columns-two-pair-summary.json`;
+log: `svg-columns-two-pair-logs/kandev-run.e2e.RPoLZSHK.log`; host observations:
+`svg-columns-two-pair-host-load.jsonl`.
+
+The validated columns measurement helpers remain. They distinguish horizontal
+columns from the grid, wait only for intersecting chats, and check offscreen
+catch-up after timing. All 16 helper tests and both browser measurement tests
+pass. Full-caller six-column, eight-column, and default-grid smokes passed in
+both versions. These short checks validate the harness and are excluded from
+performance gains.
 
 ## Summary
 

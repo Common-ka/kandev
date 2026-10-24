@@ -5,6 +5,18 @@ and the remaining stress/scenario matrix are in progress. The branch is
 `feature/evaluate-live-thread-bc0`; the frozen baseline is
 `595df36ed5c1cf02fd90cb972b623ad6edc53df8`.
 
+## Direct SVG offscreen visibility: rejected
+
+Two alternating columns pairs passed with 1,000 tasks, 30 headers, four visible
+chats, and 1,800 ordered updates per sample. Both offscreen producer chats
+caught up exactly after timing. Normal idle CPU was mixed. Streaming main-thread
+CPU increased 0.89% across pairs and renderer CPU increased 2.44%; both pairs
+were higher. Frame-gap p95 was 50.1 → 66.7 ms and 50 → 50 ms. Pausing two
+additional animations did not demonstrate a CPU gain. The candidate is removed;
+the visibility gap remains open. See the [full paired evidence](evidence/rejected-direct-svg-visibility-1x.json)
+and [work order](task-03-motion-eligibility.md). No grid follow-up is run for the
+rejected candidate.
+
 ## Measurement correction
 
 Earlier reports called CDP `TaskDuration` CPU time. With the default `timeTicks`
