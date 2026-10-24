@@ -36,7 +36,13 @@ summary tests pass, including three new RED/GREEN cases. Strict scoped lint
 passes. A final metadata full-caller smoke passed in 38.5 seconds
 (`matched-dense-1792811987862.json`, `dense-visible-version-smoke-logs/`), and its
 summary confirms the new probe in both arms. These smokes validate the harness;
-the corrected dense profile and A/B measurements remain pending.
+the corrected dense A/B measurements remain pending.
+
+The corrected dense profile passed in 5.4 minutes from commit `498956f7795`
+(`matched-dense-1792812289501.json`). Both identical-build samples verified all
+1,800 ordered updates. Neither profile contains sampled
+`_ariaSnapshotForExpect` stacks. This confirms removal of the identified
+measurement overhead. It does not establish a product speedup.
 
 [Attribution evidence](evidence/visibility-probe-attribution.json) records
 profile hashes, build identities, stack timing, and verification results.

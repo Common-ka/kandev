@@ -49,5 +49,53 @@
   ],
   "finding": "Playwright locator expectation retries collect full-page accessibility snapshots when the final-marker locator is missing. These stacks appear after the fixed 60-second stream window. Sampled stack duration is not CDP thread CPU time.",
   "source": "Installed playwright-core@1.61.1/lib/coreBundle.js: expect -> _ariaSnapshotForExpect -> _renderAriaSnapshot(document.body) when the target is missing or not visible.",
-  "correction": "Poll locator.isVisible with the same 30-second deadline; keep full locator assertions after timing. Reports record finalVisibilityProbe and the summary rejects mixed versions. No product speedup is claimed."
+  "correction": "Poll locator.isVisible with the same 30-second deadline; keep full locator assertions after timing. Reports record finalVisibilityProbe and the summary rejects mixed versions. No product speedup is claimed.",
+  "correctedValidation": {
+    "rawReport": "matched-dense-1792812289501.json",
+    "rawSha256": "dc0e6207b763e473315a5397cbe6ea4d0c7480ed54d863ab3a85ba13ff8aabc6",
+    "sourceRevision": "498956f7795d11986f531ce294435a973da2e009",
+    "finalVisibilityProbe": "boolean-poll",
+    "builds": {
+      "baseline": {
+        "binary": "/tmp/kandev-dense-timestamp-5936a872/apps/backend/bin/kandev",
+        "assets": "/tmp/kandev-dense-timestamp-5936a872/apps/web/dist",
+        "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+        "assetsSha256": "8379f62eb1bf4935c6b18d4616f732191cdefc17159c02367a54c05701f7a160"
+      },
+      "candidate": {
+        "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+        "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+        "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+        "assetsSha256": "8379f62eb1bf4935c6b18d4616f732191cdefc17159c02367a54c05701f7a160"
+      }
+    },
+    "profiles": [
+      {
+        "file": "matched-dense-1792812289501.json.baseline-1x-0.cpuprofile",
+        "sha256": "eedab4a15023c30c45c1898e7fe1309cefabf72e57ced401060d3dff2ad86b15",
+        "sampledDurationMs": 68821.019,
+        "ariaSnapshotInclusiveSampledMs": 0.0
+      },
+      {
+        "file": "matched-dense-1792812289501.json.candidate-1x-0.cpuprofile",
+        "sha256": "664191a40b3b0999a3df6e4b009e1a02d9c1b4c538dc6a2e399cc41ad79f9736",
+        "sampledDurationMs": 65498.534,
+        "ariaSnapshotInclusiveSampledMs": 0.0
+      }
+    ],
+    "validation": [
+      {
+        "arm": "baseline",
+        "scheduledUpdates": 1800,
+        "verificationErrors": []
+      },
+      {
+        "arm": "candidate",
+        "scheduledUpdates": 1800,
+        "verificationErrors": []
+      }
+    ],
+    "log": "corrected-stream-cpu-attribution-logs/kandev-run.e2e.0Pmdv4nK.log",
+    "conclusion": "Both identical-build samples verify all 1,800 ordered updates and have zero sampled ARIA snapshot stacks. This validates the probe correction; profiling does not establish a product speedup."
+  }
 }
