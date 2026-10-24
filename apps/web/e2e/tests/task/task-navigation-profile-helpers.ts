@@ -9,6 +9,7 @@ import type { ApiClient } from "../../helpers/api-client";
 import type { CreateTaskResponse } from "../../../lib/types/http";
 import { GitHelper, makeGitEnv } from "../../helpers/git-helper";
 import { NavigationResponseGate } from "../../helpers/navigation-response-hold";
+import { armNavigationReadiness } from "../../helpers/navigation-browser-readiness";
 import { SessionPage } from "../../pages/session-page";
 import {
   AVAILABLE,
@@ -115,42 +116,57 @@ export async function measureSelection(
   page: Page,
   gate: NavigationResponseGate,
   item: Awaited<ReturnType<typeof prepareProfileTask>>,
+  options: { browserReadiness?: boolean } = {},
 ) {
-  const cursor = gate.requests.length;
-  const start = performance.now();
-  await selectNavigationTask(page, item.task.title);
-  await expect(page).toHaveURL(new RegExp(`/t/${item.task.id}$`));
-  const selectedMs = performance.now() - start;
-  await new SessionPage(page).clickTab("Files");
-  await expect(new SessionPage(page).fileTreeNode(item.marker)).toBeVisible();
-  const usableDomMs = performance.now() - start;
-  await page.evaluate(
-    () =>
-      new Promise<void>((resolve) =>
-        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
-      ),
-  );
-  const paintOpportunityMs = performance.now() - start;
-  // A cached folder can be restored without a new tree request. The visible
-  // task-specific child proves that the selected task's expanded tree is usable.
-  await expect(new SessionPage(page).fileTreeNode(item.marker)).toBeVisible();
-  const restoredMs = performance.now() - start;
-  const counts: Record<string, number> = {};
-  const keys: Record<string, number> = {};
-  for (const r of gate.requests.slice(cursor)) {
-    counts[r.action] = (counts[r.action] ?? 0) + 1;
-    const key = JSON.stringify([r.action, r.payload]);
-    keys[key] = (keys[key] ?? 0) + 1;
+  const readiness = options.browserReadiness
+    ? await armNavigationReadiness(page, {
+        taskId: item.task.id,
+        sessionId: item.task.session_id!,
+        title: item.task.title,
+        transcriptMarker: `Profile conversation ${item.task.title}`,
+      })
+    : undefined;
+  try {
+    const cursor = gate.requests.length;
+    const start = performance.now();
+    await selectNavigationTask(page, item.task.title);
+    await expect(page).toHaveURL(new RegExp(`/t/${item.task.id}$`));
+    const selectedMs = performance.now() - start;
+    await new SessionPage(page).clickTab("Files");
+    await expect(new SessionPage(page).fileTreeNode(item.marker)).toBeVisible();
+    const usableDomMs = performance.now() - start;
+    const browserEventReadiness = await readiness?.finish();
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+        ),
+    );
+    const paintOpportunityMs = performance.now() - start;
+    // A cached folder can be restored without a new tree request. The visible
+    // task-specific child proves that the selected task's expanded tree is usable.
+    await expect(new SessionPage(page).fileTreeNode(item.marker)).toBeVisible();
+    const restoredMs = performance.now() - start;
+    const counts: Record<string, number> = {};
+    const keys: Record<string, number> = {};
+    for (const r of gate.requests.slice(cursor)) {
+      counts[r.action] = (counts[r.action] ?? 0) + 1;
+      const key = JSON.stringify([r.action, r.payload]);
+      keys[key] = (keys[key] ?? 0) + 1;
+    }
+    return {
+      task: item.task.title,
+      selectedMs,
+      usableDomMs,
+      paintOpportunityMs,
+      restoredMs,
+      counts,
+      keys,
+      ...(browserEventReadiness ? { browserEventReadiness } : {}),
+    };
+  } finally {
+    await readiness?.dispose();
   }
-  return {
-    task: item.task.title,
-    selectedMs,
-    usableDomMs,
-    paintOpportunityMs,
-    restoredMs,
-    counts,
-    keys,
-  };
 }
 
 export async function sampleMemory(

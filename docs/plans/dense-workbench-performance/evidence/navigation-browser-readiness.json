@@ -1,0 +1,97 @@
+{
+  "purpose": "Measure trusted browser pointerdown to destination header, transcript, and editable composer DOM state separately from driver readiness.",
+  "productionRevision": "90a440a9747179629f507b8bb2f24bf5f0f3b8f0",
+  "productionChanged": false,
+  "files": [
+    {
+      "path": "apps/web/e2e/helpers/navigation-browser-readiness.ts",
+      "sha256": "94fbf46b787f08b458960062c6ba07654b42ac1a1493b8f9872e11cc3d655e19"
+    },
+    {
+      "path": "apps/web/e2e/helpers/dense-navigation-sample.ts",
+      "sha256": "3f47e39f624c042b591c15ddd45e31feaaf162bbbfb5acc3e410e2737f078211"
+    },
+    {
+      "path": "apps/web/e2e/tests/task/task-navigation-profile-helpers.ts",
+      "sha256": "939042b369b92e41f6f99d44c7c7bbe39a02be559dd60ad5f2b379d48ed19fc0"
+    },
+    {
+      "path": "apps/web/e2e/tests/performance/dense-navigation-readiness.spec.ts",
+      "sha256": "a3fa1f64194f6fc06231b0dd6328e3acd27dac4ec8536848887ca08577c831bb"
+    },
+    {
+      "path": "apps/web/e2e/tests/performance/dense-navigation-comparison.spec.ts",
+      "sha256": "753c50886dbd66ee1ede5b54f69007141bc1d65f8de1dcb8e8ea6b01a54348e3"
+    },
+    {
+      "path": "apps/web/e2e/scripts/summarize-dense-performance.mjs",
+      "sha256": "e26b4028b8505d387e4c2cface640d80098f893f1faf132cd6c4bab1b523aff9"
+    },
+    {
+      "path": "apps/web/e2e/scripts/summarize-dense-navigation-readiness.test.mjs",
+      "sha256": "8aedff49e163aab036e0ebecaf8cd7ac291874cf0fa597c51bd7a3a5d006027f"
+    }
+  ],
+  "validation": {
+    "summaryRed": "/tmp/kandev-navigation-readiness-summary-red.log: 3 failures before implementation",
+    "summaryGreen": "/tmp/kandev-navigation-readiness-summary-final.log: 20 passed",
+    "browserRed": "navigation-browser-readiness-red-logs/kandev-run.e2e.S9hB0GGa.log: missing browserEventReadiness",
+    "browserGreen": "navigation-browser-readiness-green-logs/kandev-run.e2e.XVHo7zkZ.log: passed",
+    "strictLint": "/tmp/kandev-navigation-readiness-lint-complete.log: passed",
+    "browserModeCaller": "navigation-browser-readiness-caller-smoke-logs/kandev-run.e2e.nx97d68D.log: passed, 51.1 seconds",
+    "driverModeCaller": "navigation-driver-caller-smoke-logs/kandev-run.e2e.PlSNj8yC.log: passed, 51.0 seconds"
+  },
+  "callerReports": [
+    {
+      "report": ".kandev/diagnostics/dense-workbench-performance/matched-navigation-1792832197791.json",
+      "sha256": "b86f69a967ae2836a781397d4723b8f775e84bc92ac58ec4efa0f2a12415a488",
+      "measurementKind": "harness-rehearsal",
+      "navigationReadiness": "pointerdown-raf-v1",
+      "sampleCount": 2,
+      "selectionsPerSample": 2,
+      "builds": {
+        "baseline": {
+          "binary": "/tmp/kandev-dense-owned-motion-5936a872/apps/backend/bin/kandev",
+          "assets": "/tmp/kandev-dense-owned-motion-5936a872/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "085df3998be95fbe3df28366479b06bdcec1f2edc18925e8fcfb01164b215041"
+        },
+        "candidate": {
+          "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+          "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "131a69e7d91ef0781e6dc3b612aedc69f7f2a3f51cceeca427e053a398a39a12"
+        }
+      }
+    },
+    {
+      "report": ".kandev/diagnostics/dense-workbench-performance/matched-navigation-1792832279615.json",
+      "sha256": "74214151ff716084b3a7d88e605feeb9fa211071f3297b62dad387ffd78fc7fa",
+      "measurementKind": "harness-rehearsal",
+      "navigationReadiness": "driver",
+      "sampleCount": 2,
+      "selectionsPerSample": 2,
+      "builds": {
+        "baseline": {
+          "binary": "/tmp/kandev-dense-owned-motion-5936a872/apps/backend/bin/kandev",
+          "assets": "/tmp/kandev-dense-owned-motion-5936a872/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "085df3998be95fbe3df28366479b06bdcec1f2edc18925e8fcfb01164b215041"
+        },
+        "candidate": {
+          "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+          "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "131a69e7d91ef0781e6dc3b612aedc69f7f2a3f51cceeca427e053a398a39a12"
+        }
+      }
+    }
+  ],
+  "limits": [
+    "Small smoke runs establish caller correctness, not speed.",
+    "Readiness uses DOM content, editable state, and Dockview visibility sampled by requestAnimationFrame. It performs no geometry reads.",
+    "These are readiness upper bounds, not measured screen presentation or INP.",
+    "The native probe is opt-in. Mixed methods and navigation scenarios must not be pooled.",
+    "Session-tab and incompatible-layout summary labels are supported, but their benchmark scenarios remain to be implemented and run."
+  ]
+}

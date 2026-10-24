@@ -3,6 +3,7 @@ import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { test, expect } from "../../fixtures/test-base";
 import { hashAssetTree, sha256File, snapshotDatabase } from "../../helpers/dense-snapshot";
+import { BROWSER_READINESS_VERSION } from "../../helpers/navigation-browser-readiness";
 import { runDenseNavigationSample } from "../../helpers/dense-navigation-sample";
 import { exposeNavigationStore } from "../task/task-navigation-helpers";
 import {
@@ -66,8 +67,12 @@ test("compares dense task switches and retained Dockview owners", async ({
   fs.mkdirSync(directory, { recursive: true });
   const output = path.join(directory, `matched-navigation-${Date.now()}.json`);
   const profileTimedSwitches = process.env.KANDEV_DENSE_NAV_PROFILE === "1";
+  const navigationReadiness =
+    process.env.KANDEV_DENSE_NAV_READINESS === "1" ? BROWSER_READINESS_VERSION : "driver";
   const report = {
     measurementKind: navigationMeasurementKind(profileTimedSwitches),
+    navigationScenario: "task-switch",
+    navigationReadiness,
     profileWindow: profileTimedSwitches ? "timed-switches" : "post-timing-selection",
     machine: profileMachine(),
     sourceRevision: execFileSync("git", ["rev-parse", "HEAD"], {
@@ -117,6 +122,7 @@ test("compares dense task switches and retained Dockview owners", async ({
             pair,
             sample,
             profileTimedSwitches,
+            navigationReadiness,
             profileFile: path.join(
               directory,
               `${path.basename(output, ".json")}-${sample}.cpuprofile`,

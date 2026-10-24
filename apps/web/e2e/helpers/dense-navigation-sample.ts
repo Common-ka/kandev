@@ -12,6 +12,7 @@ import {
 import type { ApiClient } from "./api-client";
 import type { SeedData } from "../fixtures/test-base";
 import { waitForSessionDone } from "./session";
+import { BROWSER_READINESS_VERSION } from "./navigation-browser-readiness";
 import { SessionPage } from "../pages/session-page";
 
 export async function runDenseNavigationSample(options: {
@@ -27,6 +28,7 @@ export async function runDenseNavigationSample(options: {
   sample: string;
   profileFile: string;
   profileTimedSwitches?: boolean;
+  navigationReadiness: "driver" | typeof BROWSER_READINESS_VERSION;
 }) {
   const {
     browser,
@@ -39,7 +41,9 @@ export async function runDenseNavigationSample(options: {
     sample,
     profileFile,
     profileTimedSwitches,
+    navigationReadiness,
   } = options;
+  const selectionOptions = { browserReadiness: navigationReadiness === BROWSER_READINESS_VERSION };
   for (const item of items) {
     await options.api.launchSession({
       task_id: item.task.id,
@@ -93,7 +97,8 @@ export async function runDenseNavigationSample(options: {
       await session.clickTab("Files");
       await expect(session.fileTreeNode(item.marker)).toBeVisible();
     }
-    for (let i = 0; i < 5; i++) await measureSelection(page, gate, items[(i + 1) % 2]);
+    for (let i = 0; i < 5; i++)
+      await measureSelection(page, gate, items[(i + 1) % 2], selectionOptions);
     if (profileTimedSwitches) {
       await cdp.send("Profiler.enable");
       await cdp.send("Profiler.start");
@@ -102,7 +107,7 @@ export async function runDenseNavigationSample(options: {
     const selections = [];
     const switchCount = Number(process.env.KANDEV_DENSE_NAV_SWITCHES ?? 40);
     for (let i = 0; i < switchCount; i++)
-      selections.push(await measureSelection(page, gate, items[i % 2]));
+      selections.push(await measureSelection(page, gate, items[i % 2], selectionOptions));
     const measured = await endDenseWindow(page, cdp, before);
     if (profileTimedSwitches) {
       const profile = await cdp.send("Profiler.stop");
@@ -117,7 +122,8 @@ export async function runDenseNavigationSample(options: {
     }));
     let retention;
     if (pair === 0 && cpuRate === 1 && !process.env.KANDEV_DENSE_NAV_SWITCHES) {
-      for (let i = 0; i < 100; i++) await measureSelection(page, gate, items[i % 2]);
+      for (let i = 0; i < 100; i++)
+        await measureSelection(page, gate, items[i % 2], selectionOptions);
       await cdp.send("HeapProfiler.collectGarbage");
       retention = {
         switches: 100,
@@ -140,6 +146,8 @@ export async function runDenseNavigationSample(options: {
     return {
       cpuRate,
       sample,
+      navigationScenario: "task-switch",
+      navigationReadiness,
       browser: browser.version(),
       selections,
       measured,

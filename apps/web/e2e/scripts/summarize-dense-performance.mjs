@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
 
+const DEFAULT_NAVIGATION_SCENARIO = "task-switch";
+
 const LEGACY_VISIBILITY_PROBE = "locator-assertion";
 
 function median(values) {
@@ -122,6 +124,90 @@ function checkVisibilityProbe(report, sample) {
     throw new Error("Samples must use the report's final visibility probe");
 }
 
+function navigationIdentity(report, sample) {
+  const scenario = report.navigationScenario ?? DEFAULT_NAVIGATION_SCENARIO;
+  const readiness = report.navigationReadiness ?? "driver";
+  if (
+    ![DEFAULT_NAVIGATION_SCENARIO, "incompatible-layout", "session-tabs"].includes(scenario) ||
+    (sample.navigationScenario ?? DEFAULT_NAVIGATION_SCENARIO) !== scenario
+  )
+    throw new Error("Samples must use the report's navigation scenario");
+  if (
+    !["driver", "pointerdown-raf-v1"].includes(readiness) ||
+    (sample.navigationReadiness ?? "driver") !== readiness
+  )
+    throw new Error("Samples must use the report's navigation readiness probe");
+  return { scenario, readiness };
+}
+
+function browserReadinessMetrics(selections, readiness) {
+  if (readiness === "driver") {
+    if (selections.some((selection) => selection.browserEventReadiness))
+      throw new Error("Driver readiness cannot include browser-event measurements");
+    return {};
+  }
+  const spans = selections.map((selection) => {
+    const value = selection.browserEventReadiness;
+    if (
+      !value ||
+      value.version !== readiness ||
+      value.trusted !== true ||
+      !value.taskId ||
+      !value.sessionId ||
+      !Number.isFinite(value.eventAt) ||
+      value.eventAt <= 0 ||
+      ![value.headerMs, value.transcriptMs, value.composerMs].every(
+        (duration) => Number.isFinite(duration) && duration >= 0,
+      )
+    )
+      throw new Error("Invalid or incomplete browser-event readiness measurement");
+    return value;
+  });
+  const measures = {
+    Header: (span) => span.headerMs,
+    Transcript: (span) => span.transcriptMs,
+    Composer: (span) => span.composerMs,
+    AllReady: (span) => Math.max(span.headerMs, span.transcriptMs, span.composerMs),
+  };
+  return Object.fromEntries(
+    Object.entries(measures).flatMap(([name, valueOf]) => {
+      const values = spans.map(valueOf);
+      return [
+        [`event${name}P50Ms`, median(values)],
+        [`event${name}P95Ms`, percentile(values, 0.95)],
+      ];
+    }),
+  );
+}
+
+function navigationMetrics(report, sample) {
+  const { scenario, readiness } = navigationIdentity(report, sample);
+  return {
+    scenario: readiness === "driver" ? scenario : `${readiness}-${scenario}`,
+    values: {
+      ...windowMetrics(sample.measured),
+      selectionP50Ms: median(sample.selections.map((selection) => selection.paintOpportunityMs)),
+      selectionP95Ms: percentile(
+        sample.selections.map((selection) => selection.paintOpportunityMs),
+        0.95,
+      ),
+      requests: sample.selections.reduce(
+        (sum, selection) => sum + Object.values(selection.counts).reduce((a, b) => a + b, 0),
+        0,
+      ),
+      ...browserReadinessMetrics(sample.selections, readiness),
+    },
+  };
+}
+
+function navigationReportMetadata(report) {
+  if (report.samples.every((sample) => sample.cold)) return {};
+  return {
+    navigationScenario: report.navigationScenario ?? DEFAULT_NAVIGATION_SCENARIO,
+    navigationReadiness: report.navigationReadiness ?? "driver",
+  };
+}
+
 export function summarizeReport(report) {
   if (["cpu-attribution", "animation-attribution"].includes(report.measurementKind))
     throw new Error("Diagnostic attribution runs are excluded from timing comparisons");
@@ -153,24 +239,7 @@ export function summarizeReport(report) {
           values: windowMetrics(run),
         });
     } else {
-      records.push({
-        ...identity,
-        scenario: "task-switch",
-        values: {
-          ...windowMetrics(sample.measured),
-          selectionP50Ms: median(
-            sample.selections.map((selection) => selection.paintOpportunityMs),
-          ),
-          selectionP95Ms: percentile(
-            sample.selections.map((selection) => selection.paintOpportunityMs),
-            0.95,
-          ),
-          requests: sample.selections.reduce(
-            (sum, selection) => sum + Object.values(selection.counts).reduce((a, b) => a + b, 0),
-            0,
-          ),
-        },
-      });
+      records.push({ ...identity, ...navigationMetrics(report, sample) });
     }
   }
   const groups = Map.groupBy(records, (record) => `${record.cpuRate}x/${record.scenario}`);
@@ -180,6 +249,7 @@ export function summarizeReport(report) {
       comparisons.push({ group, metric, ...summarizePairs(rows, (row) => row.values[metric]) });
   return {
     measurementKind: report.measurementKind,
+    ...navigationReportMetadata(report),
     finalVisibilityProbe: report.finalVisibilityProbe ?? LEGACY_VISIBILITY_PROBE,
     layout: report.layout ?? "grid",
     extraBusyHeaders: report.extraBusyHeaders ?? 0,
@@ -200,6 +270,7 @@ export function summarizeReport(report) {
       "Positive reduction means a lower candidate value. Counts such as mounted editors are observations, not optimization scores.",
       "Final-content probe versions must not be pooled. Locator-assertion retries can collect page-wide ARIA snapshots; boolean polling retains the same visibility gate without those snapshots.",
       "Streaming duration includes the wait for final visible content. Fixed-deadline traffic is retained in the raw report.",
+      "Browser-event readiness uses trusted pointerdown timestamps and frame-sampled DOM/owner state without geometry reads. It is separate from driver-clock readiness and is not screen presentation or INP.",
       "Frame gaps and driver DOM readiness are not INP. Linux CPU throttling is not an M2 Air simulation.",
       "History decoded bytes include captured requests and responses. They are not compressed network transfer.",
     ],

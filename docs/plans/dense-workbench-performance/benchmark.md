@@ -164,6 +164,31 @@ duration that contains the measured window. Explicit `KANDEV_DENSE_NAV_SWITCHES`
 skips the additional retention switches; use `40` for the normal timed workload
 when only attribution is needed. Profiler runs are excluded from speed claims.
 
+## Browser-event navigation readiness
+
+Set `KANDEV_DENSE_NAV_READINESS=1` on the navigation comparison to record trusted
+native `pointerdown` time through destination header text, seeded transcript
+content, and an editable composer. The recorder checks the destination session
+and Dockview visibility on animation frames without geometry reads. Its listener
+and pending frame are removed after each selection, including failures.
+
+Reports and samples identify this method as `navigationReadiness: pointerdown-raf-v1`.
+The existing driver-clock readiness remains separately reported. Without the
+flag, the recorder is not installed and reports identify the `driver` method.
+The summary rejects mixed methods, untrusted/missing/invalid browser measurements,
+and mismatched navigation scenarios. Browser-event groups have the probe prefix;
+never pool them with earlier driver-only comparisons. Frame sampling supplies
+DOM-readiness upper bounds, not actual screen presentation or field INP.
+
+Validate the full caller with 10 tasks, ten messages, two switches, one pair,
+and 1x CPU. Run both with and without `KANDEV_DENSE_NAV_READINESS=1`. The new
+browser regression and summary regressions must also pass. The initial paired
+smokes pass in both modes; [measurement evidence](evidence/navigation-browser-readiness.json)
+records the source, failures before implementation, and both caller reports.
+They establish correctness only. The task-switch caller remains the current
+implemented scenario; the session-tab and incompatible-layout scenarios remain
+open in the [completion audit](completion-audit.md).
+
 ## Run order and comparison
 
 After changing the measurement harness, first run its full caller with a small
