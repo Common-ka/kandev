@@ -409,3 +409,42 @@ and scoped strict lint passes. Production code and assets are unchanged.
 The failure, captures, and correction are preserved in
 [the task-count evidence](evidence/dockview-task-total.json). The full comparison
 still needs to run.
+
+## Final Dockview core comparison (1x)
+
+Six alternating pairs compare the original baseline with production
+`f5c8fb8f6ab`. All 12 samples pass in 59.7 minutes. The disposable workspace
+contains 1,000 tasks and 36,900 stored messages. Two chats are visible, a third
+chat remains mounted behind a tab with a draft, and Files, Changes, and Plan
+are visible. Each visible chat starts with 100 loaded messages from a
+1,000-message stored history. Seven API panels and four document editors remain
+present in every streaming sample.
+
+Streaming history requests fall 96.24%, decoded history bytes fall 96.24%, and
+full-history resets fall to zero in every pair. All 21,600 scheduled updates
+pass exact-order durable verification. The hidden chat catches up to all 300
+updates and preserves its draft in every sample. Five baseline HTTP 503
+responses occur in the last streaming sample; the candidate has none. The
+backend log records a persistence table-probe deadline. The passing content
+checks do not erase these HTTP failures.
+
+Streaming renderer CPU falls 11.43% and main-thread CPU falls 9.35% by median
+paired change. Both improve in five pairs and regress in the last. Main-thread
+task time falls 6.90%, below the 20% target. Reduced-motion idle main-thread CPU
+falls 80.96% in every pair. Normal-idle main-thread CPU falls 10.70% by median
+paired change, with a 16.32% regression in the last pair.
+
+Streaming frame-gap p95 improves in four pairs, is equal in one, and increases
+from 50 to 83.4 ms in the last pair. That result exceeds the baseline range of
+33.4 to 50 ms. Candidate long-task counts are zero in the first four streaming
+samples, then seven and 48; the corresponding baseline counts are two and
+eight. These regressions remain open. Shared-host load rose late, but the
+observed correlation does not establish a cause. Panel/editor counts remain
+stable and candidate style time is lower in all streaming pairs. A separate
+attribution run is required before claiming a cause or a uniform frame gain.
+
+[Complete evidence](evidence/final-dockview-core-six-pair-1x.json) preserves all
+pairs, errors, build and harness identities, loaded-history checks, and host
+observations. Setup is outside timing. No cold-entry, MacBook Air M2, field INP,
+battery, or leak claim follows. The full-plugin series remains separate and
+pending.
