@@ -30,6 +30,42 @@ system_design:
 
 # Task 06: Matched comparison and regression evidence
 
+## Final compatible-task comparison (1x)
+
+Six alternating pairs compare the original frozen baseline with production
+commit `72085e06b49`. All 12 runs passed in 21.1 minutes: 480 measured task
+switches and 200 separate retention switches, with 1,000 workspace tasks and
+1,000 messages, 630 files, and 73 changed files per selected task. The harness
+uses five actual warmup switches and records trusted browser-event readiness
+separately from driver timing.
+
+Main-thread CPU falls 2.77%, renderer CPU 2.44%, style recalculation time 10.82%,
+and long-task count 12.08% by median paired change. Each is lower in all six
+pairs. Driver p50 falls 2.44% in all six; driver p95 falls 2.97% by median paired
+change, with five improvements and one 0.06% regression. These percentages are
+medians of paired changes, not ratios of the two arm medians.
+
+Browser-event header, transcript, and composer readiness reach the same sampled
+frame. Their p50 arm medians are essentially equal at 276.1 ms. Median paired
+p50/p95 reductions are 0.79%/1.32%, each with one regressing pair. This does not
+establish a substantial native-readiness gain. Frame-gap p95 is lower in five
+pairs and effectively equal in one. Maximum frame gap is neutral by median;
+one pair increases from 300 to 333.3 ms, within the baseline series range of
+300 to 366.7 ms.
+
+Both arms retain one editor and three panels after 100 extra switches. Post-GC
+used heap rises about 3.17 MB on baseline and 3.31 MB on candidate. These single
+checks do not prove or exclude a leak; subscription owner counts were not
+sampled in this loop. The 20% warm-switch p95 target is not met. Session tabs,
+incompatible layouts, Dockview idle/streaming, final Threads comparisons, and
+stress remain separate open work. No M2 Air, battery, or field INP claim follows.
+
+[Complete evidence](evidence/final-task-switch-six-pair-1x.json) retains every
+pair, raw-report and fixture hashes, measured harness hashes, build identities,
+retention observations, and host monitoring. Navigation summary metadata now
+omits unrelated grid/stream defaults. All numeric comparisons are unchanged;
+23 summary regressions and strict lint pass.
+
 ## Busy-header harness validation
 
 The optional columns variant seeds extra non-producer session states through

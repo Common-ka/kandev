@@ -243,12 +243,44 @@ function navigationMetrics(report, sample) {
   };
 }
 
-function navigationReportMetadata(report) {
-  if (report.samples.every((sample) => sample.cold)) return {};
+function measurementMetadata(report) {
+  if (report.samples.every((sample) => sample.cold))
+    return {
+      finalVisibilityProbe: report.finalVisibilityProbe ?? LEGACY_VISIBILITY_PROBE,
+      layout: report.layout ?? "grid",
+      extraBusyHeaders: report.extraBusyHeaders ?? 0,
+      throttleAfterLoad: Boolean(report.throttleAfterLoad),
+    };
   return {
     navigationScenario: report.navigationScenario ?? DEFAULT_NAVIGATION_SCENARIO,
     navigationReadiness: report.navigationReadiness ?? "driver",
   };
+}
+
+function measurementNotes(report) {
+  const common = [
+    "mainThreadMs and mainThreadMsPerSecond use TaskDuration with timeTicks: elapsed time in main-thread tasks, not thread CPU time. Script, style, and layout durations use the same elapsed-time domain.",
+    "mainThreadCpuMs uses ThreadTime (renderer main-thread CPU). rendererCpuMs uses ProcessTime (renderer-process CPU); it excludes separate browser, GPU, and backend processes.",
+    "Positive reduction means a lower candidate value. Counts such as mounted editors are observations, not optimization scores.",
+    "Frame gaps and driver DOM readiness are not INP. Linux CPU throttling is not an M2 Air simulation.",
+  ];
+  if (!report.samples.every((sample) => sample.cold))
+    return [
+      ...common,
+      "Browser-event readiness uses trusted pointerdown timestamps and frame-sampled DOM/owner state without geometry reads. It is separate from driver-clock readiness and is not screen presentation or INP.",
+    ];
+  return [
+    ...common,
+    "Extra busy headers are backend-seeded status rows, not additional live executions. The six canonical stream producers remain unchanged. Busy-header variants must not be pooled with the default workload.",
+    ...(report.throttleAfterLoad
+      ? [
+          "Warm stress loads at 1x before applying the recorded CPU rate. It is not a throttled cold-load measurement.",
+        ]
+      : []),
+    "Final-content probe versions must not be pooled. Locator-assertion retries can collect page-wide ARIA snapshots; boolean polling retains the same visibility gate without those snapshots.",
+    "Streaming duration includes the wait for final visible content. Fixed-deadline traffic is retained in the raw report.",
+    "History decoded bytes include captured requests and responses. They are not compressed network transfer.",
+  ];
 }
 
 export function summarizeReport(report) {
@@ -292,31 +324,12 @@ export function summarizeReport(report) {
       comparisons.push({ group, metric, ...summarizePairs(rows, (row) => row.values[metric]) });
   return {
     measurementKind: report.measurementKind,
-    ...navigationReportMetadata(report),
-    finalVisibilityProbe: report.finalVisibilityProbe ?? LEGACY_VISIBILITY_PROBE,
-    layout: report.layout ?? "grid",
-    extraBusyHeaders: report.extraBusyHeaders ?? 0,
-    throttleAfterLoad: Boolean(report.throttleAfterLoad),
+    ...measurementMetadata(report),
     machine: report.machine,
     builds: report.builds,
     sampleCount: report.samples.length,
     comparisons,
-    notes: [
-      "Extra busy headers are backend-seeded status rows, not additional live executions. The six canonical stream producers remain unchanged. Busy-header variants must not be pooled with the default workload.",
-      ...(report.throttleAfterLoad
-        ? [
-            "Warm stress loads at 1x before applying the recorded CPU rate. It is not a throttled cold-load measurement.",
-          ]
-        : []),
-      "mainThreadMs and mainThreadMsPerSecond use TaskDuration with timeTicks: elapsed time in main-thread tasks, not thread CPU time. Script, style, and layout durations use the same elapsed-time domain.",
-      "mainThreadCpuMs uses ThreadTime (renderer main-thread CPU). rendererCpuMs uses ProcessTime (renderer-process CPU); it excludes separate browser, GPU, and backend processes.",
-      "Positive reduction means a lower candidate value. Counts such as mounted editors are observations, not optimization scores.",
-      "Final-content probe versions must not be pooled. Locator-assertion retries can collect page-wide ARIA snapshots; boolean polling retains the same visibility gate without those snapshots.",
-      "Streaming duration includes the wait for final visible content. Fixed-deadline traffic is retained in the raw report.",
-      "Browser-event readiness uses trusted pointerdown timestamps and frame-sampled DOM/owner state without geometry reads. It is separate from driver-clock readiness and is not screen presentation or INP.",
-      "Frame gaps and driver DOM readiness are not INP. Linux CPU throttling is not an M2 Air simulation.",
-      "History decoded bytes include captured requests and responses. They are not compressed network transfer.",
-    ],
+    notes: measurementNotes(report),
   };
 }
 

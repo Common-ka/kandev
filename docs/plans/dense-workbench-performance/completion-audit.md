@@ -17,11 +17,11 @@ builds, fixtures, and probes; they do not automatically verify the final build.
 | Final grid cold, idle, streaming, and reduced-motion comparison | Earlier six pairs use older assets and the old final-visible assertion | Six alternating pairs on original baseline versus final retained build with corrected probe |
 | Final columns idle, streaming, and fixed first/middle/last traversal | Targeted owned-header series use 120 primary messages, not the full reference history | Full reference fixture, six pairs, traversal and offscreen catch-up evidence |
 | Dockview idle and streaming | Correctness covers focus, saved layouts, and visible unfocused Changes; navigation timing covers Files-active task switches | Two visible chats, retained hidden tabs, plan/files/changes panels, six paired observations, and core/plugin arms |
-| Switching scenarios | Existing task-to-task Files-active timing and draft/context correctness | Separate same-environment tabs, compatible-layout tasks, and incompatible-layout restoration with 40 selections after five warmups; browser-event readiness markers where specified. The opt-in recorder now passes its browser regression and both caller modes; the incompatible-layout regression and full caller now pass ([evidence](evidence/navigation-layout-rebuild.json)); the session-tab regression and both-build caller now pass with a real shared environment and retained draft ([evidence](evidence/navigation-session-tabs.json)); dense runs remain pending |
+| Switching scenarios | Existing task-to-task Files-active timing and draft/context correctness | Separate same-environment tabs, compatible-layout tasks, and incompatible-layout restoration with 40 selections after five warmups; browser-event readiness markers where specified. The opt-in recorder now passes its browser regression and both caller modes; the incompatible-layout regression and full caller now pass ([evidence](evidence/navigation-layout-rebuild.json)); the session-tab regression and both-build caller now pass with a real shared environment and retained draft ([evidence](evidence/navigation-session-tabs.json)); compatible-task 1x timing now passes six pairs ([evidence](evidence/final-task-switch-six-pair-1x.json)); full session-tab, incompatible-layout, and stress runs remain pending |
 | Expanded/collapsed composers and visibility | Existing motion correctness and targeted attribution | Audit scenario records for normal/reduced motion, offscreen columns, hidden Dockview tabs, and actual document hide/restore; state browser limitations explicitly |
 | Long-history stress | Earlier all-history attempt failed within the unchanged 360-second load bound | Final-build attempts with verified loaded counts; report overload if a full sample cannot complete |
 | 4x CPU stress | Earlier cold and warm attempts contain failures and incomplete samples | Same final desktop scenarios, with cold and throttle-after-load modes kept separate; retain every failed attempt |
-| Retention after 100 switches | Existing and preliminary candidate runs retain one editor and three panels | Final retained-owner evidence, including subscriptions where required; no leak inference from one heap sample |
+| Retention after 100 switches | Existing and preliminary candidate runs retain one editor and three panels | Final compatible-task checks retain one editor and three panels on both arms after 100 switches. Subscription ownership and other scenarios remain pending; no leak inference from one heap sample |
 | Phone parity and final correctness | Native phone composition, history, and deep-tree rerun pass for current candidate | Final targeted recovery, task-switch/draft, scroll, and motion cases; inspect captures and preserve the unexplained initial deep-tree failure |
 | Delivery and reporting | Validated production increments pushed through 90a440a9747179629f507b8bb2f24bf5f0f3b8f0 | Final normal-hook commits/pushes, accurate work-order statuses, companion records, public-doc impact check, reproducible commands, and Kandev rich results |
 
@@ -52,15 +52,15 @@ setup failure, not a measured product regression.
 The new layout benchmark exposed an existing restoration issue: moving Files
 into a third column in task B leaves that arrangement in task A after switching
 back. Explicit persistence of both environments reproduces the failure.
-`layout-manager/comparator.ts:savedLayoutMatchesLive` compares structural panel
-counts without checking arrangement. The failure artifacts are retained under
+The previous `layout-manager/comparator.ts:savedLayoutMatchesLive` compared
+structural panel counts without checking arrangement. The failure artifacts are retained under
 `navigation-layout-inherited-failure` and `navigation-layout-persisted-failure`.
 The candidate now compares root orientation and recursive structural group shape.
 The same-inventory browser regression restores both arrangements and drafts;
 75 unit tests, typecheck, lint, final build, original-baseline caller smoke, and
 four phone checks pass. See [the repair evidence](evidence/layout-arrangement.json).
 The distinct-inventory benchmark remains useful for paired rebuild timing on
-both versions. Full dense timing of the candidate remains pending.
+both versions. Compatible-task timing now passes six pairs. Full incompatible-layout timing remains pending.
 
 ## Completion rule
 

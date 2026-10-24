@@ -133,3 +133,13 @@ tests, typecheck, lint, build, final desktop regression, original-baseline calle
 smoke, and four phone cases pass. Full dense timing remains pending; this is a
 correctness repair without a new speed claim. See
 [the evidence](../dense-workbench-performance/evidence/layout-arrangement.json).
+
+
+## Final compatible-task comparison (2026-10-24)
+
+Six pairs on the original baseline versus retained production `72085e06b49`
+pass 480 measured and 200 retention switches. CPU and rendering work improve
+modestly in every pair; browser-event readiness is nearly unchanged. The 20%
+warm-p95 target remains unmet. Saved layout and draft correctness remain intact.
+See [the complete comparison](../dense-workbench-performance/evidence/final-task-switch-six-pair-1x.json).
+Other switching, Dockview, and stress scenarios remain open.

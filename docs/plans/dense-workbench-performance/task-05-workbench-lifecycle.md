@@ -27,6 +27,18 @@ system_design:
 
 # Task 05: Dockview and editor lifecycle
 
+## Final compatible-task timing
+
+The final retained build completes six alternating pairs against the original
+baseline: 480 timed switches and 200 retention switches. Main-thread CPU, renderer
+CPU, style time, and long-task count are lower in every pair, with median paired
+reductions of 2.77%, 2.44%, 10.82%, and 12.08%. Native browser-event readiness is
+nearly unchanged, and the 20% warm-p95 target is not met. One editor and three
+panels remain after each 100-switch retention check; no leak claim follows.
+See [results](results.md#final-compatible-task-comparison-1x) and
+[the full evidence](evidence/final-task-switch-six-pair-1x.json). Other scenario
+requirements remain open.
+
 ## Saved-layout arrangement correctness
 
 The new incompatible-layout benchmark exposed a false fast-path match: two tasks

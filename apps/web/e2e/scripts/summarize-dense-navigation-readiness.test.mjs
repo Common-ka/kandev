@@ -175,3 +175,15 @@ test("rejects session-tab samples without two sessions in one real environment",
     assert.throws(() => summarizeReport(report), /session/);
   }
 });
+
+test("does not label task navigation as a grid streaming workload", () => {
+  const result = summarizeReport(navigationReport());
+  for (const key of ["layout", "extraBusyHeaders", "finalVisibilityProbe", "throttleAfterLoad"])
+    assert.equal(Object.hasOwn(result, key), false, key);
+  assert.ok(
+    result.notes.every(
+      (note) =>
+        !/six canonical stream producers|Streaming duration|History decoded bytes/.test(note),
+    ),
+  );
+});
