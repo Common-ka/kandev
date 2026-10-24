@@ -120,3 +120,16 @@ attribution and failing/passing lifecycle regression. The first full-size paired
 measurement showed no clear switch-speed gain; repeatability remains pending.
 This is a separate owner from the visible session composer described
 above and does not resolve the original 213 ms editor sample.
+
+
+## Saved-layout arrangement repair (2026-10-24)
+
+The dense-workbench navigation benchmark reproduced a false fast-path match
+between two- and three-column layouts with identical panel counts. The comparator
+now checks root orientation and recursive structural group placement. Sizes,
+active tabs, and session IDs retain their existing restoration owners. The
+browser regression restores both task arrangements and drafts; 75 targeted unit
+tests, typecheck, lint, build, final desktop regression, original-baseline caller
+smoke, and four phone cases pass. Full dense timing remains pending; this is a
+correctness repair without a new speed claim. See
+[the evidence](../dense-workbench-performance/evidence/layout-arrangement.json).

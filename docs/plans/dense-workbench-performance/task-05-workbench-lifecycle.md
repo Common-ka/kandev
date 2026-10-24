@@ -27,6 +27,24 @@ system_design:
 
 # Task 05: Dockview and editor lifecycle
 
+## Saved-layout arrangement correctness
+
+The new incompatible-layout benchmark exposed a false fast-path match: two tasks
+with identical panels but different arrangements retained the outgoing task's
+split tree. The compatibility check counted components without checking their
+placement. It now compares root orientation, nested splits, and structural
+panel groups, while ignoring sizes, active tabs, and session IDs that have
+separate restoration owners. No default layout or CSS value changes.
+
+Four unit regressions fail before the fix. The retained build also fails the
+real two-column/three-column A-B-A-B regression. The candidate restores each
+arrangement and both drafts. Final validation passes 75 targeted unit tests,
+typecheck, strict lint, the build, the final browser regression, an original-
+baseline caller smoke, and four phone checks. Six desktop cases also pass before
+the final type-guard correction. Captures show both saved arrangements and their
+drafts. See [the evidence](evidence/layout-arrangement.json). This is a correctness
+repair; dense timing remains open and no new speed gain is claimed.
+
 ## Hidden Changes lifecycle: retained
 
 The existing panel-visibility signal now defers hidden anchor, scroll-margin,

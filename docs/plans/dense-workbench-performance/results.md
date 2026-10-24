@@ -5,6 +5,21 @@ and the remaining stress/scenario matrix are in progress. The branch is
 `feature/evaluate-live-thread-bc0`; the frozen baseline is
 `595df36ed5c1cf02fd90cb972b623ad6edc53df8`.
 
+## Saved layouts: correctness repair
+
+Task switches now compare the saved split arrangement before choosing the
+Dockview fast path. The old check matched identical panel counts even when one
+task used two columns and the other used three. The browser regression fails
+on the retained build and passes on the candidate, with both task drafts intact.
+Compatible arrangements can still reuse the fast path across size and session-ID
+changes. No default style or layout values change.
+
+The candidate passes 75 targeted unit tests, typecheck, strict lint, the build,
+the final browser regression, four phone checks, and a small comparison against
+the original baseline. These checks establish correctness. Dense timing remains
+pending. [Evidence](evidence/layout-arrangement.json) records build hashes,
+failures, final checks, and inspected captures.
+
 ## Hidden Changes presentation: retained
 
 The candidate removes hidden Changes timeline anchor, presentation-observer,

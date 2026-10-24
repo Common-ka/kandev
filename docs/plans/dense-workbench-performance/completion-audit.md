@@ -55,9 +55,12 @@ back. Explicit persistence of both environments reproduces the failure.
 `layout-manager/comparator.ts:savedLayoutMatchesLive` compares structural panel
 counts without checking arrangement. The failure artifacts are retained under
 `navigation-layout-inherited-failure` and `navigation-layout-persisted-failure`.
-This is an unresolved correctness finding. The rebuild benchmark uses distinct
-panel inventories to exercise the actual rebuild path on both versions; it does
-not establish that same-inventory arrangement restoration works.
+The candidate now compares root orientation and recursive structural group shape.
+The same-inventory browser regression restores both arrangements and drafts;
+75 unit tests, typecheck, lint, final build, original-baseline caller smoke, and
+four phone checks pass. See [the repair evidence](evidence/layout-arrangement.json).
+The distinct-inventory benchmark remains useful for paired rebuild timing on
+both versions. Full dense timing of the candidate remains pending.
 
 ## Completion rule
 

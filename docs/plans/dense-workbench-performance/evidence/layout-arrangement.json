@@ -1,0 +1,79 @@
+{
+  "purpose": "Restore each task saved split arrangement when panel counts match. Preserve the fast path for equal trees with different sizes, active tabs, and session IDs.",
+  "parentRevision": "5552993950f945a2f3206ae5b54ad756e31ec31b",
+  "productionChange": "Compare root orientation and recursive structural group shape instead of aggregate component counts. No CSS or default-layout values change.",
+  "files": [
+    {
+      "path": "apps/web/lib/state/layout-manager/comparator.ts",
+      "sha256": "876b527250a627ba97c820dabc9a338857493d287e263972a1745b683d250528"
+    },
+    {
+      "path": "apps/web/lib/state/layout-manager/comparator.test.ts",
+      "sha256": "de93a66bab2999305e315184db04400b3c907768939118270f7c58503b7c79c7"
+    },
+    {
+      "path": "apps/web/e2e/tests/layout/saved-layout-arrangement.spec.ts",
+      "sha256": "f4846ad455f1cc4240e85e6320c60474d49870a763d05eae1dbef896fc141dfc"
+    }
+  ],
+  "candidate": {
+    "parentDeliveredRevision": "5552993950f945a2f3206ae5b54ad756e31ec31b",
+    "productionFiles": [
+      {
+        "path": "apps/web/lib/state/layout-manager/comparator.ts",
+        "sha256": "876b527250a627ba97c820dabc9a338857493d287e263972a1745b683d250528"
+      }
+    ],
+    "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+    "assetsSha256": "d83bd02b59785cf6c806178f3f0e15d0443dbac7f104998347cb6580371a9f94",
+    "agentctlSha256": "6e768aef1a1692630fe109c25e23ac31ab461b691800c2059e6dfdd5cf0b4d0a",
+    "mockAgentSha256": "c69f05ee9f5622cc5bce83405c2e9240b537f3e79a21da65765d9867592288c1",
+    "lockSha256": "9d5a03a9086f28c93752fce491f896047fbcdbc64abfafe3b3aa53261199c554"
+  },
+  "validation": {
+    "unitRed": "/tmp/kandev-layout-arrangement-unit-red.log: 4 failed, 2 passed; columns, group placement, orientation, nested splits",
+    "unitGreen": "/tmp/kandev-layout-arrangement-unit-complete.log: 75 passed in seven files",
+    "browserRed": "layout-arrangement-red-logs/kandev-run.e2e.aCSaqT8T.log: retained build fails saved two-column restoration within unchanged 30-second bound",
+    "initialBrowserGreen": "layout-arrangement-green-logs/kandev-run.e2e.YXspbEO0.log: six passed before type-guard correction",
+    "finalBrowserGreen": "layout-arrangement-final-smoke-logs/kandev-run.e2e.GvuBlLbC.log: final arrangement regression plus original-baseline comparison smoke passed",
+    "phone": "layout-arrangement-phone-logs/kandev-run.e2e.cdkNopqS.log: four passed, 34.5 seconds",
+    "typecheck": "/tmp/kandev-layout-arrangement-typecheck-final.log: passed",
+    "lint": "/tmp/kandev-layout-arrangement-lint-complete.log: passed",
+    "build": "/tmp/kandev-layout-arrangement-build-final.log: passed"
+  },
+  "preservedFailure": "Initial implementation passed runtime tests but failed typecheck because Dockview node type does not discriminate the data union. Changed the reader to narrow with Array.isArray, rebuilt, and repeated the comparator and full targeted unit suite. Initial build assets 25ea2ffbd86ffc5e1669d10b527d16089caea65b81d1f968c7bcc7ca9f593c39 are not the final candidate.",
+  "captures": [
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/layout-arrangement-final-captures/restored-2-columns.png",
+      "sha256": "aa074348e7f018eec3805b3f878daa97e64016ae7e904f7b274f861c3576c1b5",
+      "inspection": "Expected task arrangement and matching draft visible."
+    },
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/layout-arrangement-final-captures/restored-3-columns.png",
+      "sha256": "edf9dbc98befe36dbb4cae2dc1472c96b4c65042c5ab34b4788894d16a727149",
+      "inspection": "Expected task arrangement and matching draft visible."
+    }
+  ],
+  "comparisonSmoke": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/matched-navigation-1792834237250.json",
+    "sha256": "0e89421da69e511de1371c0737f037c994d9316cd15bba5af3ddf99a5253b228",
+    "builds": {
+      "baseline": {
+        "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+        "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+        "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+        "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+      },
+      "candidate": {
+        "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+        "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+        "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+        "assetsSha256": "d83bd02b59785cf6c806178f3f0e15d0443dbac7f104998347cb6580371a9f94"
+      }
+    },
+    "sampleCount": 2,
+    "purpose": "Harness correctness only; no speed claim."
+  },
+  "publicDocsImpact": "None: restores the existing saved-layout contract without new workflow, configuration, API, or terminology.",
+  "remaining": "Full dense performance and remaining package scenarios remain open."
+}
