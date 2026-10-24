@@ -523,3 +523,16 @@ windows produce validated profiles; profiled reports are excluded from speed
 comparisons. Candidate reduced-motion diagnostics identify four shared host
 Spinner instances on plugin composer buttons. The repair and its CPU effect
 remain pending. See [evidence](evidence/dockview-cpu-attribution-harness.json).
+
+## Shared Spinner reduced-motion comparison
+
+The isolated follow-up compares the previous candidate with one shared CSS
+motion rule. All six alternating pairs pass, with 21,600 ordered updates,
+retained hidden drafts, four editors, nine API panels, and no HTTP failures.
+Reduced-motion main CPU falls 79.82% and renderer CPU falls 69.65%, with lower
+CPU in every pair. Four running rotations become zero. Normal CPU is mixed,
+including a 40.17% first-pair main-CPU regression; p95 frame gaps are neutral
+by median paired change, while several maximum gaps worsen. These results
+remain included. See [complete evidence](evidence/plugin-spinner-motion-six-pair-1x.json).
+Native application visibility checks and the remaining package matrix are
+separate gates. No original-baseline or M2 result is inferred from this series.

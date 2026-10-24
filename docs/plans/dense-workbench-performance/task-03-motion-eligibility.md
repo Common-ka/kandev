@@ -333,3 +333,24 @@ this work order's 004/006 scope, including offscreen ownership for the legacy
 SVG. It does not claim the separate 001 migration. The public animation
 guide already documents the reduced-motion contract, so no new product copy or
 public documentation change is required.
+
+## Shared plugin-action loading indicators
+
+The full plugin comparison exposed four host-owned rotations under reduced
+motion. The optional Dockview capture located them on shared `Spinner` elements
+inside two composer actions per visible chat. Desktop and phone browser tests
+both failed before the fix: the two inspected indicators remained animated.
+The shared component now disables only its rotation under reduced motion.
+
+Both browser regressions pass after the CSS change. The static indicators remain
+visible, busy actions keep their accessible state, Stop still activates by click
+or touch, and normal motion resumes when the preference changes back. All ten
+related desktop/phone browser checks, five action unit tests, strict lint,
+typecheck, and the fresh build pass. Both viewport captures were inspected.
+The six-pair comparison against the previous candidate passes all 12 samples
+and 21,600 ordered updates. Reduced-motion main CPU falls 79.82% and renderer
+CPU falls 69.65% by median paired change, with gains in every pair and zero
+running animations. Normal-mode results are mixed. The first normal-idle CPU
+regression and frame-gap regressions remain explicit in
+[the evidence](evidence/plugin-spinner-motion-six-pair-1x.json). This supports
+the reduced-motion CPU gain, without a broad frame-rate or normal-mode claim.

@@ -30,6 +30,13 @@ all document animations. Cancel or pause owned effects consistently and clean
 up preference listeners. A visible unfocused split pane remains eligible for
 normal motion. Hidden document, offscreen target, and hidden panel gates remain.
 
+The shared `@kandev/ui/spinner` also supplies persistent loading indicators on
+host-rendered plugin actions. Its CSS rotation uses `motion-reduce:animate-none`
+to keep the same visible SVG and accessible busy semantics under reduce. The
+media query responds to preference changes without another observer or listener.
+Normal rotation and the action's enabled state remain unchanged. The same rule
+also applies to bounded uses of this shared component.
+
 Component tests cover preference changes, fallback, active-state changes while
 hidden, and cleanup. Desktop and phone browser tests assert visible static
 status under reduce and the original visible motion under no-preference.

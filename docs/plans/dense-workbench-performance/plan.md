@@ -44,8 +44,12 @@ streaming task-time target is unmet. See [core evidence](evidence/final-dockview
 The scripted Threads grid/column harness and unchanged quiet caller pass both
 builds. The full-plugin six-pair series also passes, with lower streaming reads
 and CPU but mixed idle results and four remaining reduced-motion animations
-([evidence](evidence/final-dockview-plugin-six-pair-1x.json)). Full reference grid,
-columns, and stress remain separate work.
+([evidence](evidence/final-dockview-plugin-six-pair-1x.json)). The isolated
+shared-Spinner follow-up now removes those four reduced-motion rotations and
+passes six pairs, with 79.82% lower main CPU and 69.65% lower renderer CPU in
+that mode ([evidence](evidence/plugin-spinner-motion-six-pair-1x.json)). Normal
+CPU and frame regressions remain explicit. Full reference grid, columns, and
+stress remain separate work.
 
 ## Outcome and checkpoint
 

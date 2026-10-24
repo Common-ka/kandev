@@ -7,6 +7,36 @@ plugin Dockview series is also complete; core/plugin regressions still need attr
 `feature/evaluate-live-thread-bc0`; the frozen baseline is
 `595df36ed5c1cf02fd90cb972b623ad6edc53df8`.
 
+## Shared plugin-action loading indicators (isolated comparison)
+
+Six alternating pairs compare the retained `f5c8fb8f6ab` candidate with the same
+binary and a shared Spinner reduced-motion CSS rule. All 12 samples pass in
+about 1.1 hours, including 21,600 ordered updates and retained hidden drafts.
+The fixture has 1,000 tasks, 36,900 stored messages, nine API panels, and four
+document editors. Neither version records HTTP failures, resets, or plugin
+conversation reads during measured windows. Scheduled core backfill remains.
+
+Reduced-motion idle main-thread CPU falls 79.82% and renderer CPU falls 69.65%
+by median paired change. Both improve in every pair. Running animations fall
+from four to zero in every reduced-motion sample. The shared loading indicators
+remain visible and preserve their accessible busy state. All ten related
+desktop/phone browser checks and five unit tests pass. Typecheck, strict lint,
+and the fresh build pass. Normal motion resumes when the preference changes.
+
+Normal-mode CPU results are mixed and are not credited as a benefit of this
+reduced-motion rule. The first normal-idle pair regresses 40.17% in main CPU and
+34.84% in renderer CPU. Frame-gap p95 is neutral by median paired change in all
+three modes. Reduced-motion maximum gaps worsen in four pairs, including a
+33.4 to 333.32 ms final-pair increase. Normal-idle pair 2 and streaming pair 1
+also contain frame regressions. All samples remain in the evidence.
+
+Normal idle has 51 running animations in every sample. One candidate streaming
+window records 42 instead of 51; its owner is unconfirmed. It still passes the
+same pane/editor and ordered-update checks. This is not a basis for claiming
+normal-mode gains. See [complete evidence](evidence/plugin-spinner-motion-six-pair-1x.json).
+The earlier original-baseline series below retains its recorded build identity.
+These Linux measurements do not establish M2 Air or battery gains.
+
 ## Final Dockview plugin comparison (1x)
 
 Six alternating pairs compare the original baseline with production
