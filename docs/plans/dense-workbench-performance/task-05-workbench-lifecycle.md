@@ -129,6 +129,29 @@ The next bounded test uses the same six-chat workload with 4x CPU throttling,
 candidate first. A successful stress result does not erase the idle regressions;
 additional normal-load validation is required before retaining the prototype.
 
+The candidate-first 4x attempt failed during cold hydration, before any measured
+window (`matched-dense-1792803734717.json`; 4.2 minutes). Four chats loaded their
+100-message windows. Two mounted chats reported `WebSocket request timed out:
+message.list`, with no loaded history or warmup message. HTTP failures were zero.
+This is an incomplete run, not evidence for or against streaming queue speed.
+The copied artifacts are in `fair-queue-stress-4x-failure/`; its log is
+`fair-queue-stress-4x-logs/kandev-run.e2e.0T25pnb5.log`. The timeout is unchanged.
+
+### Timestamp guard correctness
+
+Before accepting a wider use of the scheduler, a separate regression checked
+its existing string comparison of message timestamps. Four cases failed:
+fractional precision could reject a newer instant or accept an older instant,
+equivalent offsets could compare unequal, and invalid incoming timestamps could
+pass the guard. The scheduler now uses the existing nanosecond timestamp parser,
+preserving equal-instant acceptance and missing-current-timestamp behavior.
+All seven new cases and all 90 related tests pass, as do typecheck, lint, and the
+production asset build. Three desktop browser checks pass for canonical
+delivery and core/plugin gap recovery (`timestamp-desktop-logs/`, 25.1 seconds).
+The phone canonical-delivery check passes (`timestamp-phone-logs/`, 17.3 seconds).
+This correctness fix is
+separate from the unaccepted session-fair queue; it makes no speed claim.
+
 ## Summary
 
 Attribute and reduce repeated work during dense Dockview and task switching. Continue the existing session-efficiency Task 05 investigation, with no speculative layout or editor rewrite.
