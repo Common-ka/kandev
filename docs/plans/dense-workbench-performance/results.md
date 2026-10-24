@@ -5,6 +5,40 @@ and the remaining stress/scenario matrix are in progress. The branch is
 `feature/evaluate-live-thread-bc0`; the frozen baseline is
 `595df36ed5c1cf02fd90cb972b623ad6edc53df8`.
 
+## Owned Threads status visibility: preliminary
+
+A new candidate reuses the board's existing geometric visibility signal to
+pause offscreen status SVGs. Hidden owners allocate no intersection observer.
+Visible owners retain direct icon intersection and shared document visibility
+checks. Unknown geometry preserves visible feedback. No wrapper, animation
+engine, icon geometry, or default timing changes.
+
+Two alternating pairs with 30 busy headers passed in 19.3 minutes. Normal-idle
+main-thread CPU fell 70.59% and 71.27%; renderer CPU fell 57.17% and 60.20%.
+Streaming CPU fell about 2% in both pairs; frame-gap p95 stayed about 50 ms.
+Reduced-motion idle results were mixed. The extra 24 busy headers are seeded
+status rows, not extra live executions. Six real mock producers remain.
+
+The separate default six-busy-header comparison passed both pairs in 19.1
+minutes. Streaming main-thread CPU changed by +0.16% and -0.05%, renderer CPU
+was mixed, and frame-gap p95 stayed 50 ms. Normal-idle main-thread CPU fell
+2.61% then increased 0.01%. These results establish no useful default streaming
+gain. Neither series had a long task in its measured windows. All eight
+samples verified 1,800 ordered updates and both offscreen chats caught up with
+all 300 ticks. Each uses 1,000 tasks, 30 columns, and 9,600 stored messages.
+
+The production candidate is not yet retained. Six alternating busy-header
+pairs must reproduce the large idle gain. The 148 related unit checks,
+typecheck, strict scoped lint, build, and desktop/phone motion checks pass.
+The first phone whole-column test moved horizontally; native scrolling kept
+the icon visible. The corrected test moves vertically and asserts actual
+viewport exclusion before checking pause, then inclusion before checking
+resume. This was a fixture correction, not a production workaround.
+
+[Preliminary evidence](evidence/owned-thread-motion-preliminary-1x.json) retains
+all paired CPU/frame values, build identities, and catch-up results. Raw reports:
+`matched-dense-1792821897277.json` and `matched-dense-1792823078900.json`.
+
 ## Deferred file-confirmation preparation: rejected
 
 The timed profile identified repeated file-row confirmation preparation. A

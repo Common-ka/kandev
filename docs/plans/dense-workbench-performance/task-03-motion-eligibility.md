@@ -24,6 +24,30 @@ system_design:
 
 # Task 03: Persistent motion eligibility
 
+## Owned board visibility candidate: validation in progress
+
+The current candidate routes geometric column visibility to desktop and phone
+status icons. It retains direct SVG intersection and document checks only for
+visible owners; hidden owners allocate no observer. Unknown geometry remains
+eligible. This implements the existing 004/006 lifecycle scope. It does not
+claim the separate 001 HTML-target migration or introduce a wrapper or pool.
+
+Six initial unit regressions failed first. The corrected candidate passes 148
+related checks across 19 files, typecheck, strict web/shared lint, and the
+production build. A frozen-assets desktop status check failed before the
+change. Three desktop checks pass; the existing two phone checks pass, and
+the corrected phone status check passes. Whole-column viewport assertions use
+vertical movement because native phone horizontal scrolling kept the original
+horizontal fixture in view. No timeout or production behavior was changed to
+make that fixture pass.
+
+Two alternating busy-header pairs show a large normal-idle CPU reduction.
+A separate default six-busy-header two-pair comparison has essentially neutral
+streaming CPU and unchanged frame-gap p95. All samples preserve ordered
+updates and offscreen catch-up. See [results](results.md#owned-threads-status-visibility-preliminary)
+and [evidence](evidence/owned-thread-motion-preliminary-1x.json). Production
+retention awaits the six-pair busy-header repeat.
+
 ## Observer geometry attribution
 
 A synthetic 30-icon check compared no observers, separate observers on rotating
