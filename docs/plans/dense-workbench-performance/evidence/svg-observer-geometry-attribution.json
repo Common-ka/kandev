@@ -1,0 +1,243 @@
+{
+  "measurementKind": "animation-attribution",
+  "sourceRevision": "c7c639e1cc09d6783121529c0a7e45c516b62d69",
+  "diagnosticSourceSha256": "2400cabbd620da4d6d829e71c721c2fdb6b322e70c9fd539235dc16bc69bfa41",
+  "browser": "149.0.7827.55",
+  "cpu": "11th Gen Intel(R) Core(TM) i7-11700T @ 1.40GHz",
+  "viewport": {
+    "width": 1470,
+    "height": 956
+  },
+  "deviceScaleFactor": 1,
+  "targets": 30,
+  "windowMs": 10000,
+  "notes": "Synthetic isolated geometry attribution. Observers never change animation state. No application performance gain is established. ThreadTime/ProcessTime are CPU seconds; TaskDuration is elapsed seconds in main-thread tasks.",
+  "samples": [
+    {
+      "round": 0,
+      "mode": "none",
+      "configured": {
+        "targets": 30,
+        "observers": 0
+      },
+      "elapsedMs": 10012.306191,
+      "metrics": {
+        "ThreadTime": 0.048797,
+        "ProcessTime": 0.52,
+        "TaskDuration": 0.011195,
+        "RecalcStyleDuration": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "LayoutCount": 0
+      },
+      "observation": {
+        "callbacks": 0,
+        "runningAnimations": 30
+      }
+    },
+    {
+      "round": 0,
+      "mode": "svg-separate",
+      "configured": {
+        "targets": 30,
+        "observers": 30
+      },
+      "elapsedMs": 10012.996405000002,
+      "metrics": {
+        "ThreadTime": 0.047922000000000006,
+        "ProcessTime": 0.51,
+        "TaskDuration": 0.011216,
+        "RecalcStyleDuration": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "LayoutCount": 0
+      },
+      "observation": {
+        "callbacks": 30,
+        "runningAnimations": 30
+      }
+    },
+    {
+      "round": 0,
+      "mode": "stable-separate",
+      "configured": {
+        "targets": 30,
+        "observers": 30
+      },
+      "elapsedMs": 10009.808013999998,
+      "metrics": {
+        "ThreadTime": 0.047757999999999995,
+        "ProcessTime": 0.52,
+        "TaskDuration": 0.011110000000000002,
+        "RecalcStyleDuration": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "LayoutCount": 0
+      },
+      "observation": {
+        "callbacks": 30,
+        "runningAnimations": 30
+      }
+    },
+    {
+      "round": 0,
+      "mode": "svg-shared",
+      "configured": {
+        "targets": 30,
+        "observers": 1
+      },
+      "elapsedMs": 10015.049838000003,
+      "metrics": {
+        "ThreadTime": 0.04822900000000002,
+        "ProcessTime": 0.52,
+        "TaskDuration": 0.011043000000000004,
+        "RecalcStyleDuration": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "LayoutCount": 0
+      },
+      "observation": {
+        "callbacks": 30,
+        "runningAnimations": 30
+      }
+    },
+    {
+      "round": 0,
+      "mode": "stable-shared",
+      "configured": {
+        "targets": 30,
+        "observers": 1
+      },
+      "elapsedMs": 10009.200945000004,
+      "metrics": {
+        "ThreadTime": 0.04544899999999999,
+        "ProcessTime": 0.48999999999999977,
+        "TaskDuration": 0.01086899999999999,
+        "RecalcStyleDuration": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "LayoutCount": 0
+      },
+      "observation": {
+        "callbacks": 30,
+        "runningAnimations": 30
+      }
+    },
+    {
+      "round": 1,
+      "mode": "stable-shared",
+      "configured": {
+        "targets": 30,
+        "observers": 1
+      },
+      "elapsedMs": 10019.695401000004,
+      "metrics": {
+        "ThreadTime": 0.04987999999999998,
+        "ProcessTime": 0.54,
+        "TaskDuration": 0.012188999999999992,
+        "RecalcStyleDuration": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "LayoutCount": 0
+      },
+      "observation": {
+        "callbacks": 30,
+        "runningAnimations": 30
+      }
+    },
+    {
+      "round": 1,
+      "mode": "svg-shared",
+      "configured": {
+        "targets": 30,
+        "observers": 1
+      },
+      "elapsedMs": 10012.657809000004,
+      "metrics": {
+        "ThreadTime": 0.048653,
+        "ProcessTime": 0.52,
+        "TaskDuration": 0.011584999999999998,
+        "RecalcStyleDuration": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "LayoutCount": 0
+      },
+      "observation": {
+        "callbacks": 30,
+        "runningAnimations": 30
+      }
+    },
+    {
+      "round": 1,
+      "mode": "stable-separate",
+      "configured": {
+        "targets": 30,
+        "observers": 30
+      },
+      "elapsedMs": 10010.595866999996,
+      "metrics": {
+        "ThreadTime": 0.048497999999999986,
+        "ProcessTime": 0.5299999999999998,
+        "TaskDuration": 0.011262999999999995,
+        "RecalcStyleDuration": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "LayoutCount": 0
+      },
+      "observation": {
+        "callbacks": 30,
+        "runningAnimations": 30
+      }
+    },
+    {
+      "round": 1,
+      "mode": "svg-separate",
+      "configured": {
+        "targets": 30,
+        "observers": 30
+      },
+      "elapsedMs": 10005.949611000004,
+      "metrics": {
+        "ThreadTime": 0.04810599999999998,
+        "ProcessTime": 0.5200000000000005,
+        "TaskDuration": 0.011129,
+        "RecalcStyleDuration": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "LayoutCount": 0
+      },
+      "observation": {
+        "callbacks": 30,
+        "runningAnimations": 30
+      }
+    },
+    {
+      "round": 1,
+      "mode": "none",
+      "configured": {
+        "targets": 30,
+        "observers": 0
+      },
+      "elapsedMs": 10011.851039000001,
+      "metrics": {
+        "ThreadTime": 0.04731200000000002,
+        "ProcessTime": 0.5099999999999998,
+        "TaskDuration": 0.010946000000000011,
+        "RecalcStyleDuration": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "LayoutCount": 0
+      },
+      "observation": {
+        "callbacks": 0,
+        "runningAnimations": 30
+      }
+    }
+  ],
+  "rawReport": "svg-observer-attribution-1792818965142.json",
+  "rawSha256": "bb2a59d078dee1abfe182c35a21137252ab7476c131c49ee9a1771d82fa05d1e",
+  "log": "svg-observer-attribution-full-logs/kandev-run.e2e.C3Kk38zH.log",
+  "conclusion": "No meaningful recurring observer overhead is demonstrated in this isolated fixture. All ten windows have zero style recalculations and zero layout work. Neither stable wrappers nor shared observers are justified by this evidence. This does not prove zero cost in every application layout.",
+  "diagnosticSource": "svg-observer-attribution-diagnostic.ts",
+  "productionChange": "None"
+}

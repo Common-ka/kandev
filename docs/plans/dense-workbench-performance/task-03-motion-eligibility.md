@@ -24,6 +24,22 @@ system_design:
 
 # Task 03: Persistent motion eligibility
 
+## Observer geometry attribution
+
+A synthetic 30-icon check compared no observers, separate observers on rotating
+SVGs, separate observers on stable 14px boxes, and the corresponding shared
+observer modes. Two opposite-order rounds used ten-second windows. All ten
+windows retained 30 running animations and produced zero style recalculations
+and zero layout work. Main-thread CPU ranged from 45.45 to 49.88 ms per window;
+renderer CPU ranged from 490 to 540 ms. No useful geometry or pooling advantage
+is demonstrated. No wrapper or observer-pool change follows from this result.
+
+The full diagnostic passed in 1.7 minutes after a short caller smoke. Scoped
+lint passed after resolving one nested-ternary warning. The temporary source
+is retained locally as `svg-observer-attribution-diagnostic.ts` and removed from
+the permanent suite. See [evidence](evidence/svg-observer-geometry-attribution.json).
+This is isolated mechanism evidence, not an application speed result.
+
 ## Direct SVG visibility experiment (rejected)
 
 The remaining Threads status SVG ignores viewport and document visibility.
