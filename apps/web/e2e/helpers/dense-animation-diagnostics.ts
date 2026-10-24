@@ -1,9 +1,10 @@
 import type { Page } from "@playwright/test";
+import { inspectDenseCompositing } from "./dense-compositing-diagnostics";
 
 /** Collect attribution after the observation windows, while the agents remain active. */
 export async function inspectDenseAnimations(page: Page) {
   if (process.env.KANDEV_DENSE_ANIMATION_DIAGNOSTICS !== "1") return;
-  return page.evaluate(() => ({
+  const snapshot = await page.evaluate(() => ({
     reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
     visibilityState: document.visibilityState,
     animations: document.getAnimations().map((animation) => {
@@ -27,4 +28,14 @@ export async function inspectDenseAnimations(page: Page) {
       };
     }),
   }));
+  try {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    const normalMotionCompositing = await inspectDenseCompositing(
+      page,
+      '[data-testid="thread-status-working"]',
+    );
+    return { ...snapshot, normalMotionCompositing };
+  } finally {
+    await page.emulateMedia({ reducedMotion: snapshot.reducedMotion ? "reduce" : "no-preference" });
+  }
 }

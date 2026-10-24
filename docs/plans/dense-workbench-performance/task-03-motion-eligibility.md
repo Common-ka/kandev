@@ -76,6 +76,28 @@ pass. Full-caller six-column, eight-column, and default-grid smokes passed in
 both versions. These short checks validate the harness and are excluded from
 performance gains.
 
+## Existing SVG compositing confirmed
+
+A separate attribution run inspected actual layer ownership after the normal
+observation windows. It temporarily restored normal-motion preference, captured
+a compositor frame, mapped DOM targets to backend node IDs, and requested each
+owned layer's compositing reasons. It then restored the prior preference.
+Both snapshots found all six 14px Threads status SVGs already owned layers with
+`ActiveTransformAnimation`, at CSS zoom 1 and `will-change: auto`. This evidence
+does not justify another wrapper or a `will-change` hint. It does not establish
+zero main-thread animation cost or apply to every browser, zoom, and device.
+
+The layer-attribution regression failed first, then passed after implementation
+(2.1 seconds). Capturing a screenshot is necessary to obtain the layer event for
+an already stable tree. Strict scoped lint passed. The full real-page caller
+passed both snapshots in 1.3 minutes (`matched-dense-1792810047044.json`,
+`current-compositing-attribution-logs/kandev-run.e2e.wiQzlC1A.log`). The summary
+command correctly rejects this `animation-attribution` report. Its short
+windows and layer instrumentation are excluded from speed claims.
+[Committed evidence](evidence/status-compositing-attribution.json) retains the
+actual reasons and source/build identities. The two snapshots use identical
+validated production assets; only the diagnostic harness changed.
+
 ## Summary
 
 Make host-owned persistent indicators respect reduced motion while preserving their default appearance. Reuse the already implemented hidden-motion lifecycle.

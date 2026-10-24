@@ -1,0 +1,1037 @@
+{
+  "measurementKind": "animation-attribution",
+  "rawReport": "matched-dense-1792810047044.json",
+  "rawSha256": "187a287a2615a504192f8b4d72bcdd70544c6612a73d5c67213449953ae790ea",
+  "sourceRevision": "c3f6bec57ee4446a2c7d2b7f771ac908748c8cb3",
+  "sourcePatchSha256": "40f83c8e8f1bd953a191d0c3b427af59f7a37c27e21ef27deab37faaf32be37b",
+  "sourceFiles": [
+    {
+      "path": "apps/web/e2e/helpers/dense-compositing-diagnostics.ts",
+      "sha256": "0e80763096181bdecd4745c40264e830f51ad1337449dc42668ff5efeb4afb89",
+      "content": "import { expect, type Page } from \"@playwright/test\";\n\ntype Layer = {\n  layerId: string;\n  backendNodeId?: number;\n  drawsContent: boolean;\n  width: number;\n  height: number;\n};\n\n/** Attribution only: enabling the layer domain and reading styles can change timing. */\nexport async function inspectDenseCompositing(page: Page, selector: string) {\n  const cdp = await page.context().newCDPSession(page);\n  let layers: Layer[] = [];\n  cdp.on(\"LayerTree.layerTreeDidChange\", (event) => {\n    layers = event.layers ?? [];\n  });\n  try {\n    await cdp.send(\"DOM.enable\");\n    await cdp.send(\"LayerTree.enable\");\n    await page.screenshot();\n    await expect.poll(() => layers.length).toBeGreaterThan(0);\n    const { root } = await cdp.send(\"DOM.getDocument\");\n    const { nodeIds } = await cdp.send(\"DOM.querySelectorAll\", { nodeId: root.nodeId, selector });\n    const styles = await page.locator(selector).evaluateAll((elements) =>\n      elements.map((element) => {\n        const style = getComputedStyle(element);\n        return {\n          className: element.getAttribute(\"class\"),\n          testId: element.getAttribute(\"data-testid\"),\n          width: style.width,\n          height: style.height,\n          zoom: style.zoom,\n          willChange: style.willChange,\n          animations: element.getAnimations().map((animation) => ({\n            state: animation.playState,\n            properties:\n              animation.effect instanceof KeyframeEffect\n                ? [...new Set(animation.effect.getKeyframes().flatMap(Object.keys))]\n                : [],\n          })),\n        };\n      }),\n    );\n    const targets = [];\n    for (const [index, nodeId] of nodeIds.entries()) {\n      const { node } = await cdp.send(\"DOM.describeNode\", { nodeId });\n      const owned = [];\n      for (const layer of layers.filter((item) => item.backendNodeId === node.backendNodeId)) {\n        const reasons = await cdp.send(\"LayerTree.compositingReasons\", { layerId: layer.layerId });\n        owned.push({\n          ...layer,\n          reasons: reasons.compositingReasons,\n          reasonIds: reasons.compositingReasonIds,\n        });\n      }\n      targets.push({\n        tag: node.nodeName,\n        backendNodeId: node.backendNodeId,\n        ...styles[index],\n        layers: owned,\n      });\n    }\n    return { layerCount: layers.length, targets };\n  } finally {\n    await cdp.detach();\n  }\n}\n"
+    },
+    {
+      "path": "apps/web/e2e/tests/performance/dense-compositing-diagnostics.spec.ts",
+      "sha256": "45985e909337785d7a67baa32ec9653d6399819fb01275820edf5033cc2d76e8",
+      "content": "import { test, expect } from \"@playwright/test\";\nimport { inspectDenseCompositing } from \"../../helpers/dense-compositing-diagnostics\";\n\ntest(\"attributes compositor layers to the actual animation targets\", async ({ page }) => {\n  await page.setContent(`\n    <style>\n      @keyframes spin { to { transform: rotate(360deg) } }\n      .target { width: 14px; height: 14px; animation: spin 1s linear infinite }\n      div.target { background: blue }\n    </style>\n    <div class=\"target\"></div>\n    <svg class=\"target\" viewBox=\"0 0 24 24\"><path d=\"M12 2a10 10 0 1 1-10 10\" /></svg>\n  `);\n  const result = await inspectDenseCompositing(page, \".target\");\n  expect(result.targets.map((target) => target.tag.toLowerCase())).toEqual([\"div\", \"svg\"]);\n  expect(result.targets[0].layers.flatMap((layer) => layer.reasons)).toContain(\n    \"Has an active accelerated transform animation or transition.\",\n  );\n});\n"
+    }
+  ],
+  "builds": {
+    "baseline": {
+      "binary": "/tmp/kandev-dense-timestamp-5936a872/apps/backend/bin/kandev",
+      "assets": "/tmp/kandev-dense-timestamp-5936a872/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "8379f62eb1bf4935c6b18d4616f732191cdefc17159c02367a54c05701f7a160"
+    },
+    "candidate": {
+      "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+      "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "8379f62eb1bf4935c6b18d4616f732191cdefc17159c02367a54c05701f7a160"
+    }
+  },
+  "browser": "149.0.7827.55",
+  "samples": [
+    {
+      "arm": "baseline",
+      "normalMotionCompositing": {
+        "layerCount": 189,
+        "targets": [
+          {
+            "tag": "svg",
+            "backendNodeId": 329,
+            "className": "tabler-icon tabler-icon-loader-2 h-3.5 w-3.5 shrink-0 animate-spin motion-reduce:animate-none text-blue-500",
+            "testId": "thread-status-working",
+            "width": "14px",
+            "height": "14px",
+            "zoom": "1",
+            "willChange": "auto",
+            "animations": [
+              {
+                "state": "running",
+                "properties": [
+                  "offset",
+                  "easing",
+                  "composite",
+                  "transform",
+                  "computedOffset"
+                ]
+              }
+            ],
+            "layers": [
+              {
+                "layerId": "290",
+                "parentLayerId": "5",
+                "backendNodeId": 329,
+                "offsetX": 0,
+                "offsetY": 0,
+                "width": 14,
+                "height": 14,
+                "transform": [
+                  -0.7430803135300855,
+                  0.6692022471899133,
+                  0,
+                  0,
+                  -0.6692022471899133,
+                  -0.7430803135300855,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  361.88597792504,
+                  68.5171464643812,
+                  0,
+                  1
+                ],
+                "anchorX": 0,
+                "anchorY": 0,
+                "anchorZ": 0,
+                "paintCount": 2,
+                "drawsContent": true,
+                "scrollRects": [
+                  {
+                    "rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 14,
+                      "height": 14
+                    },
+                    "type": "TouchEventHandler"
+                  },
+                  {
+                    "rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 14,
+                      "height": 14
+                    },
+                    "type": "WheelEventHandler"
+                  }
+                ],
+                "reasons": [
+                  "Has an active accelerated transform animation or transition."
+                ],
+                "reasonIds": [
+                  "ActiveTransformAnimation"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "svg",
+            "backendNodeId": 628,
+            "className": "tabler-icon tabler-icon-loader-2 h-3.5 w-3.5 shrink-0 animate-spin motion-reduce:animate-none text-blue-500",
+            "testId": "thread-status-working",
+            "width": "14px",
+            "height": "14px",
+            "zoom": "1",
+            "willChange": "auto",
+            "animations": [
+              {
+                "state": "running",
+                "properties": [
+                  "offset",
+                  "easing",
+                  "composite",
+                  "transform",
+                  "computedOffset"
+                ]
+              }
+            ],
+            "layers": [
+              {
+                "layerId": "312",
+                "parentLayerId": "5",
+                "backendNodeId": 628,
+                "offsetX": 0,
+                "offsetY": 0,
+                "width": 14,
+                "height": 14,
+                "transform": [
+                  -0.7430803135300855,
+                  0.6692022471899133,
+                  0,
+                  0,
+                  -0.6692022471899133,
+                  -0.7430803135300855,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  361.88597792504,
+                  520.5171464643812,
+                  0,
+                  1
+                ],
+                "anchorX": 0,
+                "anchorY": 0,
+                "anchorZ": 0,
+                "paintCount": 2,
+                "drawsContent": true,
+                "scrollRects": [
+                  {
+                    "rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 14,
+                      "height": 14
+                    },
+                    "type": "TouchEventHandler"
+                  },
+                  {
+                    "rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 14,
+                      "height": 14
+                    },
+                    "type": "WheelEventHandler"
+                  }
+                ],
+                "reasons": [
+                  "Has an active accelerated transform animation or transition."
+                ],
+                "reasonIds": [
+                  "ActiveTransformAnimation"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "svg",
+            "backendNodeId": 923,
+            "className": "tabler-icon tabler-icon-loader-2 h-3.5 w-3.5 shrink-0 animate-spin motion-reduce:animate-none text-blue-500",
+            "testId": "thread-status-working",
+            "width": "14px",
+            "height": "14px",
+            "zoom": "1",
+            "willChange": "auto",
+            "animations": [
+              {
+                "state": "running",
+                "properties": [
+                  "offset",
+                  "easing",
+                  "composite",
+                  "transform",
+                  "computedOffset"
+                ]
+              }
+            ],
+            "layers": [
+              {
+                "layerId": "334",
+                "parentLayerId": "5",
+                "backendNodeId": 923,
+                "offsetX": 0,
+                "offsetY": 0,
+                "width": 14,
+                "height": 14,
+                "transform": [
+                  -0.7430803135300855,
+                  0.6692022471899133,
+                  0,
+                  0,
+                  -0.6692022471899133,
+                  -0.7430803135300855,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  740.88597792504,
+                  68.5171464643812,
+                  0,
+                  1
+                ],
+                "anchorX": 0,
+                "anchorY": 0,
+                "anchorZ": 0,
+                "paintCount": 2,
+                "drawsContent": true,
+                "scrollRects": [
+                  {
+                    "rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 14,
+                      "height": 14
+                    },
+                    "type": "TouchEventHandler"
+                  },
+                  {
+                    "rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 14,
+                      "height": 14
+                    },
+                    "type": "WheelEventHandler"
+                  }
+                ],
+                "reasons": [
+                  "Has an active accelerated transform animation or transition."
+                ],
+                "reasonIds": [
+                  "ActiveTransformAnimation"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "svg",
+            "backendNodeId": 1215,
+            "className": "tabler-icon tabler-icon-loader-2 h-3.5 w-3.5 shrink-0 animate-spin motion-reduce:animate-none text-blue-500",
+            "testId": "thread-status-working",
+            "width": "14px",
+            "height": "14px",
+            "zoom": "1",
+            "willChange": "auto",
+            "animations": [
+              {
+                "state": "running",
+                "properties": [
+                  "offset",
+                  "easing",
+                  "composite",
+                  "transform",
+                  "computedOffset"
+                ]
+              }
+            ],
+            "layers": [
+              {
+                "layerId": "356",
+                "parentLayerId": "5",
+                "backendNodeId": 1215,
+                "offsetX": 0,
+                "offsetY": 0,
+                "width": 14,
+                "height": 14,
+                "transform": [
+                  -0.7430803135300855,
+                  0.6692022471899133,
+                  0,
+                  0,
+                  -0.6692022471899133,
+                  -0.7430803135300855,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  740.88597792504,
+                  520.5171464643812,
+                  0,
+                  1
+                ],
+                "anchorX": 0,
+                "anchorY": 0,
+                "anchorZ": 0,
+                "paintCount": 2,
+                "drawsContent": true,
+                "scrollRects": [
+                  {
+                    "rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 14,
+                      "height": 14
+                    },
+                    "type": "TouchEventHandler"
+                  },
+                  {
+                    "rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 14,
+                      "height": 14
+                    },
+                    "type": "WheelEventHandler"
+                  }
+                ],
+                "reasons": [
+                  "Has an active accelerated transform animation or transition."
+                ],
+                "reasonIds": [
+                  "ActiveTransformAnimation"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "svg",
+            "backendNodeId": 1507,
+            "className": "tabler-icon tabler-icon-loader-2 h-3.5 w-3.5 shrink-0 animate-spin motion-reduce:animate-none text-blue-500",
+            "testId": "thread-status-working",
+            "width": "14px",
+            "height": "14px",
+            "zoom": "1",
+            "willChange": "auto",
+            "animations": [
+              {
+                "state": "running",
+                "properties": [
+                  "offset",
+                  "easing",
+                  "composite",
+                  "transform",
+                  "computedOffset"
+                ]
+              }
+            ],
+            "layers": [
+              {
+                "layerId": "378",
+                "parentLayerId": "5",
+                "backendNodeId": 1507,
+                "offsetX": 0,
+                "offsetY": 0,
+                "width": 14,
+                "height": 14,
+                "transform": [
+                  -0.7430803135300855,
+                  0.6692022471899133,
+                  0,
+                  0,
+                  -0.6692022471899133,
+                  -0.7430803135300855,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  1120.88597792504,
+                  68.5171464643812,
+                  0,
+                  1
+                ],
+                "anchorX": 0,
+                "anchorY": 0,
+                "anchorZ": 0,
+                "paintCount": 2,
+                "drawsContent": true,
+                "scrollRects": [
+                  {
+                    "rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 14,
+                      "height": 14
+                    },
+                    "type": "TouchEventHandler"
+                  },
+                  {
+                    "rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 14,
+                      "height": 14
+                    },
+                    "type": "WheelEventHandler"
+                  }
+                ],
+                "reasons": [
+                  "Has an active accelerated transform animation or transition."
+                ],
+                "reasonIds": [
+                  "ActiveTransformAnimation"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "svg",
+            "backendNodeId": 1802,
+            "className": "tabler-icon tabler-icon-loader-2 h-3.5 w-3.5 shrink-0 animate-spin motion-reduce:animate-none text-blue-500",
+            "testId": "thread-status-working",
+            "width": "14px",
+            "height": "14px",
+            "zoom": "1",
+            "willChange": "auto",
+            "animations": [
+              {
+                "state": "running",
+                "properties": [
+                  "offset",
+                  "easing",
+                  "composite",
+                  "transform",
+                  "computedOffset"
+                ]
+              }
+            ],
+            "layers": [
+              {
+                "layerId": "400",
+                "parentLayerId": "5",
+                "backendNodeId": 1802,
+                "offsetX": 0,
+                "offsetY": 0,
+                "width": 14,
+                "height": 14,
+                "transform": [
+                  -0.7430803135300855,
+                  0.6692022471899133,
+                  0,
+                  0,
+                  -0.6692022471899133,
+                  -0.7430803135300855,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  1120.88597792504,
+                  520.5171464643812,
+                  0,
+                  1
+                ],
+                "anchorX": 0,
+                "anchorY": 0,
+                "anchorZ": 0,
+                "paintCount": 2,
+                "drawsContent": true,
+                "scrollRects": [
+                  {
+                    "rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 14,
+                      "height": 14
+                    },
+                    "type": "TouchEventHandler"
+                  },
+                  {
+                    "rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 14,
+                      "height": 14
+                    },
+                    "type": "WheelEventHandler"
+                  }
+                ],
+                "reasons": [
+                  "Has an active accelerated transform animation or transition."
+                ],
+                "reasonIds": [
+                  "ActiveTransformAnimation"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "arm": "candidate",
+      "normalMotionCompositing": {
+        "layerCount": 189,
+        "targets": [
+          {
+            "tag": "svg",
+            "backendNodeId": 327,
+            "className": "tabler-icon tabler-icon-loader-2 h-3.5 w-3.5 shrink-0 animate-spin motion-reduce:animate-none text-blue-500",
+            "testId": "thread-status-working",
+            "width": "14px",
+            "height": "14px",
+            "zoom": "1",
+            "willChange": "auto",
+            "animations": [
+              {
+                "state": "running",
+                "properties": [
+                  "offset",
+                  "easing",
+                  "composite",
+                  "transform",
+                  "computedOffset"
+                ]
+              }
+            ],
+            "layers": [
+              {
+                "layerId": "290",
+                "parentLayerId": "5",
+                "backendNodeId": 327,
+                "offsetX": 0,
+                "offsetY": 0,
+                "width": 14,
+                "height": 14,
+                "transform": [
+                  -0.5880851207899456,
+                  0.8087990422258641,
+                  0,
+                  0,
+                  -0.8087990422258641,
+                  -0.5880851207899456,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  361.77818914111066,
+                  66.45500254994857,
+                  0,
+                  1
+                ],
+                "anchorX": 0,
+                "anchorY": 0,
+                "anchorZ": 0,
+                "paintCount": 2,
+                "drawsContent": true,
+                "scrollRects": [
+                  {
+                    "rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 14,
+                      "height": 14
+                    },
+                    "type": "TouchEventHandler"
+                  },
+                  {
+                    "rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 14,
+                      "height": 14
+                    },
+                    "type": "WheelEventHandler"
+                  }
+                ],
+                "reasons": [
+                  "Has an active accelerated transform animation or transition."
+                ],
+                "reasonIds": [
+                  "ActiveTransformAnimation"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "svg",
+            "backendNodeId": 626,
+            "className": "tabler-icon tabler-icon-loader-2 h-3.5 w-3.5 shrink-0 animate-spin motion-reduce:animate-none text-blue-500",
+            "testId": "thread-status-working",
+            "width": "14px",
+            "height": "14px",
+            "zoom": "1",
+            "willChange": "auto",
+            "animations": [
+              {
+                "state": "running",
+                "properties": [
+                  "offset",
+                  "easing",
+                  "composite",
+                  "transform",
+                  "computedOffset"
+                ]
+              }
+            ],
+            "layers": [
+              {
+                "layerId": "312",
+                "parentLayerId": "5",
+                "backendNodeId": 626,
+                "offsetX": 0,
+                "offsetY": 0,
+                "width": 14,
+                "height": 14,
+                "transform": [
+                  -0.5880851207899456,
+                  0.8087990422258641,
+                  0,
+                  0,
+                  -0.8087990422258641,
+                  -0.5880851207899456,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  361.77818914111066,
+                  518.4550025499485,
+                  0,
+                  1
+                ],
+                "anchorX": 0,
+                "anchorY": 0,
+                "anchorZ": 0,
+                "paintCount": 2,
+                "drawsContent": true,
+                "scrollRects": [
+                  {
+                    "rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 14,
+                      "height": 14
+                    },
+                    "type": "TouchEventHandler"
+                  },
+                  {
+                    "rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 14,
+                      "height": 14
+                    },
+                    "type": "WheelEventHandler"
+                  }
+                ],
+                "reasons": [
+                  "Has an active accelerated transform animation or transition."
+                ],
+                "reasonIds": [
+                  "ActiveTransformAnimation"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "svg",
+            "backendNodeId": 921,
+            "className": "tabler-icon tabler-icon-loader-2 h-3.5 w-3.5 shrink-0 animate-spin motion-reduce:animate-none text-blue-500",
+            "testId": "thread-status-working",
+            "width": "14px",
+            "height": "14px",
+            "zoom": "1",
+            "willChange": "auto",
+            "animations": [
+              {
+                "state": "running",
+                "properties": [
+                  "offset",
+                  "easing",
+                  "composite",
+                  "transform",
+                  "computedOffset"
+                ]
+              }
+            ],
+            "layers": [
+              {
+                "layerId": "334",
+                "parentLayerId": "5",
+                "backendNodeId": 921,
+                "offsetX": 0,
+                "offsetY": 0,
+                "width": 14,
+                "height": 14,
+                "transform": [
+                  -0.5880851207899456,
+                  0.8087990422258641,
+                  0,
+                  0,
+                  -0.8087990422258641,
+                  -0.5880851207899456,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  740.7781891411107,
+                  66.45500254994857,
+                  0,
+                  1
+                ],
+                "anchorX": 0,
+                "anchorY": 0,
+                "anchorZ": 0,
+                "paintCount": 2,
+                "drawsContent": true,
+                "scrollRects": [
+                  {
+                    "rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 14,
+                      "height": 14
+                    },
+                    "type": "TouchEventHandler"
+                  },
+                  {
+                    "rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 14,
+                      "height": 14
+                    },
+                    "type": "WheelEventHandler"
+                  }
+                ],
+                "reasons": [
+                  "Has an active accelerated transform animation or transition."
+                ],
+                "reasonIds": [
+                  "ActiveTransformAnimation"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "svg",
+            "backendNodeId": 1214,
+            "className": "tabler-icon tabler-icon-loader-2 h-3.5 w-3.5 shrink-0 animate-spin motion-reduce:animate-none text-blue-500",
+            "testId": "thread-status-working",
+            "width": "14px",
+            "height": "14px",
+            "zoom": "1",
+            "willChange": "auto",
+            "animations": [
+              {
+                "state": "running",
+                "properties": [
+                  "offset",
+                  "easing",
+                  "composite",
+                  "transform",
+                  "computedOffset"
+                ]
+              }
+            ],
+            "layers": [
+              {
+                "layerId": "356",
+                "parentLayerId": "5",
+                "backendNodeId": 1214,
+                "offsetX": 0,
+                "offsetY": 0,
+                "width": 14,
+                "height": 14,
+                "transform": [
+                  -0.5880851207899456,
+                  0.8087990422258641,
+                  0,
+                  0,
+                  -0.8087990422258641,
+                  -0.5880851207899456,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  740.7781891411107,
+                  518.4550025499485,
+                  0,
+                  1
+                ],
+                "anchorX": 0,
+                "anchorY": 0,
+                "anchorZ": 0,
+                "paintCount": 2,
+                "drawsContent": true,
+                "scrollRects": [
+                  {
+                    "rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 14,
+                      "height": 14
+                    },
+                    "type": "TouchEventHandler"
+                  },
+                  {
+                    "rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 14,
+                      "height": 14
+                    },
+                    "type": "WheelEventHandler"
+                  }
+                ],
+                "reasons": [
+                  "Has an active accelerated transform animation or transition."
+                ],
+                "reasonIds": [
+                  "ActiveTransformAnimation"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "svg",
+            "backendNodeId": 1507,
+            "className": "tabler-icon tabler-icon-loader-2 h-3.5 w-3.5 shrink-0 animate-spin motion-reduce:animate-none text-blue-500",
+            "testId": "thread-status-working",
+            "width": "14px",
+            "height": "14px",
+            "zoom": "1",
+            "willChange": "auto",
+            "animations": [
+              {
+                "state": "running",
+                "properties": [
+                  "offset",
+                  "easing",
+                  "composite",
+                  "transform",
+                  "computedOffset"
+                ]
+              }
+            ],
+            "layers": [
+              {
+                "layerId": "378",
+                "parentLayerId": "5",
+                "backendNodeId": 1507,
+                "offsetX": 0,
+                "offsetY": 0,
+                "width": 14,
+                "height": 14,
+                "transform": [
+                  -0.5880851207899456,
+                  0.8087990422258641,
+                  0,
+                  0,
+                  -0.8087990422258641,
+                  -0.5880851207899456,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  1120.7781891411107,
+                  66.45500254994857,
+                  0,
+                  1
+                ],
+                "anchorX": 0,
+                "anchorY": 0,
+                "anchorZ": 0,
+                "paintCount": 2,
+                "drawsContent": true,
+                "scrollRects": [
+                  {
+                    "rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 14,
+                      "height": 14
+                    },
+                    "type": "TouchEventHandler"
+                  },
+                  {
+                    "rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 14,
+                      "height": 14
+                    },
+                    "type": "WheelEventHandler"
+                  }
+                ],
+                "reasons": [
+                  "Has an active accelerated transform animation or transition."
+                ],
+                "reasonIds": [
+                  "ActiveTransformAnimation"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "svg",
+            "backendNodeId": 1802,
+            "className": "tabler-icon tabler-icon-loader-2 h-3.5 w-3.5 shrink-0 animate-spin motion-reduce:animate-none text-blue-500",
+            "testId": "thread-status-working",
+            "width": "14px",
+            "height": "14px",
+            "zoom": "1",
+            "willChange": "auto",
+            "animations": [
+              {
+                "state": "running",
+                "properties": [
+                  "offset",
+                  "easing",
+                  "composite",
+                  "transform",
+                  "computedOffset"
+                ]
+              }
+            ],
+            "layers": [
+              {
+                "layerId": "400",
+                "parentLayerId": "5",
+                "backendNodeId": 1802,
+                "offsetX": 0,
+                "offsetY": 0,
+                "width": 14,
+                "height": 14,
+                "transform": [
+                  -0.5880851207899456,
+                  0.8087990422258641,
+                  0,
+                  0,
+                  -0.8087990422258641,
+                  -0.5880851207899456,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  1120.7781891411107,
+                  518.4550025499485,
+                  0,
+                  1
+                ],
+                "anchorX": 0,
+                "anchorY": 0,
+                "anchorZ": 0,
+                "paintCount": 2,
+                "drawsContent": true,
+                "scrollRects": [
+                  {
+                    "rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 14,
+                      "height": 14
+                    },
+                    "type": "TouchEventHandler"
+                  },
+                  {
+                    "rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 14,
+                      "height": 14
+                    },
+                    "type": "WheelEventHandler"
+                  }
+                ],
+                "reasons": [
+                  "Has an active accelerated transform animation or transition."
+                ],
+                "reasonIds": [
+                  "ActiveTransformAnimation"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "conclusion": "All six normal-motion Threads status SVGs already own ActiveTransformAnimation layers in both snapshots. No will-change hint or wrapper is justified by this evidence. This attribution run is excluded from performance gains."
+}

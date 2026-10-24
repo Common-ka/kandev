@@ -193,3 +193,14 @@ A missing baseline defect is reported as not reproduced, not 100% improvement.
 If targets are missed, name the remaining measured owner and keep unresolved
 work open. Do not declare the user's sluggishness resolved from compression
 alone. Report what was tested, where gains occurred, and what remains unknown.
+
+### Compositor attribution
+
+`KANDEV_DENSE_ANIMATION_DIAGNOSTICS=1` also inspects the six normal-motion
+Threads status SVGs after the observation windows. It temporarily restores
+normal motion, captures a compositor frame with a screenshot, and maps DOM
+backend node IDs to layer ownership and compositing reasons. It restores the
+previous motion preference afterward. These style reads and layer-domain calls
+are intrusive attribution; the report remains `animation-attribution` and the
+summary rejects it. A composited layer does not establish a CPU gain or zero
+main-thread cost. Keep this flag off in paired performance runs.
