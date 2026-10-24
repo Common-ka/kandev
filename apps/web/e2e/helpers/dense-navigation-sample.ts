@@ -26,6 +26,7 @@ export async function runDenseNavigationSample(options: {
   pair: number;
   sample: string;
   profileFile: string;
+  profileTimedSwitches?: boolean;
 }) {
   const {
     browser,
@@ -37,6 +38,7 @@ export async function runDenseNavigationSample(options: {
     pair,
     sample,
     profileFile,
+    profileTimedSwitches,
   } = options;
   for (const item of items) {
     await options.api.launchSession({
@@ -92,13 +94,21 @@ export async function runDenseNavigationSample(options: {
       await expect(session.fileTreeNode(item.marker)).toBeVisible();
     }
     for (let i = 0; i < 5; i++) await measureSelection(page, gate, items[(i + 1) % 2]);
+    if (profileTimedSwitches) {
+      await cdp.send("Profiler.enable");
+      await cdp.send("Profiler.start");
+    }
     const before = await beginDenseWindow(page, cdp);
     const selections = [];
     const switchCount = Number(process.env.KANDEV_DENSE_NAV_SWITCHES ?? 40);
     for (let i = 0; i < switchCount; i++)
       selections.push(await measureSelection(page, gate, items[i % 2]));
     const measured = await endDenseWindow(page, cdp, before);
-    // Attribution and retained-owner measurements occur after timed switches.
+    if (profileTimedSwitches) {
+      const profile = await cdp.send("Profiler.stop");
+      fs.writeFileSync(profileFile, JSON.stringify(profile.profile));
+    }
+    // Retained-owner measurements remain outside the timed profile.
     await cdp.send("HeapProfiler.collectGarbage");
     const heapBefore = await cdp.send("Runtime.getHeapUsage");
     const ownersBefore = await page.evaluate(() => ({
@@ -120,11 +130,13 @@ export async function runDenseNavigationSample(options: {
         })),
       };
     }
-    await cdp.send("Profiler.enable");
-    await cdp.send("Profiler.start");
-    for (const item of items) await selectNavigationTask(page, item.task.title);
-    const profile = await cdp.send("Profiler.stop");
-    fs.writeFileSync(profileFile, JSON.stringify(profile.profile));
+    if (!profileTimedSwitches) {
+      await cdp.send("Profiler.enable");
+      await cdp.send("Profiler.start");
+      for (const item of items) await selectNavigationTask(page, item.task.title);
+      const profile = await cdp.send("Profiler.stop");
+      fs.writeFileSync(profileFile, JSON.stringify(profile.profile));
+    }
     return {
       cpuRate,
       sample,
@@ -133,6 +145,7 @@ export async function runDenseNavigationSample(options: {
       measured,
       retention,
       profileFile,
+      profileWindow: profileTimedSwitches ? "timed-switches" : "post-timing-selection",
     };
   } finally {
     await context.close();

@@ -30,6 +30,18 @@ system_design:
 
 # Task 06: Matched comparison and regression evidence
 
+## Timed navigation profile validation
+
+The opt-in navigation CPU profile now covers the measured switch window,
+including destination-file readiness, rather than only post-timing selections.
+The summary rejects its `cpu-attribution` reports. The final full-caller smoke
+passed both arms in 1.2 minutes (`matched-navigation-1792815118498.json`,
+`timed-navigation-profile-final-smoke-logs/kandev-run.e2e.nQpZ0VbZ.log`). Each
+profile contains its two-switch measured window. Strict scoped lint and all
+nine selected summary tests pass. The preceding smoke also passed; two lint
+complexity warnings were resolved before the final smoke. This is diagnostic
+harness validation, not a product speed result.
+
 ## Retained-build navigation remeasurement
 
 Six alternating pairs with the current retained build passed all 480 timed

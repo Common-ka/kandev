@@ -13,6 +13,11 @@ import {
 
 test.skip(process.env.KANDEV_DENSE_NAVIGATION !== "1", "opt-in matched navigation benchmark");
 
+function navigationMeasurementKind(profileTimedSwitches: boolean) {
+  if (profileTimedSwitches) return "cpu-attribution";
+  return process.env.KANDEV_DENSE_NAV_TASKS ? "harness-rehearsal" : "reference-workload";
+}
+
 test("compares dense task switches and retained Dockview owners", async ({
   browser,
   testPage,
@@ -60,10 +65,10 @@ test("compares dense task switches and retained Dockview owners", async ({
   const directory = path.join(candidate, ".kandev/diagnostics/dense-workbench-performance");
   fs.mkdirSync(directory, { recursive: true });
   const output = path.join(directory, `matched-navigation-${Date.now()}.json`);
+  const profileTimedSwitches = process.env.KANDEV_DENSE_NAV_PROFILE === "1";
   const report = {
-    measurementKind: process.env.KANDEV_DENSE_NAV_TASKS
-      ? "harness-rehearsal"
-      : "reference-workload",
+    measurementKind: navigationMeasurementKind(profileTimedSwitches),
+    profileWindow: profileTimedSwitches ? "timed-switches" : "post-timing-selection",
     machine: profileMachine(),
     sourceRevision: execFileSync("git", ["rev-parse", "HEAD"], {
       encoding: "utf8",
@@ -111,6 +116,7 @@ test("compares dense task switches and retained Dockview owners", async ({
             cpuRate,
             pair,
             sample,
+            profileTimedSwitches,
             profileFile: path.join(
               directory,
               `${path.basename(output, ".json")}-${sample}.cpuprofile`,

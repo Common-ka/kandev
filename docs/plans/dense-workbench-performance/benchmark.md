@@ -123,6 +123,24 @@ After 100 switches and released owners, measure retained editor/subscription
 counts and post-GC heap in a separate retention arm. Compare with the same
 state after warm-up. An increasing single heap sample is not proof of a leak.
 
+## Navigation CPU attribution
+
+Set `KANDEV_DENSE_NAV_PROFILE=1` with the normal navigation comparison flags
+to profile the actual timed task switches. The profile begins after the five
+warm-up switches and stops after the measured window, before retained-owner
+checks. Reports and samples record `profileWindow: timed-switches`; reports
+use `measurementKind: cpu-attribution`, which the summary rejects. Without the
+flag, the existing profile covers only two post-timing task selections and is
+labelled `post-timing-selection`. Do not use it to attribute file-marker wait
+cost during the measured switches.
+
+Validate changes with the full caller on `KANDEV_DENSE_NAV_TASKS=10`,
+`KANDEV_DENSE_NAV_MESSAGES=10`, `KANDEV_DENSE_NAV_SWITCHES=2`, one pair, and 1x
+CPU. Require both profile files, matching profile-window metadata, and a profile
+duration that contains the measured window. Explicit `KANDEV_DENSE_NAV_SWITCHES`
+skips the additional retention switches; use `40` for the normal timed workload
+when only attribution is needed. Profiler runs are excluded from speed claims.
+
 ## Run order and comparison
 
 After changing the measurement harness, first run its full caller with a small
