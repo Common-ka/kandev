@@ -327,3 +327,37 @@ resolved by serializing the retry, and lint used the verified current base.
 The requirement/design/work-order lifecycle is now complete for implementation.
 Subsequent documentation-only commits must pass their own exact-head checks.
 No release was dispatched and no SDK was published.
+
+## Adversarial review cleanup
+
+The user requested a secondary-session adversarial review on 2026-10-24, with
+plugin compatibility as the priority. The [review record](adversarial-review.md)
+documents three verified implementation bugs and their corrections: a dropped
+packed-record digest, host minimum suffixes accepted by the checker but rejected
+by Kandev, and valid npm workspace hoisting rejected by the checker.
+
+Each fix has a regression that failed before the production change. The release
+test crosses the real packer/adapter/consumer boundary. The workspace test uses
+an actual npm install and checks the exact resolved lock entry, including shadow
+and local-substitution failures. The accepted versioning and strict lockfile
+policies remain unchanged. Historical green CI above does not validate this
+remediation; its pushed head requires fresh checks.
+
+Post-fix local validation passed:
+
+- `(cd pluginsdk && go test -trimpath -race ./... && go vet ./...)`.
+- SDK `golangci-lint` with the backend configuration: zero issues.
+- The required SDK packaging command from `backend-tests.yml`: 45 tests,
+  including the real release adapter, npm workspace, and GPG signature tests.
+  Node/npm used the exact packaging pins; GPG was supplied through Nix.
+- SDK CI contracts: 10 tests. Backend workflow contracts: 25 tests. Release
+  workflow contracts: 68 tests. The release contract check first lacked GPG on
+  the local PATH; it passed after supplying that tool, without source changes.
+- Public-doc validators: 63 tests and 54 pages. Catalog: 401 decisions and
+  1724 specifications. Full specification lint and whitespace checks passed.
+
+The secondary reviewer rechecked the working-tree fixes and found no remaining
+blockers. Their independent Go checker tests, real npm workspace regression,
+and whitespace check passed. Current upstream changes were limited to shared
+workflow contracts and unrelated features; final merge-result validation is
+recorded with the pushed head and live base in PR delivery evidence.

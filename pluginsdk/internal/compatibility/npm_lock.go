@@ -53,7 +53,7 @@ type npmLockedPackage struct {
 	OptionalDependencies map[string]string `json:"optionalDependencies"`
 }
 
-func checkNPMLock(root, directory, spec, version string) error {
+func checkNPMLock(root, directory, packagePath, spec, version string) error {
 	var lock struct {
 		Version  int                         `json:"lockfileVersion"`
 		Packages map[string]npmLockedPackage `json:"packages"`
@@ -76,14 +76,11 @@ func checkNPMLock(root, directory, spec, version string) error {
 	if err != nil || declared != spec {
 		return fmt.Errorf("npm lock importer differs from package.json SDK dependency")
 	}
-	key := "node_modules/@kandev/plugin-sdk"
-	if importer != "" {
-		key = importer + "/" + key
+	key, err := lockImporter(root, packagePath)
+	if err != nil {
+		return err
 	}
 	installed, ok := lock.Packages[key]
-	if !ok && importer != "" {
-		installed, ok = lock.Packages["node_modules/@kandev/plugin-sdk"]
-	}
 	if !ok || installed.Link {
 		return fmt.Errorf("npm lock has no registry SDK resolution")
 	}

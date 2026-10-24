@@ -221,3 +221,12 @@ passed. The [plan's cleanup record](plan.md#validation-and-review-cleanup)
 contains the validation evidence and review dispositions. Public publication,
 registry configuration, external repository migration, and author notices
 remain separate follow-up work; completion here does not certify those actions.
+
+## Adversarial review correction
+
+On 2026-10-24, the [implementation review](adversarial-review.md) found that the
+packer dropped the record digest required by `ReleaseIO.build`. The digest now
+crosses that boundary. The new `sdk-release-io.test.mjs` regression failed before
+the fix and passed after it, using real packing and isolated Go/npm consumers.
+Conflicting source digests remain rejected. This closes a gap that the earlier
+mocked release-state and separate packer tests did not detect.

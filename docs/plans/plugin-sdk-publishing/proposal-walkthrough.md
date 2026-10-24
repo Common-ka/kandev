@@ -262,3 +262,10 @@ The 29-repository dependency inventory is not a compatibility certification.
 All five work orders are complete. Local checks, implementation CI, and review
 cleanup passed. The legacy subprocess and Docker builder checks passed. The
 [template handoff](template-migration.md) remains separate, as does public publication.
+
+A subsequent [adversarial implementation review](adversarial-review.md) found
+three bugs in publication and author validation. The corrections preserve the
+packed-record digest, reject host minimum suffixes that Kandev rejects, and
+support registry SDKs hoisted by npm workspaces with exact lock evidence.
+Existing plugin runtime protocols remain unchanged. Each correction has a
+regression test; the remediation is validated separately from the earlier CI.

@@ -67,8 +67,9 @@ After the selected SDK version is publicly verified:
 
 4. Set `manifest.yaml`'s `min_kandev_version` to at least the highest floor of
    the SDKs actually installed. Select an `api_version` supported by all of
-   them. Inspect the installed npm record with
-   `node -p 'require("./node_modules/@kandev/plugin-sdk/sdk-release.json")'`.
+   them. Use a complete Stable host version without prerelease or build suffixes.
+   Inspect the installed npm record with
+   `node -p 'require("@kandev/plugin-sdk/sdk-release.json")'`.
    Do not invent the initial host number from these examples.
 5. Add the compatibility check before build/package in CI, after dependency
    installation. Run it from the plugin's Go module and manifest directory:
@@ -83,7 +84,10 @@ that only checks frontend dependencies. The checker reads the Go module version
 selected by Go, which can be higher than the direct requirement. It checks the
 installed frontend package against npm lockfile v2/v3 or pnpm lockfile v9.
 Run frontend checks from that package's project root; use `--manifest` to select
-a manifest elsewhere. It rejects SDK replacements, arbitrary symlinks, local
+a manifest elsewhere. For npm workspaces, the same `--frontend-sdk` argument
+finds a hoisted SDK up to the nearest lockfile root and checks its exact lock
+entry. A closer installed package takes precedence. The checker rejects SDK
+replacements, arbitrary symlinks, local
 lockfile resolutions, missing metadata, insufficient host minima, and unsupported
 API versions. It does not rewrite project files.
 

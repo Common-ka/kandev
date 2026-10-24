@@ -214,7 +214,7 @@ jobs:
         run: |
           node scripts/pluginsdk/sync-record.mjs --check
           node scripts/release/plugin-sdk.mjs --check
-          node --test scripts/pluginsdk/sync-record.test.mjs scripts/pluginsdk/pack-candidate.test.mjs scripts/pluginsdk/public-trust.test.mjs scripts/release/plugin-sdk.test.mjs scripts/release/publish-plugin-sdk.test.mjs scripts/release/sdk-*.test.mjs
+          node --test scripts/pluginsdk/sync-record.test.mjs scripts/pluginsdk/pack-candidate.test.mjs scripts/pluginsdk/npm-workspace.test.mjs scripts/pluginsdk/public-trust.test.mjs scripts/release/plugin-sdk.test.mjs scripts/release/publish-plugin-sdk.test.mjs scripts/release/sdk-*.test.mjs
           node scripts/pluginsdk/consumer-smoke.mjs --mode local
 
   static_checks:

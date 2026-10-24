@@ -82,11 +82,13 @@ func ResolveFrontend(directory, packagePath string) (Record, error) {
 	if err != nil {
 		return Record{}, err
 	}
-	if !filepath.IsAbs(packagePath) {
-		packagePath = filepath.Join(directory, packagePath)
+	lockRoot, kind, err := findLock(directory)
+	if err != nil {
+		return Record{}, err
 	}
-	if filepath.Clean(packagePath) != filepath.Join(directory, "node_modules", "@kandev", "plugin-sdk") {
-		return Record{}, fmt.Errorf("frontend SDK must be the installed node_modules/@kandev/plugin-sdk")
+	packagePath, err = installedFrontend(directory, lockRoot, kind, packagePath)
+	if err != nil {
+		return Record{}, err
 	}
 	var installed, consumer packageManifest
 	if err = readJSON(filepath.Join(packagePath, "package.json"), &installed); err != nil {
@@ -105,15 +107,11 @@ func ResolveFrontend(directory, packagePath string) (Record, error) {
 	if err = registrySpecifier(spec, installed.Version); err != nil {
 		return Record{}, err
 	}
-	lockRoot, kind, err := findLock(directory)
-	if err != nil {
-		return Record{}, err
-	}
 	if err = verifyInstalledPath(packagePath, lockRoot, installed.Version, kind); err != nil {
 		return Record{}, err
 	}
 	if kind == "npm" {
-		err = checkNPMLock(lockRoot, directory, spec, installed.Version)
+		err = checkNPMLock(lockRoot, directory, packagePath, spec, installed.Version)
 	} else {
 		err = checkPNPMLock(lockRoot, directory, spec, installed.Version)
 	}
@@ -121,6 +119,29 @@ func ResolveFrontend(directory, packagePath string) (Record, error) {
 		return Record{}, err
 	}
 	return ReadRecord(filepath.Join(packagePath, "sdk-release.json"), installed.Version)
+}
+
+func installedFrontend(directory, root, kind, requested string) (string, error) {
+	if !filepath.IsAbs(requested) {
+		requested = filepath.Join(directory, requested)
+	}
+	local := filepath.Join(directory, "node_modules", "@kandev", "plugin-sdk")
+	for current := directory; ; current = filepath.Dir(current) {
+		candidate := filepath.Join(current, "node_modules", "@kandev", "plugin-sdk")
+		_, err := os.Lstat(candidate)
+		if err == nil {
+			if filepath.Clean(requested) != local && filepath.Clean(requested) != candidate {
+				return "", fmt.Errorf("frontend SDK must match the resolved installed package %s", candidate)
+			}
+			return candidate, nil
+		}
+		if !os.IsNotExist(err) {
+			return "", err
+		}
+		if current == root || kind != "npm" {
+			return "", fmt.Errorf("installed frontend SDK not found within lockfile root %s", root)
+		}
+	}
 }
 
 func findLock(directory string) (string, string, error) {

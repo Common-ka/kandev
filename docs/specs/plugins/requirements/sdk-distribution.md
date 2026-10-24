@@ -59,7 +59,10 @@ packaged or released.
   that checks the resolved SDK dependencies against `min_kandev_version` and
   `api_version`. It shall reject a missing, malformed, or too-low host minimum,
   an unsupported API version, unresolved compatibility evidence, and local SDK
-  substitutions. When both SDKs are used, the minimum shall meet both baselines.
+  substitutions. The minimum shall identify a complete Stable version, without
+  prerelease or build suffixes. Registry SDKs installed in npm workspaces shall
+  be supported when their resolved location matches the workspace lock evidence.
+  When both SDKs are used, the minimum shall meet both baselines.
 - **AC-PLUGINS-SDK-DISTRIBUTION-002.3:** Every SDK release shall declare its
   compatibility change. Before `1.0.0`, a breaking SDK change shall increase
   the minor version and provide migration guidance. From `1.0.0`, breaking

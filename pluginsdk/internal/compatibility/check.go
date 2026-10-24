@@ -31,9 +31,9 @@ func CheckManifest(data []byte, records ...Record) error {
 	if decoder.Decode(new(any)) != io.EOF {
 		return fmt.Errorf("manifest must contain one YAML document")
 	}
-	minimum, err := semver.StrictNewVersion(strings.TrimPrefix(manifest.Minimum, "v"))
+	minimum, err := stableVersion("manifest min_kandev_version", strings.TrimPrefix(manifest.Minimum, "v"))
 	if err != nil {
-		return fmt.Errorf("manifest min_kandev_version must be a complete semantic version: %w", err)
+		return err
 	}
 	for _, record := range records {
 		if err := record.validate(record.SDKVersion); err != nil {

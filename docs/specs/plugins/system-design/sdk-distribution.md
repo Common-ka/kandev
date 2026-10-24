@@ -194,8 +194,12 @@ The frontend flag is omitted for Go-only plugins. Support `--frontend-only` for
 projects without a backend SDK dependency. Resolve the Go SDK via `go list -m
 -json` in the consumer's directory with `GOWORK=off`; inspect the selected
 module version and its record, not just the verifier's own version. For the
-frontend, inspect the installed package manifest and its release record. The
-author installs and freezes dependencies before running the check.
+frontend, inspect the installed package manifest and its release record. In an
+npm workspace, resolve the nearest installed SDK from the consumer directory
+up to the selected lockfile root. Bind that exact location to its lock entry
+and the consumer's dependency declaration; an explicit path cannot bypass a
+closer installed package. The author installs and freezes dependencies before
+running the check.
 
 Reject missing SDKs, draft/null records, metadata/package version disagreement,
 SDK pseudo-versions, Go replacements, and frontend packages resolved through
@@ -203,7 +207,9 @@ local workspace/file dependencies. Inspect npm `package-lock.json` or pnpm
 `pnpm-lock.yaml` to establish registry resolution. Normal pnpm symlinks into
 its managed dependency store are valid; a symlink alone is not evidence of a
 local SDK substitution. Missing or unsupported lock evidence fails with a
-specific diagnostic. Require the caller's minimum host to be at least the
+specific diagnostic. Require a complete Stable host minimum without prerelease
+or build suffixes, matching the runtime's Stable minimum policy. An optional
+lowercase `v` prefix remains accepted. Require the minimum to be at least the
 maximum of the consumed SDK floors and `api_version` to be in each relevant
 supported set. Plugins may intentionally pin different releases from the shared
 SDK train; both are checked. The checker is read-only and exits nonzero with a

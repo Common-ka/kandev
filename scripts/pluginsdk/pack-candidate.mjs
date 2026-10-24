@@ -101,7 +101,7 @@ export async function packCandidate({
   );
   const [packed] = JSON.parse(stdout);
   const archive = join(resolve(output), packed.filename);
-  const { files, record } = await inspectArchive(archive, config);
+  const { files, record, recordDigest } = await inspectArchive(archive, config);
   const integrity = await integrityOf(archive);
   if (integrity !== packed.integrity)
     throw new Error("npm pack integrity differs from artifact bytes");
@@ -109,6 +109,7 @@ export async function packCandidate({
     archive,
     files,
     integrity,
+    recordDigest,
     node: config.node,
     npm,
     sdk_version: record.sdk_version,

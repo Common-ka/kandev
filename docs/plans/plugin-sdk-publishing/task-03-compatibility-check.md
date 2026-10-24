@@ -67,6 +67,7 @@ compatibility declarations, auto-upgrades, and publication.
 (cd pluginsdk && go test -trimpath -race ./... && go vet ./...)
 (cd apps/backend && go test -trimpath ./internal/plugins/manifest)
 node --test scripts/pluginsdk/consumer-smoke.test.mjs scripts/pluginsdk/sync-record.test.mjs
+node --test scripts/pluginsdk/npm-workspace.test.mjs
 node scripts/pluginsdk/consumer-smoke.mjs --mode local
 node scripts/pluginsdk/sync-record.mjs --check
 git diff --check
@@ -89,7 +90,8 @@ Keep its mode distinct from the public-registry evidence produced by WO04.
 
 The checker must inspect selected versions after Go minimum-version selection,
 not just requested versions. Missing metadata or local links cannot silently
-be treated as supported. Comparison must handle SemVer prereleases correctly.
+be treated as supported. A manifest minimum must use a complete Stable version;
+prerelease and build suffixes are rejected, as they are by the runtime host.
 
 ## Parallelism
 
@@ -125,3 +127,12 @@ passed. The [plan's cleanup record](plan.md#validation-and-review-cleanup)
 contains the validation evidence and review dispositions. Public publication,
 registry configuration, external repository migration, and author notices
 remain separate follow-up work; completion here does not certify those actions.
+
+## Adversarial review correction
+
+On 2026-10-24, the [implementation review](adversarial-review.md) found that the
+checker accepted prerelease/build host minima and rejected valid hoisted npm
+workspace installations. Both were reproduced before fixing. Stable-minimum
+tests and the real npm workspace/CLI regression now pass, including shadow,
+symlink, version, and lock-root rejection cases. The strict lock policy remains
+required. SDK race tests and vet passed after the fixes.
