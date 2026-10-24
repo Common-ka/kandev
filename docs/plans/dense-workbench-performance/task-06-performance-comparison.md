@@ -30,6 +30,23 @@ system_design:
 
 # Task 06: Matched comparison and regression evidence
 
+## Dense Dockview fixture validation
+
+The fixture now prepares real siblings in one environment and gives both visible
+chats the full selected-history count. It verifies the workspace task count,
+per-session seeded counts/hashes, 630 files, 73 changes, and six selected canonical
+producers. Core layout checks pass with five visible panes and seven actual
+panel objects. The full E2E plugin variant passes on candidate and original
+baseline with six visible panes and nine panels, including its hidden review
+tab. Captures are preserved and the candidate views were inspected.
+
+The initial missing-environment and short-selected-history failures are retained.
+The plugin's additional review tab is recorded explicitly. Strict lint, the
+existing navigation regression, and a final small default Threads comparison
+on both builds pass. No production code or assets change. Full paired Dockview
+idle/streaming measurement remains open. See
+[complete fixture evidence](evidence/dockview-dense-fixture.json).
+
 ## Dockview measurement harness
 
 Session-specific stream targeting now passes its two-chat browser regression,

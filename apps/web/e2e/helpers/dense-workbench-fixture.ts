@@ -95,9 +95,58 @@ function backgroundTaskState(index: number) {
   return index % 2 === 0 ? "TODO" : "COMPLETED";
 }
 
-export async function seedDenseWorkbench(api: ApiClient, seed: SeedData, canonical = false) {
+async function seedDenseSibling(api: ApiClient, seed: SeedData, taskId: string, prepare: boolean) {
+  if (prepare) {
+    return (
+      await api.launchSession({
+        task_id: taskId,
+        agent_profile_id: seed.agentProfileId,
+        executor_profile_id: seed.worktreeExecutorProfileId,
+        workflow_step_id: seed.startStepId,
+        prompt: "",
+        intent: "prepare",
+        launch_workspace: true,
+      })
+    ).session_id;
+  }
+  return (
+    await api.seedTaskSession(taskId, {
+      sessionId: randomUUID(),
+      state: "WAITING_FOR_INPUT",
+      agentProfileId: seed.agentProfileId,
+      repositoryId: seed.repositoryId,
+    })
+  ).session_id;
+}
+
+function siblingHistoryCount(
+  taskIndex: number,
+  siblingIndex: number,
+  firstSiblingMessages?: number,
+) {
+  return taskIndex === 0 && siblingIndex === 0 && firstSiblingMessages !== undefined
+    ? firstSiblingMessages
+    : Math.min(100, DENSE_WORKLOAD.messages);
+}
+
+export async function seedDenseWorkbench(
+  api: ApiClient,
+  seed: SeedData,
+  canonical = false,
+  {
+    prepareFirstSiblings = false,
+    firstSiblingMessages,
+  }: { prepareFirstSiblings?: boolean; firstSiblingMessages?: number } = {},
+) {
+  if (prepareFirstSiblings && !canonical)
+    throw new Error("Prepared dense siblings require canonical workspaces");
   const threads: DenseThread[] = [];
-  const manifest: Array<{ title: string; messages: number; siblings: number }> = [];
+  const manifest: Array<{
+    title: string;
+    messages: number;
+    siblings: number;
+    siblingMessages: number[];
+  }> = [];
   for (let index = 0; index < DENSE_WORKLOAD.tasks; index++) {
     const title = `Dense task ${String(index).padStart(4, "0")}`;
     let taskId: string;
@@ -140,24 +189,21 @@ export async function seedDenseWorkbench(api: ApiClient, seed: SeedData, canonic
     await api.setPrimarySession(sessionId);
     const history = await seedHistory(api, sessionId, title, DENSE_WORKLOAD.messages, canonical);
     const siblings = [];
+    const siblingMessages = [];
     for (let sibling = 0; sibling < 2; sibling++) {
-      const { session_id: siblingId } = await api.seedTaskSession(taskId, {
-        sessionId: randomUUID(),
-        state: "WAITING_FOR_INPUT",
-        agentProfileId: seed.agentProfileId,
-        repositoryId: seed.repositoryId,
-      });
-      await seedHistory(
+      const siblingId = await seedDenseSibling(
         api,
-        siblingId,
-        `${title} sibling ${sibling}`,
-        Math.min(100, DENSE_WORKLOAD.messages),
-        canonical,
+        seed,
+        taskId,
+        prepareFirstSiblings && index === 0,
       );
+      const messageCount = siblingHistoryCount(index, sibling, firstSiblingMessages);
+      await seedHistory(api, siblingId, `${title} sibling ${sibling}`, messageCount, canonical);
       siblings.push(siblingId);
+      siblingMessages.push(messageCount);
     }
     threads.push({ taskId, sessionId, title, ...history, siblings });
-    manifest.push({ title, messages: DENSE_WORKLOAD.messages, siblings: 2 });
+    manifest.push({ title, messages: DENSE_WORKLOAD.messages, siblings: 2, siblingMessages });
   }
   return { threads, manifest, workload: DENSE_WORKLOAD };
 }

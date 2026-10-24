@@ -1,0 +1,344 @@
+{
+  "scope": "Dense Dockview fixture and panel arrangement validation. The paired idle/streaming caller and full reference measurements remain pending. No production source or assets changed.",
+  "productionRevision": "72085e06b4902b7ccbaae1a84be0048e5a9b6f11",
+  "sourceFiles": [
+    {
+      "path": "apps/web/e2e/helpers/dense-workbench-fixture.ts",
+      "sha256": "6d7c4376ee0a8f9c9296b8da4593927a6c35cebac951a1bd835dbd93fb1824cf"
+    },
+    {
+      "path": "apps/web/e2e/helpers/dense-dockview-fixture.ts",
+      "sha256": "c89bb8e032355ae931213c9070688c5364f14e9972a620db82d42947d88a39c2"
+    },
+    {
+      "path": "apps/web/e2e/helpers/dense-dockview-layout.ts",
+      "sha256": "ef75c7f8f4e0930f02a79110d4483b2e16c6b312de04944d8067a0995bfb66ee"
+    },
+    {
+      "path": "apps/web/e2e/helpers/dense-dockview-plugin.ts",
+      "sha256": "73b0da632105c9df3b53fa06f2b2069548916e250140f66bffbda8794a69ab84"
+    },
+    {
+      "path": "apps/web/e2e/tests/performance/dense-dockview-fixture.spec.ts",
+      "sha256": "fc15edb48ba0c99574094411eebf0182759941e7b361c19ac3c3b6efe31b5594"
+    },
+    {
+      "path": "apps/web/e2e/tests/task/task-navigation-profile-helpers.ts",
+      "sha256": "8bd4d0ac60cde75f38c0b0cb2ec4b7b7ddd6576cfc2162f37539bec7203ccf8b"
+    }
+  ],
+  "referenceFixture": {
+    "workspaceTasks": 1000,
+    "eligibleTasks": 30,
+    "sessionsPerEligibleTask": 3,
+    "visibleChats": 2,
+    "messagesPerVisibleChat": 1000,
+    "messagesPerHiddenSibling": 100,
+    "seededMessages": 36900,
+    "historyNote": "The visible sibling receives 1000 instead of 100 messages. This explicit Dockview variant adds 900 messages to the 36000-message Threads fixture. Each seeded history count and content hash is verified; the workspace task count is read back.",
+    "canonicalProducers": 6,
+    "producerSelection": "Primary and both real siblings of task 0, plus primaries of tasks 1, 2, and 3. Two chats are visible; one streaming sibling is retained hidden; three producers belong to other tasks.",
+    "core": "Five visible panes in five groups: two chats, Files, Changes, Plan. Hidden sibling and terminal retained; seven API panel objects.",
+    "files": 630,
+    "changedFiles": 73,
+    "planSteps": 20,
+    "plugin": "Full in-repo E2E plugin adds one visible prompt-history pane and one hidden review tab. Six groups and nine API panel objects. Includes navigation, toolbar, and review contributions; not an isolated conversation-only plugin.",
+    "pluginArchiveSha256": "9fd37c4eaa58a63603e071bf6a30d76e478d685c2b3e6d1ed58d7aa3f3d25894"
+  },
+  "validation": {
+    "realSiblingRed": {
+      "log": "dockview-dense-fixture-red-logs/kandev-run.e2e.vVzRhN57.log",
+      "durationSeconds": 8.6,
+      "reason": "Raw seeded sibling sessions lack the primary task environment."
+    },
+    "realSiblingGreen": {
+      "log": "dockview-dense-fixture-green-logs/kandev-run.e2e.f020gF5V.log",
+      "durationSeconds": 19.6,
+      "passed": 1
+    },
+    "selectedHistoryRed": {
+      "log": "dockview-dense-history-red-logs/kandev-run.e2e.eyTUgm2y.log",
+      "durationSeconds": 54.2,
+      "reason": "Selected sibling contains 100 rather than requested 120 messages."
+    },
+    "coreAndNavigationGreen": {
+      "log": "dockview-dense-layout-green-logs/kandev-run.e2e.PR7lxCwp.log",
+      "durationMinutes": 1.4,
+      "passed": 2,
+      "scope": "120-message core fixture plus existing same-environment navigation regression; before equivalent history-count extraction and count metadata."
+    },
+    "pluginCountFailure": {
+      "log": "dockview-dense-plugin-fixture-logs/kandev-run.e2e.mA6g1DGO.log",
+      "reason": "Expected 8 API panels; observed 9 because the complete plugin adds a retained hidden pr-detail panel. Six intended panes and prompt-history rows passed.",
+      "artifacts": "dockview-plugin-panel-count-failure/"
+    },
+    "candidatePluginGreen": {
+      "log": "dockview-dense-plugin-fixture-final-logs/kandev-run.e2e.iBBCEyPG.log",
+      "durationMinutes": 1.2,
+      "tasks": 10,
+      "eligibleTasks": 6,
+      "selectedMessages": 120,
+      "hiddenMessages": 100,
+      "scope": "Plugin layout and selected-history check before added build/count metadata. No later change to plugin mounting or panel expectations."
+    },
+    "baselinePluginGreen": {
+      "log": "dockview-dense-plugin-baseline-logs/kandev-run.e2e.ytKGqu2N.log",
+      "durationMinutes": 1.2,
+      "tasks": 10,
+      "eligibleTasks": 6,
+      "selectedMessages": 120,
+      "hiddenMessages": 100,
+      "scope": "Original frozen binary/assets; same plugin archive. Separate correctness fixture, not matched timing. Before added task-count/sibling-count metadata; final shared count fields are verified by the final core case and default Threads caller."
+    },
+    "finalCoreGreen": {
+      "log": "dockview-dense-core-final-logs/kandev-run.e2e.fhNbFIBY.log",
+      "durationSeconds": 21.9,
+      "tasks": 10,
+      "eligibleTasks": 6,
+      "seededMessages": 180,
+      "messagesPerSession": 10,
+      "scope": "Final helper, task-count and sibling-count metadata, core layout and capture."
+    },
+    "lint": {
+      "initialLog": "/tmp/kandev-dockview-dense-fixture-lint.log",
+      "initialResult": "Complexity 16 exceeds 15; history-count decision extracted without changing behavior.",
+      "finalLog": "/tmp/kandev-dockview-dense-fixture-lint-complete.log",
+      "finalResult": "passed with zero warnings"
+    },
+    "defaultThreadsCaller": {
+      "log": "dockview-fixture-threads-regression-logs/kandev-run.e2e.VzqwuIGE.log",
+      "durationMinutes": 1.2,
+      "report": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792840682372.json",
+      "sha256": "aa900049d2c7770c6be091662e7ce1ec7005ec5f46fbb2dc348f358336cb834a",
+      "samples": 2,
+      "scheduledUpdatesPerArm": 60,
+      "verificationErrorsPerArm": [
+        [],
+        []
+      ],
+      "builds": {
+        "baseline": {
+          "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+          "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+          "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+          "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+        },
+        "candidate": {
+          "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+          "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "d83bd02b59785cf6c806178f3f0e15d0443dbac7f104998347cb6580371a9f94"
+        }
+      },
+      "summary": "dockview-fixture-threads-regression-summary.json",
+      "scope": "Small default Threads path on original baseline and retained final candidate after shared-seeder changes; no speed claim."
+    }
+  },
+  "captures": {
+    "candidateCore": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/dockview-dense-core-final-captures/dense-dockview-layout.json",
+      "sha256": "2ab587144cd11dd28d244020c94d7ebda982741fc58a1b872a0f45eb0d1822da",
+      "screenshot": ".kandev/diagnostics/dense-workbench-performance/dockview-dense-core-final-captures/dense-dockview-layout.png",
+      "groups": 5,
+      "panels": [
+        {
+          "id": "session:1a0e9f58-cf6e-4a94-b6f3-c3dd21e23e48",
+          "component": "chat",
+          "visible": true
+        },
+        {
+          "id": "session:5d50aeba-40f2-4f1c-8849-64257816a46f",
+          "component": "chat",
+          "visible": false
+        },
+        {
+          "id": "files",
+          "component": "files",
+          "visible": true
+        },
+        {
+          "id": "terminal-default",
+          "component": "terminal",
+          "visible": false
+        },
+        {
+          "id": "plan",
+          "component": "plan",
+          "visible": true
+        },
+        {
+          "id": "session:2ec5db0d-e305-4228-99d2-e684f0eea972",
+          "component": "chat",
+          "visible": true
+        },
+        {
+          "id": "changes",
+          "component": "changes",
+          "visible": true
+        }
+      ],
+      "visibleSessionIds": [
+        "1a0e9f58-cf6e-4a94-b6f3-c3dd21e23e48",
+        "2ec5db0d-e305-4228-99d2-e684f0eea972"
+      ],
+      "build": {
+        "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+        "assetsSha256": "d83bd02b59785cf6c806178f3f0e15d0443dbac7f104998347cb6580371a9f94"
+      },
+      "plugin": null,
+      "files": {
+        "marker": "navigation-available/000-Dense-task-0000.txt",
+        "profileFiles": 630,
+        "changedFiles": 73
+      }
+    },
+    "candidatePlugin": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/dockview-dense-plugin-final-captures/dense-dockview-layout.json",
+      "sha256": "d58636d60d30c5ec2417cf95366030e32cd884f8b7183c93f3e766a7f48fe2ab",
+      "screenshot": ".kandev/diagnostics/dense-workbench-performance/dockview-dense-plugin-final-captures/dense-dockview-layout.png",
+      "groups": 6,
+      "panels": [
+        {
+          "id": "session:d7818ccc-a639-4e01-b243-533434a9f33a",
+          "component": "chat",
+          "visible": true
+        },
+        {
+          "id": "session:bb612ff0-a3c4-4717-9f17-af59d04794ac",
+          "component": "chat",
+          "visible": false
+        },
+        {
+          "id": "pr-detail",
+          "component": "pr-detail",
+          "visible": false
+        },
+        {
+          "id": "files",
+          "component": "files",
+          "visible": true
+        },
+        {
+          "id": "terminal-default",
+          "component": "terminal",
+          "visible": false
+        },
+        {
+          "id": "plan",
+          "component": "plan",
+          "visible": true
+        },
+        {
+          "id": "session:001aaf0e-e7fa-4f6c-ba34-dcbd20eb3361",
+          "component": "chat",
+          "visible": true
+        },
+        {
+          "id": "changes",
+          "component": "changes",
+          "visible": true
+        },
+        {
+          "id": "plugin:kandev-plugin-e2e:prompt-history-plugin",
+          "component": "plugin-panel",
+          "visible": true
+        }
+      ],
+      "visibleSessionIds": [
+        "001aaf0e-e7fa-4f6c-ba34-dcbd20eb3361",
+        "d7818ccc-a639-4e01-b243-533434a9f33a"
+      ],
+      "build": null,
+      "plugin": {
+        "id": "kandev-plugin-e2e",
+        "panelId": "plugin:kandev-plugin-e2e:prompt-history-plugin",
+        "bundleSha256": "9fd37c4eaa58a63603e071bf6a30d76e478d685c2b3e6d1ed58d7aa3f3d25894",
+        "scope": "Full in-repo E2E plugin, including navigation, toolbar, and review contributions"
+      },
+      "files": {
+        "marker": "navigation-available/000-Dense-task-0000.txt",
+        "profileFiles": 630,
+        "changedFiles": 73
+      }
+    },
+    "baselinePlugin": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/dockview-dense-plugin-baseline-captures/dense-dockview-layout.json",
+      "sha256": "c2f6ec3230c236047e6c84e167d30b1579b7822ff3f7dfe18a119efabe3d14ce",
+      "screenshot": ".kandev/diagnostics/dense-workbench-performance/dockview-dense-plugin-baseline-captures/dense-dockview-layout.png",
+      "groups": 6,
+      "panels": [
+        {
+          "id": "session:9b41870f-6f70-4f74-aa40-e4e7b79bb287",
+          "component": "chat",
+          "visible": true
+        },
+        {
+          "id": "session:595abee2-4d6a-409e-aca5-1f4d011984ce",
+          "component": "chat",
+          "visible": false
+        },
+        {
+          "id": "pr-detail",
+          "component": "pr-detail",
+          "visible": false
+        },
+        {
+          "id": "files",
+          "component": "files",
+          "visible": true
+        },
+        {
+          "id": "terminal-default",
+          "component": "terminal",
+          "visible": false
+        },
+        {
+          "id": "plan",
+          "component": "plan",
+          "visible": true
+        },
+        {
+          "id": "session:8b027166-9e6d-4cb5-bdd1-270f4c617d99",
+          "component": "chat",
+          "visible": true
+        },
+        {
+          "id": "changes",
+          "component": "changes",
+          "visible": true
+        },
+        {
+          "id": "plugin:kandev-plugin-e2e:prompt-history-plugin",
+          "component": "plugin-panel",
+          "visible": true
+        }
+      ],
+      "visibleSessionIds": [
+        "8b027166-9e6d-4cb5-bdd1-270f4c617d99",
+        "9b41870f-6f70-4f74-aa40-e4e7b79bb287"
+      ],
+      "build": {
+        "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+        "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+      },
+      "plugin": {
+        "id": "kandev-plugin-e2e",
+        "panelId": "plugin:kandev-plugin-e2e:prompt-history-plugin",
+        "bundleSha256": "9fd37c4eaa58a63603e071bf6a30d76e478d685c2b3e6d1ed58d7aa3f3d25894",
+        "scope": "Full in-repo E2E plugin, including navigation, toolbar, and review contributions"
+      },
+      "files": {
+        "marker": "navigation-available/000-Dense-task-0000.txt",
+        "profileFiles": 630,
+        "changedFiles": 73
+      }
+    }
+  },
+  "visualInspection": "Candidate core and plugin captures were inspected. Both show the expected chats and structural panels; plugin capture also shows its prompt-history pane and additional contributions. Production styles and layout defaults are unchanged.",
+  "remaining": [
+    "Implement timed Dockview sample and paired caller with explicit summary scope.",
+    "Run core and plugin small callers on identical snapshots before six full-reference pairs.",
+    "Complete visibility/composer variants, long-history and 4x stress, and retention ownership checks."
+  ],
+  "documentationImpact": "Internal benchmark/plan evidence only. No public behavior, command, configuration, API, or terminology change."
+}

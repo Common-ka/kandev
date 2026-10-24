@@ -28,6 +28,28 @@ export const PROFILE_FOLDERS = [
   `${HELD}/nested`,
 ];
 
+export function seedProfileFiles(git: GitHelper) {
+  for (const folder of PROFILE_FOLDERS)
+    for (let i = 0; i < 30; i++)
+      git.createFile(
+        `${folder}/entry-${String(i).padStart(3, "0")}.ts`,
+        "export const before = true;\n",
+      );
+  git.stageAll();
+  if (git.exec("git status --short").trim()) git.commit("seed navigation profile tree");
+}
+
+export function modifyProfileFiles(git: GitHelper, title: string) {
+  for (let i = 0; i < 72; i++)
+    git.modifyFile(
+      `${PROFILE_FOLDERS[Math.floor(i / 30)]}/entry-${String(i % 30).padStart(3, "0")}.ts`,
+      `export const changed = ${i};\n`,
+    );
+  const marker = `${AVAILABLE}/000-${title.replaceAll(" ", "-")}.txt`;
+  git.createFile(marker, "navigation marker\n");
+  return marker;
+}
+
 export async function seedProfile(
   api: ApiClient,
   seed: SeedData,
@@ -41,14 +63,7 @@ export async function seedProfile(
     path.join(backend.tmpDir, "repos", "e2e-repo"),
     makeGitEnv(backend.tmpDir),
   );
-  for (const folder of PROFILE_FOLDERS)
-    for (let i = 0; i < 30; i++)
-      git.createFile(
-        `${folder}/entry-${String(i).padStart(3, "0")}.ts`,
-        "export const before = true;\n",
-      );
-  git.stageAll();
-  if (git.exec("git status --short").trim()) git.commit("seed navigation profile tree");
+  seedProfileFiles(git);
   for (let i = 0; i < backgroundTasks; i++)
     await api.createTask(seed.workspaceId, `Profile background ${i}`, {
       workflow_id: seed.workflowId,
@@ -90,13 +105,7 @@ export async function prepareProfileTask(
   expect(profileFiles).toHaveLength(630);
   git.stageAll();
   if (git.exec("git status --short").trim()) git.commit("profile mock baseline");
-  for (let i = 0; i < 72; i++)
-    git.modifyFile(
-      `${PROFILE_FOLDERS[Math.floor(i / 30)]}/entry-${String(i % 30).padStart(3, "0")}.ts`,
-      `export const changed = ${i};\n`,
-    );
-  const marker = `${AVAILABLE}/000-${task.title.replaceAll(" ", "-")}.txt`;
-  git.createFile(marker, "navigation marker\n");
+  const marker = modifyProfileFiles(git, task.title);
   await api.seedAgentMessages(task.session_id!, historyCount, `Profile conversation ${task.title}`);
   await session.clickTab("Changes");
   await expect(

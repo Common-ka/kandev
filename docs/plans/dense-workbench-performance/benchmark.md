@@ -347,3 +347,38 @@ prepared agent profile and one nonempty environment. Local validation uses
 This fixture validates targeting only. It does not replace the required dense
 Dockview idle/streaming, structural-panel, plugin, visibility, or stress cases.
 See [the harness evidence](evidence/dockview-stream-targets.json).
+
+## Dense Dockview fixture
+
+`seedDenseDockviewFixture` preserves the 1,000-task, 30-eligible-task workload
+and three sessions per eligible task. It prepares real sibling sessions for the
+first task and verifies their shared nonempty environment. Both visible chats
+have 1,000 seeded messages; the hidden sibling has 100. This view-specific
+selection adds 900 messages to the Threads fixture, for 36,900 seeded messages.
+The manifest records each sibling count, and each seed verifies its stored
+count and content hash. The fixture reads back the workspace task count.
+
+Six canonical producers are selected: all three sessions of the first task,
+plus the primary sessions of the next three tasks. Two producer chats are
+visible, one streaming sibling is retained hidden, and three producers belong
+to other tasks. The first environment has 630 profile files and 73 working-tree
+changes, using the same file helpers as the navigation fixture.
+
+The core layout has five visible panes: two chats, Files, Changes, and a
+20-step Plan. It retains the hidden sibling and terminal, for seven actual
+Dockview panel objects. The plugin variant uses the complete in-repo E2E
+plugin archive, including its navigation, toolbar, and review contributions.
+It adds a visible prompt-history pane and a hidden review tab: six visible
+panes and nine panel objects. Record the archive hash; do not describe this as
+an isolated conversation-only plugin. The verified archive hash is
+`9fd37c4eaa58a63603e071bf6a30d76e478d685c2b3e6d1ed58d7aa3f3d25894`.
+
+The opt-in `dense-dockview-fixture.spec.ts` checks the seed, panel arrangement,
+actual prompt-history rows, and captures. Set `KANDEV_DENSE_DOCKVIEW_FIXTURE=1`;
+add `KANDEV_DENSE_DOCKVIEW_PLUGIN=1` for the plugin variant. A small check uses
+`KANDEV_DENSE_TASKS=10 KANDEV_DENSE_COLUMNS=6 KANDEV_DENSE_MESSAGES=120`.
+Providing `KANDEV_DENSE_BASELINE_ROOT` restarts that check on the named frozen
+binary and assets. These are correctness fixtures, not paired speed results.
+The timed caller must snapshot identical data, keep setup separate from cold
+entry, and preserve all final workload and identity checks.
+See [fixture evidence](evidence/dockview-dense-fixture.json).
