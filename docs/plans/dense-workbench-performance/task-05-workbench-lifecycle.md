@@ -152,6 +152,21 @@ The phone canonical-delivery check passes (`timestamp-phone-logs/`, 17.3 seconds
 This correctness fix is
 separate from the unaccepted session-fair queue; it makes no speed claim.
 
+The timestamp repair is committed separately. Its validated build is frozen at
+`/tmp/kandev-dense-timestamp-5936a872` so both arms of subsequent queue tests use
+the same timestamp semantics. The restored queue plus this repair passes 99
+related unit tests, typecheck, lint, and a fresh production asset build.
+
+The next stress series explicitly loads at 1x before applying 4x throttling.
+It isolates warm streaming from the separately retained cold-hydration failure.
+Three new report regressions failed before implementation; all nine report
+tests now pass. A full-caller smoke passed both versions in 31.8 seconds
+(`matched-dense-1792804411109.json`, `fair-queue-warm-smoke-logs/`). The smoke
+used ten tasks, one chat, ten seeded messages, and one-second windows. It
+verifies mode labels and final content, not performance. The dense warm stress
+comparison is pending; idle regressions and fully throttled cold loading remain
+unresolved.
+
 ## Summary
 
 Attribute and reduce repeated work during dense Dockview and task switching. Continue the existing session-efficiency Task 05 investigation, with no speculative layout or editor rewrite.

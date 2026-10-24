@@ -63,6 +63,11 @@ async function waitForDenseStream(
   }
 }
 
+function denseThrottlingMode(cpuRate: number) {
+  const throttleAfterLoad = process.env.KANDEV_DENSE_THROTTLE_AFTER_LOAD === "1";
+  return { throttleAfterLoad, coldCpuRate: throttleAfterLoad ? 1 : cpuRate };
+}
+
 export async function runDenseSample(options: {
   browser: Browser;
   backend: BackendContext;
@@ -92,8 +97,9 @@ export async function runDenseSample(options: {
   }, String(backend.port));
   const traffic = captureDenseTraffic(page);
   const cdp = await context.newCDPSession(page);
+  const { throttleAfterLoad, coldCpuRate } = denseThrottlingMode(cpuRate);
   await cdp.send("Performance.enable", { timeDomain: "timeTicks" });
-  await cdp.send("Emulation.setCPUThrottlingRate", { rate: cpuRate });
+  await cdp.send("Emulation.setCPUThrottlingRate", { rate: coldCpuRate });
   try {
     const cold = await loadDenseCold({
       page,
@@ -126,7 +132,15 @@ export async function runDenseSample(options: {
     const initialLoadedHistory = await loadedDenseHistory(page, threads);
     const editor = await prepareFocusedComposer(page, threads[0].taskId);
     const focusComposer = Boolean(editor);
-    options.checkpoint?.({ historyMode, historyLoadMs, initialLoadedHistory, focusComposer });
+    if (throttleAfterLoad) await cdp.send("Emulation.setCPUThrottlingRate", { rate: cpuRate });
+    options.checkpoint?.({
+      historyMode,
+      historyLoadMs,
+      initialLoadedHistory,
+      focusComposer,
+      throttleAfterLoad,
+      coldCpuRate,
+    });
     const runs = [];
     const scenarios = denseScenarios(historyMode, options.profilePath);
     for (const scenario of scenarios) {
@@ -188,6 +202,8 @@ export async function runDenseSample(options: {
       initialLoadedHistory,
       focusComposer,
       cpuRate,
+      coldCpuRate,
+      throttleAfterLoad,
       browser: browser.version(),
       viewport: { width: 1470, height: 956, scale: 2 },
       scheduledUpdates: stream.scheduledUpdates,

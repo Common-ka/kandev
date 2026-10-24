@@ -144,6 +144,15 @@ slowdown as a separate stress series. This is not an M2 Air emulation. The
 current Linux host cannot substantiate an M2-specific latency or battery claim.
 Provide the exact runnable protocol for optional measurement on the user's Mac.
 
+To isolate streaming from a separately recorded cold-load failure, use
+`KANDEV_DENSE_THROTTLE_AFTER_LOAD=1`. Both versions load and hydrate at 1x, then
+apply the requested CPU rate before the observation windows. Reports retain
+this mode and the cold CPU rate. The summary labels loading as
+`1x/cold-before-4x` and subsequent windows as `4x/warm-*`; it rejects mixed modes.
+This series does not replace the fully throttled cold-load reference. Run the
+small full-caller smoke with this flag and `KANDEV_DENSE_CPU_RATES=4` before
+using it for timing.
+
 Report per-arm medians/ranges and paired percentage changes. For task switches,
 report each run's p50/p95 and their paired differences, not only a pooled p95.
 Use `(baseline - candidate) / baseline * 100` for lower-is-better metrics;

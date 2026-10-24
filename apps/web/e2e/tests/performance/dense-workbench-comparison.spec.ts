@@ -76,6 +76,7 @@ test("compares frozen builds on identical dense conversation snapshots", async (
     sourceFiles,
     lockfileSha256,
     measurementKind,
+    throttleAfterLoad: process.env.KANDEV_DENSE_THROTTLE_AFTER_LOAD === "1",
     candidateFirst: process.env.KANDEV_DENSE_CANDIDATE_FIRST === "1",
     builds,
     fixture,

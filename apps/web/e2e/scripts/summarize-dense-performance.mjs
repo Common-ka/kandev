@@ -85,18 +85,32 @@ function windowMetrics(run) {
   };
 }
 
+function sampleThrottling(report, sample) {
+  if (Boolean(sample.throttleAfterLoad) !== Boolean(report.throttleAfterLoad))
+    throw new Error("Samples must use the report's throttling mode");
+  if (sample.throttleAfterLoad && sample.coldCpuRate !== 1)
+    throw new Error("Warm stress requires a cold CPU rate of 1");
+  return {
+    coldCpuRate: sample.coldCpuRate ?? sample.cpuRate,
+    coldScenario: sample.throttleAfterLoad ? `cold-before-${sample.cpuRate}x` : "cold",
+    windowPrefix: sample.throttleAfterLoad ? "warm-" : "",
+  };
+}
+
 export function summarizeReport(report) {
   if (["cpu-attribution", "animation-attribution"].includes(report.measurementKind))
     throw new Error("Diagnostic attribution runs are excluded from timing comparisons");
   if (report.error) throw new Error(`input report contains an error: ${report.error}`);
   const records = [];
   for (const sample of report.samples) {
+    const throttling = sampleThrottling(report, sample);
     const identity = { arm: sample.arm, pair: sample.pair, cpuRate: sample.cpuRate };
     if (sample.cold) {
       const assets = sample.cold.resources.filter((resource) => /\.(js|css)$/.test(resource.path));
       records.push({
         ...identity,
-        scenario: "cold",
+        cpuRate: throttling.coldCpuRate,
+        scenario: throttling.coldScenario,
         values: {
           readyMs: sample.cold.readyMs,
           documentMs: sample.cold.documentMs,
@@ -107,7 +121,7 @@ export function summarizeReport(report) {
       for (const run of sample.runs)
         records.push({
           ...identity,
-          scenario: sample.historyMode === "all" ? `long-history-${run.scenario}` : run.scenario,
+          scenario: `${throttling.windowPrefix}${sample.historyMode === "all" ? "long-history-" : ""}${run.scenario}`,
           values: windowMetrics(run),
         });
     } else {
@@ -138,11 +152,17 @@ export function summarizeReport(report) {
       comparisons.push({ group, metric, ...summarizePairs(rows, (row) => row.values[metric]) });
   return {
     measurementKind: report.measurementKind,
+    throttleAfterLoad: Boolean(report.throttleAfterLoad),
     machine: report.machine,
     builds: report.builds,
     sampleCount: report.samples.length,
     comparisons,
     notes: [
+      ...(report.throttleAfterLoad
+        ? [
+            "Warm stress loads at 1x before applying the recorded CPU rate. It is not a throttled cold-load measurement.",
+          ]
+        : []),
       "mainThreadMs and mainThreadMsPerSecond use TaskDuration with timeTicks: elapsed time in main-thread tasks, not thread CPU time. Script, style, and layout durations use the same elapsed-time domain.",
       "mainThreadCpuMs uses ThreadTime (renderer main-thread CPU). rendererCpuMs uses ProcessTime (renderer-process CPU); it excludes separate browser, GPU, and backend processes.",
       "Positive reduction means a lower candidate value. Counts such as mounted editors are observations, not optimization scores.",
