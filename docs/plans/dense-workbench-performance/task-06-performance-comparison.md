@@ -559,3 +559,17 @@ streaming frame-gap p95. The raw report retains the failure and the summary
 rejects it. See [evidence](evidence/final-scripted-grid-failed-attempt.json).
 A separate quiet CPU attribution run is preparing the same dense workload.
 The six-pair final grid gate and the interaction failure remain open.
+
+## Current grid CPU attribution
+
+The full-reference quiet profiling run passes both arms with all 1,800 ordered
+updates per arm. The current profile samples about 4.24 seconds in synchronous
+selection checks, mainly during content updates, and substantial React rendering
+and context propagation. Profiles cover the measured windows, with no sampled
+ARIA inspection functions. This separate attribution run is excluded from speed
+summaries. It does not resolve the scripted return-bottom failure.
+
+A stream-quiet cleanup experiment is being measured separately. Its browser
+checks preserve the 140 ms fade, synchronous selection, scrolling, and reduced
+motion. No speed gain is established yet. See
+[the attribution evidence](evidence/current-grid-render-cpu-attribution.json).

@@ -1140,3 +1140,21 @@ Log: `/tmp/kandev-run.e2e.4mOH5oEZ.log` (16.4 minutes). The frozen retained
 control is `/tmp/kandev-dense-before-composer-5936a872`. Its selection fix
 remains in the branch. The candidate's passing unit and browser checks are
 recorded above as experiment evidence, not evidence of a retained speed gain.
+
+## Current grid renderer attribution
+
+A separate full-reference quiet run on original `595df36` and current assets
+`9f2b7a96` passes both streaming samples and all ordered-content checks. Each
+sample has six visible chats, 100 loaded messages per chat, 36,000 stored
+messages, and 1,800 scheduled updates. Both CPU profiles cover their measured
+windows; no sampled ARIA inspection functions were found.
+
+The current profile samples about 4.24 seconds in the selection guard. About
+3.56 seconds comes from content updates and 0.674 seconds from cleanup timers.
+React rendering and context propagation are also prominent. These overlapping
+stacks are attribution evidence. This single profiled pair is excluded from
+speed summaries and does not explain the separate scripted scroll failure.
+
+[Complete evidence](evidence/current-grid-render-cpu-attribution.json) retains
+profile hashes, mapped bundle locations, caller costs, and limitations. A
+separate stream-quiet cleanup experiment is still under test.
