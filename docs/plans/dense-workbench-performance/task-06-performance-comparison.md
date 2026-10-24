@@ -30,6 +30,38 @@ system_design:
 
 # Task 06: Matched comparison and regression evidence
 
+## Final incompatible-layout comparison (1x)
+
+Six alternating pairs on the same original baseline and final production build
+pass in 24.3 minutes: 480 measured switches and 200 retention switches. The
+fixture has 1,000 tasks, with 1,000 messages, 630 files, and 73 changed files per
+selected task. Every measured switch verifies its task/session identity and the
+expected two- or three-column arrangement. Different terminal inventories force
+both versions to restore the layout; the separate correctness test covers equal
+inventories with different arrangements.
+
+Main-thread CPU falls 1.37%, renderer CPU 1.23%, style time 2.85%, and long-task
+count 3.39% by median paired change. Only long-task count improves in every
+pair. Driver p50/p95 fall 1.79%/1.42%, each with two regressing pairs.
+Browser-event p50/p95 fall about 0.50%; p95 improves in three pairs, regresses
+in two, and is equal in one. The 20% warm-p95 target remains unmet.
+
+Frame-gap p95 is essentially unchanged by median. Pair 1 increases from 150 to
+166.6 ms (11.07%), one approximately 16.6 ms frame interval. It remains within
+the baseline series range of 116.7–183.3 ms; the other pairs differ by at most
+0.1 ms. The cause is unconfirmed, and no frame-smoothness gain is claimed.
+Maximum frame-gap arm medians are 341.7 and 341.75 ms.
+
+Both versions retain one editor and three Dockview group content containers
+after 100 extra switches. Post-GC used heap rises 18.85 MB on baseline and
+18.16 MB on candidate. Individual panel and subscription owners were not
+counted; this single loop does not establish a leak or bounded ownership.
+
+[Complete evidence](evidence/final-incompatible-layout-six-pair-1x.json) preserves
+all pairs, layout/readiness checks, exact build and fixture identities, retention,
+and host observations. Same-environment session tabs, final Threads/Dockview
+streaming, visibility, and stress remain open. No M2 Air or field INP claim follows.
+
 ## Final compatible-task comparison (1x)
 
 Six alternating pairs compare the original frozen baseline with production
@@ -53,7 +85,7 @@ pairs and effectively equal in one. Maximum frame gap is neutral by median;
 one pair increases from 300 to 333.3 ms, within the baseline series range of
 300 to 366.7 ms.
 
-Both arms retain one editor and three panels after 100 extra switches. Post-GC
+Both arms retain one editor and three Dockview group content containers after 100 extra switches. Post-GC
 used heap rises about 3.17 MB on baseline and 3.31 MB on candidate. These single
 checks do not prove or exclude a leak; subscription owner counts were not
 sampled in this loop. The 20% warm-switch p95 target is not met. Session tabs,
@@ -102,7 +134,7 @@ harness validation, not a product speed result.
 Six alternating pairs with the current retained build passed all 480 timed
 switches. Switch-readiness p50/p95 were essentially neutral (0.08%/0.32% slower
 across paired changes), while main-thread/renderer CPU were 2.48%/2.30% higher
-and increased in five pairs. Both versions retained one editor and three panels
+and increased in five pairs. Both versions retained one editor and three Dockview group content containers
 after the separate 100-switch checks. No navigation-speed or leak claim follows.
 The first preparation attempt failed before timing; the unchanged retry passed.
 See [results](results.md#current-retained-build-navigation-comparison) and

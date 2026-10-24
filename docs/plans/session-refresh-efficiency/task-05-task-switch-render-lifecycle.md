@@ -143,3 +143,14 @@ modestly in every pair; browser-event readiness is nearly unchanged. The 20%
 warm-p95 target remains unmet. Saved layout and draft correctness remain intact.
 See [the complete comparison](../dense-workbench-performance/evidence/final-task-switch-six-pair-1x.json).
 Other switching, Dockview, and stress scenarios remain open.
+
+## Final incompatible-layout comparison (2026-10-24)
+
+Six pairs pass 480 measured and 200 retention switches on the same frozen
+original baseline and final production build. All measured selections restore
+the expected layout and session. Median paired main-thread CPU falls 1.37%,
+renderer CPU 1.23%, and driver p95 1.42%, with regressing pairs preserved.
+Browser-event p95 falls about 0.50%; the 20% target remains unmet. One frame-gap
+p95 pair regresses 11.07%, within the baseline series range; its cause is unknown.
+See [complete evidence](../dense-workbench-performance/evidence/final-incompatible-layout-six-pair-1x.json).
+Session tabs, streaming, visibility, stress, and individual owner retention remain open.

@@ -29,10 +29,12 @@ legacy_specs: []
 ## Latest measured checkpoint
 
 The retained production build at `72085e06b49` passes the final six-pair
-compatible-task 1x comparison. Rendering work and CPU fall modestly and
-consistently; browser-event readiness is nearly unchanged. The other required
+compatible-task and incompatible-layout 1x comparisons. Compatible-task rendering
+work and CPU fall modestly and consistently; incompatible-layout gains are small
+and mixed. Browser-event readiness is nearly unchanged in both scenarios. The other required
 scenarios remain open in the [completion audit](completion-audit.md).
-See [the paired evidence](evidence/final-task-switch-six-pair-1x.json).
+See the [compatible-task evidence](evidence/final-task-switch-six-pair-1x.json)
+and [layout-restoration evidence](evidence/final-incompatible-layout-six-pair-1x.json).
 
 ## Outcome and checkpoint
 

@@ -17,13 +17,13 @@ builds, fixtures, and probes; they do not automatically verify the final build.
 | Final grid cold, idle, streaming, and reduced-motion comparison | Earlier six pairs use older assets and the old final-visible assertion | Six alternating pairs on original baseline versus final retained build with corrected probe |
 | Final columns idle, streaming, and fixed first/middle/last traversal | Targeted owned-header series use 120 primary messages, not the full reference history | Full reference fixture, six pairs, traversal and offscreen catch-up evidence |
 | Dockview idle and streaming | Correctness covers focus, saved layouts, and visible unfocused Changes; navigation timing covers Files-active task switches | Two visible chats, retained hidden tabs, plan/files/changes panels, six paired observations, and core/plugin arms |
-| Switching scenarios | Existing task-to-task Files-active timing and draft/context correctness | Separate same-environment tabs, compatible-layout tasks, and incompatible-layout restoration with 40 selections after five warmups; browser-event readiness markers where specified. The opt-in recorder now passes its browser regression and both caller modes; the incompatible-layout regression and full caller now pass ([evidence](evidence/navigation-layout-rebuild.json)); the session-tab regression and both-build caller now pass with a real shared environment and retained draft ([evidence](evidence/navigation-session-tabs.json)); compatible-task 1x timing now passes six pairs ([evidence](evidence/final-task-switch-six-pair-1x.json)); full session-tab, incompatible-layout, and stress runs remain pending |
+| Switching scenarios | Existing task-to-task Files-active timing and draft/context correctness | Separate same-environment tabs, compatible-layout tasks, and incompatible-layout restoration with 40 selections after five warmups; browser-event readiness markers where specified. The opt-in recorder now passes its browser regression and both caller modes; the incompatible-layout regression and full caller now pass ([evidence](evidence/navigation-layout-rebuild.json)); the session-tab regression and both-build caller now pass with a real shared environment and retained draft ([evidence](evidence/navigation-session-tabs.json)); compatible-task 1x timing now passes six pairs ([evidence](evidence/final-task-switch-six-pair-1x.json)); incompatible-layout 1x timing now passes six pairs ([evidence](evidence/final-incompatible-layout-six-pair-1x.json)); full session-tab and stress runs remain pending |
 | Expanded/collapsed composers and visibility | Existing motion correctness and targeted attribution | Audit scenario records for normal/reduced motion, offscreen columns, hidden Dockview tabs, and actual document hide/restore; state browser limitations explicitly |
 | Long-history stress | Earlier all-history attempt failed within the unchanged 360-second load bound | Final-build attempts with verified loaded counts; report overload if a full sample cannot complete |
 | 4x CPU stress | Earlier cold and warm attempts contain failures and incomplete samples | Same final desktop scenarios, with cold and throttle-after-load modes kept separate; retain every failed attempt |
-| Retention after 100 switches | Existing and preliminary candidate runs retain one editor and three panels | Final compatible-task checks retain one editor and three panels on both arms after 100 switches. Subscription ownership and other scenarios remain pending; no leak inference from one heap sample |
+| Retention after 100 switches | Existing and preliminary candidate runs retain one editor and three Dockview group content containers | Final compatible-task checks retain one editor and three Dockview group content containers on both arms after 100 switches. Incompatible-layout checks also retain one editor and three group containers, with about 18 MB used-heap growth per arm. Individual panel/subscription ownership and other scenarios remain pending; no leak inference from one heap sample |
 | Phone parity and final correctness | Native phone composition, history, and deep-tree rerun pass for current candidate | Final targeted recovery, task-switch/draft, scroll, and motion cases; inspect captures and preserve the unexplained initial deep-tree failure |
-| Delivery and reporting | Validated production increments pushed through 90a440a9747179629f507b8bb2f24bf5f0f3b8f0 | Final normal-hook commits/pushes, accurate work-order statuses, companion records, public-doc impact check, reproducible commands, and Kandev rich results |
+| Delivery and reporting | Production fixes pushed through `72085e06b49`; compatible-task evidence pushed in `e9a849ab745` | Final normal-hook commits/pushes, accurate work-order statuses, companion records, public-doc impact check, reproducible commands, and Kandev rich results |
 
 ## Current candidate limits
 
@@ -60,7 +60,7 @@ The same-inventory browser regression restores both arrangements and drafts;
 75 unit tests, typecheck, lint, final build, original-baseline caller smoke, and
 four phone checks pass. See [the repair evidence](evidence/layout-arrangement.json).
 The distinct-inventory benchmark remains useful for paired rebuild timing on
-both versions. Compatible-task timing now passes six pairs. Full incompatible-layout timing remains pending.
+both versions. Compatible-task timing now passes six pairs. Incompatible-layout timing also passes six pairs, with small mixed gains and an unmet 20% warm-p95 target.
 
 ## Completion rule
 
@@ -68,3 +68,12 @@ Close each row only with evidence whose build, fixture, scenario, and measuremen
 scope match the requirement. Keep missed experiment targets and unresolved
 owners explicit. Do not infer M2 Air performance, field INP, battery savings,
 or a memory leak from Linux Chromium measurements.
+
+## Retention counter scope
+
+The legacy report field `panels` counts `.dv-content-container` elements.
+Dockview 4.13.1 constructs one such content container per group
+(`dockviewGroupPanelModel.js:161`), so this is a group-container count.
+It does not count API panel objects or subscription owners. Keep the raw field
+for historical comparisons; individual panel and subscription retention remain
+open checks. No timing calculation changes.

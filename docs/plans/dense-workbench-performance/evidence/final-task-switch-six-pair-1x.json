@@ -1527,12 +1527,19 @@
     "Driver p50 improves in all six pairs; driver p95 improves in five, with one 0.06% regression. Median paired reductions are 2.44% and 2.97%.",
     "Browser-event header, transcript, and composer readiness share the same sampled ready frame. p50/p95 median paired reductions are 0.79%/1.32%; each regresses in one pair. Arm p50 medians are essentially identical at 276.1 ms. Do not claim a substantial native-readiness gain.",
     "Frame-gap p95 is lower in five pairs and effectively equal in one. Maximum frame gap is neutral by median; pair 3 rises from 300 to 333.3 ms, within the baseline series range of 300 to 366.7 ms.",
-    "Both versions retain one editor and three panels after 100 additional switches. Post-GC used heap rises about 3.17 MB and 3.31 MB. These single checks do not prove or exclude a leak. Subscription owner counts were not sampled in this retention loop.",
+    "Both versions retain one editor and three Dockview group content containers after 100 additional switches. Post-GC used heap rises about 3.17 MB and 3.31 MB. These single checks do not prove or exclude a leak. Subscription owner counts were not sampled in this retention loop.",
     "The 20% warm-switch p95 target is not met. This result does not close the remaining scenario matrix or establish M2 Air, battery, or field INP effects."
   ],
   "summaryValidation": {
     "tests": "/tmp/kandev-final-navigation-summary-tests.log: 23 passed",
     "lint": "/tmp/kandev-final-navigation-summary-lint.log: passed",
     "metadataRegression": "/tmp/kandev-final-navigation-metadata-red.log: failed before cleanup. Navigation summaries no longer invent grid/stream metadata. Every numeric comparison is unchanged."
+  },
+  "retentionCounterScope": {
+    "legacyField": "panels",
+    "selector": ".dv-content-container",
+    "measuredEntity": "Dockview group content container",
+    "source": "dockview-core4.13.1/dist/esm/dockview/dockviewGroupPanelModel.js:161 and components/panel/content.js:20",
+    "limitation": "Individual API panel objects and subscription owners are not counted. Raw observations and timing calculations are unchanged."
   }
 }

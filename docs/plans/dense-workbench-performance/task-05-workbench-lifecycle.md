@@ -27,14 +27,23 @@ system_design:
 
 # Task 05: Dockview and editor lifecycle
 
+## Final incompatible-layout timing
+
+Six alternating pairs pass 480 measured and 200 retention switches. All measured
+selections restore their expected two- or three-column arrangement and correct
+session. Median paired CPU and driver-readiness gains are small and mixed;
+long-task count falls in every pair. Browser-event p95 improves about 0.50%,
+so the 20% target remains unmet. Frame-gap p95 is neutral by median, with one
+11.07% regressing pair retained. See [results](results.md#final-incompatible-layout-comparison-1x)
+and [complete evidence](evidence/final-incompatible-layout-six-pair-1x.json).
+
 ## Final compatible-task timing
 
 The final retained build completes six alternating pairs against the original
 baseline: 480 timed switches and 200 retention switches. Main-thread CPU, renderer
 CPU, style time, and long-task count are lower in every pair, with median paired
 reductions of 2.77%, 2.44%, 10.82%, and 12.08%. Native browser-event readiness is
-nearly unchanged, and the 20% warm-p95 target is not met. One editor and three
-panels remain after each 100-switch retention check; no leak claim follows.
+nearly unchanged, and the 20% warm-p95 target is not met. One editor and three Dockview group content containers remain after each 100-switch retention check; no leak claim follows.
 See [results](results.md#final-compatible-task-comparison-1x) and
 [the full evidence](evidence/final-task-switch-six-pair-1x.json). Other scenario
 requirements remain open.
@@ -55,7 +64,7 @@ typecheck, strict lint, the build, the final browser regression, an original-
 baseline caller smoke, and four phone checks. Six desktop cases also pass before
 the final type-guard correction. Captures show both saved arrangements and their
 drafts. See [the evidence](evidence/layout-arrangement.json). This is a correctness
-repair; dense timing remains open and no new speed gain is claimed.
+repair; the distinct-inventory timing above shows small mixed gains.
 
 ## Hidden Changes lifecycle: retained
 
@@ -133,7 +142,7 @@ p95 was 2.34% slower across paired changes. The candidate is removed. Both
 series and the interrupted preparation attempt remain in the
 [paired evidence](evidence/rejected-deferred-file-confirmation-navigation-1x.json).
 The preliminary gain is not a retained result. Existing retention checks kept
-one editor and three panels in both versions; no leak claim follows.
+one editor and three Dockview group content containers in both versions; no leak claim follows.
 
 ## Local reveal compaction experiment (rejected)
 
@@ -272,7 +281,7 @@ fix and the validated measurement helpers remain in the branch.
 Six alternating pairs with the current retained build passed all 480 timed
 switches. Switch-readiness p50/p95 were essentially neutral (0.08%/0.32% slower
 across paired changes), while main-thread/renderer CPU were 2.48%/2.30% higher
-and increased in five pairs. Both versions retained one editor and three panels
+and increased in five pairs. Both versions retained one editor and three Dockview group content containers
 after the separate 100-switch checks. No navigation-speed or leak claim follows.
 The first preparation attempt failed before timing; the unchanged retry passed.
 See [results](results.md#current-retained-build-navigation-comparison) and
@@ -370,7 +379,7 @@ and absence of horizontal overflow. The first full-size matched pair passed
 with 1,000 tasks and 1,000 messages per switching task. Median switch readiness
 was 1,003 ms baseline and 1,010 ms candidate; p95 was 1,178 ms and 1,121 ms.
 Main-thread time across 40 switches was 40,356 ms and 40,484 ms. This single pair
-shows no clear speed gain. Both arms retained one editor and three panels after
+shows no clear speed gain. Both arms retained one editor and three Dockview group content containers after
 100 additional switches. The six-pair comparison remains pending.
 
 The earlier visible chat-composer construction attribution remains unresolved;
