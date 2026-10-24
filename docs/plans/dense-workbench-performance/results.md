@@ -5,6 +5,27 @@ and the remaining stress/scenario matrix are in progress. The branch is
 `feature/evaluate-live-thread-bc0`; the frozen baseline is
 `595df36ed5c1cf02fd90cb972b623ad6edc53df8`.
 
+## Timed navigation CPU attribution
+
+The current retained build completed two identical-build profiles with 40 timed
+switches each in 7.0 minutes. The fixture has 1,000 tasks, two stored 1,000-message
+conversations, and the 630-file / 73-change tree per task. Both profiles contain
+zero sampled `_ariaSnapshotForExpect` stacks. The streaming probe finding does
+not justify changing these navigation waits.
+
+Repeated costs include translation hooks, editor updates, static Markdown
+parsing, virtualizer scroll writes, and Changes timeline anchor reads.
+`recordTimelineAnchor` accounts for 1,226 and 1,422 ms of self sampled duration;
+browser `scrollTo` calls account for 1,089 and 1,577 ms. These are profiler
+samples, not CDP CPU counters. Both builds are identical, and profiling is
+intrusive, so no product speed comparison is claimed. The next candidate must
+preserve actual scrolling, focus, and confirmation behavior.
+
+[Attribution evidence](evidence/timed-navigation-cpu-attribution.json) records
+profile hashes, top self samples, and build identities. Raw report:
+`matched-navigation-1792815554978.json`; log:
+`timed-navigation-cpu-attribution-logs/kandev-run.e2e.DswMAwhJ.log`.
+
 ## Local text-motion cleanup: rejected
 
 The reveal-compaction regression confirmed that cleanup reparses unchanged

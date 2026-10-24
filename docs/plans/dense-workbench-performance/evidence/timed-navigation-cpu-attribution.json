@@ -1,0 +1,326 @@
+{
+  "measurementKind": "cpu-attribution",
+  "profileWindow": "timed-switches",
+  "sourceRevision": "cdccf0b64087fb38ad3d4d1639ddd238adeb3184",
+  "rawReport": "matched-navigation-1792815554978.json",
+  "rawSha256": "b9eabb5dbedefe3de4bcfa1ed5c28c8374242dbb4bd31a13b4e486157d75b8d2",
+  "builds": {
+    "baseline": {
+      "binary": "/tmp/kandev-dense-timestamp-5936a872/apps/backend/bin/kandev",
+      "assets": "/tmp/kandev-dense-timestamp-5936a872/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "8379f62eb1bf4935c6b18d4616f732191cdefc17159c02367a54c05701f7a160"
+    },
+    "candidate": {
+      "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+      "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "8379f62eb1bf4935c6b18d4616f732191cdefc17159c02367a54c05701f7a160"
+    }
+  },
+  "profiles": [
+    {
+      "sample": "baseline-1x-0",
+      "file": "matched-navigation-1792815554978-baseline-1x-0.cpuprofile",
+      "sha256": "4ace3f8bc04811ed5b4286fa1acc5ec0f17f2438326ab006c55b120ae8fcaa8f",
+      "switches": 40,
+      "sampledDurationMs": 52425.554,
+      "ariaSnapshotInclusiveSampledMs": 0.0,
+      "topSelfSamples": [
+        {
+          "function": "(program)",
+          "url": "",
+          "line": -1,
+          "column": -1,
+          "sampledMs": 10245.778
+        },
+        {
+          "function": "(garbage collector)",
+          "url": "",
+          "line": -1,
+          "column": -1,
+          "sampledMs": 1815.358
+        },
+        {
+          "function": "querySelectorAll",
+          "url": "",
+          "line": -1,
+          "column": -1,
+          "sampledMs": 1737.782
+        },
+        {
+          "function": "cSt",
+          "url": "http://localhost:18107/assets/index-HKA628Wj.js",
+          "line": 257,
+          "column": 186490,
+          "sampledMs": 1226.001
+        },
+        {
+          "function": "scrollTo",
+          "url": "",
+          "line": -1,
+          "column": -1,
+          "sampledMs": 1088.951
+        },
+        {
+          "function": "updateStateInner",
+          "url": "http://localhost:18107/assets/table-resize-CLEpU4sO.js",
+          "line": 9,
+          "column": 45301,
+          "sampledMs": 1026.198
+        },
+        {
+          "function": "extractFromKey",
+          "url": "http://localhost:18107/assets/i18n-DiQz1IvB.js",
+          "line": 8,
+          "column": 30101,
+          "sampledMs": 940.086
+        },
+        {
+          "function": "",
+          "url": "",
+          "line": -1,
+          "column": -1,
+          "sampledMs": 904.391
+        },
+        {
+          "function": "S",
+          "url": "http://localhost:18107/assets/useTranslation-w6iMKhrR.js",
+          "line": 0,
+          "column": 2446,
+          "sampledMs": 886.027
+        },
+        {
+          "function": "I",
+          "url": "http://localhost:18107/assets/useTranslation-w6iMKhrR.js",
+          "line": 0,
+          "column": 3914,
+          "sampledMs": 852.579
+        },
+        {
+          "function": "Gi",
+          "url": "http://localhost:18107/assets/index-HKA628Wj.js",
+          "line": 8,
+          "column": 33956,
+          "sampledMs": 674.518
+        },
+        {
+          "function": "",
+          "url": "http://localhost:18107/assets/rolldown-runtime-QTnfLwEv.js",
+          "line": 0,
+          "column": 493,
+          "sampledMs": 639.336
+        },
+        {
+          "function": "translate",
+          "url": "http://localhost:18107/assets/i18n-DiQz1IvB.js",
+          "line": 8,
+          "column": 30689,
+          "sampledMs": 605.57
+        },
+        {
+          "function": "getBoundingClientRect",
+          "url": "",
+          "line": -1,
+          "column": -1,
+          "sampledMs": 538.023
+        },
+        {
+          "function": "uc",
+          "url": "http://localhost:18107/assets/index-HKA628Wj.js",
+          "line": 8,
+          "column": 70165,
+          "sampledMs": 537.778
+        },
+        {
+          "function": "qv",
+          "url": "http://localhost:18107/assets/tooltip-sBATZp2A.js",
+          "line": 3,
+          "column": 108679,
+          "sampledMs": 522.541
+        },
+        {
+          "function": "(idle)",
+          "url": "",
+          "line": -1,
+          "column": -1,
+          "sampledMs": 507.19
+        },
+        {
+          "function": "query",
+          "url": "",
+          "line": 5446,
+          "column": 20,
+          "sampledMs": 506.069
+        },
+        {
+          "function": "",
+          "url": "http://localhost:18107/assets/index-HKA628Wj.js",
+          "line": 8,
+          "column": 52180,
+          "sampledMs": 505.918
+        },
+        {
+          "function": "hs",
+          "url": "http://localhost:18107/assets/index-HKA628Wj.js",
+          "line": 8,
+          "column": 56200,
+          "sampledMs": 505.737
+        }
+      ]
+    },
+    {
+      "sample": "candidate-1x-0",
+      "file": "matched-navigation-1792815554978-candidate-1x-0.cpuprofile",
+      "sha256": "a2a11ad40b65dcce8f0762b12ef4d8cc5cc5687b05187d0370aac0e6c63343cb",
+      "switches": 40,
+      "sampledDurationMs": 64456.494,
+      "ariaSnapshotInclusiveSampledMs": 0.0,
+      "topSelfSamples": [
+        {
+          "function": "(program)",
+          "url": "",
+          "line": -1,
+          "column": -1,
+          "sampledMs": 12730.771
+        },
+        {
+          "function": "(garbage collector)",
+          "url": "",
+          "line": -1,
+          "column": -1,
+          "sampledMs": 2465.558
+        },
+        {
+          "function": "querySelectorAll",
+          "url": "",
+          "line": -1,
+          "column": -1,
+          "sampledMs": 2365.802
+        },
+        {
+          "function": "scrollTo",
+          "url": "",
+          "line": -1,
+          "column": -1,
+          "sampledMs": 1576.651
+        },
+        {
+          "function": "cSt",
+          "url": "http://localhost:18107/assets/index-HKA628Wj.js",
+          "line": 257,
+          "column": 186490,
+          "sampledMs": 1421.757
+        },
+        {
+          "function": "updateStateInner",
+          "url": "http://localhost:18107/assets/table-resize-CLEpU4sO.js",
+          "line": 9,
+          "column": 45301,
+          "sampledMs": 1416.784
+        },
+        {
+          "function": "extractFromKey",
+          "url": "http://localhost:18107/assets/i18n-DiQz1IvB.js",
+          "line": 8,
+          "column": 30101,
+          "sampledMs": 1163.688
+        },
+        {
+          "function": "",
+          "url": "",
+          "line": -1,
+          "column": -1,
+          "sampledMs": 1132.58
+        },
+        {
+          "function": "I",
+          "url": "http://localhost:18107/assets/useTranslation-w6iMKhrR.js",
+          "line": 0,
+          "column": 3914,
+          "sampledMs": 1128.695
+        },
+        {
+          "function": "S",
+          "url": "http://localhost:18107/assets/useTranslation-w6iMKhrR.js",
+          "line": 0,
+          "column": 2446,
+          "sampledMs": 1000.238
+        },
+        {
+          "function": "",
+          "url": "http://localhost:18107/assets/rolldown-runtime-QTnfLwEv.js",
+          "line": 0,
+          "column": 493,
+          "sampledMs": 762.397
+        },
+        {
+          "function": "getBoundingClientRect",
+          "url": "",
+          "line": -1,
+          "column": -1,
+          "sampledMs": 741.335
+        },
+        {
+          "function": "Gi",
+          "url": "http://localhost:18107/assets/index-HKA628Wj.js",
+          "line": 8,
+          "column": 33956,
+          "sampledMs": 737.253
+        },
+        {
+          "function": "qv",
+          "url": "http://localhost:18107/assets/tooltip-sBATZp2A.js",
+          "line": 3,
+          "column": 108679,
+          "sampledMs": 679.017
+        },
+        {
+          "function": "translate",
+          "url": "http://localhost:18107/assets/i18n-DiQz1IvB.js",
+          "line": 8,
+          "column": 30689,
+          "sampledMs": 639.692
+        },
+        {
+          "function": "(idle)",
+          "url": "",
+          "line": -1,
+          "column": -1,
+          "sampledMs": 632.494
+        },
+        {
+          "function": "query",
+          "url": "",
+          "line": 5446,
+          "column": 20,
+          "sampledMs": 629.051
+        },
+        {
+          "function": "",
+          "url": "http://localhost:18107/assets/index-HKA628Wj.js",
+          "line": 8,
+          "column": 52180,
+          "sampledMs": 551.18
+        },
+        {
+          "function": "hs",
+          "url": "http://localhost:18107/assets/index-HKA628Wj.js",
+          "line": 8,
+          "column": 56200,
+          "sampledMs": 545.804
+        },
+        {
+          "function": "a",
+          "url": "http://localhost:18107/assets/i18n-DiQz1IvB.js",
+          "line": 8,
+          "column": 61323,
+          "sampledMs": 517.299
+        }
+      ]
+    }
+  ],
+  "log": "timed-navigation-cpu-attribution-logs/kandev-run.e2e.DswMAwhJ.log",
+  "hostLoad": "timed-navigation-cpu-attribution-host-load.jsonl",
+  "finding": "Both identical-build samples completed 40 timed switches. Neither contains sampled ARIA snapshot stacks. Do not change navigation visibility gates based on the streaming finding. Repeated application costs include translation, static Markdown parsing, editor updates, virtualizer scroll writes, and Changes timeline anchor scrollTop reads. Sampled stack duration is not a CDP CPU counter; no product speed comparison is claimed."
+}
