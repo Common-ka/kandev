@@ -6,7 +6,12 @@
 // coverage in mobile-file-viewer.spec.ts.
 import path from "node:path";
 import { test, expect } from "../../fixtures/test-base";
-import { GitHelper, makeGitEnv, createStandardProfile } from "../../helpers/git-helper";
+import {
+  GitHelper,
+  makeGitEnv,
+  createStandardProfile,
+  publishSeedCommit,
+} from "../../helpers/git-helper";
 import { waitForWorkspaceFile } from "../../helpers/session";
 import { waitForActiveTaskSession } from "../../helpers/session-store";
 import { SessionPage } from "../../pages/session-page";
@@ -27,10 +32,13 @@ test.describe("Chat multi-file read links", () => {
       path.join(backend.tmpDir, "repos", "e2e-repo"),
       makeGitEnv(backend.tmpDir),
     );
+    // Tasks use main even when a preceding test changed the shared checkout.
+    git.exec("git checkout main");
     git.createFile(fileA, 'export const alpha = "alpha";');
     git.createFile(fileB, 'export const beta = "beta";');
     git.stageAll();
     git.commit(`add ${fileA} and ${fileB}`);
+    publishSeedCommit(git, seedData.repositoryRemoteURL);
 
     const profile = await createStandardProfile(apiClient, `multi-read-${Date.now()}`);
     // `e2e:message(...)` emits a single non-activity text message, so the seeded

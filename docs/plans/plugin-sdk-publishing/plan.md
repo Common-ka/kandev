@@ -361,3 +361,27 @@ blockers. Their independent Go checker tests, real npm workspace regression,
 and whitespace check passed. Current upstream changes were limited to shared
 workflow contracts and unrelated features; final merge-result validation is
 recorded with the pushed head and live base in PR delivery evidence.
+
+### Browser validation follow-up
+
+The SDK remediation at `5e6310d4` passed backend, frontend, and SDK CI. E2E
+run `40129872943` remained failed after one failed-job rerun: the artifact audit
+found two retry-pass failures and 40 skipped tests. The
+[review record](adversarial-review.md#browser-validation-follow-up) records the
+three test defects found during investigation and the corrections.
+
+Local browser checks use the PR merged with upstream
+`cc687bdce96bc22fb8a9ca87abe571b8309d3125`, with fresh runtime/web/fixture builds,
+one worker, `CI=true`, strict WebSocket assertions, `GOMAXPROCS=2`, and
+`GOMEMLIMIT=3GiB`. Retries are disabled. The temporary wrong-branch stimulus
+failed before the chat-fixture correction and passed afterward; it is not part
+of the permanent test source. Four workflow lifecycle variants each passed
+three runs (12 tests) after excluding startup-only turns. ESLint, Prettier, and
+the E2E sleep ratchet passed for the edited tests.
+
+The PR-watcher cleanup case followed by the chat case passed three runs in the
+same worker per repeat (six tests), with retries disabled. This checks the real
+preceding branch change as well as the cleanup-message readiness correction.
+The secondary reviewer inspected all three test corrections and found no
+remaining issue. Fresh CI on the pushed follow-up remains required before
+reporting validation complete.

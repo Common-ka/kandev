@@ -66,3 +66,33 @@ The same secondary reviewer rechecked the fixes and reported no new findings
 or blockers. They independently passed the focused Go compatibility/CLI tests,
 the real npm workspace regression, and whitespace checks. They inspected the
 release-adapter test; the primary session ran its full consumer verification.
+
+## Browser validation follow-up
+
+SDK, backend, and frontend checks passed at `5e6310d4`. E2E run `40129872943`
+still failed after one failed-job rerun. Its retained reports contained 4237
+first-attempt passes, two retry-pass failures, and 40 skipped tests. These
+results did not satisfy the required E2E check.
+
+The browser investigation found three test defects:
+
+1. The multi-file read fixture committed files on the shared checkout's current
+   branch. A preceding PR-watcher test left that checkout on `feature/always`,
+   while the new task used `main`. Starting the focused test on that branch
+   reproduced the same missing-file assertion. The fixture now selects `main`
+   and publishes the seed commit through the existing helper. The same branch
+   stimulus then passed with retries disabled.
+2. The workflow session test accepted a completed synthetic startup turn as
+   evidence that its new agent prompt finished. The retained trace and backend
+   log showed startup readiness followed by the actual prompt entering
+   `RUNNING`. The completion check now excludes `lifecycle_only` turns and
+   retains its session identity, state, and real-turn completion assertions.
+3. The ordered local replay exposed a PR-watcher test that submitted a user
+   message as soon as the task card reached Done. That workflow move precedes
+   the session's ready state. The test now uses the shared session-state wait
+   before submitting the message once.
+
+The secondary reviewer confirmed both readiness findings from source and
+retained evidence. These corrections change test setup and synchronization;
+they do not change plugin or runtime behavior. Current-head CI must pass before
+validation is complete.
