@@ -575,3 +575,17 @@ failures or verification retries. Streaming CPU is essentially unchanged, with
 mixed frame results. The two source/test changes were removed and retained
 assets remain `9f2b7a96`. See [the attribution evidence](evidence/current-grid-render-cpu-attribution.json)
 and [the rejected experiment](evidence/rejected-stream-quiet-cleanup-1x.json).
+
+## Context stability experiment disposition
+
+The recovery/editor context candidate passes 113 unit and twenty desktop/phone
+browser checks and removes the targeted live context updates. Its uninstrumented
+comparison is interrupted after one complete pair. Streaming CPU and p95 are
+essentially unchanged in that pair. Both production changes and both tests are
+removed; retained assets remain `9f2b7a96`. All fourteen identified surviving
+disposable processes are stopped. The raw attempt remains incomplete. See
+[attribution](evidence/context-stability-attribution.json) and
+[interrupted comparison](evidence/interrupted-context-stability-1x.json).
+
+The next work is the remaining final matrix, starting with the full-reference
+columns comparison. No further optimization prototype is pending.

@@ -1,0 +1,268 @@
+{
+  "status": "attribution complete; performance candidate rejected",
+  "kind": "read-only context attribution, excluded from speed comparisons",
+  "sourceRevision": "c085aa4ac8984661b19efad44b729e27979040c4 plus the recorded candidate patches",
+  "method": [
+    "Install the standard React DevTools hook before page load. Read provider Fiber values after each commit without changing app props, state, DOM, or native selection behavior.",
+    "Compare each current provider value with the previous value for that Fiber or its alternate. Track identities through a WeakMap.",
+    "Match providers by value fields and mapped compiled owner. Observe six real canonical producers until final visible content and ordered durable verification pass.",
+    "The field named providers in raw files counts repeated observations before the active window, not unique providers or mounts. newProviders counts newly observed Fiber identities, not a public component mount counter.",
+    "The last two diagnostic sources also report which fields changed. All four source hashes and exact source text are retained here."
+  ],
+  "runs": [
+    {
+      "label": "file-link only",
+      "rawReport": "context-attribution-1792867779770.json",
+      "rawSha256": "97698e7a8665460d73587b80008d5448c259a9b7f1bbfb81972e89e43f5e876a",
+      "source": "context-attribution-source.ts",
+      "sourceSha256": "87a41acd32005ee6b3205a911ad651ea224d5e48372f97b85a597ea2a83066e5",
+      "sourceText": "import fs from \"node:fs\";\nimport path from \"node:path\";\nimport { test, expect } from \"../../fixtures/test-base\";\nimport { seedDenseWorkbench, DENSE_WORKLOAD } from \"../../helpers/dense-workbench-fixture\";\nimport { prepareDenseStream } from \"../../helpers/dense-canonical-stream\";\nimport { seedThreadPresentation } from \"../task/threads-presentation-helpers\";\nimport { dwell } from \"../../helpers/causal-waits\";\n\ntest(\"attributes file-link context updates in the retained production build\", async ({\n  testPage: page, apiClient: api, seedData: seed, backend,\n}, info) => {\n  test.setTimeout(600_000);\n  const directory = path.resolve(process.cwd(), \"../../.kandev/diagnostics/dense-workbench-performance\");\n  const output = path.join(directory, `context-attribution-${Date.now()}.json`);\n  const report: Record<string, unknown> = {\n    kind: \"context-attribution; excluded from speed comparisons\",\n    assetsSha256: \"9f2b7a961b623e0e4074fdfd0e253b10b65ccf979e110223af6b88b9121dbea8\",\n    workload: DENSE_WORKLOAD,\n    source: \"context-attribution-source.ts\",\n  };\n  await page.setViewportSize({ width: 1470, height: 956 });\n  await page.addInitScript(() => {\n    const win = window as any;\n    const stats = {\n      active: false, commits: 0, providers: 0, valueChanges: 0,\n      aliasIdentityChanges: 0, redundantValueChanges: 0,\n      aliasSemanticChanges: 0, callbackChanges: 0, pathChanges: 0,\n      groups: {} as Record<string, number>, renderers: [] as string[], errors: [] as string[],\n    };\n    const previous = new WeakMap<object, any>();\n    const aliasKeys = new WeakMap<object, string>();\n    const aliasKey = (value: object) => {\n      let key = aliasKeys.get(value);\n      if (key === undefined) { key = JSON.stringify(value); aliasKeys.set(value, key); }\n      return key;\n    };\n    win.__reactContextAttribution = stats;\n    win.__KANDEV_E2E_EXPOSE_STORE__ = true;\n    win.__REACT_DEVTOOLS_GLOBAL_HOOK__ = {\n      supportsFiber: true,\n      renderers: new Map(),\n      inject(renderer: any) {\n        const id = this.renderers.size + 1;\n        this.renderers.set(id, renderer);\n        stats.renderers.push(renderer.version || \"unknown\");\n        return id;\n      },\n      onCommitFiberRoot(_id: number, root: any) {\n        try {\n          const stack = [root.current];\n          if (stats.active) stats.commits++;\n          while (stack.length) {\n            const fiber = stack.pop();\n            if (!fiber) continue;\n            if (fiber.child) stack.push(fiber.child);\n            if (fiber.sibling) stack.push(fiber.sibling);\n            const value = fiber.memoizedProps?.value;\n            if (fiber.tag !== 10 || !value || !Array.isArray(value.fileRootAliases)) continue;\n            const prior = previous.get(fiber) || (fiber.alternate && previous.get(fiber.alternate));\n            const current = { value, aliases: value.fileRootAliases,\n              key: aliasKey(value.fileRootAliases), path: value.worktreePath, callback: value.onOpenFile };\n            previous.set(fiber, current);\n            if (fiber.alternate) previous.set(fiber.alternate, current);\n            if (!stats.active) { stats.providers++; continue; }\n            if (!prior || prior.value === value) continue;\n            stats.valueChanges++;\n            if (prior.aliases !== current.aliases) stats.aliasIdentityChanges++;\n            if (prior.key !== current.key) stats.aliasSemanticChanges++;\n            if (prior.path !== current.path) stats.pathChanges++;\n            if (prior.callback !== current.callback) stats.callbackChanges++;\n            if (prior.key === current.key && prior.path === current.path && prior.callback === current.callback) {\n              stats.redundantValueChanges++;\n              let owner = fiber.return;\n              while (owner && typeof owner.type !== \"function\") owner = owner.return;\n              const name = owner?.type?.displayName || owner?.type?.name || \"anonymous\";\n              stats.groups[name] = (stats.groups[name] || 0) + 1;\n            }\n          }\n        } catch (error) {\n          if (stats.errors.length < 10) stats.errors.push(String(error));\n        }\n      },\n      onCommitFiberUnmount() {},\n      onPostCommitFiberRoot() {},\n    };\n  });\n  let stream: Awaited<ReturnType<typeof prepareDenseStream>> | undefined;\n  try {\n    const fixture = await seedDenseWorkbench(api, seed, true);\n    report.fixture = fixture;\n    await seedThreadPresentation(api, { layout: \"grid\", maxChats: 6, autoHideComposer: true });\n    stream = await prepareDenseStream(api, seed, backend, fixture.threads.slice(0, 6), \"context-attribution\");\n    await page.goto(`/threads?workspace=${seed.workspaceId}`);\n    await expect(page.getByTestId(\"threads-board\")).toBeVisible();\n    for (const thread of fixture.threads.slice(0, 6)) {\n      await expect(page.getByTestId(`thread-column-${thread.taskId}`)).toContainText(stream.warmup);\n    }\n    report.before = await page.evaluate(() => {\n      const stats = (window as any).__reactContextAttribution;\n      stats.active = true;\n      return JSON.parse(JSON.stringify(stats));\n    });\n    expect((report.before as any).renderers.length).toBeGreaterThan(0);\n    expect((report.before as any).providers).toBeGreaterThan(0);\n    stream.release();\n    await dwell(page, DENSE_WORKLOAD.durationMs, \"clock-separation\", \"observe a fixed canonical stream for context attribution\");\n    await stream.waitForVisible(page);\n    await stream.verify();\n    report.after = await page.evaluate(() => {\n      const stats = (window as any).__reactContextAttribution;\n      stats.active = false;\n      return JSON.parse(JSON.stringify(stats));\n    });\n    report.scheduledUpdates = stream.scheduledUpdates;\n    report.verificationErrors = stream.verificationErrors;\n    expect((report.after as any).errors).toEqual([]);\n  } catch (error) {\n    report.error = String(error);\n    throw error;\n  } finally {\n    if (stream) await stream.finish();\n    fs.writeFileSync(output, JSON.stringify(report, null, 2));\n    await info.attach(\"context-attribution\", { path: output, contentType: \"application/json\" });\n  }\n});\n",
+      "workload": {
+        "layout": "grid",
+        "extraBusyHeaders": 0,
+        "tasks": 60,
+        "columns": 6,
+        "messages": 120,
+        "durationMs": 10000
+      },
+      "assetsSha256": "9f2b7a961b623e0e4074fdfd0e253b10b65ccf979e110223af6b88b9121dbea8",
+      "before": {
+        "active": true,
+        "commits": 0,
+        "providers": 31608,
+        "valueChanges": 0,
+        "aliasIdentityChanges": 0,
+        "redundantValueChanges": 0,
+        "aliasSemanticChanges": 0,
+        "callbackChanges": 0,
+        "pathChanges": 0,
+        "groups": {},
+        "renderers": [
+          "19.2.3"
+        ],
+        "errors": []
+      },
+      "after": {
+        "active": false,
+        "commits": 912,
+        "providers": 31608,
+        "valueChanges": 0,
+        "aliasIdentityChanges": 0,
+        "redundantValueChanges": 0,
+        "aliasSemanticChanges": 0,
+        "callbackChanges": 0,
+        "pathChanges": 0,
+        "groups": {},
+        "renderers": [
+          "19.2.3"
+        ],
+        "errors": []
+      },
+      "orderedUpdates": 300,
+      "verificationErrors": []
+    },
+    {
+      "label": "all providers, retained",
+      "rawReport": "all-context-attribution-1792867949890.json",
+      "rawSha256": "214ffe956f28d8b98866f0f3095eb9a46cf0e0bf2a89c14527fae173340a5998",
+      "source": "all-context-attribution-source.ts",
+      "sourceSha256": "1d2b81c770d6e827dd3a6ea241b2fe59bf5834401cfb9436da34ff39d1ef5308",
+      "sourceText": "import fs from \"node:fs\";\nimport path from \"node:path\";\nimport { test, expect } from \"../../fixtures/test-base\";\nimport { seedDenseWorkbench, DENSE_WORKLOAD } from \"../../helpers/dense-workbench-fixture\";\nimport { prepareDenseStream } from \"../../helpers/dense-canonical-stream\";\nimport { seedThreadPresentation } from \"../task/threads-presentation-helpers\";\nimport { dwell } from \"../../helpers/causal-waits\";\n\ntest(\"attributes provider updates in the retained production build\", async ({\n  testPage: page, apiClient: api, seedData: seed, backend,\n}, info) => {\n  test.setTimeout(600_000);\n  const directory = path.resolve(process.cwd(), \"../../.kandev/diagnostics/dense-workbench-performance\");\n  const output = path.join(directory, `all-context-attribution-${Date.now()}.json`);\n  const report: Record<string, unknown> = {\n    kind: \"context-attribution; excluded from speed comparisons\",\n    assetsSha256: \"9f2b7a961b623e0e4074fdfd0e253b10b65ccf979e110223af6b88b9121dbea8\",\n    workload: DENSE_WORKLOAD,\n    source: \"all-context-attribution-source.ts\",\n  };\n  await page.setViewportSize({ width: 1470, height: 956 });\n  await page.addInitScript(() => {\n    const win = window as any;\n    const stats = {\n      active: false, commits: 0, providers: 0, valueChanges: 0,\n      aliasIdentityChanges: 0, redundantValueChanges: 0,\n      aliasSemanticChanges: 0, callbackChanges: 0, pathChanges: 0, newProviders: 0,\n      groups: {} as Record<string, number>, renderers: [] as string[], errors: [] as string[],\n    };\n    const previous = new WeakMap<object, any>();\n    const aliasKeys = new WeakMap<object, string>();\n    const aliasKey = (value: object) => {\n      let key = aliasKeys.get(value);\n      if (key === undefined) { key = JSON.stringify(value); aliasKeys.set(value, key); }\n      return key;\n    };\n    win.__reactContextAttribution = stats;\n    win.__KANDEV_E2E_EXPOSE_STORE__ = true;\n    win.__REACT_DEVTOOLS_GLOBAL_HOOK__ = {\n      supportsFiber: true,\n      renderers: new Map(),\n      inject(renderer: any) {\n        const id = this.renderers.size + 1;\n        this.renderers.set(id, renderer);\n        stats.renderers.push(renderer.version || \"unknown\");\n        return id;\n      },\n      onCommitFiberRoot(_id: number, root: any) {\n        try {\n          const stack = [root.current];\n          if (stats.active) stats.commits++;\n          while (stack.length) {\n            const fiber = stack.pop();\n            if (!fiber) continue;\n            if (fiber.child) stack.push(fiber.child);\n            if (fiber.sibling) stack.push(fiber.sibling);\n            const value = fiber.memoizedProps?.value;\n            if (fiber.tag !== 10) continue;\n            const prior = previous.get(fiber) || (fiber.alternate && previous.get(fiber.alternate));\n            const current = { value };\n            previous.set(fiber, current);\n            if (fiber.alternate) previous.set(fiber.alternate, current);\n            if (!stats.active) { stats.providers++; continue; }\n            if (!prior) { stats.newProviders++; continue; }\n            if (prior.value === value) continue;\n            stats.valueChanges++;\n            let owner = fiber.return;\n            while (owner && typeof owner.type !== \"function\") owner = owner.return;\n            const name = owner?.type?.displayName || owner?.type?.name || \"anonymous\";\n            const fields = value && typeof value === \"object\" ? Object.keys(value).sort().join(\",\") : typeof value;\n            const group = `${name}: ${fields}`;\n            stats.groups[group] = (stats.groups[group] || 0) + 1;\n          }\n        } catch (error) {\n          if (stats.errors.length < 10) stats.errors.push(String(error));\n        }\n      },\n      onCommitFiberUnmount() {},\n      onPostCommitFiberRoot() {},\n    };\n  });\n  let stream: Awaited<ReturnType<typeof prepareDenseStream>> | undefined;\n  try {\n    const fixture = await seedDenseWorkbench(api, seed, true);\n    report.fixture = fixture;\n    await seedThreadPresentation(api, { layout: \"grid\", maxChats: 6, autoHideComposer: true });\n    stream = await prepareDenseStream(api, seed, backend, fixture.threads.slice(0, 6), \"context-attribution\");\n    await page.goto(`/threads?workspace=${seed.workspaceId}`);\n    await expect(page.getByTestId(\"threads-board\")).toBeVisible();\n    for (const thread of fixture.threads.slice(0, 6)) {\n      await expect(page.getByTestId(`thread-column-${thread.taskId}`)).toContainText(stream.warmup);\n    }\n    report.before = await page.evaluate(() => {\n      const stats = (window as any).__reactContextAttribution;\n      stats.active = true;\n      return JSON.parse(JSON.stringify(stats));\n    });\n    expect((report.before as any).renderers.length).toBeGreaterThan(0);\n    expect((report.before as any).providers).toBeGreaterThan(0);\n    stream.release();\n    await dwell(page, DENSE_WORKLOAD.durationMs, \"clock-separation\", \"observe a fixed canonical stream for context attribution\");\n    await stream.waitForVisible(page);\n    await stream.verify();\n    report.after = await page.evaluate(() => {\n      const stats = (window as any).__reactContextAttribution;\n      stats.active = false;\n      return JSON.parse(JSON.stringify(stats));\n    });\n    report.scheduledUpdates = stream.scheduledUpdates;\n    report.verificationErrors = stream.verificationErrors;\n    expect((report.after as any).errors).toEqual([]);\n  } catch (error) {\n    report.error = String(error);\n    throw error;\n  } finally {\n    if (stream) await stream.finish();\n    fs.writeFileSync(output, JSON.stringify(report, null, 2));\n    await info.attach(\"context-attribution\", { path: output, contentType: \"application/json\" });\n  }\n});\n",
+      "workload": {
+        "layout": "grid",
+        "extraBusyHeaders": 0,
+        "tasks": 60,
+        "columns": 6,
+        "messages": 120,
+        "durationMs": 10000
+      },
+      "assetsSha256": "9f2b7a961b623e0e4074fdfd0e253b10b65ccf979e110223af6b88b9121dbea8",
+      "before": {
+        "active": true,
+        "commits": 0,
+        "providers": 437885,
+        "valueChanges": 0,
+        "aliasIdentityChanges": 0,
+        "redundantValueChanges": 0,
+        "aliasSemanticChanges": 0,
+        "callbackChanges": 0,
+        "pathChanges": 0,
+        "newProviders": 0,
+        "groups": {},
+        "renderers": [
+          "19.2.3"
+        ],
+        "errors": []
+      },
+      "after": {
+        "active": false,
+        "commits": 886,
+        "providers": 437885,
+        "valueChanges": 1818,
+        "aliasIdentityChanges": 0,
+        "redundantValueChanges": 0,
+        "aliasSemanticChanges": 0,
+        "callbackChanges": 0,
+        "pathChanges": 0,
+        "newProviders": 591,
+        "groups": {
+          "cR: model,onDeliveryReconciled,pending,sessionId": 670,
+          "XWe: detailActive,sessionId,taskId": 748,
+          "PopperProvider: anchor,onAnchorChange": 197,
+          "TooltipProvider: contentId,disableHoverableContent,onClose,onOpen,onTriggerChange,onTriggerEnter,onTriggerLeave,open,stateAttribute,trigger": 197,
+          "anonymous: activatorEvent,activators,active,activeNodeRect,ariaDescribedById,dispatch,draggableNodes,measureDroppableContainers,over": 2,
+          "anonymous: scaleX,scaleY,x,y": 2,
+          "Ef: activeIndex,containerId,disableTransforms,disabled,items,overIndex,sortedRects,strategy,useDragOverlay": 2
+        },
+        "renderers": [
+          "19.2.3"
+        ],
+        "errors": []
+      },
+      "orderedUpdates": 300,
+      "verificationErrors": []
+    },
+    {
+      "label": "recovery only",
+      "rawReport": "isolated-recovery-context-attribution-1792868403661.json",
+      "rawSha256": "891aead403e43ae233f435a062fb9b7c78ca52eaa21e5d902145ddafbed915cd",
+      "source": "isolated-recovery-context-attribution-source.ts",
+      "sourceSha256": "fa908c948a0a27abf20e731666f5f4a404ff587799548f58551a73ad4da5717e",
+      "sourceText": "import fs from \"node:fs\";\nimport path from \"node:path\";\nimport { test, expect } from \"../../fixtures/test-base\";\nimport { seedDenseWorkbench, DENSE_WORKLOAD } from \"../../helpers/dense-workbench-fixture\";\nimport { prepareDenseStream } from \"../../helpers/dense-canonical-stream\";\nimport { seedThreadPresentation } from \"../task/threads-presentation-helpers\";\nimport { dwell } from \"../../helpers/causal-waits\";\n\ntest(\"attributes provider updates in the isolated recovery candidate build\", async ({\n  testPage: page, apiClient: api, seedData: seed, backend,\n}, info) => {\n  test.setTimeout(600_000);\n  const directory = path.resolve(process.cwd(), \"../../.kandev/diagnostics/dense-workbench-performance\");\n  const output = path.join(directory, `isolated-recovery-context-attribution-${Date.now()}.json`);\n  const report: Record<string, unknown> = {\n    kind: \"context-attribution; excluded from speed comparisons\",\n    assetsSha256: \"b9d5b756d4f9826c424f0fedeb97deef6ba533b25b7f7d8bcdbe0c0a20261431\",\n    workload: DENSE_WORKLOAD,\n    source: \"isolated-recovery-context-attribution-source.ts\",\n  };\n  await page.setViewportSize({ width: 1470, height: 956 });\n  await page.addInitScript(() => {\n    const win = window as any;\n    const stats = {\n      active: false, commits: 0, providers: 0, valueChanges: 0,\n      aliasIdentityChanges: 0, redundantValueChanges: 0,\n      aliasSemanticChanges: 0, callbackChanges: 0, pathChanges: 0, newProviders: 0,\n      groups: {} as Record<string, number>, renderers: [] as string[], errors: [] as string[],\n    };\n    const previous = new WeakMap<object, any>();\n    const aliasKeys = new WeakMap<object, string>();\n    const aliasKey = (value: object) => {\n      let key = aliasKeys.get(value);\n      if (key === undefined) { key = JSON.stringify(value); aliasKeys.set(value, key); }\n      return key;\n    };\n    win.__reactContextAttribution = stats;\n    win.__KANDEV_E2E_EXPOSE_STORE__ = true;\n    win.__REACT_DEVTOOLS_GLOBAL_HOOK__ = {\n      supportsFiber: true,\n      renderers: new Map(),\n      inject(renderer: any) {\n        const id = this.renderers.size + 1;\n        this.renderers.set(id, renderer);\n        stats.renderers.push(renderer.version || \"unknown\");\n        return id;\n      },\n      onCommitFiberRoot(_id: number, root: any) {\n        try {\n          const stack = [root.current];\n          if (stats.active) stats.commits++;\n          while (stack.length) {\n            const fiber = stack.pop();\n            if (!fiber) continue;\n            if (fiber.child) stack.push(fiber.child);\n            if (fiber.sibling) stack.push(fiber.sibling);\n            const value = fiber.memoizedProps?.value;\n            if (fiber.tag !== 10) continue;\n            const prior = previous.get(fiber) || (fiber.alternate && previous.get(fiber.alternate));\n            const current = { value };\n            previous.set(fiber, current);\n            if (fiber.alternate) previous.set(fiber.alternate, current);\n            if (!stats.active) { stats.providers++; continue; }\n            if (!prior) { stats.newProviders++; continue; }\n            if (prior.value === value) continue;\n            stats.valueChanges++;\n            let owner = fiber.return;\n            while (owner && typeof owner.type !== \"function\") owner = owner.return;\n            const name = owner?.type?.displayName || owner?.type?.name || \"anonymous\";\n            const fields = value && typeof value === \"object\" ? Object.keys(value).sort().join(\",\") : typeof value;\n            const changed = value && prior.value && typeof value === \"object\" && typeof prior.value === \"object\"\n              ? [...new Set([...Object.keys(value), ...Object.keys(prior.value)])].filter(key => !Object.is(value[key], prior.value[key])).sort().join(\",\")\n              : \"value\";\n            const group = `${name}: ${fields}; changed=${changed || \"none\"}`;\n            stats.groups[group] = (stats.groups[group] || 0) + 1;\n          }\n        } catch (error) {\n          if (stats.errors.length < 10) stats.errors.push(String(error));\n        }\n      },\n      onCommitFiberUnmount() {},\n      onPostCommitFiberRoot() {},\n    };\n  });\n  let stream: Awaited<ReturnType<typeof prepareDenseStream>> | undefined;\n  try {\n    const fixture = await seedDenseWorkbench(api, seed, true);\n    report.fixture = fixture;\n    await seedThreadPresentation(api, { layout: \"grid\", maxChats: 6, autoHideComposer: true });\n    stream = await prepareDenseStream(api, seed, backend, fixture.threads.slice(0, 6), \"context-attribution\");\n    await page.goto(`/threads?workspace=${seed.workspaceId}`);\n    await expect(page.getByTestId(\"threads-board\")).toBeVisible();\n    for (const thread of fixture.threads.slice(0, 6)) {\n      await expect(page.getByTestId(`thread-column-${thread.taskId}`)).toContainText(stream.warmup);\n    }\n    report.before = await page.evaluate(() => {\n      const stats = (window as any).__reactContextAttribution;\n      stats.active = true;\n      return JSON.parse(JSON.stringify(stats));\n    });\n    expect((report.before as any).renderers.length).toBeGreaterThan(0);\n    expect((report.before as any).providers).toBeGreaterThan(0);\n    stream.release();\n    await dwell(page, DENSE_WORKLOAD.durationMs, \"clock-separation\", \"observe a fixed canonical stream for context attribution\");\n    await stream.waitForVisible(page);\n    await stream.verify();\n    report.after = await page.evaluate(() => {\n      const stats = (window as any).__reactContextAttribution;\n      stats.active = false;\n      return JSON.parse(JSON.stringify(stats));\n    });\n    report.scheduledUpdates = stream.scheduledUpdates;\n    report.verificationErrors = stream.verificationErrors;\n    expect((report.after as any).errors).toEqual([]);\n  } catch (error) {\n    report.error = String(error);\n    throw error;\n  } finally {\n    if (stream) await stream.finish();\n    fs.writeFileSync(output, JSON.stringify(report, null, 2));\n    await info.attach(\"context-attribution\", { path: output, contentType: \"application/json\" });\n  }\n});\n",
+      "workload": {
+        "layout": "grid",
+        "extraBusyHeaders": 0,
+        "tasks": 60,
+        "columns": 6,
+        "messages": 120,
+        "durationMs": 10000
+      },
+      "assetsSha256": "b9d5b756d4f9826c424f0fedeb97deef6ba533b25b7f7d8bcdbe0c0a20261431",
+      "before": {
+        "active": true,
+        "commits": 0,
+        "providers": 456015,
+        "valueChanges": 0,
+        "aliasIdentityChanges": 0,
+        "redundantValueChanges": 0,
+        "aliasSemanticChanges": 0,
+        "callbackChanges": 0,
+        "pathChanges": 0,
+        "newProviders": 0,
+        "groups": {},
+        "renderers": [
+          "19.2.3"
+        ],
+        "errors": []
+      },
+      "after": {
+        "active": false,
+        "commits": 880,
+        "providers": 456015,
+        "valueChanges": 999,
+        "aliasIdentityChanges": 0,
+        "redundantValueChanges": 0,
+        "aliasSemanticChanges": 0,
+        "callbackChanges": 0,
+        "pathChanges": 0,
+        "newProviders": 519,
+        "groups": {
+          "XWe: detailActive,sessionId,taskId; changed=none": 647,
+          "PopperProvider: anchor,onAnchorChange; changed=anchor": 173,
+          "TooltipProvider: contentId,disableHoverableContent,onClose,onOpen,onTriggerChange,onTriggerEnter,onTriggerLeave,open,stateAttribute,trigger; changed=trigger": 173,
+          "anonymous: activatorEvent,activators,active,activeNodeRect,ariaDescribedById,dispatch,draggableNodes,measureDroppableContainers,over; changed=activators,ariaDescribedById": 2,
+          "anonymous: scaleX,scaleY,x,y; changed=none": 2,
+          "Ef: activeIndex,containerId,disableTransforms,disabled,items,overIndex,sortedRects,strategy,useDragOverlay; changed=disabled,items,sortedRects": 2
+        },
+        "renderers": [
+          "19.2.3"
+        ],
+        "errors": []
+      },
+      "orderedUpdates": 300,
+      "verificationErrors": []
+    },
+    {
+      "label": "recovery and editor",
+      "rawReport": "context-stability-attribution-1792868667813.json",
+      "rawSha256": "68e29bbac2afc55013439129ca021ee4b67153ddbcea050e5bec1cafcf4eee35",
+      "source": "context-stability-attribution-source.ts",
+      "sourceSha256": "661c2784a38fa8681ee013ac8a0c5995ff4002b58642ada36255fdf4a7c5a696",
+      "sourceText": "import fs from \"node:fs\";\nimport path from \"node:path\";\nimport { test, expect } from \"../../fixtures/test-base\";\nimport { seedDenseWorkbench, DENSE_WORKLOAD } from \"../../helpers/dense-workbench-fixture\";\nimport { prepareDenseStream } from \"../../helpers/dense-canonical-stream\";\nimport { seedThreadPresentation } from \"../task/threads-presentation-helpers\";\nimport { dwell } from \"../../helpers/causal-waits\";\n\ntest(\"attributes provider updates in the context stability candidate build\", async ({\n  testPage: page, apiClient: api, seedData: seed, backend,\n}, info) => {\n  test.setTimeout(600_000);\n  const directory = path.resolve(process.cwd(), \"../../.kandev/diagnostics/dense-workbench-performance\");\n  const output = path.join(directory, `context-stability-attribution-${Date.now()}.json`);\n  const report: Record<string, unknown> = {\n    kind: \"context-attribution; excluded from speed comparisons\",\n    assetsSha256: \"fd6c1fcc50b7739df452802b0f07a05c5ca4d3982426de5b9791643271a347ff\",\n    workload: DENSE_WORKLOAD,\n    source: \"context-stability-attribution-source.ts\",\n  };\n  await page.setViewportSize({ width: 1470, height: 956 });\n  await page.addInitScript(() => {\n    const win = window as any;\n    const stats = {\n      active: false, commits: 0, providers: 0, valueChanges: 0,\n      aliasIdentityChanges: 0, redundantValueChanges: 0,\n      aliasSemanticChanges: 0, callbackChanges: 0, pathChanges: 0, newProviders: 0,\n      groups: {} as Record<string, number>, renderers: [] as string[], errors: [] as string[],\n    };\n    const previous = new WeakMap<object, any>();\n    const aliasKeys = new WeakMap<object, string>();\n    const aliasKey = (value: object) => {\n      let key = aliasKeys.get(value);\n      if (key === undefined) { key = JSON.stringify(value); aliasKeys.set(value, key); }\n      return key;\n    };\n    win.__reactContextAttribution = stats;\n    win.__KANDEV_E2E_EXPOSE_STORE__ = true;\n    win.__REACT_DEVTOOLS_GLOBAL_HOOK__ = {\n      supportsFiber: true,\n      renderers: new Map(),\n      inject(renderer: any) {\n        const id = this.renderers.size + 1;\n        this.renderers.set(id, renderer);\n        stats.renderers.push(renderer.version || \"unknown\");\n        return id;\n      },\n      onCommitFiberRoot(_id: number, root: any) {\n        try {\n          const stack = [root.current];\n          if (stats.active) stats.commits++;\n          while (stack.length) {\n            const fiber = stack.pop();\n            if (!fiber) continue;\n            if (fiber.child) stack.push(fiber.child);\n            if (fiber.sibling) stack.push(fiber.sibling);\n            const value = fiber.memoizedProps?.value;\n            if (fiber.tag !== 10) continue;\n            const prior = previous.get(fiber) || (fiber.alternate && previous.get(fiber.alternate));\n            const current = { value };\n            previous.set(fiber, current);\n            if (fiber.alternate) previous.set(fiber.alternate, current);\n            if (!stats.active) { stats.providers++; continue; }\n            if (!prior) { stats.newProviders++; continue; }\n            if (prior.value === value) continue;\n            stats.valueChanges++;\n            let owner = fiber.return;\n            while (owner && typeof owner.type !== \"function\") owner = owner.return;\n            const name = owner?.type?.displayName || owner?.type?.name || \"anonymous\";\n            const fields = value && typeof value === \"object\" ? Object.keys(value).sort().join(\",\") : typeof value;\n            const changed = value && prior.value && typeof value === \"object\" && typeof prior.value === \"object\"\n              ? [...new Set([...Object.keys(value), ...Object.keys(prior.value)])].filter(key => !Object.is(value[key], prior.value[key])).sort().join(\",\")\n              : \"value\";\n            const group = `${name}: ${fields}; changed=${changed || \"none\"}`;\n            stats.groups[group] = (stats.groups[group] || 0) + 1;\n          }\n        } catch (error) {\n          if (stats.errors.length < 10) stats.errors.push(String(error));\n        }\n      },\n      onCommitFiberUnmount() {},\n      onPostCommitFiberRoot() {},\n    };\n  });\n  let stream: Awaited<ReturnType<typeof prepareDenseStream>> | undefined;\n  try {\n    const fixture = await seedDenseWorkbench(api, seed, true);\n    report.fixture = fixture;\n    await seedThreadPresentation(api, { layout: \"grid\", maxChats: 6, autoHideComposer: true });\n    stream = await prepareDenseStream(api, seed, backend, fixture.threads.slice(0, 6), \"context-attribution\");\n    await page.goto(`/threads?workspace=${seed.workspaceId}`);\n    await expect(page.getByTestId(\"threads-board\")).toBeVisible();\n    for (const thread of fixture.threads.slice(0, 6)) {\n      await expect(page.getByTestId(`thread-column-${thread.taskId}`)).toContainText(stream.warmup);\n    }\n    report.before = await page.evaluate(() => {\n      const stats = (window as any).__reactContextAttribution;\n      stats.active = true;\n      return JSON.parse(JSON.stringify(stats));\n    });\n    expect((report.before as any).renderers.length).toBeGreaterThan(0);\n    expect((report.before as any).providers).toBeGreaterThan(0);\n    stream.release();\n    await dwell(page, DENSE_WORKLOAD.durationMs, \"clock-separation\", \"observe a fixed canonical stream for context attribution\");\n    await stream.waitForVisible(page);\n    await stream.verify();\n    report.after = await page.evaluate(() => {\n      const stats = (window as any).__reactContextAttribution;\n      stats.active = false;\n      return JSON.parse(JSON.stringify(stats));\n    });\n    report.scheduledUpdates = stream.scheduledUpdates;\n    report.verificationErrors = stream.verificationErrors;\n    expect((report.after as any).errors).toEqual([]);\n  } catch (error) {\n    report.error = String(error);\n    throw error;\n  } finally {\n    if (stream) await stream.finish();\n    fs.writeFileSync(output, JSON.stringify(report, null, 2));\n    await info.attach(\"context-attribution\", { path: output, contentType: \"application/json\" });\n  }\n});\n",
+      "workload": {
+        "layout": "grid",
+        "extraBusyHeaders": 0,
+        "tasks": 60,
+        "columns": 6,
+        "messages": 120,
+        "durationMs": 10000
+      },
+      "assetsSha256": "fd6c1fcc50b7739df452802b0f07a05c5ca4d3982426de5b9791643271a347ff",
+      "before": {
+        "active": true,
+        "commits": 0,
+        "providers": 462957,
+        "valueChanges": 0,
+        "aliasIdentityChanges": 0,
+        "redundantValueChanges": 0,
+        "aliasSemanticChanges": 0,
+        "callbackChanges": 0,
+        "pathChanges": 0,
+        "newProviders": 0,
+        "groups": {},
+        "renderers": [
+          "19.2.3"
+        ],
+        "errors": []
+      },
+      "after": {
+        "active": false,
+        "commits": 850,
+        "providers": 462957,
+        "valueChanges": 382,
+        "aliasIdentityChanges": 0,
+        "redundantValueChanges": 0,
+        "aliasSemanticChanges": 0,
+        "callbackChanges": 0,
+        "pathChanges": 0,
+        "newProviders": 564,
+        "groups": {
+          "PopperProvider: anchor,onAnchorChange; changed=anchor": 188,
+          "TooltipProvider: contentId,disableHoverableContent,onClose,onOpen,onTriggerChange,onTriggerEnter,onTriggerLeave,open,stateAttribute,trigger; changed=trigger": 188,
+          "anonymous: activatorEvent,activators,active,activeNodeRect,ariaDescribedById,dispatch,draggableNodes,measureDroppableContainers,over; changed=activators,ariaDescribedById": 2,
+          "anonymous: scaleX,scaleY,x,y; changed=none": 2,
+          "Ef: activeIndex,containerId,disableTransforms,disabled,items,overIndex,sortedRects,strategy,useDragOverlay; changed=disabled,items,sortedRects": 2
+        },
+        "renderers": [
+          "19.2.3"
+        ],
+        "errors": []
+      },
+      "orderedUpdates": 300,
+      "verificationErrors": []
+    }
+  ],
+  "findings": [
+    "File-link context remains stable during 300 ordered updates. No file-link code was changed.",
+    "The retained all-provider run records 670 recovery and 748 editor value changes during 300 ordered updates.",
+    "Recovery-only structural sharing removes recovery context updates. Editor context still changes 647 times with identical session, task, and activity fields.",
+    "The combined candidate records zero updates in both targeted contexts. All-provider value changes total 382, versus 1,818 in the retained diagnostic run.",
+    "These diagnostic runs are unpaired and can change scheduling. Counts do not establish a CPU, frame-rate, M2 Air, battery, or memory gain. Separate uninstrumented paired timing is required."
+  ],
+  "correctness": {
+    "unitRed": [
+      "Recovery consumer renders 21 times instead of 1 for 20 irrelevant updates.",
+      "Editor consumer renders 21 times instead of 1 for 20 identical values."
+    ],
+    "unitGreen": "113 checks pass across 10 test files. Recovery model, pending action, callback, and session-owner changes remain observable. Editor session, task, and activity changes remain observable.",
+    "typecheck": "passed",
+    "strictLint": "passed",
+    "productionBuild": "passed",
+    "desktop": "6 checks pass in 2.7 minutes; context-stability-desktop-logs/kandev-run.e2e.GNfCnpJm.log",
+    "phone": "14 checks pass in 1.2 minutes; context-stability-phone-logs/kandev-run.e2e.mxsVZUcj.log",
+    "temporarySources": "All four temporary diagnostic tests removed after checksum verification. Exact source copies and browser artifacts retained."
+  },
+  "candidateBuild": "context-stability-build.json",
+  "previousExperiment": "The earlier combined composer experiment was rejected. This candidate isolates its recovery-context sharing and adds editor-context stability identified by the fresh live trace. It does not restore the earlier submission selector or composer memoization.",
+  "performanceDecision": "interrupted-context-stability-1x.json"
+}

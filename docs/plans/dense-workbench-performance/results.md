@@ -1184,3 +1184,29 @@ production assets remain `9f2b7a96`.
 all paired metrics, exact builds, the rejected patch hash, correctness checks,
 and host observations. This is a separate 9f-to-experiment comparison, not the
 final original-baseline package comparison.
+
+## Rejected context stability candidate
+
+Read-only React diagnostics identify repeated recovery and editor context
+updates during a fixed 300-update canonical stream. Structural sharing and
+memoization remove both sets of updates. The candidate passes 113 relevant
+unit checks, typecheck, lint, build, six desktop checks, and fourteen phone
+checks. File-link context is stable already and was not changed.
+
+The separate uninstrumented two-pair attempt is interrupted after one completed
+pair. Its streaming main CPU changes by -0.49%, renderer CPU by -0.99%, and
+frame-gap p95 from 116.7 to 116.6 ms. This does not establish a useful speed
+gain. Initial and reduced-motion idle CPU are higher in the completed candidate
+sample; causes are unconfirmed. The second candidate has two saved windows,
+but no completed sample or matching second control. The attempt remains incomplete.
+
+Both production changes and both tests were removed. The exact retained
+`9f2b7a96` asset tree is restored. Fourteen surviving disposable backend and
+mock processes were identified by the exact inherited benchmark marker and
+process start identity, then stopped with SIGTERM. No forced kill was needed.
+
+[Attribution evidence](evidence/context-stability-attribution.json) includes
+the diagnostic source and counts. [The interrupted result](evidence/interrupted-context-stability-1x.json)
+preserves the rejected patch, first-pair metrics, partial checkpoint summary,
+raw hash, correctness checks, and cleanup audit. No complete two-pair or M2
+performance claim follows. Remaining work returns to the final comparison matrix.

@@ -1,0 +1,1453 @@
+{
+  "status": "candidate rejected; comparison incomplete after interruption",
+  "decision": "Remove both production changes and both tests. The completed first pair shows less than 1% streaming CPU change and essentially unchanged frame-gap p95. It does not establish a useful speed gain. This interrupted attempt is not a complete two-pair result.",
+  "rawReport": "matched-dense-1792869306638.json",
+  "rawSha256": "5baa2a8c03b994c2f9cbfbbb3ead78fdd7a7be14e95d24cb16db3052ec3067a0",
+  "sourceRevision": "c085aa4ac8984661b19efad44b729e27979040c4",
+  "sourcePatchSha256": "7542a3de8f47db270761df29aea4689e5e545a310a9e565066e197eda8ee6986",
+  "builds": {
+    "baseline": {
+      "binary": "/tmp/kandev-dense-spinner-motion-5936a872/apps/backend/bin/kandev",
+      "assets": "/tmp/kandev-dense-spinner-motion-5936a872/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "9f2b7a961b623e0e4074fdfd0e253b10b65ccf979e110223af6b88b9121dbea8"
+    },
+    "candidate": {
+      "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+      "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "fd6c1fcc50b7739df452802b0f07a05c5ca4d3982426de5b9791643271a347ff"
+    }
+  },
+  "lockfileSha256": "9d5a03a9086f28c93752fce491f896047fbcdbc64abfafe3b3aa53261199c554",
+  "machine": {
+    "revision": "c085aa4ac8984661b19efad44b729e27979040c4",
+    "cpu": "11th Gen Intel(R) Core(TM) i7-11700T @ 1.40GHz",
+    "cores": 16,
+    "load": [
+      2.16,
+      1.6,
+      1.65
+    ],
+    "totalMemory": 33303863296,
+    "freeMemory": 21771501568,
+    "platform": "linux 6.18.49"
+  },
+  "workload": {
+    "layout": "grid",
+    "extraBusyHeaders": 0,
+    "tasks": 1000,
+    "columns": 6,
+    "messages": 120,
+    "durationMs": 60000
+  },
+  "storedMessages": 1920,
+  "interactionMode": "quiet",
+  "probe": "boolean-poll",
+  "expectedPairs": 2,
+  "completedPairs": 1,
+  "completedSamples": 2,
+  "verifiedOrderedUpdates": 3600,
+  "incompleteSample": {
+    "sample": "candidate-1x-1",
+    "checkpointSha256": "28010adb944d302929b37f9ae965d272f991f803ffa41fb68467e8fbf693a03d",
+    "checkpointSummary": {
+      "historyMode": "newest-window",
+      "historyLoadMs": 0,
+      "initialLoadedHistory": [
+        {
+          "sessionId": "fbfca5cc-8059-45dd-9338-c4ace3284b70",
+          "messages": 100
+        },
+        {
+          "sessionId": "46017db2-c671-4ab3-b6ab-93d819d25628",
+          "messages": 100
+        },
+        {
+          "sessionId": "b23cba66-5bca-48a2-b1f9-d72edde80402",
+          "messages": 100
+        },
+        {
+          "sessionId": "7de56f5a-c084-47dd-a63c-f8b6bbdcd37f",
+          "messages": 100
+        },
+        {
+          "sessionId": "b2e910eb-fa4b-472c-ad71-62e0e1240796",
+          "messages": 100
+        },
+        {
+          "sessionId": "4a6afa3f-4604-43e2-b68e-3ef7dc1d4258",
+          "messages": 100
+        }
+      ],
+      "focusComposer": false,
+      "throttleAfterLoad": false,
+      "coldCpuRate": 1,
+      "observing": "streaming",
+      "selectionBefore": {
+        "rangeCount": 0,
+        "activeElementTag": "BODY",
+        "activeElementEditable": false
+      },
+      "verificationErrors": [],
+      "cold": {
+        "documentMs": 15023.338921000017,
+        "readyMs": 21359.474707999965,
+        "visibleTaskIds": [
+          "034e548d-6d97-481b-9c7c-9bc8935b50b1",
+          "65803f86-1d83-4f3a-a621-d90b0b62de18",
+          "6b72dc76-3e4d-4682-ba4f-157a2a1fac53",
+          "3d63facf-bfe8-4507-a4c7-9c9a00bcf09d",
+          "ab30d1da-dde7-4eaf-ba81-14c84581d826",
+          "c9f2a505-b574-4729-9192-276a7cc5bd6f"
+        ],
+        "displayedColumns": 6
+      },
+      "deadline": {
+        "elapsedMs": 60000.11940299999,
+        "metrics": {
+          "metrics": [
+            {
+              "name": "Timestamp",
+              "value": 357956.011673
+            },
+            {
+              "name": "AudioHandlers",
+              "value": 0
+            },
+            {
+              "name": "AudioWorkletProcessors",
+              "value": 0
+            },
+            {
+              "name": "Documents",
+              "value": 5
+            },
+            {
+              "name": "Frames",
+              "value": 4
+            },
+            {
+              "name": "JSEventListeners",
+              "value": 8963
+            },
+            {
+              "name": "LayoutObjects",
+              "value": 33725
+            },
+            {
+              "name": "MediaKeySessions",
+              "value": 0
+            },
+            {
+              "name": "MediaKeys",
+              "value": 0
+            },
+            {
+              "name": "Nodes",
+              "value": 38101
+            },
+            {
+              "name": "Resources",
+              "value": 110
+            },
+            {
+              "name": "ContextLifecycleStateObservers",
+              "value": 26
+            },
+            {
+              "name": "V8PerContextDatas",
+              "value": 2
+            },
+            {
+              "name": "WorkerGlobalScopes",
+              "value": 1
+            },
+            {
+              "name": "UACSSResources",
+              "value": 0
+            },
+            {
+              "name": "RTCPeerConnections",
+              "value": 0
+            },
+            {
+              "name": "ResourceFetchers",
+              "value": 6
+            },
+            {
+              "name": "AdSubframes",
+              "value": 0
+            },
+            {
+              "name": "DetachedScriptStates",
+              "value": 0
+            },
+            {
+              "name": "ArrayBufferContents",
+              "value": 60
+            },
+            {
+              "name": "LayoutCount",
+              "value": 3131
+            },
+            {
+              "name": "RecalcStyleCount",
+              "value": 6682
+            },
+            {
+              "name": "LayoutDuration",
+              "value": 1.382655
+            },
+            {
+              "name": "RecalcStyleDuration",
+              "value": 7.829049
+            },
+            {
+              "name": "DevToolsCommandDuration",
+              "value": 1.083368
+            },
+            {
+              "name": "ScriptDuration",
+              "value": 44.755834
+            },
+            {
+              "name": "V8CompileDuration",
+              "value": 0.02097
+            },
+            {
+              "name": "TaskDuration",
+              "value": 81.213873
+            },
+            {
+              "name": "TaskOtherDuration",
+              "value": 26.141997
+            },
+            {
+              "name": "ThreadTime",
+              "value": 81.35585
+            },
+            {
+              "name": "ProcessTime",
+              "value": 107.12
+            },
+            {
+              "name": "JSHeapUsedSize",
+              "value": 370822184
+            },
+            {
+              "name": "JSHeapTotalSize",
+              "value": 636510208
+            },
+            {
+              "name": "FirstMeaningfulPaint",
+              "value": 357835.690895
+            },
+            {
+              "name": "DomContentLoaded",
+              "value": 357829.376715
+            },
+            {
+              "name": "NavigationStart",
+              "value": 357814.357526
+            }
+          ]
+        },
+        "streamProgress": [
+          {
+            "at": 1792869849171,
+            "elapsedMs": 5008.499999976164,
+            "rows": [
+              {
+                "taskId": "034e548d-6d97-481b-9c7c-9bc8935b50b1",
+                "connected": true,
+                "lastTick": 23
+              },
+              {
+                "taskId": "65803f86-1d83-4f3a-a621-d90b0b62de18",
+                "connected": true,
+                "lastTick": 23
+              },
+              {
+                "taskId": "6b72dc76-3e4d-4682-ba4f-157a2a1fac53",
+                "connected": true,
+                "lastTick": 23
+              },
+              {
+                "taskId": "3d63facf-bfe8-4507-a4c7-9c9a00bcf09d",
+                "connected": true,
+                "lastTick": 23
+              },
+              {
+                "taskId": "ab30d1da-dde7-4eaf-ba81-14c84581d826",
+                "connected": true,
+                "lastTick": 23
+              },
+              {
+                "taskId": "c9f2a505-b574-4729-9192-276a7cc5bd6f",
+                "connected": true,
+                "lastTick": 23
+              }
+            ]
+          },
+          {
+            "at": 1792869854275,
+            "elapsedMs": 10058.399999976158,
+            "rows": [
+              {
+                "taskId": "034e548d-6d97-481b-9c7c-9bc8935b50b1",
+                "connected": true,
+                "lastTick": 49
+              },
+              {
+                "taskId": "65803f86-1d83-4f3a-a621-d90b0b62de18",
+                "connected": true,
+                "lastTick": 49
+              },
+              {
+                "taskId": "6b72dc76-3e4d-4682-ba4f-157a2a1fac53",
+                "connected": true,
+                "lastTick": 48
+              },
+              {
+                "taskId": "3d63facf-bfe8-4507-a4c7-9c9a00bcf09d",
+                "connected": true,
+                "lastTick": 49
+              },
+              {
+                "taskId": "ab30d1da-dde7-4eaf-ba81-14c84581d826",
+                "connected": true,
+                "lastTick": 49
+              },
+              {
+                "taskId": "c9f2a505-b574-4729-9192-276a7cc5bd6f",
+                "connected": true,
+                "lastTick": 49
+              }
+            ]
+          },
+          {
+            "at": 1792869859276,
+            "elapsedMs": 15074.899999976158,
+            "rows": [
+              {
+                "taskId": "034e548d-6d97-481b-9c7c-9bc8935b50b1",
+                "connected": true,
+                "lastTick": 74
+              },
+              {
+                "taskId": "65803f86-1d83-4f3a-a621-d90b0b62de18",
+                "connected": true,
+                "lastTick": 74
+              },
+              {
+                "taskId": "6b72dc76-3e4d-4682-ba4f-157a2a1fac53",
+                "connected": true,
+                "lastTick": 74
+              },
+              {
+                "taskId": "3d63facf-bfe8-4507-a4c7-9c9a00bcf09d",
+                "connected": true,
+                "lastTick": 73
+              },
+              {
+                "taskId": "ab30d1da-dde7-4eaf-ba81-14c84581d826",
+                "connected": true,
+                "lastTick": 74
+              },
+              {
+                "taskId": "c9f2a505-b574-4729-9192-276a7cc5bd6f",
+                "connected": true,
+                "lastTick": 74
+              }
+            ]
+          },
+          {
+            "at": 1792869864356,
+            "elapsedMs": 20157.899999976158,
+            "rows": [
+              {
+                "taskId": "034e548d-6d97-481b-9c7c-9bc8935b50b1",
+                "connected": true,
+                "lastTick": 99
+              },
+              {
+                "taskId": "65803f86-1d83-4f3a-a621-d90b0b62de18",
+                "connected": true,
+                "lastTick": 99
+              },
+              {
+                "taskId": "6b72dc76-3e4d-4682-ba4f-157a2a1fac53",
+                "connected": true,
+                "lastTick": 99
+              },
+              {
+                "taskId": "3d63facf-bfe8-4507-a4c7-9c9a00bcf09d",
+                "connected": true,
+                "lastTick": 99
+              },
+              {
+                "taskId": "ab30d1da-dde7-4eaf-ba81-14c84581d826",
+                "connected": true,
+                "lastTick": 99
+              },
+              {
+                "taskId": "c9f2a505-b574-4729-9192-276a7cc5bd6f",
+                "connected": true,
+                "lastTick": 99
+              }
+            ]
+          },
+          {
+            "at": 1792869869364,
+            "elapsedMs": 25174.399999976158,
+            "rows": [
+              {
+                "taskId": "034e548d-6d97-481b-9c7c-9bc8935b50b1",
+                "connected": true,
+                "lastTick": 124
+              },
+              {
+                "taskId": "65803f86-1d83-4f3a-a621-d90b0b62de18",
+                "connected": true,
+                "lastTick": 123
+              },
+              {
+                "taskId": "6b72dc76-3e4d-4682-ba4f-157a2a1fac53",
+                "connected": true,
+                "lastTick": 123
+              },
+              {
+                "taskId": "3d63facf-bfe8-4507-a4c7-9c9a00bcf09d",
+                "connected": true,
+                "lastTick": 124
+              },
+              {
+                "taskId": "ab30d1da-dde7-4eaf-ba81-14c84581d826",
+                "connected": true,
+                "lastTick": 123
+              },
+              {
+                "taskId": "c9f2a505-b574-4729-9192-276a7cc5bd6f",
+                "connected": true,
+                "lastTick": 122
+              }
+            ]
+          },
+          {
+            "at": 1792869874396,
+            "elapsedMs": 30190.899999976158,
+            "rows": [
+              {
+                "taskId": "034e548d-6d97-481b-9c7c-9bc8935b50b1",
+                "connected": true,
+                "lastTick": 149
+              },
+              {
+                "taskId": "65803f86-1d83-4f3a-a621-d90b0b62de18",
+                "connected": true,
+                "lastTick": 148
+              },
+              {
+                "taskId": "6b72dc76-3e4d-4682-ba4f-157a2a1fac53",
+                "connected": true,
+                "lastTick": 149
+              },
+              {
+                "taskId": "3d63facf-bfe8-4507-a4c7-9c9a00bcf09d",
+                "connected": true,
+                "lastTick": 148
+              },
+              {
+                "taskId": "ab30d1da-dde7-4eaf-ba81-14c84581d826",
+                "connected": true,
+                "lastTick": 148
+              },
+              {
+                "taskId": "c9f2a505-b574-4729-9192-276a7cc5bd6f",
+                "connected": true,
+                "lastTick": 149
+              }
+            ]
+          },
+          {
+            "at": 1792869879430,
+            "elapsedMs": 35240.69999997616,
+            "rows": [
+              {
+                "taskId": "034e548d-6d97-481b-9c7c-9bc8935b50b1",
+                "connected": true,
+                "lastTick": 174
+              },
+              {
+                "taskId": "65803f86-1d83-4f3a-a621-d90b0b62de18",
+                "connected": true,
+                "lastTick": 174
+              },
+              {
+                "taskId": "6b72dc76-3e4d-4682-ba4f-157a2a1fac53",
+                "connected": true,
+                "lastTick": 174
+              },
+              {
+                "taskId": "3d63facf-bfe8-4507-a4c7-9c9a00bcf09d",
+                "connected": true,
+                "lastTick": 173
+              },
+              {
+                "taskId": "ab30d1da-dde7-4eaf-ba81-14c84581d826",
+                "connected": true,
+                "lastTick": 175
+              },
+              {
+                "taskId": "c9f2a505-b574-4729-9192-276a7cc5bd6f",
+                "connected": true,
+                "lastTick": 171
+              }
+            ]
+          },
+          {
+            "at": 1792869884538,
+            "elapsedMs": 40273.79999997615,
+            "rows": [
+              {
+                "taskId": "034e548d-6d97-481b-9c7c-9bc8935b50b1",
+                "connected": true,
+                "lastTick": 199
+              },
+              {
+                "taskId": "65803f86-1d83-4f3a-a621-d90b0b62de18",
+                "connected": true,
+                "lastTick": 199
+              },
+              {
+                "taskId": "6b72dc76-3e4d-4682-ba4f-157a2a1fac53",
+                "connected": true,
+                "lastTick": 198
+              },
+              {
+                "taskId": "3d63facf-bfe8-4507-a4c7-9c9a00bcf09d",
+                "connected": true,
+                "lastTick": 198
+              },
+              {
+                "taskId": "ab30d1da-dde7-4eaf-ba81-14c84581d826",
+                "connected": true,
+                "lastTick": 197
+              },
+              {
+                "taskId": "c9f2a505-b574-4729-9192-276a7cc5bd6f",
+                "connected": true,
+                "lastTick": 199
+              }
+            ]
+          },
+          {
+            "at": 1792869889470,
+            "elapsedMs": 45290.29999997615,
+            "rows": [
+              {
+                "taskId": "034e548d-6d97-481b-9c7c-9bc8935b50b1",
+                "connected": true,
+                "lastTick": 222
+              },
+              {
+                "taskId": "65803f86-1d83-4f3a-a621-d90b0b62de18",
+                "connected": true,
+                "lastTick": 221
+              },
+              {
+                "taskId": "6b72dc76-3e4d-4682-ba4f-157a2a1fac53",
+                "connected": true,
+                "lastTick": 223
+              },
+              {
+                "taskId": "3d63facf-bfe8-4507-a4c7-9c9a00bcf09d",
+                "connected": true,
+                "lastTick": 221
+              },
+              {
+                "taskId": "ab30d1da-dde7-4eaf-ba81-14c84581d826",
+                "connected": true,
+                "lastTick": 224
+              },
+              {
+                "taskId": "c9f2a505-b574-4729-9192-276a7cc5bd6f",
+                "connected": true,
+                "lastTick": 223
+              }
+            ]
+          },
+          {
+            "at": 1792869894488,
+            "elapsedMs": 50306.79999997615,
+            "rows": [
+              {
+                "taskId": "034e548d-6d97-481b-9c7c-9bc8935b50b1",
+                "connected": true,
+                "lastTick": 248
+              },
+              {
+                "taskId": "65803f86-1d83-4f3a-a621-d90b0b62de18",
+                "connected": true,
+                "lastTick": 248
+              },
+              {
+                "taskId": "6b72dc76-3e4d-4682-ba4f-157a2a1fac53",
+                "connected": true,
+                "lastTick": 249
+              },
+              {
+                "taskId": "3d63facf-bfe8-4507-a4c7-9c9a00bcf09d",
+                "connected": true,
+                "lastTick": 248
+              },
+              {
+                "taskId": "ab30d1da-dde7-4eaf-ba81-14c84581d826",
+                "connected": true,
+                "lastTick": 249
+              },
+              {
+                "taskId": "c9f2a505-b574-4729-9192-276a7cc5bd6f",
+                "connected": true,
+                "lastTick": 249
+              }
+            ]
+          },
+          {
+            "at": 1792869899539,
+            "elapsedMs": 55356.499999976164,
+            "rows": [
+              {
+                "taskId": "034e548d-6d97-481b-9c7c-9bc8935b50b1",
+                "connected": true,
+                "lastTick": 273
+              },
+              {
+                "taskId": "65803f86-1d83-4f3a-a621-d90b0b62de18",
+                "connected": true,
+                "lastTick": 274
+              },
+              {
+                "taskId": "6b72dc76-3e4d-4682-ba4f-157a2a1fac53",
+                "connected": true,
+                "lastTick": 274
+              },
+              {
+                "taskId": "3d63facf-bfe8-4507-a4c7-9c9a00bcf09d",
+                "connected": true,
+                "lastTick": 273
+              },
+              {
+                "taskId": "ab30d1da-dde7-4eaf-ba81-14c84581d826",
+                "connected": true,
+                "lastTick": 274
+              },
+              {
+                "taskId": "c9f2a505-b574-4729-9192-276a7cc5bd6f",
+                "connected": true,
+                "lastTick": 274
+              }
+            ]
+          }
+        ],
+        "delivery": {
+          "traffic": {
+            "frameCount": 3271,
+            "byteCount": 33465778,
+            "sentFrameCount": 78,
+            "sentByteCount": 15114,
+            "receivedFrameCount": 3193,
+            "receivedByteCount": 33450664,
+            "byAction": {
+              "session.conversation.changed": {
+                "sent": 0,
+                "received": 1594,
+                "bytes": 6972277
+              },
+              "session.message.updated": {
+                "sent": 0,
+                "received": 1521,
+                "bytes": 13234063
+              },
+              "message.list": {
+                "sent": 72,
+                "received": 72,
+                "bytes": 13257609
+              },
+              "automation.list": {
+                "sent": 6,
+                "received": 6,
+                "bytes": 1829
+              }
+            }
+          },
+          "httpFailures": [],
+          "changedNotifications": 1594,
+          "resets": 0,
+          "readObservations": 72
+        }
+      },
+      "runs": [
+        {
+          "scenario": "idle",
+          "elapsedMs": 60048.17587699997,
+          "metrics": {
+            "Timestamp": 60.02993499999866,
+            "AudioHandlers": 0,
+            "AudioWorkletProcessors": 0,
+            "Documents": -4,
+            "Frames": -1,
+            "JSEventListeners": -2799,
+            "LayoutObjects": -774,
+            "MediaKeySessions": 0,
+            "MediaKeys": 0,
+            "Nodes": -1142,
+            "Resources": -30,
+            "ContextLifecycleStateObservers": -4,
+            "V8PerContextDatas": 0,
+            "WorkerGlobalScopes": 0,
+            "UACSSResources": 0,
+            "RTCPeerConnections": 0,
+            "ResourceFetchers": -4,
+            "AdSubframes": 0,
+            "DetachedScriptStates": -1,
+            "ArrayBufferContents": 0,
+            "LayoutCount": 359,
+            "RecalcStyleCount": 3600,
+            "LayoutDuration": 0.14876799999999998,
+            "RecalcStyleDuration": 2.072204,
+            "DevToolsCommandDuration": 0.0008550000000000502,
+            "ScriptDuration": 1.7770679999999999,
+            "V8CompileDuration": 0,
+            "TaskDuration": 15.148781,
+            "TaskOtherDuration": 11.149886,
+            "ThreadTime": 15.469078,
+            "ProcessTime": 23.54,
+            "JSHeapUsedSize": -39840936,
+            "JSHeapTotalSize": -73900032,
+            "FirstMeaningfulPaint": 357835.690895,
+            "DomContentLoaded": 0,
+            "NavigationStart": 0
+          },
+          "frameGapP95Ms": 16.799999999995634,
+          "frameGapMaxMs": 50,
+          "delivery": {
+            "traffic": {
+              "frameCount": 298,
+              "byteCount": 13376414,
+              "sentFrameCount": 112,
+              "sentByteCount": 20436,
+              "receivedFrameCount": 186,
+              "receivedByteCount": 13355978,
+              "byAction": {
+                "github.task_pr.sync": {
+                  "sent": 32,
+                  "received": 34,
+                  "bytes": 10976
+                },
+                "message.list": {
+                  "sent": 74,
+                  "received": 74,
+                  "bytes": 13337190
+                },
+                "automation.list": {
+                  "sent": 6,
+                  "received": 6,
+                  "bytes": 1829
+                },
+                "session.conversation.changed": {
+                  "sent": 0,
+                  "received": 72,
+                  "bytes": 26419
+                }
+              }
+            },
+            "httpFailures": [],
+            "changedNotifications": 72,
+            "resets": 0,
+            "readObservations": 74
+          }
+        },
+        {
+          "scenario": "streaming",
+          "elapsedMs": 60686.29006399994,
+          "metrics": {
+            "Timestamp": 60.66121900000144,
+            "AudioHandlers": 0,
+            "AudioWorkletProcessors": 0,
+            "Documents": 0,
+            "Frames": 0,
+            "JSEventListeners": 4541,
+            "LayoutObjects": 4246,
+            "MediaKeySessions": 0,
+            "MediaKeys": 0,
+            "Nodes": 6046,
+            "Resources": 7,
+            "ContextLifecycleStateObservers": -1,
+            "V8PerContextDatas": 0,
+            "WorkerGlobalScopes": 0,
+            "UACSSResources": 0,
+            "RTCPeerConnections": 0,
+            "ResourceFetchers": 0,
+            "AdSubframes": 0,
+            "DetachedScriptStates": 0,
+            "ArrayBufferContents": 0,
+            "LayoutCount": 2356,
+            "RecalcStyleCount": 2666,
+            "LayoutDuration": 1.044303,
+            "RecalcStyleDuration": 5.413632,
+            "DevToolsCommandDuration": 0.11534299999999997,
+            "ScriptDuration": 39.240463,
+            "V8CompileDuration": 0,
+            "TaskDuration": 59.854387,
+            "TaskOtherDuration": 14.040646,
+            "ThreadTime": 59.763144000000004,
+            "ProcessTime": 73.96000000000001,
+            "JSHeapUsedSize": 245515788,
+            "JSHeapTotalSize": 447504384,
+            "FirstMeaningfulPaint": 0,
+            "DomContentLoaded": 0,
+            "NavigationStart": 0
+          },
+          "frameGapP95Ms": 99.89999999999418,
+          "frameGapMaxMs": 150,
+          "delivery": {
+            "traffic": {
+              "frameCount": 3292,
+              "byteCount": 33741306,
+              "sentFrameCount": 78,
+              "sentByteCount": 15114,
+              "receivedFrameCount": 3214,
+              "receivedByteCount": 33726192,
+              "byAction": {
+                "session.conversation.changed": {
+                  "sent": 0,
+                  "received": 1604,
+                  "bytes": 7059834
+                },
+                "session.message.updated": {
+                  "sent": 0,
+                  "received": 1532,
+                  "bytes": 13422034
+                },
+                "message.list": {
+                  "sent": 72,
+                  "received": 72,
+                  "bytes": 13257609
+                },
+                "automation.list": {
+                  "sent": 6,
+                  "received": 6,
+                  "bytes": 1829
+                }
+              }
+            },
+            "httpFailures": [],
+            "changedNotifications": 1604,
+            "resets": 0,
+            "readObservations": 72
+          }
+        }
+      ]
+    }
+  },
+  "completedFirstPair": [
+    {
+      "scenario": "idle",
+      "metrics": {
+        "TaskDurationMs": {
+          "baseline": 13279.625,
+          "candidate": 14098.395,
+          "candidateChangePercent": 6.165610851210035
+        },
+        "ThreadTimeMs": {
+          "baseline": 13596.347999999998,
+          "candidate": 14414.676,
+          "candidateChangePercent": 6.0187338541202395
+        },
+        "ProcessTimeMs": {
+          "baseline": 21180.0,
+          "candidate": 22129.999999999996,
+          "candidateChangePercent": 4.485363550519339
+        },
+        "RecalcStyleDurationMs": {
+          "baseline": 1734.1940000000002,
+          "candidate": 1911.287,
+          "candidateChangePercent": 10.211833278168413
+        },
+        "LayoutDurationMs": {
+          "baseline": 129.541,
+          "candidate": 137.336,
+          "candidateChangePercent": 6.017399896557851
+        },
+        "frameGapP95Ms": {
+          "baseline": 16.70000000001164,
+          "candidate": 16.799999999995634,
+          "candidateChangePercent": 0.5988023951133181
+        },
+        "frameGapMaxMs": {
+          "baseline": 66.60000000000582,
+          "candidate": 50,
+          "candidateChangePercent": -24.924924924931492
+        }
+      }
+    },
+    {
+      "scenario": "streaming",
+      "metrics": {
+        "TaskDurationMs": {
+          "baseline": 59838.688,
+          "candidate": 59562.952,
+          "candidateChangePercent": -0.4607988731303858
+        },
+        "ThreadTimeMs": {
+          "baseline": 59940.850000000006,
+          "candidate": 59647.948,
+          "candidateChangePercent": -0.48865172916301436
+        },
+        "ProcessTimeMs": {
+          "baseline": 74540.0,
+          "candidate": 73800.00000000001,
+          "candidateChangePercent": -0.99275556748053
+        },
+        "RecalcStyleDurationMs": {
+          "baseline": 5284.52,
+          "candidate": 5429.257,
+          "candidateChangePercent": 2.738886407847807
+        },
+        "LayoutDurationMs": {
+          "baseline": 1112.331,
+          "candidate": 1111.603,
+          "candidateChangePercent": -0.06544814448216085
+        },
+        "frameGapP95Ms": {
+          "baseline": 116.69999999998254,
+          "candidate": 116.59999999999127,
+          "candidateChangePercent": -0.08568980290598605
+        },
+        "frameGapMaxMs": {
+          "baseline": 150,
+          "candidate": 150.09999999999127,
+          "candidateChangePercent": 0.06666666666084176
+        }
+      }
+    },
+    {
+      "scenario": "reduced-motion-idle",
+      "metrics": {
+        "TaskDurationMs": {
+          "baseline": 4917.392000000007,
+          "candidate": 6802.415000000011,
+          "candidateChangePercent": 38.33379563801302
+        },
+        "ThreadTimeMs": {
+          "baseline": 5200.581,
+          "candidate": 7132.149999999996,
+          "candidateChangePercent": 37.14140785423774
+        },
+        "ProcessTimeMs": {
+          "baseline": 9100.00000000001,
+          "candidate": 12140.0,
+          "candidateChangePercent": 33.40659340659327
+        },
+        "RecalcStyleDurationMs": {
+          "baseline": 19.66399999999968,
+          "candidate": 21.04100000000031,
+          "candidateChangePercent": 7.0026444263662
+        },
+        "LayoutDurationMs": {
+          "baseline": 112.15599999999992,
+          "candidate": 178.52500000000003,
+          "candidateChangePercent": 59.175612539677026
+        },
+        "frameGapP95Ms": {
+          "baseline": 16.70000000001164,
+          "candidate": 16.70000000001164,
+          "candidateChangePercent": 0.0
+        },
+        "frameGapMaxMs": {
+          "baseline": 50,
+          "candidate": 66.60000000000582,
+          "candidateChangePercent": 33.20000000001164
+        }
+      }
+    }
+  ],
+  "percentConvention": "100 * (candidate / baseline -1). A negative value means lower. These are single-pair values, not a multi-pair median.",
+  "samples": [
+    {
+      "arm": "baseline",
+      "pair": 0,
+      "scheduledUpdates": 1800,
+      "initialLoadedHistory": [
+        {
+          "sessionId": "fbfca5cc-8059-45dd-9338-c4ace3284b70",
+          "messages": 100
+        },
+        {
+          "sessionId": "46017db2-c671-4ab3-b6ab-93d819d25628",
+          "messages": 100
+        },
+        {
+          "sessionId": "b23cba66-5bca-48a2-b1f9-d72edde80402",
+          "messages": 100
+        },
+        {
+          "sessionId": "7de56f5a-c084-47dd-a63c-f8b6bbdcd37f",
+          "messages": 100
+        },
+        {
+          "sessionId": "b2e910eb-fa4b-472c-ad71-62e0e1240796",
+          "messages": 100
+        },
+        {
+          "sessionId": "4a6afa3f-4604-43e2-b68e-3ef7dc1d4258",
+          "messages": 100
+        }
+      ],
+      "verificationErrors": [],
+      "coldHttpFailures": [],
+      "runs": [
+        {
+          "scenario": "idle",
+          "elapsedMs": 60024.962971,
+          "metrics": {
+            "Timestamp": 60.00590499996906,
+            "AudioHandlers": 0,
+            "AudioWorkletProcessors": 0,
+            "Documents": -4,
+            "Frames": -1,
+            "JSEventListeners": -2991,
+            "LayoutObjects": -774,
+            "MediaKeySessions": 0,
+            "MediaKeys": 0,
+            "Nodes": -1181,
+            "Resources": -30,
+            "ContextLifecycleStateObservers": -4,
+            "V8PerContextDatas": 0,
+            "WorkerGlobalScopes": 0,
+            "UACSSResources": 0,
+            "RTCPeerConnections": 0,
+            "ResourceFetchers": -4,
+            "AdSubframes": 0,
+            "DetachedScriptStates": -1,
+            "ArrayBufferContents": 0,
+            "LayoutCount": 360,
+            "RecalcStyleCount": 3595,
+            "LayoutDuration": 0.129541,
+            "RecalcStyleDuration": 1.7341940000000002,
+            "DevToolsCommandDuration": 0.0005720000000000169,
+            "ScriptDuration": 1.720765,
+            "V8CompileDuration": 0,
+            "TaskDuration": 13.279625,
+            "TaskOtherDuration": 9.694552999999999,
+            "ThreadTime": 13.596347999999999,
+            "ProcessTime": 21.18,
+            "JSHeapUsedSize": -68819448,
+            "JSHeapTotalSize": -78069760,
+            "FirstMeaningfulPaint": 357402.575957,
+            "DomContentLoaded": 0,
+            "NavigationStart": 0
+          },
+          "httpFailures": [],
+          "historyReads": {
+            "sent": 74,
+            "received": 76,
+            "bytes": 13694821
+          },
+          "resets": 0
+        },
+        {
+          "scenario": "streaming",
+          "elapsedMs": 60698.028915,
+          "metrics": {
+            "Timestamp": 60.68371799995657,
+            "AudioHandlers": 0,
+            "AudioWorkletProcessors": 0,
+            "Documents": 0,
+            "Frames": 0,
+            "JSEventListeners": 382,
+            "LayoutObjects": 3691,
+            "MediaKeySessions": 0,
+            "MediaKeys": 0,
+            "Nodes": 5491,
+            "Resources": 1,
+            "ContextLifecycleStateObservers": -1,
+            "V8PerContextDatas": 0,
+            "WorkerGlobalScopes": 0,
+            "UACSSResources": 0,
+            "RTCPeerConnections": 0,
+            "ResourceFetchers": 0,
+            "AdSubframes": 0,
+            "DetachedScriptStates": 0,
+            "ArrayBufferContents": 0,
+            "LayoutCount": 2393,
+            "RecalcStyleCount": 2546,
+            "LayoutDuration": 1.112331,
+            "RecalcStyleDuration": 5.2845200000000006,
+            "DevToolsCommandDuration": 0.088333,
+            "ScriptDuration": 41.995832,
+            "V8CompileDuration": 0,
+            "TaskDuration": 59.838688000000005,
+            "TaskOtherDuration": 11.357672,
+            "ThreadTime": 59.940850000000005,
+            "ProcessTime": 74.54,
+            "JSHeapUsedSize": 28749956,
+            "JSHeapTotalSize": 465862656,
+            "FirstMeaningfulPaint": 0,
+            "DomContentLoaded": 0,
+            "NavigationStart": 0
+          },
+          "httpFailures": [],
+          "historyReads": {
+            "sent": 72,
+            "received": 72,
+            "bytes": 13254834
+          },
+          "resets": 0
+        },
+        {
+          "scenario": "reduced-motion-idle",
+          "elapsedMs": 60045.667033999984,
+          "metrics": {
+            "Timestamp": 60.02411800000118,
+            "AudioHandlers": 0,
+            "AudioWorkletProcessors": 0,
+            "Documents": 0,
+            "Frames": 0,
+            "JSEventListeners": -1829,
+            "LayoutObjects": -2575,
+            "MediaKeySessions": 0,
+            "MediaKeys": 0,
+            "Nodes": -2911,
+            "Resources": 13,
+            "ContextLifecycleStateObservers": -1,
+            "V8PerContextDatas": 0,
+            "WorkerGlobalScopes": 0,
+            "UACSSResources": 0,
+            "RTCPeerConnections": 0,
+            "ResourceFetchers": 0,
+            "AdSubframes": 0,
+            "DetachedScriptStates": 0,
+            "ArrayBufferContents": 0,
+            "LayoutCount": 359,
+            "RecalcStyleCount": 2,
+            "LayoutDuration": 0.11215599999999992,
+            "RecalcStyleDuration": 0.01966399999999968,
+            "DevToolsCommandDuration": 0.0015000000000000568,
+            "ScriptDuration": 1.5414699999999968,
+            "V8CompileDuration": 0,
+            "TaskDuration": 4.917392000000007,
+            "TaskOtherDuration": 3.242601999999998,
+            "ThreadTime": 5.200581,
+            "ProcessTime": 9.100000000000009,
+            "JSHeapUsedSize": -46843260,
+            "JSHeapTotalSize": -449318912,
+            "FirstMeaningfulPaint": 0,
+            "DomContentLoaded": 0,
+            "NavigationStart": 0
+          },
+          "httpFailures": [],
+          "historyReads": {
+            "sent": 72,
+            "received": 72,
+            "bytes": 13528111
+          },
+          "resets": 0
+        }
+      ]
+    },
+    {
+      "arm": "candidate",
+      "pair": 0,
+      "scheduledUpdates": 1800,
+      "initialLoadedHistory": [
+        {
+          "sessionId": "fbfca5cc-8059-45dd-9338-c4ace3284b70",
+          "messages": 100
+        },
+        {
+          "sessionId": "46017db2-c671-4ab3-b6ab-93d819d25628",
+          "messages": 100
+        },
+        {
+          "sessionId": "b23cba66-5bca-48a2-b1f9-d72edde80402",
+          "messages": 100
+        },
+        {
+          "sessionId": "7de56f5a-c084-47dd-a63c-f8b6bbdcd37f",
+          "messages": 100
+        },
+        {
+          "sessionId": "b2e910eb-fa4b-472c-ad71-62e0e1240796",
+          "messages": 100
+        },
+        {
+          "sessionId": "4a6afa3f-4604-43e2-b68e-3ef7dc1d4258",
+          "messages": 100
+        }
+      ],
+      "verificationErrors": [],
+      "coldHttpFailures": [],
+      "runs": [
+        {
+          "scenario": "idle",
+          "elapsedMs": 60035.67462800001,
+          "metrics": {
+            "Timestamp": 60.01548099995125,
+            "AudioHandlers": 0,
+            "AudioWorkletProcessors": 0,
+            "Documents": -4,
+            "Frames": -1,
+            "JSEventListeners": -2813,
+            "LayoutObjects": -774,
+            "MediaKeySessions": 0,
+            "MediaKeys": 0,
+            "Nodes": -1146,
+            "Resources": -26,
+            "ContextLifecycleStateObservers": -4,
+            "V8PerContextDatas": 0,
+            "WorkerGlobalScopes": 0,
+            "UACSSResources": 0,
+            "RTCPeerConnections": 0,
+            "ResourceFetchers": -4,
+            "AdSubframes": 0,
+            "DetachedScriptStates": 0,
+            "ArrayBufferContents": 0,
+            "LayoutCount": 358,
+            "RecalcStyleCount": 3599,
+            "LayoutDuration": 0.137336,
+            "RecalcStyleDuration": 1.911287,
+            "DevToolsCommandDuration": 0.000676000000000121,
+            "ScriptDuration": 1.6760739999999998,
+            "V8CompileDuration": 0,
+            "TaskDuration": 14.098395,
+            "TaskOtherDuration": 10.373021999999999,
+            "ThreadTime": 14.414676,
+            "ProcessTime": 22.129999999999995,
+            "JSHeapUsedSize": -58709364,
+            "JSHeapTotalSize": -71872512,
+            "FirstMeaningfulPaint": 357615.783119,
+            "DomContentLoaded": 0,
+            "NavigationStart": 0
+          },
+          "httpFailures": [],
+          "historyReads": {
+            "sent": 74,
+            "received": 74,
+            "bytes": 13337186
+          },
+          "resets": 0
+        },
+        {
+          "scenario": "streaming",
+          "elapsedMs": 60453.893802999984,
+          "metrics": {
+            "Timestamp": 60.440714000025764,
+            "AudioHandlers": 0,
+            "AudioWorkletProcessors": 0,
+            "Documents": 0,
+            "Frames": 0,
+            "JSEventListeners": 6877,
+            "LayoutObjects": 4486,
+            "MediaKeySessions": 0,
+            "MediaKeys": 0,
+            "Nodes": 6286,
+            "Resources": 9,
+            "ContextLifecycleStateObservers": -1,
+            "V8PerContextDatas": 0,
+            "WorkerGlobalScopes": 0,
+            "UACSSResources": 0,
+            "RTCPeerConnections": 0,
+            "ResourceFetchers": 0,
+            "AdSubframes": 0,
+            "DetachedScriptStates": 0,
+            "ArrayBufferContents": 0,
+            "LayoutCount": 2545,
+            "RecalcStyleCount": 2746,
+            "LayoutDuration": 1.1116030000000001,
+            "RecalcStyleDuration": 5.429257,
+            "DevToolsCommandDuration": 0.06207499999999988,
+            "ScriptDuration": 40.005057,
+            "V8CompileDuration": 0,
+            "TaskDuration": 59.562951999999996,
+            "TaskOtherDuration": 12.95496,
+            "ThreadTime": 59.647948,
+            "ProcessTime": 73.80000000000001,
+            "JSHeapUsedSize": 369063992,
+            "JSHeapTotalSize": 458424320,
+            "FirstMeaningfulPaint": 0,
+            "DomContentLoaded": 0,
+            "NavigationStart": 0
+          },
+          "httpFailures": [],
+          "historyReads": {
+            "sent": 72,
+            "received": 72,
+            "bytes": 13257525
+          },
+          "resets": 0
+        },
+        {
+          "scenario": "reduced-motion-idle",
+          "elapsedMs": 60041.544380999985,
+          "metrics": {
+            "Timestamp": 60.02343900001142,
+            "AudioHandlers": 0,
+            "AudioWorkletProcessors": 0,
+            "Documents": 0,
+            "Frames": 0,
+            "JSEventListeners": -8842,
+            "LayoutObjects": -3370,
+            "MediaKeySessions": 0,
+            "MediaKeys": 0,
+            "Nodes": -3706,
+            "Resources": -12,
+            "ContextLifecycleStateObservers": -1,
+            "V8PerContextDatas": 0,
+            "WorkerGlobalScopes": 0,
+            "UACSSResources": 0,
+            "RTCPeerConnections": 0,
+            "ResourceFetchers": 0,
+            "AdSubframes": 0,
+            "DetachedScriptStates": 0,
+            "ArrayBufferContents": 0,
+            "LayoutCount": 359,
+            "RecalcStyleCount": 3,
+            "LayoutDuration": 0.17852500000000004,
+            "RecalcStyleDuration": 0.02104100000000031,
+            "DevToolsCommandDuration": 0.0005269999999999442,
+            "ScriptDuration": 1.9163870000000003,
+            "V8CompileDuration": 0,
+            "TaskDuration": 6.8024150000000105,
+            "TaskOtherDuration": 4.685934999999997,
+            "ThreadTime": 7.132149999999996,
+            "ProcessTime": 12.14,
+            "JSHeapUsedSize": -375788056,
+            "JSHeapTotalSize": -423530496,
+            "FirstMeaningfulPaint": 0,
+            "DomContentLoaded": 0,
+            "NavigationStart": 0
+          },
+          "httpFailures": [],
+          "historyReads": {
+            "sent": 72,
+            "received": 72,
+            "bytes": 13530397
+          },
+          "resets": 0
+        }
+      ]
+    }
+  ],
+  "rejectedPatch": {
+    "path": "rejected-context-stability.patch",
+    "sha256": "e78f61ee8ba51781441a34ceee788b89871d3af7709b4c65338b27d702d0287a",
+    "text": "diff --git a/apps/web/components/task/chat/editor-context.tsx b/apps/web/components/task/chat/editor-context.tsx\nindex 1dbcedd24a3..a07a45fc77b 100644\n--- a/apps/web/components/task/chat/editor-context.tsx\n+++ b/apps/web/components/task/chat/editor-context.tsx\n@@ -1,6 +1,6 @@\n \"use client\";\n \n-import { createContext, useContext } from \"react\";\n+import { createContext, useContext, useMemo, type ProviderProps } from \"react\";\n \n type EditorContextValue = {\n   sessionId: string | null;\n@@ -14,5 +14,14 @@ const EditorContext = createContext<EditorContextValue>({\n   detailActive: true,\n });\n \n-export const EditorContextProvider = EditorContext.Provider;\n+export function EditorContextProvider({\n+  value: { sessionId, taskId, detailActive },\n+  children,\n+}: ProviderProps<EditorContextValue>) {\n+  const value = useMemo(\n+    () => ({ sessionId, taskId, detailActive }),\n+    [sessionId, taskId, detailActive],\n+  );\n+  return <EditorContext.Provider value={value}>{children}</EditorContext.Provider>;\n+}\n export const useEditorContext = () => useContext(EditorContext);\ndiff --git a/apps/web/components/task/chat/session-recovery-context.tsx b/apps/web/components/task/chat/session-recovery-context.tsx\nindex ffa34cd882a..99b63937d26 100644\n--- a/apps/web/components/task/chat/session-recovery-context.tsx\n+++ b/apps/web/components/task/chat/session-recovery-context.tsx\n@@ -1,6 +1,7 @@\n \"use client\";\n \n import { createContext, useContext, useRef, type ReactNode } from \"react\";\n+import { useShallow } from \"zustand/react/shallow\";\n import type { Message, TaskSession } from \"@/lib/types/http\";\n import {\n   selectActiveSessionRecovery,\n@@ -51,9 +52,10 @@ export function SessionRecoveryProvider({\n   const model = chooseRecoveryModel(selected, retainPending, previous.current, requestLocalModel);\n   previous.current = model;\n   const presentedModel = model ? { ...model, loading: messagesLoading } : null;\n+  const selectContext = useShallow(recoveryContextValue);\n   return (\n     <Context.Provider\n-      value={recoveryContextValue({\n+      value={selectContext({\n         enabled,\n         session,\n         model: presentedModel,\ndiff --git a/apps/web/components/task/chat/editor-context.test.tsx b/apps/web/components/task/chat/editor-context.test.tsx\nnew file mode 100644\nindex 00000000000..83aad25784f\n--- /dev/null\n+++ b/apps/web/components/task/chat/editor-context.test.tsx\n@@ -0,0 +1,36 @@\n+import { memo } from \"react\";\n+import { cleanup, render } from \"@testing-library/react\";\n+import { afterEach, expect, it, vi } from \"vitest\";\n+import { EditorContextProvider, useEditorContext } from \"./editor-context\";\n+\n+afterEach(cleanup);\n+\n+it(\"keeps editor consumers stable when their session, task, and activity stay unchanged\", () => {\n+  const observed = vi.fn();\n+  const Consumer = memo(function Consumer() {\n+    observed(useEditorContext());\n+    return null;\n+  });\n+  const child = <Consumer />;\n+  const value: ReturnType<typeof useEditorContext> = {\n+    sessionId: \"session\",\n+    taskId: \"task\",\n+    detailActive: true,\n+  };\n+  const draw = (next = value) => (\n+    <EditorContextProvider value={{ ...next }}>{child}</EditorContextProvider>\n+  );\n+  const view = render(draw());\n+  for (let tick = 0; tick < 20; tick++) view.rerender(draw());\n+  expect(observed).toHaveBeenCalledTimes(1);\n+  for (const next of [\n+    { ...value, sessionId: \"next-session\" },\n+    { ...value, taskId: \"next-task\" },\n+    { ...value, detailActive: false },\n+    { sessionId: null, taskId: null, detailActive: true },\n+  ]) {\n+    view.rerender(draw(next));\n+    expect(observed).toHaveBeenLastCalledWith(next);\n+  }\n+  expect(observed).toHaveBeenCalledTimes(5);\n+});\ndiff --git a/apps/web/components/task/chat/session-recovery-stability.test.tsx b/apps/web/components/task/chat/session-recovery-stability.test.tsx\nnew file mode 100644\nindex 00000000000..6a583a028a8\n--- /dev/null\n+++ b/apps/web/components/task/chat/session-recovery-stability.test.tsx\n@@ -0,0 +1,113 @@\n+import { memo } from \"react\";\n+import { act, cleanup, render } from \"@testing-library/react\";\n+import { afterEach, describe, expect, it, vi } from \"vitest\";\n+import { sessionId, taskId, type Message, type TaskSession } from \"@/lib/types/http\";\n+import { claimSessionRecovery } from \"@/hooks/domains/session/session-recovery-pending\";\n+import { SessionRecoveryProvider, useSessionComposerRecovery } from \"./session-recovery-context\";\n+\n+vi.mock(\"../task-launch-error-context\", () => ({ useTaskLaunchErrorContext: () => null }));\n+afterEach(cleanup);\n+const session: TaskSession = {\n+  id: sessionId(\"session\"),\n+  task_id: taskId(\"task\"),\n+  state: \"RUNNING\",\n+  started_at: \"2026-10-23T10:00:00Z\",\n+  updated_at: \"2026-10-23T10:00:00Z\",\n+};\n+\n+function probe() {\n+  const observed = vi.fn();\n+  const Consumer = memo(function Consumer({ id }: { id: string }) {\n+    observed(useSessionComposerRecovery(id));\n+    return null;\n+  });\n+  return { observed, Consumer };\n+}\n+\n+describe(\"composer recovery subscriptions\", () => {\n+  it(\"does not notify a healthy composer when only its transcript or session timestamp changes\", () => {\n+    const { observed, Consumer } = probe();\n+    const child = <Consumer id=\"session\" />;\n+    const draw = (tick: number) => (\n+      <SessionRecoveryProvider\n+        enabled\n+        taskId=\"task\"\n+        session={{ ...session, updated_at: String(tick) }}\n+        messages={[{ id: String(tick), content: String(tick) } as Message]}\n+      >\n+        {child}\n+      </SessionRecoveryProvider>\n+    );\n+    const view = render(draw(0));\n+    for (let tick = 1; tick <= 20; tick++) view.rerender(draw(tick));\n+    expect(observed).toHaveBeenCalledTimes(1);\n+    expect(observed).toHaveBeenLastCalledWith(\n+      expect.objectContaining({ sessionId: \"session\", model: null, pending: null }),\n+    );\n+  });\n+\n+  it(\"publishes recovery, loading, callback, and enabled changes\", () => {\n+    const { observed, Consumer } = probe();\n+    const child = <Consumer id=\"session\" />;\n+    const callback = vi.fn();\n+    const draw = (\n+      current: TaskSession,\n+      enabled = true,\n+      loading = false,\n+      onDeliveryReconciled?: () => void,\n+    ) => (\n+      <SessionRecoveryProvider\n+        enabled={enabled}\n+        taskId=\"task\"\n+        session={current}\n+        messages={[]}\n+        messagesLoading={loading}\n+        onDeliveryReconciled={onDeliveryReconciled}\n+      >\n+        {child}\n+      </SessionRecoveryProvider>\n+    );\n+    const view = render(draw(session));\n+    view.rerender(draw(session, true, false, callback));\n+    expect(observed).toHaveBeenLastCalledWith(\n+      expect.objectContaining({ onDeliveryReconciled: callback }),\n+    );\n+    const failed: TaskSession = { ...session, state: \"FAILED\", error_message: \"Agent exited\" };\n+    view.rerender(draw(failed));\n+    expect(observed).toHaveBeenLastCalledWith(\n+      expect.objectContaining({\n+        model: expect.objectContaining({ summary: \"Agent exited\", loading: false }),\n+      }),\n+    );\n+    view.rerender(draw(failed, true, true));\n+    expect(observed).toHaveBeenLastCalledWith(\n+      expect.objectContaining({ model: expect.objectContaining({ loading: true }) }),\n+    );\n+    view.rerender(draw(failed, false));\n+    expect(observed).toHaveBeenLastCalledWith(null);\n+  });\n+\n+  it(\"publishes pending recovery and excludes a different session owner\", () => {\n+    const { observed, Consumer } = probe();\n+    const child = <Consumer id=\"session\" />;\n+    const draw = (current: TaskSession) => (\n+      <SessionRecoveryProvider enabled taskId=\"task\" session={current} messages={[]}>\n+        {child}\n+      </SessionRecoveryProvider>\n+    );\n+    const view = render(draw(session));\n+    let release: (() => void) | null = null;\n+    try {\n+      act(() => {\n+        release = claimSessionRecovery(\"task\\u0000session\", \"resume\");\n+      });\n+      expect(observed).toHaveBeenLastCalledWith(expect.objectContaining({ pending: \"resume\" }));\n+      act(() => release?.());\n+      expect(observed).toHaveBeenLastCalledWith(expect.objectContaining({ pending: null }));\n+      view.rerender(draw({ ...session, id: sessionId(\"replacement\") }));\n+      expect(observed).toHaveBeenLastCalledWith(null);\n+    } finally {\n+      act(() => release?.());\n+    }\n+  });\n+});\n"
+  },
+  "attribution": "context-stability-attribution.json",
+  "validation": {
+    "unitRed": "Both stability regressions reproduce 21 consumer renders instead of 1.",
+    "unitGreen": "113 relevant checks pass.",
+    "desktop": "6 browser checks pass in 2.7 minutes.",
+    "phone": "14 browser checks pass in 1.2 minutes.",
+    "typecheck": "passed",
+    "lint": "passed",
+    "build": "passed",
+    "runner": "Interrupted. No terminal runner result. Log context-stability-two-pair-logs/kandev-run.e2e.vPiKzZFo.log",
+    "summary": "Not generated. Missing runner failure metadata does not make an interrupted attempt complete."
+  },
+  "resourceCleanup": {
+    "ownership": "Exact inherited KANDEV_RUN_QUIET_DIR marker and process start identity checked before each signal.",
+    "terminated": [
+      {
+        "pid": 592802,
+        "start": "35779948",
+        "name": "kandev"
+      },
+      {
+        "pid": 592855,
+        "start": "35779982",
+        "name": "agentctl"
+      },
+      {
+        "pid": 593172,
+        "start": "35780128",
+        "name": "mock-agent"
+      },
+      {
+        "pid": 593173,
+        "start": "35780129",
+        "name": "bash"
+      },
+      {
+        "pid": 593319,
+        "start": "35780358",
+        "name": "mock-agent"
+      },
+      {
+        "pid": 593326,
+        "start": "35780358",
+        "name": "bash"
+      },
+      {
+        "pid": 593552,
+        "start": "35780584",
+        "name": "mock-agent"
+      },
+      {
+        "pid": 593553,
+        "start": "35780584",
+        "name": "bash"
+      },
+      {
+        "pid": 593737,
+        "start": "35780810",
+        "name": "mock-agent"
+      },
+      {
+        "pid": 593738,
+        "start": "35780810",
+        "name": "bash"
+      },
+      {
+        "pid": 593914,
+        "start": "35781036",
+        "name": "mock-agent"
+      },
+      {
+        "pid": 593915,
+        "start": "35781036",
+        "name": "bash"
+      },
+      {
+        "pid": 594211,
+        "start": "35781272",
+        "name": "mock-agent"
+      },
+      {
+        "pid": 594212,
+        "start": "35781272",
+        "name": "bash"
+      }
+    ],
+    "forcedPids": [],
+    "remainingOwned": []
+  },
+  "hostObservations": {
+    "file": "context-stability-two-pair-host-load.jsonl",
+    "samples": 24,
+    "minLoad1m": 1.087890625,
+    "maxLoad1m": 5.447265625,
+    "minAvailableMemoryKiB": 19842920,
+    "causalAttribution": false
+  },
+  "limits": [
+    "The attempt uses 6 eligible threads with 120 primary messages, not the full 30-thread, 1,000-message reference fixture. All six visible histories initially have 100 loaded messages.",
+    "Only the completed first pair is reported as a pair. The partial second candidate is preserved but is not paired with the first control or credited as a completed sample. The unchanged raw report retains the full checkpoint.",
+    "Initial idle main CPU is 6% higher and reduced-motion idle main CPU 37% higher in the completed candidate sample. Causes are unconfirmed; these values do not prove that the code causes those differences.",
+    "No M2 Air, energy, leak, or overall speed claim.",
+    "The retained production source and exact 9f2b asset tree were restored. No candidate source or test changes were committed."
+  ]
+}
