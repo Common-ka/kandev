@@ -381,3 +381,22 @@ fixture counts, and per-sample errors. [results.md](results.md) records medians,
 ranges, interpretation, and the remaining work. No owned builds or tests ran
 during measurement. Network isolation prevented port conflicts; CPU resources
 remained shared. The 4x stress and broader timing matrix remain open.
+
+### Dockview timed caller validated
+
+The new paired caller passes small core and full-plugin runs on the original
+baseline and final retained assets. Both arms deliver all 60 scheduled updates
+in order with no verification errors. A meaningful RED check found that an
+unopened hidden tab did not have a document chat root or editor. The caller now
+opens that session, waits for warmup, writes a draft, and hides it before timing.
+Both builds retain the hidden chat and preserve its draft through streaming and
+reveal. Loaded history and actual API panel visibility are recorded.
+
+Plugin installation and layout setup stay outside timing. Plugin HTTP
+conversation reads are separate from core WebSocket traffic. In the short
+plugin rehearsal, streaming generated 20 such HTTP requests on the baseline
+and zero on the candidate. This is a traffic observation, not a repeated speed
+result. The 29 summary/progress tests and scoped strict lint pass. The summary
+rejects mismatched panes, visible session IDs, and plugin hashes.
+See [the caller evidence](evidence/dockview-timed-caller.json).
+Six full-reference pairs per core/plugin series remain pending.

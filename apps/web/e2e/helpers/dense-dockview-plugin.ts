@@ -7,9 +7,8 @@ import { inspectDenseDockviewLayout } from "./dense-dockview-layout";
 const PANEL_KEY = "prompt-history-plugin";
 export const DENSE_DOCKVIEW_PLUGIN_PANEL = `plugin:${PLUGIN_ID}:${PANEL_KEY}`;
 
-export async function installDenseDockviewPlugin(page: Page) {
+export function denseDockviewPluginIdentity() {
   const bundleSha256 = sha256File(PACKAGE_PATH);
-  await installFixturePlugin(page);
   return {
     id: PLUGIN_ID,
     panelId: DENSE_DOCKVIEW_PLUGIN_PANEL,
@@ -60,4 +59,10 @@ export async function mountDenseDockviewPlugin(page: Page, visibleSessionIds: st
     ].sort(),
   );
   return state;
+}
+
+export async function installDenseDockviewPlugin(page: Page) {
+  const identity = denseDockviewPluginIdentity();
+  await installFixturePlugin(page);
+  return identity;
 }

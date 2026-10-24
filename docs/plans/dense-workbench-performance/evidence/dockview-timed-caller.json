@@ -1,0 +1,479 @@
+{
+  "scope": "Paired Dockview measurement harness and validation. No production changes or speed claim from these small rehearsals.",
+  "productionRevision": "72085e06b4902b7ccbaae1a84be0048e5a9b6f11",
+  "sourceFiles": [
+    {
+      "path": "apps/web/e2e/helpers/dense-dockview-sample.ts",
+      "sha256": "dbf6a81528d6b840845e75e7ebaf0967d8c3ee7b6bead3c1cc04fdcf6a73f0c8"
+    },
+    {
+      "path": "apps/web/e2e/helpers/dense-dockview-observations.ts",
+      "sha256": "09c73fc8f7e8955bf26ee32393424a961bc9c4981f7bb95ef10aecec1f17480e"
+    },
+    {
+      "path": "apps/web/e2e/helpers/dense-dockview-plugin.ts",
+      "sha256": "0c7518ec883723ecfdb4c8e8aeea00fc6292998e6521f1bba592e2c48fe23845"
+    },
+    {
+      "path": "apps/web/e2e/helpers/dense-stream-progress.ts",
+      "sha256": "111de1c7da5e5847c70fd35b74c1d408ce3ca87841472d0f1bd2d6de2a4adfde"
+    },
+    {
+      "path": "apps/web/e2e/tests/performance/dense-dockview-comparison.spec.ts",
+      "sha256": "e82ce2cc0da903847bbec9c850203b4fb2768fdb84a60365f339223229bb5d93"
+    },
+    {
+      "path": "apps/web/e2e/scripts/dense-dockview-summary.mjs",
+      "sha256": "5994196cd816600a5280030971888640d111d77eb3515e1314278223753a41e8"
+    },
+    {
+      "path": "apps/web/e2e/scripts/summarize-dense-performance.mjs",
+      "sha256": "bfce9c415e9a205d90df9b59878c34afe78eabb80106d42cbd10748efc09b753"
+    },
+    {
+      "path": "apps/web/e2e/scripts/summarize-dense-dockview.test.mjs",
+      "sha256": "1740f1c51039520e183c1b9d8767123bea783c0326a368bbf76e28865339c179"
+    }
+  ],
+  "measurement": {
+    "surface": "Two visible chat sessions, one previously opened hidden sibling with a draft, Files, Changes, and Plan. Plugin series adds its prompt-history pane and hidden review tab.",
+    "windows": [
+      "idle",
+      "streaming",
+      "reduced-motion-idle"
+    ],
+    "setup": "Plugin installation, pane arrangement, and initial histories occur outside measurement. Setup is not cold-entry timing.",
+    "progress": "DOM-only per-session observation at the fixed deadline. Final visible boolean poll retains its 30-second bound. All six producers pass ordered durable stored checks after timing.",
+    "traffic": "Core WebSocket and plugin HTTP conversation traffic are recorded separately. Plugin paths and statuses are raw observations, not encoded-byte estimates.",
+    "summary": "Requires matching panel IDs, visible session IDs, hidden panel states, and exact plugin hash per sample. Core and plugin are separate groups."
+  },
+  "validation": {
+    "summaryRed": {
+      "log": "/tmp/kandev-dockview-summary-red.log",
+      "failed": 3,
+      "reason": "Existing summary treated Dockview samples as navigation."
+    },
+    "retentionRed": {
+      "report": "matched-dockview-1792841720665.json",
+      "log": "dockview-retained-chat-red-logs/kandev-run.e2e.xLoTWNII.log",
+      "artifacts": "dockview-retained-chat-red-failure/",
+      "durationSeconds": 31,
+      "reason": "Hidden session had an API tab but no document chat root or editor. Caller now opens it, waits for warmup, enters a draft, and hides it before timing."
+    },
+    "initialRehearsal": {
+      "report": "matched-dockview-1792841635239.json",
+      "log": "dockview-core-caller-smoke-logs/kandev-run.e2e.V2B6Lay5.log",
+      "status": "Passed timing setup but lacks a previously opened hidden chat. Superseded for that workload requirement."
+    },
+    "unit": {
+      "passed": 29,
+      "log": "/tmp/kandev-dockview-caller-units.log"
+    },
+    "lint": {
+      "status": "passed with zero warnings",
+      "log": "/tmp/kandev-dockview-caller-lint-complete.log"
+    },
+    "core": {
+      "report": ".kandev/diagnostics/dense-workbench-performance/matched-dockview-1792841783532.json",
+      "sha256": "4da40b8d6daf651c2e3a57f90816dbb21cf4fb9dde51e66a7b5badbd1f896cdd",
+      "log": "dockview-retained-chat-green-logs/kandev-run.e2e.jtcDcJxH.log",
+      "summary": "dockview-core-caller-smoke-summary.json",
+      "builds": {
+        "baseline": {
+          "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+          "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+          "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+          "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+        },
+        "candidate": {
+          "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+          "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "d83bd02b59785cf6c806178f3f0e15d0443dbac7f104998347cb6580371a9f94"
+        }
+      },
+      "databaseSha256": "5b801062a1bf46f7482f3512466cf40e027a84a3c5c68b8cd062c4d32ec049b7",
+      "plugin": null,
+      "fixture": {
+        "taskId": "17b5e0ef-8877-4beb-a407-fda11955205e",
+        "taskCount": 10,
+        "seededMessages": 180,
+        "environmentId": "5a8b728e-dbb9-4012-846d-c027cee80db9",
+        "visibleSessionIds": [
+          "2531aeb1-1ea4-4d37-b2c4-93b2206f3d8a",
+          "39680815-7763-4edf-8131-f9382d22d602"
+        ],
+        "hiddenSessionId": "236a5e03-2cd7-44c4-ae65-f6773b5827c9",
+        "visibleHistoryMessages": 10,
+        "hiddenHistoryMessages": 10,
+        "files": {
+          "marker": "navigation-available/000-Dense-task-0000.txt",
+          "profileFiles": 630,
+          "changedFiles": 73
+        }
+      },
+      "samples": [
+        {
+          "arm": "baseline",
+          "scheduledUpdates": 60,
+          "verificationErrors": [],
+          "hiddenDraftPreserved": true,
+          "initialHistory": [
+            {
+              "sessionId": "2531aeb1-1ea4-4d37-b2c4-93b2206f3d8a",
+              "loadedMessages": 14,
+              "mounted": true,
+              "detailActive": true,
+              "renderedAgentBodies": 9,
+              "chatEditors": 1
+            },
+            {
+              "sessionId": "39680815-7763-4edf-8131-f9382d22d602",
+              "loadedMessages": 14,
+              "mounted": true,
+              "detailActive": true,
+              "renderedAgentBodies": 9,
+              "chatEditors": 1
+            },
+            {
+              "sessionId": "236a5e03-2cd7-44c4-ae65-f6773b5827c9",
+              "loadedMessages": 14,
+              "mounted": true,
+              "detailActive": false,
+              "renderedAgentBodies": 9,
+              "chatEditors": 1
+            },
+            {
+              "sessionId": "c4da2543-e162-40a1-8367-d06953208db2",
+              "loadedMessages": 0,
+              "mounted": false,
+              "detailActive": false,
+              "renderedAgentBodies": 0,
+              "chatEditors": 0
+            },
+            {
+              "sessionId": "a2a82aa6-92ab-4771-a48b-de9e22d3cd2d",
+              "loadedMessages": 0,
+              "mounted": false,
+              "detailActive": false,
+              "renderedAgentBodies": 0,
+              "chatEditors": 0
+            },
+            {
+              "sessionId": "13052efe-fb02-491e-910e-02ee73f37319",
+              "loadedMessages": 0,
+              "mounted": false,
+              "detailActive": false,
+              "renderedAgentBodies": 0,
+              "chatEditors": 0
+            }
+          ],
+          "panels": 7,
+          "windows": [
+            {
+              "scenario": "idle",
+              "pluginHttpRequests": 0,
+              "pluginHttpResponses": 0,
+              "httpFailures": []
+            },
+            {
+              "scenario": "streaming",
+              "pluginHttpRequests": 0,
+              "pluginHttpResponses": 0,
+              "httpFailures": []
+            },
+            {
+              "scenario": "reduced-motion-idle",
+              "pluginHttpRequests": 0,
+              "pluginHttpResponses": 0,
+              "httpFailures": []
+            }
+          ]
+        },
+        {
+          "arm": "candidate",
+          "scheduledUpdates": 60,
+          "verificationErrors": [],
+          "hiddenDraftPreserved": true,
+          "initialHistory": [
+            {
+              "sessionId": "2531aeb1-1ea4-4d37-b2c4-93b2206f3d8a",
+              "loadedMessages": 14,
+              "mounted": true,
+              "detailActive": true,
+              "renderedAgentBodies": 9,
+              "chatEditors": 1
+            },
+            {
+              "sessionId": "39680815-7763-4edf-8131-f9382d22d602",
+              "loadedMessages": 14,
+              "mounted": true,
+              "detailActive": true,
+              "renderedAgentBodies": 9,
+              "chatEditors": 1
+            },
+            {
+              "sessionId": "236a5e03-2cd7-44c4-ae65-f6773b5827c9",
+              "loadedMessages": 14,
+              "mounted": true,
+              "detailActive": false,
+              "renderedAgentBodies": 9,
+              "chatEditors": 1
+            },
+            {
+              "sessionId": "c4da2543-e162-40a1-8367-d06953208db2",
+              "loadedMessages": 0,
+              "mounted": false,
+              "detailActive": false,
+              "renderedAgentBodies": 0,
+              "chatEditors": 0
+            },
+            {
+              "sessionId": "a2a82aa6-92ab-4771-a48b-de9e22d3cd2d",
+              "loadedMessages": 0,
+              "mounted": false,
+              "detailActive": false,
+              "renderedAgentBodies": 0,
+              "chatEditors": 0
+            },
+            {
+              "sessionId": "13052efe-fb02-491e-910e-02ee73f37319",
+              "loadedMessages": 0,
+              "mounted": false,
+              "detailActive": false,
+              "renderedAgentBodies": 0,
+              "chatEditors": 0
+            }
+          ],
+          "panels": 7,
+          "windows": [
+            {
+              "scenario": "idle",
+              "pluginHttpRequests": 0,
+              "pluginHttpResponses": 0,
+              "httpFailures": []
+            },
+            {
+              "scenario": "streaming",
+              "pluginHttpRequests": 0,
+              "pluginHttpResponses": 0,
+              "httpFailures": []
+            },
+            {
+              "scenario": "reduced-motion-idle",
+              "pluginHttpRequests": 0,
+              "pluginHttpResponses": 0,
+              "httpFailures": []
+            }
+          ]
+        }
+      ]
+    },
+    "plugin": {
+      "report": ".kandev/diagnostics/dense-workbench-performance/matched-dockview-1792841917399.json",
+      "sha256": "9c797e11fd91991c9b718e85a7c7880a80d3eebc3d67822b6345d8329d67d225",
+      "log": "dockview-plugin-caller-smoke-logs/kandev-run.e2e.lwrkunpi.log",
+      "summary": "dockview-plugin-caller-smoke-summary.json",
+      "builds": {
+        "baseline": {
+          "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+          "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+          "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+          "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+        },
+        "candidate": {
+          "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+          "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "d83bd02b59785cf6c806178f3f0e15d0443dbac7f104998347cb6580371a9f94"
+        }
+      },
+      "databaseSha256": "71b5957364f8e2e073250dcf77a30deebdcced509d7e71e369fbc2c6e8aa714e",
+      "plugin": {
+        "id": "kandev-plugin-e2e",
+        "panelId": "plugin:kandev-plugin-e2e:prompt-history-plugin",
+        "bundleSha256": "9fd37c4eaa58a63603e071bf6a30d76e478d685c2b3e6d1ed58d7aa3f3d25894",
+        "scope": "Full in-repo E2E plugin, including navigation, toolbar, and review contributions"
+      },
+      "fixture": {
+        "taskId": "b33acbb9-ac64-4233-9c00-e6141525c0ae",
+        "taskCount": 10,
+        "seededMessages": 1940,
+        "environmentId": "6466d183-e195-400a-b5fb-a50ee4c22601",
+        "visibleSessionIds": [
+          "61d6ed9b-a448-47ba-980d-3de02602205f",
+          "27ab9705-e168-4520-ae65-d60960bbb280"
+        ],
+        "hiddenSessionId": "9e462857-9512-4a92-864c-6514572723e1",
+        "visibleHistoryMessages": 120,
+        "hiddenHistoryMessages": 100,
+        "files": {
+          "marker": "navigation-available/000-Dense-task-0000.txt",
+          "profileFiles": 630,
+          "changedFiles": 73
+        }
+      },
+      "samples": [
+        {
+          "arm": "baseline",
+          "scheduledUpdates": 60,
+          "verificationErrors": [],
+          "hiddenDraftPreserved": true,
+          "initialHistory": [
+            {
+              "sessionId": "61d6ed9b-a448-47ba-980d-3de02602205f",
+              "loadedMessages": 100,
+              "mounted": true,
+              "detailActive": true,
+              "renderedAgentBodies": 84,
+              "chatEditors": 1
+            },
+            {
+              "sessionId": "27ab9705-e168-4520-ae65-d60960bbb280",
+              "loadedMessages": 100,
+              "mounted": true,
+              "detailActive": true,
+              "renderedAgentBodies": 84,
+              "chatEditors": 1
+            },
+            {
+              "sessionId": "9e462857-9512-4a92-864c-6514572723e1",
+              "loadedMessages": 100,
+              "mounted": true,
+              "detailActive": false,
+              "renderedAgentBodies": 84,
+              "chatEditors": 1
+            },
+            {
+              "sessionId": "34a213d5-003f-4e21-a50e-b57c09d469c9",
+              "loadedMessages": 0,
+              "mounted": false,
+              "detailActive": false,
+              "renderedAgentBodies": 0,
+              "chatEditors": 0
+            },
+            {
+              "sessionId": "88270a03-6374-4448-b063-84f84892e352",
+              "loadedMessages": 0,
+              "mounted": false,
+              "detailActive": false,
+              "renderedAgentBodies": 0,
+              "chatEditors": 0
+            },
+            {
+              "sessionId": "55a17910-0532-4936-8ed1-eb15fd69cb85",
+              "loadedMessages": 0,
+              "mounted": false,
+              "detailActive": false,
+              "renderedAgentBodies": 0,
+              "chatEditors": 0
+            }
+          ],
+          "panels": 9,
+          "windows": [
+            {
+              "scenario": "idle",
+              "pluginHttpRequests": 0,
+              "pluginHttpResponses": 0,
+              "httpFailures": []
+            },
+            {
+              "scenario": "streaming",
+              "pluginHttpRequests": 20,
+              "pluginHttpResponses": 20,
+              "httpFailures": []
+            },
+            {
+              "scenario": "reduced-motion-idle",
+              "pluginHttpRequests": 0,
+              "pluginHttpResponses": 0,
+              "httpFailures": []
+            }
+          ]
+        },
+        {
+          "arm": "candidate",
+          "scheduledUpdates": 60,
+          "verificationErrors": [],
+          "hiddenDraftPreserved": true,
+          "initialHistory": [
+            {
+              "sessionId": "61d6ed9b-a448-47ba-980d-3de02602205f",
+              "loadedMessages": 100,
+              "mounted": true,
+              "detailActive": true,
+              "renderedAgentBodies": 84,
+              "chatEditors": 1
+            },
+            {
+              "sessionId": "27ab9705-e168-4520-ae65-d60960bbb280",
+              "loadedMessages": 100,
+              "mounted": true,
+              "detailActive": true,
+              "renderedAgentBodies": 84,
+              "chatEditors": 1
+            },
+            {
+              "sessionId": "9e462857-9512-4a92-864c-6514572723e1",
+              "loadedMessages": 100,
+              "mounted": true,
+              "detailActive": false,
+              "renderedAgentBodies": 84,
+              "chatEditors": 1
+            },
+            {
+              "sessionId": "34a213d5-003f-4e21-a50e-b57c09d469c9",
+              "loadedMessages": 0,
+              "mounted": false,
+              "detailActive": false,
+              "renderedAgentBodies": 0,
+              "chatEditors": 0
+            },
+            {
+              "sessionId": "88270a03-6374-4448-b063-84f84892e352",
+              "loadedMessages": 0,
+              "mounted": false,
+              "detailActive": false,
+              "renderedAgentBodies": 0,
+              "chatEditors": 0
+            },
+            {
+              "sessionId": "55a17910-0532-4936-8ed1-eb15fd69cb85",
+              "loadedMessages": 0,
+              "mounted": false,
+              "detailActive": false,
+              "renderedAgentBodies": 0,
+              "chatEditors": 0
+            }
+          ],
+          "panels": 9,
+          "windows": [
+            {
+              "scenario": "idle",
+              "pluginHttpRequests": 0,
+              "pluginHttpResponses": 0,
+              "httpFailures": []
+            },
+            {
+              "scenario": "streaming",
+              "pluginHttpRequests": 0,
+              "pluginHttpResponses": 0,
+              "httpFailures": []
+            },
+            {
+              "scenario": "reduced-motion-idle",
+              "pluginHttpRequests": 0,
+              "pluginHttpResponses": 0,
+              "httpFailures": []
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "remaining": [
+    "Six alternating full-reference pairs per core/plugin series.",
+    "Final grid, columns, visibility/composer, long-history, and 4x cases.",
+    "Separate actual panel/subscription ownership and release checks after 100 switches."
+  ]
+}

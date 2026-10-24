@@ -382,3 +382,39 @@ binary and assets. These are correctness fixtures, not paired speed results.
 The timed caller must snapshot identical data, keep setup separate from cold
 entry, and preserve all final workload and identity checks.
 See [fixture evidence](evidence/dockview-dense-fixture.json).
+
+## Timed Dockview caller
+
+Set `KANDEV_DENSE_DOCKVIEW_COMPARE=1` and run
+`e2e/tests/performance/dense-dockview-comparison.spec.ts` with the guarded runner.
+`KANDEV_DENSE_BASELINE_ROOT` identifies the frozen original checkout. Optional
+`KANDEV_DENSE_CANDIDATE_ASSETS` identifies the candidate asset directory.
+The normal pair, CPU-rate, window, and small-fixture environment settings apply.
+Add `KANDEV_DENSE_DOCKVIEW_PLUGIN=1` for a separate full-plugin series.
+
+The caller snapshots the seeded database, checks its hash for each arm, and
+records the binary, asset, lockfile, source patch, and untracked harness hashes.
+Plugin installation and layout preparation occur before measurement. Setup
+elapsed time includes those actions and must not be called cold-entry time.
+Each sample records actual loaded message counts separately from seeded counts.
+
+Before timing, open the hidden sibling, wait for its warmup, enter a draft,
+and return to the visible primary chat. Verify that the hidden chat and its
+editor remain mounted with detail activity disabled. An unopened tab alone
+does not establish this workload. After streaming, reveal the hidden sibling
+and verify every tick and its draft. All six producers also pass ordered,
+durable stored-history checks outside the timing window.
+
+The three windows are idle, streaming, and reduced-motion idle. Record actual
+API panel IDs, their visibility, and the two visible session IDs before and
+after every window. The summary rejects missing or mismatched pane witnesses.
+Core and plugin groups stay separate; all samples must use the report's exact
+plugin archive hash. Global editor counts include the Plan editor. The history
+observations report chat editors separately.
+
+Fixed-deadline observations record core WebSocket traffic, separate plugin
+HTTP conversation requests/responses, and DOM-only stream progress by session.
+The final streaming duration includes the unchanged boolean visibility wait.
+DOM progress reads do not fetch history. Stored-history verification occurs
+after measurement. Plugin HTTP paths and status counts remain raw evidence;
+core `historyRequests` counts do not include them.

@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
+import { dockviewMetadata, dockviewRecords } from "./dense-dockview-summary.mjs";
 
 const DEFAULT_NAVIGATION_SCENARIO = "task-switch";
 
@@ -244,6 +245,7 @@ function navigationMetrics(report, sample) {
 }
 
 function measurementMetadata(report) {
+  if (report.workbenchSurface === "dockview") return dockviewMetadata(report);
   if (report.samples.every((sample) => sample.cold))
     return {
       finalVisibilityProbe: report.finalVisibilityProbe ?? LEGACY_VISIBILITY_PROBE,
@@ -264,6 +266,12 @@ function measurementNotes(report) {
     "Positive reduction means a lower candidate value. Counts such as mounted editors are observations, not optimization scores.",
     "Frame gaps and driver DOM readiness are not INP. Linux CPU throttling is not an M2 Air simulation.",
   ];
+  if (report.workbenchSurface === "dockview")
+    return [
+      ...common,
+      "Dockview setup is outside the measured windows and is not a cold-entry result. Core and full E2E plugin workloads remain separate; the plugin archive hash must match in both arms.",
+      "Streaming duration includes the wait for final visible content. Fixed-deadline traffic and visible-session progress are retained in the raw report.",
+    ];
   if (!report.samples.every((sample) => sample.cold))
     return [
       ...common,
@@ -291,6 +299,10 @@ export function summarizeReport(report) {
   for (const sample of report.samples) {
     checkVisibilityProbe(report, sample);
     const throttling = sampleThrottling(report, sample);
+    if (report.workbenchSurface === "dockview") {
+      records.push(...dockviewRecords(report, sample, windowMetrics, throttling.windowPrefix));
+      continue;
+    }
     const layoutPrefix =
       sampleLayoutPrefix(report, sample) + sampleBusyHeaderPrefix(report, sample);
     const identity = { arm: sample.arm, pair: sample.pair, cpuRate: sample.cpuRate };

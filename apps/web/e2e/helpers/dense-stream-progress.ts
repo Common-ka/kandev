@@ -21,7 +21,11 @@ export function summarizeStreamTicks(contents: string[]) {
   };
 }
 
-async function browserProgress(page: Page, threads: DenseThread[], surface: DenseStreamSurface) {
+export async function inspectDenseBrowserProgress(
+  page: Page,
+  threads: DenseThread[],
+  surface: DenseStreamSurface = "threads",
+) {
   try {
     const rows = await page.evaluate(
       (items) => {
@@ -66,7 +70,7 @@ export async function inspectDenseStreamProgress(
   surface: DenseStreamSurface = "threads",
 ) {
   const [browser, stored] = await Promise.all([
-    browserProgress(page, threads, surface),
+    inspectDenseBrowserProgress(page, threads, surface),
     Promise.all(threads.map((thread) => storedProgress(api, thread.sessionId))),
   ]);
   return { browser, stored };
