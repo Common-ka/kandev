@@ -205,6 +205,7 @@ func (r *sqliteRepository) DeleteMCPWorkspaceData(ctx context.Context, workspace
 	}
 	defer func() { _ = tx.Rollback() }()
 	queries := []string{
+		`DELETE FROM workspace_builtin_mcp_policies WHERE workspace_id = ?`,
 		`DELETE FROM workspace_agent_profile_mcp_selections WHERE workspace_id = ? OR mcp_server_id IN (SELECT id FROM mcp_server_definitions WHERE workspace_id = ?)`,
 		`DELETE FROM repository_mcp_selections WHERE mcp_server_id IN (SELECT id FROM mcp_server_definitions WHERE workspace_id = ?)`,
 		`DELETE FROM task_mcp_selections WHERE mcp_server_id IN (SELECT id FROM mcp_server_definitions WHERE workspace_id = ?)`,

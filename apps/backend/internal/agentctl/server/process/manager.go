@@ -34,6 +34,7 @@ import (
 	"github.com/kandev/kandev/internal/common/securityutil"
 	"github.com/kandev/kandev/internal/gitconfigenv"
 	"github.com/kandev/kandev/internal/githubauth"
+	mcpprofile "github.com/kandev/kandev/internal/mcp/profile"
 	tools "github.com/kandev/kandev/internal/tools/installer"
 	"go.uber.org/zap"
 )
@@ -114,6 +115,8 @@ const processStderrDrainTimeout = time.Second
 // Manager manages the agent subprocess
 type Manager struct {
 	cfg                      *config.InstanceConfig
+	builtinCatalogMu         sync.RWMutex
+	builtinCatalog           func() map[mcpprofile.PackageID][]string
 	logger                   *logger.Logger
 	managedGitTools          installedManagedGitTools
 	materializeGitHelperPath string

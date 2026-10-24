@@ -2710,6 +2710,7 @@ func registerMCPAndDebugRoutes(
 		mcpScopeResolver.SetCoordinatorLookup(p.services.Coordinator)
 	}
 	p.lifecycleMgr.SetMCPPrincipalScoper(mcpScopeResolver.ScopePrincipal)
+	wireBuiltinMCPActions(p)
 	if p.authSvc != nil {
 		p.lifecycleMgr.SetMCPIdentityScoper(mcpScopeResolver.Scope)
 		p.log.Debug("In-session MCP dispatch scoped to task owner")
