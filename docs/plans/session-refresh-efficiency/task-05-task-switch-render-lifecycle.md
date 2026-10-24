@@ -154,3 +154,13 @@ Browser-event p95 falls about 0.50%; the 20% target remains unmet. One frame-gap
 p95 pair regresses 11.07%, within the baseline series range; its cause is unknown.
 See [complete evidence](../dense-workbench-performance/evidence/final-incompatible-layout-six-pair-1x.json).
 Session tabs, streaming, visibility, stress, and individual owner retention remain open.
+
+## Final session-tab comparison (2026-10-24)
+
+Six pairs pass 480 measured and 200 retention switches between two real sessions
+in one shared environment. Renderer CPU falls in every pair (median 2.45%).
+Main-thread CPU falls 1.63% and browser-event p95 falls 2.25%, each with one
+regressing pair. The 20% warm-p95 target remains unmet. See
+[complete evidence](../dense-workbench-performance/evidence/final-session-tabs-six-pair-1x.json).
+All three switching scenarios now have six-pair final-build evidence at 1x;
+streaming, visibility, 4x stress, and individual owner retention remain open.

@@ -1,0 +1,1559 @@
+{
+  "scope": "Final retained build versus original baseline: switching between two real sessions in one shared task environment, at 1x CPU. Other workbench surfaces and 4x stress are separate scenarios.",
+  "productionRevision": "72085e06b4902b7ccbaae1a84be0048e5a9b6f11",
+  "baselineRevision": "595df36ed5c1cf02fd90cb972b623ad6edc53df8",
+  "harnessFiles": [
+    {
+      "path": "apps/web/e2e/helpers/dense-navigation-sample.ts",
+      "sha256": "27bc78e98c78f0b315abb8b8f2bca2d37231cb374fe35b59077d4c9ca236c3ef"
+    },
+    {
+      "path": "apps/web/e2e/helpers/dense-navigation-fixture.ts",
+      "sha256": "7c42d4c7c145364de890cdda908cccfe17b99baf6ebf7fb65a18f814660e63b7"
+    },
+    {
+      "path": "apps/web/e2e/helpers/navigation-browser-readiness.ts",
+      "sha256": "902e0b455c59d55641ae7de8c5abf99e726ce10286bce7d67374ce06a312988b"
+    },
+    {
+      "path": "apps/web/e2e/helpers/navigation-layout.ts",
+      "sha256": "22299a51f77eaa5c465204d5a85c682f85575bb608683dd89b389405d8e9b0b0"
+    },
+    {
+      "path": "apps/web/e2e/helpers/navigation-session-tabs.ts",
+      "sha256": "bbd16f7054da3812a73226cb7522ac1bd708904a28971e49e6d95d55af05585e"
+    },
+    {
+      "path": "apps/web/e2e/helpers/dense-measurement.ts",
+      "sha256": "5c03dab7ae4975ee54c05533f957389c0a51e52d75ca568a72ed393b09990983"
+    },
+    {
+      "path": "apps/web/e2e/helpers/navigation-response-hold.ts",
+      "sha256": "ced7e611616465b77f879d4597f4153a9fd7eeec6a5825d567e1c4ccc3e7ef08"
+    },
+    {
+      "path": "apps/web/e2e/tests/task/task-navigation-profile-helpers.ts",
+      "sha256": "871d95ac6c85d4e0afb81c8ffb9f63bf69abf5b5fe5f84e56a2602545579b871"
+    },
+    {
+      "path": "apps/web/e2e/tests/task/task-navigation-helpers.ts",
+      "sha256": "a0102d4d5b166d06ad07268e309b6b0b7c15f8c21df4a537e6f44eae4a6471cb"
+    },
+    {
+      "path": "apps/web/e2e/tests/performance/dense-navigation-comparison.spec.ts",
+      "sha256": "dc73727190285d092faa60a232ec07aaf3bbff1a2058ae9316f745baf6e64f60"
+    }
+  ],
+  "sourceIdentityNote": "Measured harness files match the delivery clone at productionRevision. The report machine revision reflects the original workspace read-only base c7c639e1cc09d6783121529c0a7e45c516b62d69. Exact build hashes and source patch remain in the raw report.",
+  "rawReport": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/matched-navigation-1792838186865.json",
+    "sha256": "556bdc83181ac821e353f29473e71120c232448ef9bd316085b30a5fe7397bc0",
+    "databaseSha256": "d7eee65cab54039958d2893e44f5dc0c7f038042a5d5df9e1670585c32ee1967",
+    "error": null
+  },
+  "run": {
+    "log": "final-navigation-session-tabs-six-pair-logs/kandev-run.e2e.jbM66C57.log",
+    "status": "passed",
+    "durationMinutes": 13,
+    "pairs": 6,
+    "timedSwitches": 480,
+    "retentionSwitches": 200,
+    "workspaceTasks": 1000,
+    "primaryHistory": 1000,
+    "siblingHistory": 100,
+    "filesInSharedTask": 630,
+    "changedFilesInSharedTask": 73,
+    "warmup": "Select A, then five alternating switches before each measured window.",
+    "order": [
+      "baseline-1x-0",
+      "candidate-1x-0",
+      "candidate-1x-1",
+      "baseline-1x-1",
+      "baseline-1x-2",
+      "candidate-1x-2",
+      "candidate-1x-3",
+      "baseline-1x-3",
+      "baseline-1x-4",
+      "candidate-1x-4",
+      "candidate-1x-5",
+      "baseline-1x-5"
+    ]
+  },
+  "summary": {
+    "measurementKind": "reference-workload",
+    "navigationScenario": "session-tabs",
+    "navigationReadiness": "pointerdown-raf-v1",
+    "machine": {
+      "revision": "c7c639e1cc09d6783121529c0a7e45c516b62d69",
+      "cpu": "11th Gen Intel(R) Core(TM) i7-11700T @ 1.40GHz",
+      "cores": 16,
+      "load": [
+        2.34,
+        1.81,
+        1.81
+      ],
+      "totalMemory": 33303863296,
+      "freeMemory": 22556573696,
+      "platform": "linux 6.18.49"
+    },
+    "builds": {
+      "baseline": {
+        "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+        "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+        "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+        "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+      },
+      "candidate": {
+        "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+        "assets": "/tmp/kandev-dense-layout-arrangement-v2-5936a872/apps/web/dist",
+        "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+        "assetsSha256": "d83bd02b59785cf6c806178f3f0e15d0443dbac7f104998347cb6580371a9f94"
+      }
+    },
+    "sampleCount": 12,
+    "comparisons": [
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "elapsedMs",
+        "pairs": 6,
+        "baseline": {
+          "median": 23880.960603000043,
+          "min": 22933.615992999985,
+          "max": 24772.90068099997,
+          "values": [
+            22933.615992999985,
+            23580.608479999995,
+            23041.083868000016,
+            24181.31272600009,
+            24196.437874000054,
+            24772.90068099997
+          ]
+        },
+        "candidate": {
+          "median": 23693.990832499956,
+          "min": 22450.743732000003,
+          "max": 24312.280624000006,
+          "values": [
+            22450.743732000003,
+            22902.217865000013,
+            23507.537217999983,
+            23880.44444699993,
+            24312.280624000006,
+            24205.972749999957
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          482.87226099998225,
+          678.3906149999821,
+          -466.45334999996703,
+          300.86827900016215,
+          -115.8427499999525,
+          566.9279310000129
+        ],
+        "pairedPercentReduction": [
+          2.1055216985728245,
+          2.876900380138037,
+          -2.024441873794783,
+          1.2442181382347548,
+          -0.47875952073271794,
+          2.2885003992884396
+        ],
+        "medianPairedPercentReduction": 1.6748699184037896
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "mainThreadMs",
+        "pairs": 6,
+        "baseline": {
+          "median": 19747.351000000002,
+          "min": 19279.31,
+          "max": 19879.2,
+          "values": [
+            19689.508,
+            19834.507999999998,
+            19279.31,
+            19879.2,
+            19700.082000000002,
+            19794.620000000003
+          ]
+        },
+        "candidate": {
+          "median": 19467.0645,
+          "min": 19023.118,
+          "max": 19551.898999999998,
+          "values": [
+            19023.118,
+            19255.898999999998,
+            19484.015,
+            19540.289,
+            19551.898999999998,
+            19450.113999999998
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          666.390000000003,
+          578.6090000000004,
+          -204.7049999999981,
+          338.91100000000006,
+          148.18300000000454,
+          344.50600000000486
+        ],
+        "pairedPercentReduction": [
+          3.3844928984513123,
+          2.9171835268109523,
+          -1.0617859249112032,
+          1.7048523079399576,
+          0.7521948385798827,
+          1.7404021900900588
+        ],
+        "medianPairedPercentReduction": 1.7226272490150083
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "mainThreadMsPerSecond",
+        "pairs": 6,
+        "baseline": {
+          "median": 829.4128045854632,
+          "min": 799.0432874573243,
+          "max": 858.5435461206736,
+          "values": [
+            858.5435461206736,
+            841.1363946279305,
+            836.736245154489,
+            822.0893640164375,
+            814.1728176100025,
+            799.0432874573243
+          ]
+        },
+        "candidate": {
+          "median": 823.5480071740076,
+          "min": 803.5254026302263,
+          "max": 847.3268514880217,
+          "values": [
+            847.3268514880217,
+            840.787521693589,
+            828.8411848213888,
+            818.2548295266264,
+            804.1984749344836,
+            803.5254026302263
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          11.216694632651866,
+          0.3488729343414434,
+          7.8950603331002185,
+          3.8345344898110625,
+          9.974342675518983,
+          -4.482115172902013
+        ],
+        "pairedPercentReduction": [
+          1.306479407286266,
+          0.041476380830693264,
+          0.9435542417123967,
+          0.46643767182157486,
+          1.2250891284725745,
+          -0.5609352138060976
+        ],
+        "medianPairedPercentReduction": 0.7049959567669858
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "mainThreadCpuMs",
+        "pairs": 6,
+        "baseline": {
+          "median": 19582.406000000003,
+          "min": 19098.249000000003,
+          "max": 19669.262,
+          "values": [
+            19465.496000000003,
+            19630.993,
+            19098.249000000003,
+            19669.262,
+            19535.376,
+            19629.436
+          ]
+        },
+        "candidate": {
+          "median": 19286.65,
+          "min": 18832.584,
+          "max": 19417.263,
+          "values": [
+            18832.584,
+            19083.618000000002,
+            19307.029,
+            19390.696,
+            19417.263,
+            19266.271000000004
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          632.9120000000039,
+          547.3749999999964,
+          -208.7799999999952,
+          278.5659999999989,
+          118.1130000000012,
+          363.16499999999724
+        ],
+        "pairedPercentReduction": [
+          3.251455806725931,
+          2.7883204889329662,
+          -1.0931892237869303,
+          1.4162503910924513,
+          0.6046108352355296,
+          1.8501040987626807
+        ],
+        "medianPairedPercentReduction": 1.633177244927566
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "rendererCpuMs",
+        "pairs": 6,
+        "baseline": {
+          "median": 26835,
+          "min": 26139.999999999996,
+          "max": 26990.000000000004,
+          "values": [
+            26850,
+            26990.000000000004,
+            26139.999999999996,
+            26830,
+            26730,
+            26840
+          ]
+        },
+        "candidate": {
+          "median": 26070.000000000004,
+          "min": 25630.000000000004,
+          "max": 26340,
+          "values": [
+            25630.000000000004,
+            26080.000000000004,
+            25930.000000000004,
+            26060.000000000004,
+            26189.999999999996,
+            26340
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          1219.9999999999964,
+          910,
+          209.99999999999272,
+          769.9999999999964,
+          540.0000000000036,
+          500
+        ],
+        "pairedPercentReduction": [
+          4.5437616387336925,
+          3.3716191181919224,
+          0.8033664881407527,
+          2.8699217294073662,
+          2.0202020202020337,
+          1.8628912071535022
+        ],
+        "medianPairedPercentReduction": 2.4450618748046997
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "scriptMs",
+        "pairs": 6,
+        "baseline": {
+          "median": 12350.679,
+          "min": 12131.313000000002,
+          "max": 12465.563,
+          "values": [
+            12465.563,
+            12412.329,
+            12131.313000000002,
+            12399.413,
+            12301.945,
+            12256.312999999998
+          ]
+        },
+        "candidate": {
+          "median": 12093.9335,
+          "min": 11971.151999999998,
+          "max": 12237.865,
+          "values": [
+            11971.151999999998,
+            12090.309000000001,
+            12237.865,
+            12104.204,
+            12097.557999999999,
+            11990.494999999999
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          494.4110000000019,
+          322.0199999999986,
+          -106.55199999999786,
+          295.20900000000074,
+          204.38700000000063,
+          265.8179999999993
+        ],
+        "pairedPercentReduction": [
+          3.9662147630235545,
+          2.5943559826685116,
+          -0.8783220744530937,
+          2.3808304473768294,
+          1.6614202063169736,
+          2.1688251597360426
+        ],
+        "medianPairedPercentReduction": 2.2748278035564358
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "styleMs",
+        "pairs": 6,
+        "baseline": {
+          "median": 2421.282,
+          "min": 2296.7810000000004,
+          "max": 2538.9939999999997,
+          "values": [
+            2296.7810000000004,
+            2419.332,
+            2328.395,
+            2473.5139999999997,
+            2423.232,
+            2538.9939999999997
+          ]
+        },
+        "candidate": {
+          "median": 2388.3305,
+          "min": 2258.437,
+          "max": 2455.893,
+          "values": [
+            2258.437,
+            2288.9880000000003,
+            2363.8379999999997,
+            2455.893,
+            2439.79,
+            2412.8230000000003
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          38.344000000000506,
+          130.3439999999996,
+          -35.442999999999756,
+          17.62099999999964,
+          -16.557999999999993,
+          126.17099999999937
+        ],
+        "pairedPercentReduction": [
+          1.6694669626751744,
+          5.387602858970972,
+          -1.5222073574286046,
+          0.7123873161825501,
+          -0.6833023003988059,
+          4.969330372580612
+        ],
+        "medianPairedPercentReduction": 1.1909271394288623
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "layoutMs",
+        "pairs": 6,
+        "baseline": {
+          "median": 190.52399999999997,
+          "min": 185.831,
+          "max": 202.164,
+          "values": [
+            202.164,
+            188.25199999999998,
+            185.831,
+            192.79599999999996,
+            186.40499999999997,
+            193.22000000000003
+          ]
+        },
+        "candidate": {
+          "median": 185.913,
+          "min": 183.025,
+          "max": 190.355,
+          "values": [
+            190.355,
+            187.425,
+            183.025,
+            185.574,
+            184.14600000000004,
+            186.25199999999998
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          11.808999999999997,
+          0.8269999999999698,
+          2.805999999999983,
+          7.221999999999952,
+          2.2589999999999293,
+          6.968000000000046
+        ],
+        "pairedPercentReduction": [
+          5.84129716467818,
+          0.4393047617023829,
+          1.5099741162669218,
+          3.7459283387621904,
+          1.2118773638045812,
+          3.606251940792902
+        ],
+        "medianPairedPercentReduction": 2.558113028529912
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "styleRecalculations",
+        "pairs": 6,
+        "baseline": {
+          "median": 1170.5,
+          "min": 1108,
+          "max": 1199,
+          "values": [
+            1108,
+            1166,
+            1166,
+            1175,
+            1182,
+            1199
+          ]
+        },
+        "candidate": {
+          "median": 1178.5,
+          "min": 1126,
+          "max": 1192,
+          "values": [
+            1126,
+            1143,
+            1168,
+            1189,
+            1192,
+            1191
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          -18,
+          23,
+          -2,
+          -14,
+          -10,
+          8
+        ],
+        "pairedPercentReduction": [
+          -1.6245487364620939,
+          1.9725557461406518,
+          -0.17152658662092624,
+          -1.1914893617021276,
+          -0.8460236886632826,
+          0.6672226855713094
+        ],
+        "medianPairedPercentReduction": -0.5087751376421044
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "layouts",
+        "pairs": 6,
+        "baseline": {
+          "median": 439,
+          "min": 418,
+          "max": 442,
+          "values": [
+            418,
+            438,
+            436,
+            442,
+            440,
+            442
+          ]
+        },
+        "candidate": {
+          "median": 432.5,
+          "min": 421,
+          "max": 439,
+          "values": [
+            421,
+            424,
+            429,
+            436,
+            436,
+            439
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          -3,
+          14,
+          7,
+          6,
+          4,
+          3
+        ],
+        "pairedPercentReduction": [
+          -0.7177033492822966,
+          3.1963470319634704,
+          1.6055045871559632,
+          1.3574660633484164,
+          0.9090909090909091,
+          0.6787330316742082
+        ],
+        "medianPairedPercentReduction": 1.1332784862196628
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "frameGapP95Ms",
+        "pairs": 6,
+        "baseline": {
+          "median": 125.05000000000018,
+          "min": 116.69999999999891,
+          "max": 133.29999999999927,
+          "values": [
+            133.29999999999927,
+            133.29999999999927,
+            133.29999999999927,
+            116.80000000000109,
+            116.69999999999891,
+            116.69999999999982
+          ]
+        },
+        "candidate": {
+          "median": 116.70000000000073,
+          "min": 116.60000000000036,
+          "max": 133.29999999999927,
+          "values": [
+            133.29999999999927,
+            116.70000000000073,
+            116.70000000000073,
+            116.60000000000036,
+            116.70000000000073,
+            116.69999999999891
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          0,
+          16.599999999998545,
+          16.599999999998545,
+          0.2000000000007276,
+          -1.8189894035458565e-12,
+          9.094947017729282e-13
+        ],
+        "pairedPercentReduction": [
+          0,
+          12.453113278318556,
+          12.453113278318556,
+          0.17123287671295012,
+          -1.5586884349150588e-12,
+          7.793442174575232e-13
+        ],
+        "medianPairedPercentReduction": 0.08561643835686474
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "frameGapMaxMs",
+        "pairs": 6,
+        "baseline": {
+          "median": 250.04999999999973,
+          "min": 250,
+          "max": 266.7000000000007,
+          "values": [
+            250,
+            250,
+            250.09999999999945,
+            266.7000000000007,
+            250,
+            266.59999999999854
+          ]
+        },
+        "candidate": {
+          "median": 258.2999999999997,
+          "min": 250,
+          "max": 266.7000000000007,
+          "values": [
+            250,
+            266.59999999999945,
+            266.7000000000007,
+            266.6999999999971,
+            250,
+            250
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          0,
+          -16.599999999999454,
+          -16.600000000001273,
+          3.637978807091713e-12,
+          0,
+          16.599999999998545
+        ],
+        "pairedPercentReduction": [
+          0,
+          -6.639999999999782,
+          -6.637345061975734,
+          1.364071543716424e-12,
+          0,
+          6.226556639159278
+        ],
+        "medianPairedPercentReduction": 0
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "longTasks",
+        "pairs": 6,
+        "baseline": {
+          "median": 41,
+          "min": 40,
+          "max": 41,
+          "values": [
+            40,
+            41,
+            40,
+            41,
+            41,
+            41
+          ]
+        },
+        "candidate": {
+          "median": 40,
+          "min": 40,
+          "max": 40,
+          "values": [
+            40,
+            40,
+            40,
+            40,
+            40,
+            40
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          0,
+          1,
+          0,
+          1,
+          1,
+          1
+        ],
+        "pairedPercentReduction": [
+          0,
+          2.4390243902439024,
+          0,
+          2.4390243902439024,
+          2.4390243902439024,
+          2.4390243902439024
+        ],
+        "medianPairedPercentReduction": 2.4390243902439024
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "longTaskMs",
+        "pairs": 6,
+        "baseline": {
+          "median": 7514.5,
+          "min": 7439,
+          "max": 7614,
+          "values": [
+            7462,
+            7562,
+            7439,
+            7614,
+            7467,
+            7584
+          ]
+        },
+        "candidate": {
+          "median": 7348.5,
+          "min": 7313,
+          "max": 7453,
+          "values": [
+            7350,
+            7313,
+            7453,
+            7347,
+            7395,
+            7315
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          112,
+          249,
+          -14,
+          267,
+          72,
+          269
+        ],
+        "pairedPercentReduction": [
+          1.5009380863039399,
+          3.2927796879132503,
+          -0.18819733835192903,
+          3.5066981875492513,
+          0.9642426677380475,
+          3.5469409282700424
+        ],
+        "medianPairedPercentReduction": 2.396858887108595
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "domNodes",
+        "pairs": 6,
+        "baseline": {
+          "median": 8732,
+          "min": 8732,
+          "max": 8732,
+          "values": [
+            8732,
+            8732,
+            8732,
+            8732,
+            8732,
+            8732
+          ]
+        },
+        "candidate": {
+          "median": 8751,
+          "min": 8751,
+          "max": 8751,
+          "values": [
+            8751,
+            8751,
+            8751,
+            8751,
+            8751,
+            8751
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          -19,
+          -19,
+          -19,
+          -19,
+          -19,
+          -19
+        ],
+        "pairedPercentReduction": [
+          -0.21759047182775995,
+          -0.21759047182775995,
+          -0.21759047182775995,
+          -0.21759047182775995,
+          -0.21759047182775995,
+          -0.21759047182775995
+        ],
+        "medianPairedPercentReduction": -0.21759047182775995
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "mountedEditors",
+        "pairs": 6,
+        "baseline": {
+          "median": 2,
+          "min": 2,
+          "max": 2,
+          "values": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        "candidate": {
+          "median": 2,
+          "min": 2,
+          "max": 2,
+          "values": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pairedPercentReduction": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "medianPairedPercentReduction": 0
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "runningAnimations",
+        "pairs": 6,
+        "baseline": {
+          "median": 10,
+          "min": 10,
+          "max": 10,
+          "values": [
+            10,
+            10,
+            10,
+            10,
+            10,
+            10
+          ]
+        },
+        "candidate": {
+          "median": 10,
+          "min": 10,
+          "max": 10,
+          "values": [
+            10,
+            10,
+            10,
+            10,
+            10,
+            10
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pairedPercentReduction": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "medianPairedPercentReduction": 0
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "selectionP50Ms",
+        "pairs": 6,
+        "baseline": {
+          "median": 581.7848452499893,
+          "min": 550.8877424999955,
+          "max": 613.0243900000933,
+          "values": [
+            574.6716180000076,
+            575.1230450000148,
+            550.8877424999955,
+            588.4466454999638,
+            591.8142259999877,
+            613.0243900000933
+          ]
+        },
+        "candidate": {
+          "median": 574.2474655000115,
+          "min": 536.6865584999905,
+          "max": 587.1052180000115,
+          "values": [
+            536.6865584999905,
+            553.3436220000149,
+            569.2844070000283,
+            579.2105239999946,
+            584.9984279999626,
+            587.1052180000115
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          37.98505950001709,
+          21.77942299999995,
+          -18.396664500032784,
+          9.236121499969158,
+          6.815798000025097,
+          25.919172000081744
+        ],
+        "pairedPercentReduction": [
+          6.609872196614482,
+          3.786915372170383,
+          -3.339457947738406,
+          1.5695767102422418,
+          1.1516786350494452,
+          4.228081691835753
+        ],
+        "medianPairedPercentReduction": 2.6782460412063123
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "selectionP95Ms",
+        "pairs": 6,
+        "baseline": {
+          "median": 672.9553459999879,
+          "min": 658.1264130000491,
+          "max": 693.059358999948,
+          "values": [
+            672.7361969999911,
+            673.1744949999847,
+            658.1264130000491,
+            693.059358999948,
+            668.1943060000194,
+            691.0576989999972
+          ]
+        },
+        "candidate": {
+          "median": 671.1279610000493,
+          "min": 644.1761270000134,
+          "max": 690.7900680000894,
+          "values": [
+            644.1761270000134,
+            657.9540960000013,
+            667.9884520000196,
+            674.2674700000789,
+            690.7900680000894,
+            677.1842770000221
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          28.560069999977713,
+          15.220398999983445,
+          -9.862038999970537,
+          18.791888999869116,
+          -22.595762000069954,
+          13.873421999975108
+        ],
+        "pairedPercentReduction": [
+          4.2453594926717,
+          2.2609886608944967,
+          -1.4985022337904255,
+          2.7114400456239314,
+          -3.3816154668144236,
+          2.0075634813201266
+        ],
+        "medianPairedPercentReduction": 2.134276071107312
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "requests",
+        "pairs": 6,
+        "baseline": {
+          "median": 366,
+          "min": 366,
+          "max": 368,
+          "values": [
+            366,
+            366,
+            366,
+            366,
+            367,
+            368
+          ]
+        },
+        "candidate": {
+          "median": 366,
+          "min": 366,
+          "max": 366,
+          "values": [
+            366,
+            366,
+            366,
+            366,
+            366,
+            366
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          2
+        ],
+        "pairedPercentReduction": [
+          0,
+          0,
+          0,
+          0,
+          0.2724795640326976,
+          0.5434782608695652
+        ],
+        "medianPairedPercentReduction": 0
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "eventHeaderP50Ms",
+        "pairs": 6,
+        "baseline": {
+          "median": 191.12500001490116,
+          "min": 185.25,
+          "max": 200.40000000596046,
+          "values": [
+            193.89999997615814,
+            192.00000002980232,
+            186.80000001192093,
+            200.40000000596046,
+            185.25,
+            190.25
+          ]
+        },
+        "candidate": {
+          "median": 189.84999999403954,
+          "min": 184.59999999403954,
+          "max": 193.25000002980232,
+          "values": [
+            189.55000001192093,
+            192.19999998807907,
+            190.14999997615814,
+            184.59999999403954,
+            193.25000002980232,
+            186.34999999403954
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          4.349999964237213,
+          -0.19999995827674866,
+          -3.349999964237213,
+          15.800000011920929,
+          -8.000000029802322,
+          3.9000000059604645
+        ],
+        "pairedPercentReduction": [
+          2.2434244274224278,
+          -0.1041666449196378,
+          -1.7933618651089014,
+          7.884231542640215,
+          -4.318488545102468,
+          2.049934300110625
+        ],
+        "medianPairedPercentReduction": 0.9728838275954936
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "eventHeaderP95Ms",
+        "pairs": 6,
+        "baseline": {
+          "median": 244.34999999403954,
+          "min": 240.19999998807907,
+          "max": 254,
+          "values": [
+            254,
+            247.0999999642372,
+            241.60000002384186,
+            250.60000002384186,
+            241.20000004768372,
+            240.19999998807907
+          ]
+        },
+        "candidate": {
+          "median": 239.7000000178814,
+          "min": 235.9000000357628,
+          "max": 247.30000001192093,
+          "values": [
+            239.9000000357628,
+            239.5,
+            247.30000001192093,
+            243.80000001192093,
+            239,
+            235.9000000357628
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          14.099999964237213,
+          7.599999964237213,
+          -5.699999988079071,
+          6.800000011920929,
+          2.200000047683716,
+          4.299999952316284
+        ],
+        "pairedPercentReduction": [
+          5.551181088282368,
+          3.0756778491854155,
+          -2.359271518011828,
+          2.713487634187543,
+          0.9121061555757835,
+          1.7901748345252664
+        ],
+        "medianPairedPercentReduction": 2.2518312343564046
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "eventTranscriptP50Ms",
+        "pairs": 6,
+        "baseline": {
+          "median": 191.12500001490116,
+          "min": 185.25,
+          "max": 200.40000000596046,
+          "values": [
+            193.89999997615814,
+            192.00000002980232,
+            186.80000001192093,
+            200.40000000596046,
+            185.25,
+            190.25
+          ]
+        },
+        "candidate": {
+          "median": 189.84999999403954,
+          "min": 184.59999999403954,
+          "max": 193.25000002980232,
+          "values": [
+            189.55000001192093,
+            192.19999998807907,
+            190.14999997615814,
+            184.59999999403954,
+            193.25000002980232,
+            186.34999999403954
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          4.349999964237213,
+          -0.19999995827674866,
+          -3.349999964237213,
+          15.800000011920929,
+          -8.000000029802322,
+          3.9000000059604645
+        ],
+        "pairedPercentReduction": [
+          2.2434244274224278,
+          -0.1041666449196378,
+          -1.7933618651089014,
+          7.884231542640215,
+          -4.318488545102468,
+          2.049934300110625
+        ],
+        "medianPairedPercentReduction": 0.9728838275954936
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "eventTranscriptP95Ms",
+        "pairs": 6,
+        "baseline": {
+          "median": 244.34999999403954,
+          "min": 240.19999998807907,
+          "max": 254,
+          "values": [
+            254,
+            247.0999999642372,
+            241.60000002384186,
+            250.60000002384186,
+            241.20000004768372,
+            240.19999998807907
+          ]
+        },
+        "candidate": {
+          "median": 239.7000000178814,
+          "min": 235.9000000357628,
+          "max": 247.30000001192093,
+          "values": [
+            239.9000000357628,
+            239.5,
+            247.30000001192093,
+            243.80000001192093,
+            239,
+            235.9000000357628
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          14.099999964237213,
+          7.599999964237213,
+          -5.699999988079071,
+          6.800000011920929,
+          2.200000047683716,
+          4.299999952316284
+        ],
+        "pairedPercentReduction": [
+          5.551181088282368,
+          3.0756778491854155,
+          -2.359271518011828,
+          2.713487634187543,
+          0.9121061555757835,
+          1.7901748345252664
+        ],
+        "medianPairedPercentReduction": 2.2518312343564046
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "eventComposerP50Ms",
+        "pairs": 6,
+        "baseline": {
+          "median": 191.12500001490116,
+          "min": 185.25,
+          "max": 200.40000000596046,
+          "values": [
+            193.89999997615814,
+            192.00000002980232,
+            186.80000001192093,
+            200.40000000596046,
+            185.25,
+            190.25
+          ]
+        },
+        "candidate": {
+          "median": 189.84999999403954,
+          "min": 184.59999999403954,
+          "max": 193.25000002980232,
+          "values": [
+            189.55000001192093,
+            192.19999998807907,
+            190.14999997615814,
+            184.59999999403954,
+            193.25000002980232,
+            186.34999999403954
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          4.349999964237213,
+          -0.19999995827674866,
+          -3.349999964237213,
+          15.800000011920929,
+          -8.000000029802322,
+          3.9000000059604645
+        ],
+        "pairedPercentReduction": [
+          2.2434244274224278,
+          -0.1041666449196378,
+          -1.7933618651089014,
+          7.884231542640215,
+          -4.318488545102468,
+          2.049934300110625
+        ],
+        "medianPairedPercentReduction": 0.9728838275954936
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "eventComposerP95Ms",
+        "pairs": 6,
+        "baseline": {
+          "median": 244.34999999403954,
+          "min": 240.19999998807907,
+          "max": 254,
+          "values": [
+            254,
+            247.0999999642372,
+            241.60000002384186,
+            250.60000002384186,
+            241.20000004768372,
+            240.19999998807907
+          ]
+        },
+        "candidate": {
+          "median": 239.7000000178814,
+          "min": 235.9000000357628,
+          "max": 247.30000001192093,
+          "values": [
+            239.9000000357628,
+            239.5,
+            247.30000001192093,
+            243.80000001192093,
+            239,
+            235.9000000357628
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          14.099999964237213,
+          7.599999964237213,
+          -5.699999988079071,
+          6.800000011920929,
+          2.200000047683716,
+          4.299999952316284
+        ],
+        "pairedPercentReduction": [
+          5.551181088282368,
+          3.0756778491854155,
+          -2.359271518011828,
+          2.713487634187543,
+          0.9121061555757835,
+          1.7901748345252664
+        ],
+        "medianPairedPercentReduction": 2.2518312343564046
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "eventAllReadyP50Ms",
+        "pairs": 6,
+        "baseline": {
+          "median": 191.12500001490116,
+          "min": 185.25,
+          "max": 200.40000000596046,
+          "values": [
+            193.89999997615814,
+            192.00000002980232,
+            186.80000001192093,
+            200.40000000596046,
+            185.25,
+            190.25
+          ]
+        },
+        "candidate": {
+          "median": 189.84999999403954,
+          "min": 184.59999999403954,
+          "max": 193.25000002980232,
+          "values": [
+            189.55000001192093,
+            192.19999998807907,
+            190.14999997615814,
+            184.59999999403954,
+            193.25000002980232,
+            186.34999999403954
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          4.349999964237213,
+          -0.19999995827674866,
+          -3.349999964237213,
+          15.800000011920929,
+          -8.000000029802322,
+          3.9000000059604645
+        ],
+        "pairedPercentReduction": [
+          2.2434244274224278,
+          -0.1041666449196378,
+          -1.7933618651089014,
+          7.884231542640215,
+          -4.318488545102468,
+          2.049934300110625
+        ],
+        "medianPairedPercentReduction": 0.9728838275954936
+      },
+      {
+        "group": "1x/pointerdown-raf-v1-session-tabs",
+        "metric": "eventAllReadyP95Ms",
+        "pairs": 6,
+        "baseline": {
+          "median": 244.34999999403954,
+          "min": 240.19999998807907,
+          "max": 254,
+          "values": [
+            254,
+            247.0999999642372,
+            241.60000002384186,
+            250.60000002384186,
+            241.20000004768372,
+            240.19999998807907
+          ]
+        },
+        "candidate": {
+          "median": 239.7000000178814,
+          "min": 235.9000000357628,
+          "max": 247.30000001192093,
+          "values": [
+            239.9000000357628,
+            239.5,
+            247.30000001192093,
+            243.80000001192093,
+            239,
+            235.9000000357628
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          14.099999964237213,
+          7.599999964237213,
+          -5.699999988079071,
+          6.800000011920929,
+          2.200000047683716,
+          4.299999952316284
+        ],
+        "pairedPercentReduction": [
+          5.551181088282368,
+          3.0756778491854155,
+          -2.359271518011828,
+          2.713487634187543,
+          0.9121061555757835,
+          1.7901748345252664
+        ],
+        "medianPairedPercentReduction": 2.2518312343564046
+      }
+    ],
+    "notes": [
+      "mainThreadMs and mainThreadMsPerSecond use TaskDuration with timeTicks: elapsed time in main-thread tasks, not thread CPU time. Script, style, and layout durations use the same elapsed-time domain.",
+      "mainThreadCpuMs uses ThreadTime (renderer main-thread CPU). rendererCpuMs uses ProcessTime (renderer-process CPU); it excludes separate browser, GPU, and backend processes.",
+      "Positive reduction means a lower candidate value. Counts such as mounted editors are observations, not optimization scores.",
+      "Frame gaps and driver DOM readiness are not INP. Linux CPU throttling is not an M2 Air simulation.",
+      "Browser-event readiness uses trusted pointerdown timestamps and frame-sampled DOM/owner state without geometry reads. It is separate from driver-clock readiness and is not screen presentation or INP."
+    ]
+  },
+  "sessionValidation": {
+    "trustedSelectionsWithExpectedTaskAndSession": 480,
+    "sharedNonemptyEnvironmentIds": [
+      "3e9a4587-43ba-40e7-9f1f-ab91f011b776"
+    ],
+    "taskIds": [
+      "13ba6fe0-bf1b-4fcf-a182-2c83f87e0934"
+    ],
+    "sessionIds": [
+      "38eb023f-f732-467a-baa7-23e3b2685e36",
+      "425a39ef-f384-4a89-ac8e-8a0bfe84a692"
+    ],
+    "headerTranscriptComposerSameReadyFrame": 480
+  },
+  "retention": [
+    {
+      "arm": "baseline",
+      "switches": 100,
+      "heapBefore": {
+        "usedSize": 100702784,
+        "totalSize": 121249792,
+        "embedderHeapUsedSize": 18763760,
+        "backingStorageSize": 17509578
+      },
+      "heapAfter": {
+        "usedSize": 102885964,
+        "totalSize": 109191168,
+        "embedderHeapUsedSize": 18702184,
+        "backingStorageSize": 17507481
+      },
+      "ownersBefore": {
+        "editors": 2,
+        "panels": 3
+      },
+      "ownersAfter": {
+        "editors": 2,
+        "panels": 3
+      }
+    },
+    {
+      "arm": "candidate",
+      "switches": 100,
+      "heapBefore": {
+        "usedSize": 86488820,
+        "totalSize": 92217344,
+        "embedderHeapUsedSize": 17807736,
+        "backingStorageSize": 13527592
+      },
+      "heapAfter": {
+        "usedSize": 88530976,
+        "totalSize": 93790208,
+        "embedderHeapUsedSize": 18611144,
+        "backingStorageSize": 13525338
+      },
+      "ownersBefore": {
+        "editors": 2,
+        "panels": 3
+      },
+      "ownersAfter": {
+        "editors": 2,
+        "panels": 3
+      }
+    }
+  ],
+  "retentionCounterScope": {
+    "legacyField": "panels",
+    "selector": ".dv-content-container",
+    "measuredEntity": "Dockview group content container",
+    "source": "dockview-core4.13.1/dist/esm/dockview/dockviewGroupPanelModel.js:161 and components/panel/content.js:20",
+    "limitation": "Individual API panel objects and subscription owners are not counted. Raw observations and timing calculations are unchanged."
+  },
+  "hostMonitor": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/final-navigation-session-tabs-host.jsonl",
+    "sha256": "20f286ceaccf3d59b3cd3efad0e87783d2c2bcfff353b3ce166633120084a99f",
+    "samples": 27,
+    "load1Min": 0.72705078125,
+    "load1Max": 3.3876953125,
+    "availableMemoryKiBMin": 20986384
+  },
+  "conclusions": [
+    "Renderer CPU falls in every pair, median paired reduction 2.45%. Main-thread CPU falls 1.63%, with five improvements and one 1.09% regression. Script time falls 2.28%, style 1.19%, and layout 2.56%; style has two regressing pairs.",
+    "Driver p 50/p 95 fall 2.68%/2.13% by median paired change, with one/two regressing pairs. Browser-event p 50 falls 0.97%, with three better and three worse pairs; p 95 falls 2.25%, with five better and one 2.36% worse pair. Header, transcript, and composer share the same ready frame for all 480 measured switches.",
+    "Frame-gap p 95 arm medians are 125.05/116.7 ms, but median paired reduction is only 0.09%: two pairs improve about 12.45%, one improves 0.17%, and three are effectively equal. Do not substitute the ratio of arm medians for the paired reduction. Maximum frame gap is neutral by median paired change, with two approximately 6.64% regressions, one 6.23% improvement, and three effectively equal pairs.",
+    "Both versions retain two mounted editors and three Dockview group content containers after 100 extra switches. Post-GC used heap rises 2,183,180 bytes baseline and 2,042,156 bytes candidate. These are separate session editors, not duplicate editors for one session. Individual API panel and subscription ownership remain uncounted in this loop; no leak conclusion follows.",
+    "The 20% warm-switch p 95 target is not met. These Linux Chromium results do not establish M2 Air, field INP, or battery effects. Final Threads/Dockview streaming, visibility, stress, and individual owner retention remain open."
+  ],
+  "summaryValidation": {
+    "tests": "/tmp/kandev-final-navigation-summary-tests.log: 23 passed",
+    "lint": "/tmp/kandev-final-navigation-summary-lint.log: passed",
+    "metadataRegression": "/tmp/kandev-final-navigation-metadata-red.log: failed before cleanup. Navigation summaries no longer invent grid/stream metadata. Every numeric comparison is unchanged."
+  }
+}

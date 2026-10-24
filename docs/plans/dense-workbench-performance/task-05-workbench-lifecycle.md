@@ -27,6 +27,16 @@ system_design:
 
 # Task 05: Dockview and editor lifecycle
 
+## Final session-tab timing
+
+Six alternating pairs pass 480 measured and 200 retention switches between two
+real sessions in one environment. Renderer CPU falls in every pair (median
+2.45%); main-thread CPU falls 1.63%, with one regression. Browser-event p95 falls
+2.25%, with one regression. The 20% target remains unmet. Both versions retain
+two editors and three group containers; individual panel and subscription owner
+counts remain open. See [results](results.md#final-session-tab-comparison-1x)
+and [complete evidence](evidence/final-session-tabs-six-pair-1x.json).
+
 ## Final incompatible-layout timing
 
 Six alternating pairs pass 480 measured and 200 retention switches. All measured

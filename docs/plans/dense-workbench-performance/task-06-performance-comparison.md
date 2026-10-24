@@ -30,6 +30,38 @@ system_design:
 
 # Task 06: Matched comparison and regression evidence
 
+## Final session-tab comparison (1x)
+
+Six alternating pairs compare the original baseline with production `72085e06b49`.
+All 12 runs pass in 13 minutes: 480 measured switches and 200 separate retention
+switches. The workspace has 1,000 tasks; the selected task has two real sessions
+in one shared environment, with 1,000 primary and 100 sibling messages. Every
+measured switch verifies its expected task, session, and nonempty environment.
+
+Renderer CPU falls in all six pairs, by a median paired 2.45%. Main-thread CPU
+falls 1.63%, with one 1.09% regression. Driver p50/p95 fall 2.68%/2.13%, with
+one/two regressing pairs. Browser-event p50 falls 0.97%, with three better and
+three worse pairs; p95 falls 2.25%, with five better and one 2.36% worse pair.
+Header, transcript, and composer reach the same sampled frame in all switches.
+These are modest gains, and the 20% warm-p95 target remains unmet.
+
+Frame-gap p95 improves about 12.45% in two pairs, is nearly equal in the others,
+and has only a 0.09% median paired reduction. Its arm medians are 125.05 and
+116.7 ms; their ratio is not the median paired change. Maximum frame gap is
+neutral by median paired change, with two approximately 6.64% regressing pairs.
+
+Both versions retain two session editors and three Dockview group content
+containers after 100 extra switches. Post-GC used heap rises 2.18 MB on baseline
+and 2.04 MB on candidate. API panel and subscription owners are not counted in
+this loop; no leak conclusion follows. The separate draft regression remains
+part of the correctness evidence.
+
+[Complete evidence](evidence/final-session-tabs-six-pair-1x.json) preserves all
+pairs, identities, retention, and host observations. All three required switching
+scenarios now have final-build six-pair evidence at 1x. Final Threads/Dockview
+streaming, visibility, 4x stress, and individual owner retention remain open.
+No M2 Air, field INP, or battery claim follows.
+
 ## Final incompatible-layout comparison (1x)
 
 Six alternating pairs on the same original baseline and final production build

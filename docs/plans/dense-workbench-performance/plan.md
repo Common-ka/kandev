@@ -28,13 +28,13 @@ legacy_specs: []
 
 ## Latest measured checkpoint
 
-The retained production build at `72085e06b49` passes the final six-pair
-compatible-task and incompatible-layout 1x comparisons. Compatible-task rendering
-work and CPU fall modestly and consistently; incompatible-layout gains are small
-and mixed. Browser-event readiness is nearly unchanged in both scenarios. The other required
-scenarios remain open in the [completion audit](completion-audit.md).
-See the [compatible-task evidence](evidence/final-task-switch-six-pair-1x.json)
-and [layout-restoration evidence](evidence/final-incompatible-layout-six-pair-1x.json).
+The retained production build at `72085e06b49` passes final six-pair comparisons
+at 1x for compatible tasks, incompatible layouts, and same-environment session
+tabs. Gains are modest and some pairs regress; the 20% warm-p95 target remains
+unmet. Other required scenarios remain open in the [completion audit](completion-audit.md).
+See the [compatible-task](evidence/final-task-switch-six-pair-1x.json),
+[layout-restoration](evidence/final-incompatible-layout-six-pair-1x.json), and
+[session-tab](evidence/final-session-tabs-six-pair-1x.json) evidence.
 
 ## Outcome and checkpoint
 
