@@ -24,6 +24,40 @@ system_design:
 
 # Task 03: Persistent motion eligibility
 
+## Direct SVG visibility experiment (in progress)
+
+The remaining Threads status SVG ignores viewport and document visibility.
+Three component regressions failed before implementation. A fresh browser check
+also failed: moving its ancestor outside the viewport left one CSS animation
+running (`svg-visibility-red-logs/kandev-run.e2e.IV0wTxZb.log`).
+
+The candidate attaches the existing persistent-motion visibility controller
+directly to the SVG. The controller's element type now includes SVG elements;
+its runtime logic is unchanged. The component keeps the same SVG, classes,
+geometry, accessible label, and one-second CSS animation. No wrapper, promoted
+layer, or different animation engine is introduced.
+
+All 47 related unit tests pass. Typecheck, strict scoped web/shared lint, and
+the production asset build pass. Three fresh desktop checks passed in 53.3
+seconds (`svg-visibility-desktop-logs/`); the corresponding three phone checks
+passed in 46.2 seconds (`svg-visibility-phone-logs/`). They cover offscreen
+pause/resume, reduced-motion changes, hidden settlement, existing composer
+motion, and CSS fallback. The unit checks cover hidden-document startup,
+combined visibility conditions, DOM identity, and listener/observer cleanup.
+
+Dense performance validation is pending. The benchmark now distinguishes the
+horizontal columns view from the grid, waits only for intersecting chats, and
+checks offscreen catch-up after timing. A viewport regression and two summary
+regressions failed first; all 16 measurement-helper tests and both standalone
+browser measurement tests now pass. The six-column and eight-column full-caller
+smokes both passed in both versions, with four visible chats and exact catch-up
+in the two offscreen producer chats. The eight-column run also asserted all
+eight headers, proving the grid cap was removed (`matched-dense-1792805980564.json`,
+`columns-eight-smoke-logs/`, 1.2 minutes). The default six-chat grid smoke passed
+both versions too (`matched-dense-1792805870109.json`, `columns-grid-smoke-logs/`,
+1.1 minutes). These small runs validate the harness and are excluded from gains.
+No CPU improvement is inferred from the animation count alone.
+
 ## Summary
 
 Make host-owned persistent indicators respect reduced motion while preserving their default appearance. Reuse the already implemented hidden-motion lifecycle.

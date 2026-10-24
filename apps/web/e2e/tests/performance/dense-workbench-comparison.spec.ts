@@ -1,14 +1,27 @@
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
-import { test, expect } from "../../fixtures/test-base";
-import { seedDenseWorkbench } from "../../helpers/dense-workbench-fixture";
+import { test, expect, type SeedData } from "../../fixtures/test-base";
+import type { ApiClient } from "../../helpers/api-client";
+import { DENSE_WORKLOAD, seedDenseWorkbench } from "../../helpers/dense-workbench-fixture";
 import { runDenseSample } from "../../helpers/dense-comparison-sample";
 import { hashAssetTree, sha256File, snapshotDatabase } from "../../helpers/dense-snapshot";
 import { seedThreadPresentation } from "../task/threads-presentation-helpers";
 import { profileMachine } from "../task/task-navigation-profile-helpers";
 
 test.skip(process.env.KANDEV_DENSE_COMPARE !== "1", "opt-in matched dense benchmark");
+
+async function seedComparison(api: ApiClient, seed: SeedData) {
+  if (DENSE_WORKLOAD.layout === "columns" && process.env.KANDEV_DENSE_HISTORY === "all")
+    throw new Error("Columns timing requires viewport-bounded history");
+  const fixture = await seedDenseWorkbench(api, seed, true);
+  await seedThreadPresentation(api, {
+    layout: DENSE_WORKLOAD.layout,
+    maxChats: DENSE_WORKLOAD.layout === "columns" ? null : 6,
+    autoHideComposer: true,
+  });
+  return fixture;
+}
 
 test("compares frozen builds on identical dense conversation snapshots", async ({
   browser,
@@ -55,8 +68,7 @@ test("compares frozen builds on identical dense conversation snapshots", async (
     }));
   const lockfileSha256 = sha256File(path.join(candidateRoot, "apps/pnpm-lock.yaml"));
   expect(lockfileSha256).toBe(sha256File(path.join(baselineRoot, "apps/pnpm-lock.yaml")));
-  const fixture = await seedDenseWorkbench(api, seed, true);
-  await seedThreadPresentation(api, { layout: "grid", maxChats: 6, autoHideComposer: true });
+  const fixture = await seedComparison(api, seed);
   await testPage.close();
   const snapshot = path.join(backend.tmpDir, "dense-base.db");
   snapshotDatabase(path.join(backend.tmpDir, "kandev.db"), snapshot);
@@ -76,6 +88,7 @@ test("compares frozen builds on identical dense conversation snapshots", async (
     sourceFiles,
     lockfileSha256,
     measurementKind,
+    layout: DENSE_WORKLOAD.layout,
     throttleAfterLoad: process.env.KANDEV_DENSE_THROTTLE_AFTER_LOAD === "1",
     candidateFirst: process.env.KANDEV_DENSE_CANDIDATE_FIRST === "1",
     builds,

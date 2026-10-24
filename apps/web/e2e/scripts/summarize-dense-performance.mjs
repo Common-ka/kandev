@@ -97,6 +97,13 @@ function sampleThrottling(report, sample) {
   };
 }
 
+function sampleLayoutPrefix(report, sample) {
+  const layout = sample.layout ?? "grid";
+  if (layout !== (report.layout ?? "grid") || !["grid", "columns"].includes(layout))
+    throw new Error("Samples must use the report's layout");
+  return layout === "columns" ? "columns-" : "";
+}
+
 export function summarizeReport(report) {
   if (["cpu-attribution", "animation-attribution"].includes(report.measurementKind))
     throw new Error("Diagnostic attribution runs are excluded from timing comparisons");
@@ -104,13 +111,14 @@ export function summarizeReport(report) {
   const records = [];
   for (const sample of report.samples) {
     const throttling = sampleThrottling(report, sample);
+    const layoutPrefix = sampleLayoutPrefix(report, sample);
     const identity = { arm: sample.arm, pair: sample.pair, cpuRate: sample.cpuRate };
     if (sample.cold) {
       const assets = sample.cold.resources.filter((resource) => /\.(js|css)$/.test(resource.path));
       records.push({
         ...identity,
         cpuRate: throttling.coldCpuRate,
-        scenario: throttling.coldScenario,
+        scenario: `${layoutPrefix}${throttling.coldScenario}`,
         values: {
           readyMs: sample.cold.readyMs,
           documentMs: sample.cold.documentMs,
@@ -121,7 +129,7 @@ export function summarizeReport(report) {
       for (const run of sample.runs)
         records.push({
           ...identity,
-          scenario: `${throttling.windowPrefix}${sample.historyMode === "all" ? "long-history-" : ""}${run.scenario}`,
+          scenario: `${layoutPrefix}${throttling.windowPrefix}${sample.historyMode === "all" ? "long-history-" : ""}${run.scenario}`,
           values: windowMetrics(run),
         });
     } else {
@@ -152,6 +160,7 @@ export function summarizeReport(report) {
       comparisons.push({ group, metric, ...summarizePairs(rows, (row) => row.values[metric]) });
   return {
     measurementKind: report.measurementKind,
+    layout: report.layout ?? "grid",
     throttleAfterLoad: Boolean(report.throttleAfterLoad),
     machine: report.machine,
     builds: report.builds,

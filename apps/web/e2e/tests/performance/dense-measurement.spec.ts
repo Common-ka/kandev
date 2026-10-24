@@ -4,6 +4,24 @@ import {
   endDenseWindow,
   denseStreamObservations,
 } from "../../helpers/dense-measurement";
+import { denseViewportTaskIds } from "../../helpers/dense-viewport";
+
+test("limits columns measurements to the board viewport", async ({ page }) => {
+  await page.setContent(`
+    <style>body { margin: 0 } section { flex: 0 0 400px; height: 200px }</style>
+    <main data-testid="threads-board" style="display:flex;width:600px;height:300px;overflow:auto">
+      <section data-thread-column-id="one"></section>
+      <section data-thread-column-id="two"></section>
+      <section data-thread-column-id="three"></section>
+    </main>
+  `);
+  const ids = ["one", "two", "three"];
+  expect(await denseViewportTaskIds(page, ids)).toEqual(["one", "two"]);
+  await page.getByTestId("threads-board").evaluate((board) => {
+    board.scrollLeft = 400;
+  });
+  expect(await denseViewportTaskIds(page, ids)).toEqual(["two", "three"]);
+});
 
 test("records visible stream progress during the measured window", async ({ page }) => {
   test.setTimeout(30_000);

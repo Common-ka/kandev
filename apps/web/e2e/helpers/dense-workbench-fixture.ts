@@ -4,7 +4,11 @@ import { dwell } from "./causal-waits";
 import type { ApiClient } from "./api-client";
 import type { SeedData } from "../fixtures/test-base";
 
+const layout = process.env.KANDEV_DENSE_LAYOUT ?? "grid";
+if (layout !== "grid" && layout !== "columns") throw new Error("Unknown dense layout");
+
 export const DENSE_WORKLOAD = {
+  layout,
   tasks: Number(process.env.KANDEV_DENSE_TASKS ?? 1_000),
   columns: Number(process.env.KANDEV_DENSE_COLUMNS ?? 30),
   messages: Number(process.env.KANDEV_DENSE_MESSAGES ?? 1_000),

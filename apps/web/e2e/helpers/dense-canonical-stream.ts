@@ -50,8 +50,8 @@ export async function prepareDenseStream(
     scheduledUpdates: updatesPerSession * threads.length,
     release: () => fs.writeFileSync(release, "start"),
     inspect: (page: Page) => inspectDenseStreamProgress(page, api, threads),
-    async waitForVisible(page: Page) {
-      for (const thread of threads) {
+    async waitForVisible(page: Page, visibleTaskIds = threads.map((thread) => thread.taskId)) {
+      for (const thread of threads.filter((thread) => visibleTaskIds.includes(thread.taskId))) {
         await expect(
           page
             .getByTestId(`thread-column-${thread.taskId}`)

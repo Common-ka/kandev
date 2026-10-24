@@ -153,6 +153,20 @@ This series does not replace the fully throttled cold-load reference. Run the
 small full-caller smoke with this flag and `KANDEV_DENSE_CPU_RATES=4` before
 using it for timing.
 
+Use `KANDEV_DENSE_LAYOUT=columns` for the horizontal columns view. This removes
+the six-column display cap while retaining the existing viewport activation
+policy. The six prepared conversations produce updates; only columns that
+intersect the board viewport participate in visible-content gates and progress
+observations. The cold result records those task IDs. Stored-content checks
+still verify every producer. After all timed windows, scroll to each previously
+offscreen producer and require its exact ordered tick sequence to appear.
+This catch-up check is outside timing. Summaries label these groups
+`columns-*` and reject mixed-layout pairs. Default grid behavior is unchanged.
+The columns smoke must use at least seven eligible columns so it exercises
+offscreen catch-up and removal of the grid's six-column cap. Cold loading also
+asserts and records the actual displayed column count. Full-history loading
+is not combined with columns timing, because it would activate offscreen detail.
+
 Report per-arm medians/ranges and paired percentage changes. For task switches,
 report each run's p50/p95 and their paired differences, not only a pooled p95.
 Use `(baseline - candidate) / baseline * 100` for lower-is-better metrics;

@@ -15,6 +15,7 @@ import {
 import { dwell } from "./causal-waits";
 import { inspectDenseAnimations } from "./dense-animation-diagnostics";
 import { loadDenseCold } from "./dense-cold-load";
+import { verifyDenseOffscreenCatchup } from "./dense-viewport";
 
 async function startDenseProfile(cdp: CDPSession, profilePath?: string) {
   if (!profilePath) return;
@@ -52,11 +53,12 @@ async function waitForDenseStream(
   scenario: string,
   stream: Awaited<ReturnType<typeof prepareDenseStream>>,
   page: Page,
+  visibleTaskIds: string[],
   checkpoint?: (evidence: Record<string, unknown>) => void,
 ) {
   if (scenario !== "streaming") return;
   try {
-    await stream.waitForVisible(page);
+    await stream.waitForVisible(page, visibleTaskIds);
   } catch (error) {
     checkpoint?.({ streamFailure: await stream.inspect(page) });
     throw error;
@@ -103,6 +105,8 @@ export async function runDenseSample(options: {
   try {
     const cold = await loadDenseCold({
       page,
+      layout: DENSE_WORKLOAD.layout,
+      totalColumns: DENSE_WORKLOAD.columns,
       workspaceId: seed.workspaceId,
       threads,
       warmup: stream.warmup,
@@ -156,7 +160,7 @@ export async function runDenseSample(options: {
       const before = await beginDenseWindow(
         page,
         cdp,
-        scenario === "streaming" ? threads.map((thread) => thread.taskId) : [],
+        scenario === "streaming" ? cold.visibleTaskIds : [],
       );
       if (scenario === "streaming") stream.release();
       await dwell(
@@ -171,7 +175,7 @@ export async function runDenseSample(options: {
         streamProgress: await denseStreamObservations(page),
       };
       options.checkpoint?.({ observing: scenario, deadline, selectionBefore });
-      await waitForDenseStream(scenario, stream, page, options.checkpoint);
+      await waitForDenseStream(scenario, stream, page, cold.visibleTaskIds, options.checkpoint);
       const measured = await endDenseWindow(page, cdp, before);
       await saveDenseProfile(cdp, options.profilePath);
       await checkComposerFocus(editor);
@@ -192,10 +196,17 @@ export async function runDenseSample(options: {
         }
       }
     }
+    const offscreenCatchup = await verifyDenseOffscreenCatchup(
+      page,
+      threads.map((thread) => thread.taskId).filter((id) => !cold.visibleTaskIds.includes(id)),
+      stream.scheduledUpdates / threads.length,
+    );
     const history = await loadedDenseHistory(page, threads);
     const animationDiagnostics = await inspectDenseAnimations(page);
     return {
       sample,
+      layout: DENSE_WORKLOAD.layout,
+      offscreenCatchup,
       animationDiagnostics,
       historyMode,
       historyLoadMs,
