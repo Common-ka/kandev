@@ -7,6 +7,28 @@ plugin Dockview series is also complete; core/plugin regressions still need attr
 `feature/evaluate-live-thread-bc0`; the frozen baseline is
 `595df36ed5c1cf02fd90cb972b623ad6edc53df8`.
 
+## Final scripted columns attempt (incomplete)
+
+The full reference columns run stops after 21.7 minutes in its first control
+streaming window. The fixture has 1,000 tasks, 30 columns, and 36,000 stored
+messages; four producer columns are initially visible and load 100 messages
+each. The other two producers remain offscreen and initially load no messages.
+No extra busy headers are enabled.
+
+The native return-bottom wheel action fails the unchanged five-second check:
+expected at most 3 px from the bottom, observed 507 px. Its last checkpoint is
+549 px from the bottom. This repeats the prior scripted grid control failure.
+The capture shows the first transcript behind neighboring live tails, which
+does not prove message loss. The cause remains unconfirmed.
+
+No sample or pair completes. Candidate timing, final ordered verification,
+offscreen catch-up, and full-deck traversal are not reached. The raw error is
+preserved and the speed summary rejects the report. Backend logs also retain
+HTTP 503 responses; the completed cold/idle traffic observations do not cover
+the failed streaming window. See [complete failure evidence](evidence/final-scripted-columns-failed-attempt.json).
+A focused scroll reproduction and final combined correctness precede another
+dense scripted attempt. No timeout or final-position bound changed.
+
 ## Final scripted grid attempt (incomplete)
 
 The final full-reference attempt stops after 50.8 minutes in the fifth control

@@ -589,3 +589,15 @@ disposable processes are stopped. The raw attempt remains incomplete. See
 
 The next work is the remaining final matrix, starting with the full-reference
 columns comparison. No further optimization prototype is pending.
+
+## Final columns attempt stopped
+
+The full 1,000-task, 30-column, 36,000-message scripted run stops after 21.7
+minutes in the first control stream. Its return-bottom wheel action is 507 px
+from the bottom at the unchanged five-second assertion; the last checkpoint
+records 549 px. This repeats the earlier grid control failure. No complete
+sample or pair, candidate timing, ordered-content success, or offscreen/deck
+verification is credited. The raw failure remains intact and the summary
+rejects it. See [evidence](evidence/final-scripted-columns-failed-attempt.json).
+The retained-build combined desktop suite is running. A focused scroll
+reproduction is needed before another dense scripted timing attempt.

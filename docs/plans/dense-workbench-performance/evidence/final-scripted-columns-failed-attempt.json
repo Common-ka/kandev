@@ -1,0 +1,535 @@
+{
+  "status": "failed attempt; no completed samples or pairs",
+  "measurementUse": "Failure diagnosis only. The final six-pair columns comparison remains incomplete.",
+  "rawReport": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792871550233.json",
+    "sha256": "5e41dccdcc7edbc6ef1c58e0af385d722c730f0852a5e1e2b02f8a3cedf65666"
+  },
+  "runner": {
+    "exitCode": 1,
+    "durationMinutes": 21.7,
+    "log": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/final-columns-six-pair-logs/kandev-run.e2e.VDIlNRNz.log",
+      "sha256": "d2436795408f525cf133f31257aa25c2e5d8e7255b8fbcf4d8b3e5481be311d8"
+    },
+    "artifacts": "final-columns-return-bottom-failure",
+    "inspectedCapture": "performance-dense-workbenc-80a45-ense-conversation-snapshots-chromium/test-failed-1.png"
+  },
+  "sourceRevision": "e41ee2a95a5ebb6f067b02f17539000317b4ded2",
+  "sourcePatchBytes": 0,
+  "capturedUntrackedDocumentation": [
+    {
+      "path": "docs/plans/dense-workbench-performance/evidence/context-stability-attribution.json",
+      "sha256": "8acf555866a3de64f5b4db7908ca3a6afbd6737319195d1f6562eda7cfb7dbe6",
+      "note": "Captured before fixture seeding while documentation delivery was in progress; the identical bytes are now committed in the recorded source revision."
+    },
+    {
+      "path": "docs/plans/dense-workbench-performance/evidence/interrupted-context-stability-1x.json",
+      "sha256": "6ef10243d1d7220c982bc21aa98e8990a00a1f38ac500da01ce9a18fef251d87",
+      "note": "Captured before fixture seeding while documentation delivery was in progress; the identical bytes are now committed in the recorded source revision."
+    }
+  ],
+  "lockfileSha256": "9d5a03a9086f28c93752fce491f896047fbcdbc64abfafe3b3aa53261199c554",
+  "builds": {
+    "baseline": {
+      "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+      "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+      "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+      "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+    },
+    "candidate": {
+      "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+      "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "9f2b7a961b623e0e4074fdfd0e253b10b65ccf979e110223af6b88b9121dbea8"
+    }
+  },
+  "machine": {
+    "revision": "e41ee2a95a5ebb6f067b02f17539000317b4ded2",
+    "cpu": "11th Gen Intel(R) Core(TM) i7-11700T @ 1.40GHz",
+    "cores": 16,
+    "load": [
+      4.48,
+      4.85,
+      3.43
+    ],
+    "totalMemory": 33303863296,
+    "freeMemory": 20418191360,
+    "platform": "linux 6.18.49"
+  },
+  "databaseSha256": "aeb4aa8db08cf65e4851c26562c2df5907be3fbeb7ed410963719278ac4e83ab",
+  "protocol": {
+    "measurementKind": "reference-workload",
+    "finalVisibilityProbe": "boolean-poll",
+    "layout": "columns",
+    "extraBusyHeaders": 0,
+    "interactionMode": "scripted-scroll-v1",
+    "throttleAfterLoad": false,
+    "candidateFirst": false
+  },
+  "fixture": {
+    "workload": {
+      "layout": "columns",
+      "extraBusyHeaders": 0,
+      "tasks": 1000,
+      "columns": 30,
+      "messages": 1000,
+      "durationMs": 60000
+    },
+    "manifest": [
+      {
+        "title": "Dense task 0000",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0001",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0002",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0003",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0004",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0005",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0006",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0007",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0008",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0009",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0010",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0011",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0012",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0013",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0014",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0015",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0016",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0017",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0018",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0019",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0020",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0021",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0022",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0023",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0024",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0025",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0026",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0027",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0028",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0029",
+        "messages": 1000,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      }
+    ],
+    "storedMessages": 36000,
+    "initialLoadedHistory": [
+      {
+        "sessionId": "99630eab-c667-48fb-9d0d-abf36e0dad57",
+        "messages": 100
+      },
+      {
+        "sessionId": "f0f2e4e9-a2c1-4f56-9802-6df427981525",
+        "messages": 100
+      },
+      {
+        "sessionId": "fe123696-98b6-4b3a-888e-4666d7374134",
+        "messages": 100
+      },
+      {
+        "sessionId": "6dee537c-6afa-4eab-b305-576dc8de93a2",
+        "messages": 100
+      },
+      {
+        "sessionId": "75751202-7ef9-4e56-aafd-a9d745dec73a",
+        "messages": 0
+      },
+      {
+        "sessionId": "93a178bf-b03b-4770-b97e-ffccf266bf7c",
+        "messages": 0
+      }
+    ],
+    "cold": {
+      "documentMs": 13171.502825999865,
+      "readyMs": 17109.897253999952,
+      "visibleTaskIds": [
+        "dcdff0c5-320f-4478-ad06-71fa5cd8a1a5",
+        "fd3b093f-785b-406a-9a4f-88b36dc0d8b9",
+        "6520c9da-671b-4bca-8c2b-2421724177fc",
+        "04524c21-7ce3-4849-b357-2d084083715d"
+      ],
+      "displayedColumns": 30
+    }
+  },
+  "failure": {
+    "sample": "baseline-1x-0",
+    "completedWindows": [
+      "idle"
+    ],
+    "interaction": {
+      "action": "return-bottom",
+      "taskId": "dcdff0c5-320f-4478-ad06-71fa5cd8a1a5",
+      "scheduledMs": 24000,
+      "startedMs": 23999.692830999848,
+      "observations": [
+        {
+          "action": "scroll-up",
+          "taskId": "dcdff0c5-320f-4478-ad06-71fa5cd8a1a5",
+          "scheduledMs": 12000,
+          "startedMs": 11998.855856999988,
+          "finishedMs": 13919.316473999992,
+          "before": {
+            "scrollTop": 51151,
+            "scrollHeight": 51998,
+            "clientHeight": 804,
+            "composer": "closed",
+            "sessionId": "99630eab-c667-48fb-9d0d-abf36e0dad57"
+          },
+          "after": {
+            "scrollTop": 51388,
+            "scrollHeight": 52210,
+            "clientHeight": 616,
+            "composer": "open",
+            "sessionId": "99630eab-c667-48fb-9d0d-abf36e0dad57"
+          }
+        }
+      ],
+      "state": {
+        "scrollTop": 52777,
+        "scrollHeight": 53942,
+        "clientHeight": 616,
+        "composer": "open",
+        "sessionId": "99630eab-c667-48fb-9d0d-abf36e0dad57"
+      },
+      "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: <= \u001b[32m3\u001b[39m\nReceived:    \u001b[31m507\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate"
+    },
+    "lastCheckpointBottomDistancePx": 549,
+    "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: <= \u001b[32m3\u001b[39m\nReceived:    \u001b[31m507\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate",
+    "orderedStreamVerification": "Not reached. No successful ordered-update or offscreen catch-up result is credited.",
+    "candidateMeasurement": "Not reached."
+  },
+  "partialIdleObservation": {
+    "scope": "One control window only; not a paired performance comparison.",
+    "elapsedMs": 60037.040569999954,
+    "metrics": {
+      "Timestamp": 60.00955700001214,
+      "AudioHandlers": 0,
+      "AudioWorkletProcessors": 0,
+      "Documents": 0,
+      "Frames": 0,
+      "JSEventListeners": -1116,
+      "LayoutObjects": -487,
+      "MediaKeySessions": 0,
+      "MediaKeys": 0,
+      "Nodes": -733,
+      "Resources": 5,
+      "ContextLifecycleStateObservers": 0,
+      "V8PerContextDatas": 0,
+      "WorkerGlobalScopes": 0,
+      "UACSSResources": 0,
+      "RTCPeerConnections": 0,
+      "ResourceFetchers": 0,
+      "AdSubframes": 0,
+      "DetachedScriptStates": 0,
+      "ArrayBufferContents": 0,
+      "LayoutCount": 241,
+      "RecalcStyleCount": 3334,
+      "LayoutDuration": 0.11236400000000002,
+      "RecalcStyleDuration": 1.326106,
+      "DevToolsCommandDuration": 0.0007539999999999769,
+      "ScriptDuration": 2.059365,
+      "V8CompileDuration": 0,
+      "TaskDuration": 12.641904999999998,
+      "TaskOtherDuration": 9.143316,
+      "ThreadTime": 11.390977,
+      "ProcessTime": 18.54,
+      "JSHeapUsedSize": -19789820,
+      "JSHeapTotalSize": -120471552,
+      "FirstMeaningfulPaint": 359637.306102,
+      "DomContentLoaded": 0,
+      "NavigationStart": 0
+    },
+    "browser": {
+      "streamProgress": [],
+      "longTasksMs": [
+        62,
+        93,
+        65
+      ],
+      "domNodes": 18112,
+      "editors": 4,
+      "animations": {
+        "running": 33,
+        "paused": 58
+      }
+    },
+    "headerMotion": {
+      "targets": 6,
+      "running": 6,
+      "paused": 0
+    }
+  },
+  "availability": {
+    "capturedColdAndIdleHttpStatuses": {},
+    "backendLog": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792871550233.json.backend.log",
+      "sha256": "79091fb0d87b4e4aaef60c9a4a095e12636d2b427c3f655b9f9f1779e86b1114"
+    },
+    "limit": "Backend logs contain HTTP 503 responses during the failed attempt. There is no completed streaming traffic observation; cold/idle counts are not a total for the failed stream."
+  },
+  "hostObservations": {
+    "file": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/final-columns-host-load.jsonl",
+      "sha256": "9b52b5f4af8bdbafd305441e20385304ab5aa31ded932fd45b23ae14c7e6eba9"
+    },
+    "records": 46,
+    "loadAverage1MinRange": [
+      1.17919921875,
+      9.564453125
+    ],
+    "minimumAvailableMemoryKiB": 13996852,
+    "causalAttribution": false
+  },
+  "summaryGuard": {
+    "exitCode": 1,
+    "log": "/tmp/kandev-final-columns-summary-rejection-5936a872.log",
+    "result": "Rejected because the raw report contains an error. No partial speed summary created."
+  },
+  "finding": "The first scripted control return-bottom wheel action does not reach the live edge within the unchanged five-second, three-pixel bound. This repeats the prior grid control failure. The screenshot shows the first transcript positioned behind neighboring live tails; it does not prove message loss. Root cause remains unconfirmed.",
+  "nextSteps": [
+    "Complete the retained-build desktop and phone correctness gates.",
+    "Use a short focused reproduction to distinguish native wheel placement from application follow-state behavior before repeating dense timing.",
+    "Retain the scripted-v1 failures and keep any changed interaction method in a separate report series."
+  ],
+  "limits": [
+    "No complete A/B sample, six-pair result, speed gain, or ordered-stream success follows from this attempt.",
+    "The failed control is not evidence of a candidate regression or candidate correctness.",
+    "Linux Chromium measurements do not establish M2 Air, field INP, battery, or leak behavior."
+  ]
+}
