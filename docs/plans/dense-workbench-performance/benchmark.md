@@ -425,3 +425,18 @@ contains 1,000. A 61-task fixture validates this boundary. The first full
 Dockview attempt stopped on this fixture assertion before timing; preserve it
 as a setup failure, not a product performance result.
 See [the count correction](evidence/dockview-task-total.json).
+
+
+### Departed API retention mode
+
+`KANDEV_DENSE_NAV_RETENTION=1` enables a separate ownership check. Set
+`KANDEV_DENSE_PAIRS=1`, `KANDEV_DENSE_CPU_RATES=1`, and omit
+`KANDEV_DENSE_NAV_SWITCHES` and timed profiling. The caller performs its normal
+selections, then 100 retention switches and native navigation to Settings.
+It records actual API panels, document editors, and successfully acknowledged
+gateway scopes before and after switching and after release. It requires the
+same document and connection epoch across release. It does not expose private
+frontend subscription reference counts. The control records its old API
+behavior; the candidate must release the API and panels. Speed summaries
+reject this mode. See [the cleanup evidence](evidence/dockview-api-release.json)
+for the small control/candidate validation and post-GC observations.

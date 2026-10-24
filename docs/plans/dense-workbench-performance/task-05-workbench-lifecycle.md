@@ -787,3 +787,36 @@ Log: `/tmp/kandev-run.e2e.4mOH5oEZ.log` (16.4 minutes). The frozen retained
 control is `/tmp/kandev-dense-before-composer-5936a872`. Its selection fix
 remains in the branch. The candidate's passing unit and browser checks are
 recorded above as experiment evidence, not evidence of a retained speed gain.
+
+### Departed Dockview API ownership: retained fix
+
+Native navigation to Settings left the departed Dockview API and four panel
+objects reachable from the application store. Document editors and acknowledged
+gateway scopes already released. The original baseline and the retained
+pre-cleanup build both reproduce this failure. Stable counts during switching
+do not establish increasing leakage per task switch.
+
+The layout now tracks its acquired API. Unmount clears the store API and global
+portals only if that API remains current. Local listeners and pending save work
+still release. A replaced or never-ready layout cannot clear a newer owner.
+There are no CSS, default-layout, or user-facing copy changes.
+
+Three unit regressions fail before the fix and pass after it. All 43 related
+unit tests, 32 harness checks, typecheck, strict lint, and the fresh build pass.
+Four browser gates pass, including native Settings release and return without
+a document reload, draft preservation through responsive transitions,
+saved-layout restoration, gateway reconnect, and the ordinary paired caller.
+Six native-phone gates pass for committed streaming, touch composition,
+questions, draft navigation, and model/attachment/cancellation controls.
+
+The separate paired retention run uses ten tasks and ten messages per selected
+task. Both arms retain four API panels, one editor, and three acknowledged
+scopes after 100 switches. Native Settings navigation leaves four API panels
+in the pre-cleanup control and zero in the candidate. Both release editors
+and scopes with the same document and gateway connection epoch. Post-GC used
+heap after release is 59,107,832 and 58,505,356 bytes, respectively. One pair
+cannot establish a memory-saving percentage or leak freedom. These observed
+wire scopes are not private frontend reference counts. Speed summaries reject
+this instrumentation mode. See [the evidence](evidence/dockview-api-release.json).
+
+Full-reference and stress comparisons remain open in the completion audit.

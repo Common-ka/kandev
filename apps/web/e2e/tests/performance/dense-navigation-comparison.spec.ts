@@ -12,8 +12,37 @@ import { profileMachine } from "../task/task-navigation-profile-helpers";
 test.skip(process.env.KANDEV_DENSE_NAVIGATION !== "1", "opt-in matched navigation benchmark");
 
 function navigationMeasurementKind(profileTimedSwitches: boolean) {
+  if (process.env.KANDEV_DENSE_NAV_RETENTION === "1") return "owner-retention";
   if (profileTimedSwitches) return "cpu-attribution";
   return process.env.KANDEV_DENSE_NAV_TASKS ? "harness-rehearsal" : "reference-workload";
+}
+
+function readOwnerRetention() {
+  const ownerRetention = process.env.KANDEV_DENSE_NAV_RETENTION === "1";
+  if (
+    ownerRetention &&
+    (process.env.KANDEV_DENSE_NAV_SWITCHES ||
+      process.env.KANDEV_DENSE_NAV_PROFILE === "1" ||
+      process.env.KANDEV_DENSE_PAIRS !== "1" ||
+      process.env.KANDEV_DENSE_CPU_RATES !== "1")
+  )
+    throw new Error(
+      "Owner retention requires one 1x pair, default switch count, and no profile override",
+    );
+  return ownerRetention;
+}
+
+function createOwnerCheckpoint(
+  enabled: boolean,
+  checkpoints: Record<string, Record<string, unknown>>,
+  sample: string,
+  save: () => void,
+) {
+  if (!enabled) return undefined;
+  return (evidence: Record<string, unknown>) => {
+    checkpoints[sample] = { ...checkpoints[sample], ...evidence };
+    save();
+  };
 }
 
 test("compares dense task switches and retained Dockview owners", async ({
@@ -25,6 +54,7 @@ test("compares dense task switches and retained Dockview owners", async ({
 }, info) => {
   test.setTimeout(7_200_000);
   const navigationScenario = readNavigationScenario();
+  const ownerRetention = readOwnerRetention();
   const baseline = process.env.KANDEV_DENSE_BASELINE_ROOT;
   if (!baseline) throw new Error("KANDEV_DENSE_BASELINE_ROOT must name the frozen checkout");
   const candidate = path.resolve(process.cwd(), "../..");
@@ -55,11 +85,12 @@ test("compares dense task switches and retained Dockview owners", async ({
   const profileTimedSwitches = process.env.KANDEV_DENSE_NAV_PROFILE === "1";
   const navigationReadiness =
     process.env.KANDEV_DENSE_NAV_READINESS === "1" ? BROWSER_READINESS_VERSION : "driver";
+  const profileWindow = profileTimedSwitches ? "timed-switches" : "post-timing-selection";
   const report = {
     measurementKind: navigationMeasurementKind(profileTimedSwitches),
     navigationScenario,
     navigationReadiness,
-    profileWindow: profileTimedSwitches ? "timed-switches" : "post-timing-selection",
+    profileWindow: ownerRetention ? "none" : profileWindow,
     machine: profileMachine(),
     sourceRevision: execFileSync("git", ["rev-parse", "HEAD"], {
       encoding: "utf8",
@@ -70,6 +101,7 @@ test("compares dense task switches and retained Dockview owners", async ({
     items,
     databaseSha256: sha256File(snapshot),
     samples: [] as unknown[],
+    checkpoints: {} as Record<string, Record<string, unknown>>,
     error: undefined as string | undefined,
     timingDefinition:
       "Driver selection start to destination file marker and two requestAnimationFrame callbacks. This is a DOM readiness upper bound, not INP or screen presentation.",
@@ -108,6 +140,14 @@ test("compares dense task switches and retained Dockview owners", async ({
             pair,
             sample,
             profileTimedSwitches,
+            ownerRetention,
+            ownerApiReleaseRequired: arm === "candidate",
+            ownerCheckpoint: createOwnerCheckpoint(
+              ownerRetention,
+              report.checkpoints,
+              sample,
+              save,
+            ),
             navigationReadiness,
             navigationScenario,
             profileFile: path.join(

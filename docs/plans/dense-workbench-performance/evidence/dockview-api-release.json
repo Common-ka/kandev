@@ -1,0 +1,256 @@
+{
+  "scope": "Departed Dockview API ownership and correctness. This is not speed evidence.",
+  "finding": "Native navigation to Settings left the departed API and four panel objects reachable from the application store. Editors and acknowledged scopes already released. Stable counts during switching do not prove increasing leakage.",
+  "fix": "Track the API acquired by each desktop layout. Release global portals and clear the store API only if that API is still current. Preserve newer owners.",
+  "build": {
+    "parentDeliveredRevision": "ff2c9257159ef4013c5c5a049708a4773b7a46eb",
+    "parentProductionRevision": "72085e06b4902b7ccbaae1a84be0048e5a9b6f11",
+    "productionFiles": [
+      {
+        "path": "apps/web/components/task/dockview-desktop-layout-hooks.ts",
+        "sha256": "b6cfeeab50b35f1e8a0f523732b9f05c3469d4cd7ee8f08f0c195add8ff86aa4"
+      },
+      {
+        "path": "apps/web/components/task/dockview-desktop-layout.tsx",
+        "sha256": "354bc07f278692bc83289b815d982f0eb308df81bf6f7ae8a0c5c8f5f32b88d2"
+      }
+    ],
+    "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+    "assetsSha256": "590010efe61225b25e160854f8386332d2f4457786f878724039179f6f0fd0e0",
+    "agentctlSha256": "6e768aef1a1692630fe109c25e23ac31ab461b691800c2059e6dfdd5cf0b4d0a",
+    "mockAgentSha256": "c69f05ee9f5622cc5bce83405c2e9240b537f3e79a21da65765d9867592288c1",
+    "lockSha256": "9d5a03a9086f28c93752fce491f896047fbcdbc64abfafe3b3aa53261199c554"
+  },
+  "retention": {
+    "report": "matched-navigation-1792844160894.json",
+    "log": "navigation-owner-retention-green-logs/kandev-run.e2e.p9wi3oug.log",
+    "controlRoot": "/tmp/kandev-dense-layout-arrangement-v2-5936a872",
+    "candidateRoot": "/tmp/kandev-dense-api-release-5936a872",
+    "controlAssetsSha256": "d83bd02b59785cf6c806178f3f0e15d0443dbac7f104998347cb6580371a9f94",
+    "tasks": 10,
+    "messagesPerSelectedTask": 10,
+    "pairs": 1,
+    "cpuRate": 1,
+    "durationMinutes": 3.8,
+    "samples": [
+      {
+        "arm": "baseline",
+        "switches": 100,
+        "before": {
+          "apiAvailable": true,
+          "apiPanels": 4,
+          "documentEditors": 1,
+          "acknowledgedScopes": 3,
+          "pendingRequests": 0,
+          "failedRequests": 0,
+          "parseErrors": 0,
+          "documentTimeOrigin": 1792844171586.9,
+          "openConnections": 1,
+          "totalConnections": 3
+        },
+        "after": {
+          "apiAvailable": true,
+          "apiPanels": 4,
+          "documentEditors": 1,
+          "acknowledgedScopes": 3,
+          "pendingRequests": 0,
+          "failedRequests": 0,
+          "parseErrors": 0,
+          "documentTimeOrigin": 1792844171586.9,
+          "openConnections": 1,
+          "totalConnections": 3
+        },
+        "released": {
+          "apiAvailable": true,
+          "apiPanels": 4,
+          "documentEditors": 0,
+          "acknowledgedScopes": 0,
+          "pendingRequests": 0,
+          "failedRequests": 0,
+          "parseErrors": 0,
+          "documentTimeOrigin": 1792844171586.9,
+          "openConnections": 1,
+          "totalConnections": 3
+        },
+        "postGcHeapBytes": {
+          "heapBefore": {
+            "usedSize": 64082076,
+            "totalSize": 68100096,
+            "embedderHeapUsedSize": 8538976,
+            "backingStorageSize": 13521152
+          },
+          "heapAfter": {
+            "usedSize": 66343300,
+            "totalSize": 70459392,
+            "embedderHeapUsedSize": 8982016,
+            "backingStorageSize": 13519848
+          },
+          "released": {
+            "usedSize": 59107832,
+            "totalSize": 63193088,
+            "embedderHeapUsedSize": 5034360,
+            "backingStorageSize": 16779006
+          }
+        }
+      },
+      {
+        "arm": "candidate",
+        "switches": 100,
+        "before": {
+          "apiAvailable": true,
+          "apiPanels": 4,
+          "documentEditors": 1,
+          "acknowledgedScopes": 3,
+          "pendingRequests": 0,
+          "failedRequests": 0,
+          "parseErrors": 0,
+          "documentTimeOrigin": 1792844273314.5,
+          "openConnections": 1,
+          "totalConnections": 3
+        },
+        "after": {
+          "apiAvailable": true,
+          "apiPanels": 4,
+          "documentEditors": 1,
+          "acknowledgedScopes": 3,
+          "pendingRequests": 0,
+          "failedRequests": 0,
+          "parseErrors": 0,
+          "documentTimeOrigin": 1792844273314.5,
+          "openConnections": 1,
+          "totalConnections": 3
+        },
+        "released": {
+          "apiAvailable": false,
+          "apiPanels": 0,
+          "documentEditors": 0,
+          "acknowledgedScopes": 0,
+          "pendingRequests": 0,
+          "failedRequests": 0,
+          "parseErrors": 0,
+          "documentTimeOrigin": 1792844273314.5,
+          "openConnections": 1,
+          "totalConnections": 3
+        },
+        "postGcHeapBytes": {
+          "heapBefore": {
+            "usedSize": 63690964,
+            "totalSize": 68362240,
+            "embedderHeapUsedSize": 8540664,
+            "backingStorageSize": 13521723
+          },
+          "heapAfter": {
+            "usedSize": 66332032,
+            "totalSize": 69672960,
+            "embedderHeapUsedSize": 8972648,
+            "backingStorageSize": 13520461
+          },
+          "released": {
+            "usedSize": 58505356,
+            "totalSize": 63979520,
+            "embedderHeapUsedSize": 4883112,
+            "backingStorageSize": 16779535
+          }
+        }
+      }
+    ],
+    "limits": [
+      "Acknowledged gateway scopes are observed wire ownership, not private frontend reference counts.",
+      "One pair and post-GC heap samples do not establish a memory-saving percentage or absence of leaks.",
+      "The historical panels field counts group containers; this evidence records actual API panels separately.",
+      "Owner-retention mode is rejected by performance summary."
+    ]
+  },
+  "validation": {
+    "unitRed": "/tmp/kandev-dockview-api-release-red.log",
+    "unitGreen": "/tmp/kandev-dockview-api-release-unit-complete.log",
+    "relatedUnits": {
+      "passed": 43,
+      "files": 6,
+      "log": "/tmp/kandev-dockview-api-release-units.log"
+    },
+    "harnessUnits": {
+      "passed": 32,
+      "log": "/tmp/kandev-navigation-owner-retention-units.log"
+    },
+    "typecheck": "/tmp/kandev-dockview-api-release-typecheck-complete.log",
+    "lint": "/tmp/kandev-dockview-api-release-lint-delivery.log",
+    "build": "/tmp/kandev-dockview-api-release-build.log",
+    "browserRed": "dockview-api-release-browser-red-logs/kandev-run.e2e.YrqfPwvE.log",
+    "browserGreen": {
+      "passed": 4,
+      "durationMinutes": 1.3,
+      "log": "dockview-api-release-browser-green-logs/kandev-run.e2e.YBMuQojv.log"
+    },
+    "defaultCallerReport": "matched-navigation-1792844042682.json",
+    "phone": {
+      "passed": 6,
+      "durationMinutes": 1.3,
+      "log": "dockview-api-release-phone-logs/kandev-run.e2e.wE5i4mVk.log",
+      "captures": "dockview-api-release-phone-captures/"
+    },
+    "captures": {
+      "passed": 1,
+      "durationSeconds": 12.6,
+      "log": "dockview-api-release-capture-logs/kandev-run.e2e.PkUTYxs1.log",
+      "directory": ".kandev/diagnostics/dense-workbench-performance/dockview-api-release-captures",
+      "inspection": "Phone and restored desktop show the retained draft and expected native layouts. Raw-seeded fixture has no live workspace or terminal; their waiting states are not readiness evidence."
+    }
+  },
+  "visualImpact": "No CSS, default layout, or user-facing copy changes. Drafts and saved layouts must remain intact.",
+  "documentationImpact": "Internal implementation cleanup. No public commands, configuration, APIs, or terminology changed.",
+  "sourceFiles": [
+    {
+      "path": "apps/web/components/task/dockview-desktop-layout-hooks.ts",
+      "sha256": "b6cfeeab50b35f1e8a0f523732b9f05c3469d4cd7ee8f08f0c195add8ff86aa4"
+    },
+    {
+      "path": "apps/web/components/task/dockview-desktop-layout.tsx",
+      "sha256": "354bc07f278692bc83289b815d982f0eb308df81bf6f7ae8a0c5c8f5f32b88d2"
+    },
+    {
+      "path": "apps/web/components/task/dockview-desktop-layout-hooks.test.tsx",
+      "sha256": "726745fa96adfd9d5c0b26c978d526a72ecc67047741375734f7609a8480df85"
+    },
+    {
+      "path": "apps/web/e2e/tests/layout/dockview-owner-release.spec.ts",
+      "sha256": "a13d758f09f2a251d6c106d73367c3a2ec677e8f814443297373c6636f1dfecc"
+    },
+    {
+      "path": "apps/web/e2e/helpers/gateway-scope-ledger.ts",
+      "sha256": "98084826055952d11ae8de201d124ed45bf438b43f0939bded70aca2ecbdb956"
+    },
+    {
+      "path": "apps/web/e2e/helpers/capture-gateway-scopes.ts",
+      "sha256": "76d170d02f75bf4e85fe4676f014dd031e6abd14036f3fe84c9eabdcd4044f9b"
+    },
+    {
+      "path": "apps/web/e2e/helpers/navigation-owner-retention.ts",
+      "sha256": "8377cdcd4170fcd25f14343b4f1772947d5f6a9e06df8c9a5a0a878dd42f0dba"
+    },
+    {
+      "path": "apps/web/e2e/helpers/dense-navigation-retention.ts",
+      "sha256": "8ea1b7fc780c6fd12514721b0f9dcfa99163c82c0437b300fdd02985b45ea5b4"
+    },
+    {
+      "path": "apps/web/e2e/helpers/dense-navigation-sample.ts",
+      "sha256": "9ef3a16ca5693edc0b87c83f1870763f86605ab5272f0268327216cb6d896cde"
+    },
+    {
+      "path": "apps/web/e2e/tests/performance/dense-navigation-comparison.spec.ts",
+      "sha256": "7484f8c21c239be32585bcfcfd5b752ee3b7f7e8f781ccdbc07525fffb9fb0c9"
+    },
+    {
+      "path": "apps/web/e2e/scripts/gateway-scope-ledger.test.mjs",
+      "sha256": "c4bdb2aeec58d8d3ecb8f5c70dede21afc2c807f5d818ff5b82b867a1c5c5626"
+    },
+    {
+      "path": "apps/web/e2e/scripts/summarize-dense-owner-retention.test.mjs",
+      "sha256": "1bbe40f01b107a9ee4f887a7ec51546e7ec34b8f9302333f23517cdbbe25a6cf"
+    },
+    {
+      "path": "apps/web/e2e/scripts/summarize-dense-performance.mjs",
+      "sha256": "947ed310dc776dd3792d3cb9be94730ff5a69f476776c5fafb59445400ec0847"
+    }
+  ]
+}

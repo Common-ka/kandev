@@ -1,3 +1,9 @@
+import { captureGatewayScopes } from "./capture-gateway-scopes";
+import type { OwnerCheckpoint } from "./navigation-owner-retention";
+import {
+  measureNavigationRetention,
+  navigationProfileMetadata,
+} from "./dense-navigation-retention";
 import fs from "node:fs";
 import {
   expect,
@@ -43,6 +49,9 @@ export async function runDenseNavigationSample(options: {
   sample: string;
   profileFile: string;
   profileTimedSwitches?: boolean;
+  ownerRetention?: boolean;
+  ownerCheckpoint?: OwnerCheckpoint;
+  ownerApiReleaseRequired?: boolean;
   navigationScenario: NavigationScenario;
   navigationReadiness: "driver" | typeof BROWSER_READINESS_VERSION;
 }) {
@@ -59,6 +68,7 @@ export async function runDenseNavigationSample(options: {
     profileTimedSwitches,
     navigationReadiness,
     navigationScenario,
+    ownerRetention,
   } = options;
   const selectionOptions = (index: number) => ({
     browserReadiness: navigationReadiness === BROWSER_READINESS_VERSION,
@@ -75,6 +85,7 @@ export async function runDenseNavigationSample(options: {
   });
   try {
     const page = await context.newPage();
+    const scopeCapture = ownerRetention ? captureGatewayScopes(page) : undefined;
     await page.addInitScript(
       ({ port, sessionStorageState }) => {
         window.__KANDEV_API_PORT = port;
@@ -111,30 +122,18 @@ export async function runDenseNavigationSample(options: {
       const profile = await cdp.send("Profiler.stop");
       fs.writeFileSync(profileFile, JSON.stringify(profile.profile));
     }
-    // Retained-owner measurements remain outside the timed profile.
-    await cdp.send("HeapProfiler.collectGarbage");
-    const heapBefore = await cdp.send("Runtime.getHeapUsage");
-    const ownersBefore = await page.evaluate(() => ({
-      editors: document.querySelectorAll(".tiptap").length,
-      panels: document.querySelectorAll(".dv-content-container").length,
-    }));
-    let retention;
-    if (pair === 0 && cpuRate === 1 && !process.env.KANDEV_DENSE_NAV_SWITCHES) {
-      for (let i = 0; i < 100; i++)
-        await measureSelection(page, gate, items[i % 2], selectionOptions(i % 2));
-      await cdp.send("HeapProfiler.collectGarbage");
-      retention = {
-        switches: 100,
-        heapBefore,
-        heapAfter: await cdp.send("Runtime.getHeapUsage"),
-        ownersBefore,
-        ownersAfter: await page.evaluate(() => ({
-          editors: document.querySelectorAll(".tiptap").length,
-          panels: document.querySelectorAll(".dv-content-container").length,
-        })),
-      };
-    }
-    if (!profileTimedSwitches)
+    const { retention, ownership } = await measureNavigationRetention({
+      page,
+      cdp,
+      pair,
+      cpuRate,
+      capture: scopeCapture,
+      checkpoint: options.ownerCheckpoint,
+      requireApiRelease: options.ownerApiReleaseRequired,
+      select: (index) => measureSelection(page, gate, items[index], selectionOptions(index)),
+    });
+    const profile = navigationProfileMetadata(profileFile, profileTimedSwitches, ownerRetention);
+    if (profile.profileWindow === "post-timing-selection")
       await profileNavigationSelections(page, cdp, items, navigationScenario, profileFile);
     return {
       cpuRate,
@@ -145,8 +144,8 @@ export async function runDenseNavigationSample(options: {
       selections,
       measured,
       retention,
-      profileFile,
-      profileWindow: profileTimedSwitches ? "timed-switches" : "post-timing-selection",
+      ownership,
+      ...profile,
     };
   } finally {
     await context.close();

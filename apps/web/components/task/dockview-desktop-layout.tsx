@@ -438,6 +438,7 @@ export const DockviewDesktopLayout = memo(function DockviewDesktopLayout({
   const layoutRootRef = useRef<HTMLDivElement>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const readyDisposersRef = useRef<Array<() => void>>([]);
+  const ownedApiRef = useRef<DockviewReadyEvent["api"] | null>(null);
   const appStore = useAppStoreApi();
 
   const effectiveSessionId =
@@ -473,6 +474,7 @@ export const DockviewDesktopLayout = memo(function DockviewDesktopLayout({
 
   const onReady = useCallback(
     (event: DockviewReadyEvent) => {
+      ownedApiRef.current = event.api;
       setupReadyDockview({
         api: event.api,
         appStore,
@@ -508,7 +510,7 @@ export const DockviewDesktopLayout = memo(function DockviewDesktopLayout({
 
   useSyncReviewPanel();
   useSyncTodoPanel();
-  useDockviewUnmountCleanup(saveTimerRef, readyDisposersRef);
+  useDockviewUnmountCleanup(saveTimerRef, readyDisposersRef, ownedApiRef);
 
   // Visual masking: hide the dockview container during slow-path layout
   // switches (full fromJSON rebuild) to prevent the old layout from flashing.
