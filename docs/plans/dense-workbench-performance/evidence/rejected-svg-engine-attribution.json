@@ -1,0 +1,103 @@
+{
+  "status": "closed without a production candidate: mixed same-page attribution; no consistent reduction in style work",
+  "measurementKind": "animation-attribution",
+  "rawReport": "matched-dense-1792810553185.json",
+  "rawSha256": "05f670dee7d1bf7999615d7a44c241964f5331b40cc9899e9af111cd2d8a5a15",
+  "sourceRevision": "8fd3e393419853061c11a07f793041debce4ca7d",
+  "builds": {
+    "baseline": {
+      "binary": "/tmp/kandev-dense-timestamp-5936a872/apps/backend/bin/kandev",
+      "assets": "/tmp/kandev-dense-timestamp-5936a872/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "8379f62eb1bf4935c6b18d4616f732191cdefc17159c02367a54c05701f7a160"
+    },
+    "candidate": {
+      "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+      "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "8379f62eb1bf4935c6b18d4616f732191cdefc17159c02367a54c05701f7a160"
+    }
+  },
+  "samples": [
+    {
+      "page": "baseline",
+      "engine": "css",
+      "targets": 6,
+      "elapsedMs": 10016.474978000006,
+      "mainThreadCpuMs": 1890.8449999999998,
+      "rendererCpuMs": 2810.0000000000005,
+      "styleRecalculations": 600,
+      "styleElapsedMs": 387.325
+    },
+    {
+      "page": "baseline",
+      "engine": "native",
+      "targets": 6,
+      "elapsedMs": 10040.534323,
+      "mainThreadCpuMs": 2618.4320000000002,
+      "rendererCpuMs": 4290.000000000001,
+      "styleRecalculations": 583,
+      "styleElapsedMs": 511.90100000000007
+    },
+    {
+      "page": "baseline",
+      "engine": "native",
+      "targets": 6,
+      "elapsedMs": 10008.085290999996,
+      "mainThreadCpuMs": 2280.233,
+      "rendererCpuMs": 3730.0000000000005,
+      "styleRecalculations": 549,
+      "styleElapsedMs": 474.3800000000001
+    },
+    {
+      "page": "baseline",
+      "engine": "css",
+      "targets": 6,
+      "elapsedMs": 10009.883963,
+      "mainThreadCpuMs": 1676.031,
+      "rendererCpuMs": 2650.0000000000023,
+      "styleRecalculations": 600,
+      "styleElapsedMs": 334.473
+    },
+    {
+      "page": "candidate",
+      "engine": "native",
+      "targets": 6,
+      "elapsedMs": 10007.902384,
+      "mainThreadCpuMs": 1985.0089999999998,
+      "rendererCpuMs": 3239.9999999999986,
+      "styleRecalculations": 577,
+      "styleElapsedMs": 367.383
+    },
+    {
+      "page": "candidate",
+      "engine": "css",
+      "targets": 6,
+      "elapsedMs": 10009.514484999992,
+      "mainThreadCpuMs": 2036.982,
+      "rendererCpuMs": 3309.9999999999986,
+      "styleRecalculations": 599,
+      "styleElapsedMs": 395.44599999999997
+    },
+    {
+      "page": "candidate",
+      "engine": "css",
+      "targets": 6,
+      "elapsedMs": 10035.29912500002,
+      "mainThreadCpuMs": 2406.7940000000003,
+      "rendererCpuMs": 4239.999999999998,
+      "styleRecalculations": 542,
+      "styleElapsedMs": 478.83700000000005
+    },
+    {
+      "page": "candidate",
+      "engine": "native",
+      "targets": 6,
+      "elapsedMs": 10014.828950000025,
+      "mainThreadCpuMs": 2374.5709999999995,
+      "rendererCpuMs": 3810.0000000000023,
+      "styleRecalculations": 526,
+      "styleElapsedMs": 477.87500000000006
+    }
+  ]
+}

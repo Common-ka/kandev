@@ -98,6 +98,29 @@ windows and layer instrumentation are excluded from speed claims.
 actual reasons and source/build identities. The two snapshots use identical
 validated production assets; only the diagnostic harness changed.
 
+## Direct native SVG rotation attribution: closed
+
+A temporary diagnostic swapped only the six existing SVG animation engines,
+keeping DOM identity, 14px size, one-second duration, infinite repetition, and
+animation phase. Its browser regression failed first and then passed, including
+CSS restoration. Strict lint passed after extracting the engine-start helper.
+The full caller passed in 2.8 minutes with identical production assets:
+`matched-dense-1792810553185.json`, `svg-engine-caller-smoke-logs/`.
+
+Each fresh page used four ten-second windows: CSS/native/native/CSS, then
+native/CSS/CSS/native. In the first page, CSS main-thread CPU was 1,891/1,676 ms
+and native CPU was 2,618/2,280 ms. In the reversed page, CSS was 2,037/2,407 ms
+and native was 1,985/2,375 ms. Style recalculation continued in both engines
+(526–600 calls per window). These short same-page observations are mixed and
+are excluded from production-build gains. They do not justify a production
+candidate. [Evidence](evidence/rejected-svg-engine-attribution.json) preserves
+all windows and build identities.
+
+The temporary engine-switch helper, browser test, and caller changes are
+removed. Their patch remains in
+`rejected-direct-svg-native-engine-diagnostic.patch`. The committed read-only
+compositor diagnostic remains. No production assets changed in this experiment.
+
 ## Summary
 
 Make host-owned persistent indicators respect reduced motion while preserving their default appearance. Reuse the already implemented hidden-motion lifecycle.
