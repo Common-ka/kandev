@@ -1,3 +1,5 @@
+import { DENSE_INTERACTION_MODE, runDenseInteractions } from "./dense-interactions";
+import { verifyDenseColumnTraversal } from "./dense-column-traversal";
 import { inspectDenseBusyHeaderMotion } from "./dense-busy-headers";
 import { DENSE_VISIBILITY_PROBE } from "./dense-visible";
 import fs from "node:fs";
@@ -78,6 +80,7 @@ export async function runDenseSample(options: {
   api: ApiClient;
   seed: SeedData;
   threads: DenseThread[];
+  allThreads: DenseThread[];
   sample: string;
   cpuRate: number;
   profilePath?: string;
@@ -165,11 +168,13 @@ export async function runDenseSample(options: {
         scenario === "streaming" ? cold.visibleTaskIds : [],
       );
       if (scenario === "streaming") stream.release();
-      await dwell(
-        DENSE_WORKLOAD.durationMs,
-        "clock-separation",
-        `fixed ${scenario} performance observation window`,
-      );
+      const interactions = await observeDenseWindow({
+        page,
+        scenario,
+        started: before.started,
+        taskId: cold.visibleTaskIds[0],
+        checkpoint: options.checkpoint,
+      });
       const deadline = {
         elapsedMs: performance.now() - before.started,
         metrics: await cdp.send("Performance.getMetrics"),
@@ -184,7 +189,15 @@ export async function runDenseSample(options: {
       const delivery = traffic.snapshot();
       const headerMotion = await inspectDenseBusyHeaderMotion(page);
       expect(headerMotion.targets).toBe(threads.length + DENSE_WORKLOAD.extraBusyHeaders);
-      runs.push({ scenario, selectionBefore, deadline, ...measured, delivery, headerMotion });
+      runs.push({
+        scenario,
+        selectionBefore,
+        deadline,
+        ...measured,
+        delivery,
+        headerMotion,
+        interactions,
+      });
       options.checkpoint?.({ cold, runs, historyMode, initialLoadedHistory });
       if (scenario === "streaming") {
         try {
@@ -206,6 +219,11 @@ export async function runDenseSample(options: {
       threads.map((thread) => thread.taskId).filter((id) => !cold.visibleTaskIds.includes(id)),
       stream.scheduledUpdates / threads.length,
     );
+    const columnTraversal = await verifyDenseColumnTraversal(
+      page,
+      options.allThreads,
+      DENSE_WORKLOAD.layout,
+    );
     const history = await loadedDenseHistory(page, threads);
     const animationDiagnostics = await inspectDenseAnimations(page);
     return {
@@ -214,6 +232,8 @@ export async function runDenseSample(options: {
       layout: DENSE_WORKLOAD.layout,
       extraBusyHeaders: DENSE_WORKLOAD.extraBusyHeaders,
       offscreenCatchup,
+      columnTraversal,
+      interactionMode: DENSE_INTERACTION_MODE,
       animationDiagnostics,
       historyMode,
       historyLoadMs,
@@ -253,4 +273,27 @@ async function loadedDenseHistory(page: Page, threads: DenseThread[]) {
     },
     threads.map((thread) => thread.sessionId),
   );
+}
+
+async function observeDenseWindow(options: {
+  page: Page;
+  scenario: string;
+  started: number;
+  taskId: string;
+  checkpoint?: (evidence: Record<string, unknown>) => void;
+}) {
+  const durationMs = DENSE_WORKLOAD.durationMs;
+  const results = await Promise.allSettled([
+    dwell(
+      durationMs,
+      "clock-separation",
+      `fixed ${options.scenario} performance observation window`,
+    ),
+    options.scenario === "streaming" && DENSE_INTERACTION_MODE !== "quiet"
+      ? runDenseInteractions({ ...options, durationMs })
+      : Promise.resolve([]),
+  ]);
+  for (const result of results) if (result.status === "rejected") throw result.reason;
+  const interactions = results[1];
+  return interactions.status === "fulfilled" ? interactions.value : [];
 }

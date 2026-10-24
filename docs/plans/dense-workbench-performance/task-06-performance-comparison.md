@@ -448,3 +448,26 @@ pairs, errors, build and harness identities, loaded-history checks, and host
 observations. Setup is outside timing. No cold-entry, MacBook Air M2, field INP,
 battery, or leak claim follows. The full-plugin series remains separate and
 pending.
+
+### Scripted inputs and full-column traversal validated
+
+The opt-in `scripted-scroll-v1` caller passes paired grid and eight-column
+rehearsals on the original baseline and retained candidate. Both builds verify
+all scheduled updates, scroll away and return to the bottom, and close/reopen
+the composer. The column run visits first/middle/last/first, including a
+non-producer column, and verifies session identity and visible content. The
+unchanged quiet caller also passes both arms. All 32 selected summary checks
+pass. These short windows validate the harness; recorded late actions prevent
+an on-time or speed claim.
+
+The first grid rehearsal failed its upward-scroll assertion. Composer
+disclosure changes transcript bounds; retargeting the pointer after disclosure
+passes the same assertion on both builds. The failed report and screenshot
+remain preserved. Global pnpm11 then failed before the first columns launch;
+the repository-pinned pnpm9.15.9 runs the guarded check successfully.
+
+Native visibility probing found that this headless Chromium session stays
+visible when another tab is selected or the window is minimized. The bounded
+hidden wait times out and no visibility event fires. This is a local environment
+limitation, not a passing hide/restore test. Synthetic visibility tests remain
+separate. See [the harness evidence](evidence/scripted-threads-harness.json).

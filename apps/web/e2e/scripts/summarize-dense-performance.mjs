@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { interactionPrefix } from "./dense-interaction-summary.mjs";
 import { pathToFileURL } from "node:url";
 import { dockviewMetadata, dockviewRecords } from "./dense-dockview-summary.mjs";
 
@@ -251,6 +252,7 @@ function measurementMetadata(report) {
       finalVisibilityProbe: report.finalVisibilityProbe ?? LEGACY_VISIBILITY_PROBE,
       layout: report.layout ?? "grid",
       extraBusyHeaders: report.extraBusyHeaders ?? 0,
+      interactionMode: report.interactionMode ?? "quiet",
       throttleAfterLoad: Boolean(report.throttleAfterLoad),
     };
   return {
@@ -286,6 +288,7 @@ function measurementNotes(report) {
         ]
       : []),
     "Final-content probe versions must not be pooled. Locator-assertion retries can collect page-wide ARIA snapshots; boolean polling retains the same visibility gate without those snapshots.",
+    "Scripted input variants have a separate mode and window prefix. Their later idle windows can retain composer state changed by those inputs. Action timestamps preserve late execution; they do not imply that all inputs completed on schedule.",
     "Streaming duration includes the wait for final visible content. Fixed-deadline traffic is retained in the raw report.",
     "History decoded bytes include captured requests and responses. They are not compressed network transfer.",
   ];
@@ -324,7 +327,7 @@ export function summarizeReport(report) {
       for (const run of sample.runs)
         records.push({
           ...identity,
-          scenario: `${layoutPrefix}${throttling.windowPrefix}${sample.historyMode === "all" ? "long-history-" : ""}${run.scenario}`,
+          scenario: `${layoutPrefix}${throttling.windowPrefix}${sample.historyMode === "all" ? "long-history-" : ""}${interactionPrefix(report, sample, run)}${run.scenario}`,
           values: windowMetrics(run),
         });
     } else {

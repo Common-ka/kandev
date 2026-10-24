@@ -1,3 +1,4 @@
+import { DENSE_INTERACTION_MODE } from "../../helpers/dense-interactions";
 import { seedDenseBusyHeaders } from "../../helpers/dense-busy-headers";
 import { DENSE_VISIBILITY_PROBE } from "../../helpers/dense-visible";
 import fs from "node:fs";
@@ -92,6 +93,7 @@ test("compares frozen builds on identical dense conversation snapshots", async (
     measurementKind,
     finalVisibilityProbe: DENSE_VISIBILITY_PROBE,
     layout: DENSE_WORKLOAD.layout,
+    interactionMode: DENSE_INTERACTION_MODE,
     extraBusyHeaders: DENSE_WORKLOAD.extraBusyHeaders,
     throttleAfterLoad: process.env.KANDEV_DENSE_THROTTLE_AFTER_LOAD === "1",
     candidateFirst: process.env.KANDEV_DENSE_CANDIDATE_FIRST === "1",
@@ -146,6 +148,7 @@ test("compares frozen builds on identical dense conversation snapshots", async (
             api,
             seed,
             threads: fixture.threads.slice(0, 6),
+            allThreads: fixture.threads,
             sample,
             cpuRate,
             profilePath:

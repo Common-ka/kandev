@@ -138,3 +138,26 @@ The benchmark uses separate runtime homes as well as separate database copies,
 so retained agent journals cannot contaminate the next sample. The raw manifest
 is `.kandev/diagnostics/dense-workbench-performance/matched-dense-1792753924108.json`.
 The timed comparison waits for owned verification jobs to finish.
+
+### Scripted inputs and full-column traversal validated
+
+The opt-in `scripted-scroll-v1` caller passes paired grid and eight-column
+rehearsals on the original baseline and retained candidate. Both builds verify
+all scheduled updates, scroll away and return to the bottom, and close/reopen
+the composer. The column run visits first/middle/last/first, including a
+non-producer column, and verifies session identity and visible content. The
+unchanged quiet caller also passes both arms. All 32 selected summary checks
+pass. These short windows validate the harness; recorded late actions prevent
+an on-time or speed claim.
+
+The first grid rehearsal failed its upward-scroll assertion. Composer
+disclosure changes transcript bounds; retargeting the pointer after disclosure
+passes the same assertion on both builds. The failed report and screenshot
+remain preserved. Global pnpm11 then failed before the first columns launch;
+the repository-pinned pnpm9.15.9 runs the guarded check successfully.
+
+Native visibility probing found that this headless Chromium session stays
+visible when another tab is selected or the window is minimized. The bounded
+hidden wait times out and no visibility event fires. This is a local environment
+limitation, not a passing hide/restore test. Synthetic visibility tests remain
+separate. See [the harness evidence](evidence/scripted-threads-harness.json).

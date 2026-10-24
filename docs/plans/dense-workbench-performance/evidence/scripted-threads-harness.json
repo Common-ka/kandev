@@ -1,0 +1,705 @@
+{
+  "scope": "Validation of opt-in native Threads pointer/wheel inputs and untimed full-column traversal. No production assets changed and no speed result is claimed.",
+  "productionRevision": "f5c8fb8f6ab55417749a6c980095a7570d7300e8",
+  "reports": [
+    {
+      "mode": "scripted grid",
+      "report": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792848919202.json",
+        "sha256": "f634eb35de365f4e7ce925f433022679661ee9ebee460bd8f44968317d7219a2"
+      },
+      "log": "scripted-grid-rehover-logs/kandev-run.e2e.bt3eQURs.log",
+      "builds": {
+        "baseline": {
+          "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+          "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+          "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+          "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+        },
+        "candidate": {
+          "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+          "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "590010efe61225b25e160854f8386332d2f4457786f878724039179f6f0fd0e0"
+        }
+      },
+      "fixtureWorkload": {
+        "layout": "grid",
+        "extraBusyHeaders": 0,
+        "tasks": 10,
+        "columns": 6,
+        "messages": 10,
+        "durationMs": 2000
+      },
+      "interactionMode": "scripted-scroll-v1",
+      "samples": [
+        {
+          "sample": "baseline-1x-0",
+          "scheduledUpdates": 60,
+          "verificationErrors": [],
+          "offscreenCatchup": [],
+          "columnTraversal": null,
+          "interactions": [
+            [],
+            [
+              {
+                "action": "scroll-up",
+                "taskId": "83270e32-9e20-4eaf-85a7-808d15a91e67",
+                "scheduledMs": 400,
+                "startedMs": 399.1994110000014,
+                "finishedMs": 2377.873372000002,
+                "before": {
+                  "scrollTop": 5281,
+                  "scrollHeight": 5655,
+                  "clientHeight": 352,
+                  "composer": "closed",
+                  "sessionId": "7ae39415-41c3-49ac-8f3d-1835b638d75d"
+                },
+                "after": {
+                  "scrollTop": 5479,
+                  "scrollHeight": 5824,
+                  "clientHeight": 164,
+                  "composer": "open",
+                  "sessionId": "7ae39415-41c3-49ac-8f3d-1835b638d75d"
+                }
+              },
+              {
+                "action": "return-bottom",
+                "taskId": "83270e32-9e20-4eaf-85a7-808d15a91e67",
+                "scheduledMs": 800,
+                "startedMs": 2388.538489999999,
+                "finishedMs": 2646.2125319999977,
+                "before": {
+                  "scrollTop": 5479,
+                  "scrollHeight": 5824,
+                  "clientHeight": 164,
+                  "composer": "open",
+                  "sessionId": "7ae39415-41c3-49ac-8f3d-1835b638d75d"
+                },
+                "after": {
+                  "scrollTop": 5660,
+                  "scrollHeight": 5824,
+                  "clientHeight": 164,
+                  "composer": "open",
+                  "sessionId": "7ae39415-41c3-49ac-8f3d-1835b638d75d"
+                }
+              },
+              {
+                "action": "leave-tile",
+                "taskId": "83270e32-9e20-4eaf-85a7-808d15a91e67",
+                "scheduledMs": 1200,
+                "startedMs": 2653.479363999999,
+                "finishedMs": 3044.833918999997,
+                "before": {
+                  "scrollTop": 5660,
+                  "scrollHeight": 5824,
+                  "clientHeight": 164,
+                  "composer": "open",
+                  "sessionId": "7ae39415-41c3-49ac-8f3d-1835b638d75d"
+                },
+                "after": {
+                  "scrollTop": 5506,
+                  "scrollHeight": 5824,
+                  "clientHeight": 318,
+                  "composer": "closed",
+                  "sessionId": "7ae39415-41c3-49ac-8f3d-1835b638d75d"
+                }
+              },
+              {
+                "action": "hover-tile",
+                "taskId": "83270e32-9e20-4eaf-85a7-808d15a91e67",
+                "scheduledMs": 1600,
+                "startedMs": 3064.6787479999984,
+                "finishedMs": 3668.720290999998,
+                "before": {
+                  "scrollTop": 5493,
+                  "scrollHeight": 5824,
+                  "clientHeight": 331,
+                  "composer": "closed",
+                  "sessionId": "7ae39415-41c3-49ac-8f3d-1835b638d75d"
+                },
+                "after": {
+                  "scrollTop": 5660,
+                  "scrollHeight": 5824,
+                  "clientHeight": 164,
+                  "composer": "open",
+                  "sessionId": "7ae39415-41c3-49ac-8f3d-1835b638d75d"
+                }
+              }
+            ],
+            []
+          ]
+        },
+        {
+          "sample": "candidate-1x-0",
+          "scheduledUpdates": 60,
+          "verificationErrors": [],
+          "offscreenCatchup": [],
+          "columnTraversal": null,
+          "interactions": [
+            [],
+            [
+              {
+                "action": "scroll-up",
+                "taskId": "83270e32-9e20-4eaf-85a7-808d15a91e67",
+                "scheduledMs": 400,
+                "startedMs": 399.2713950000034,
+                "finishedMs": 1515.5872949999903,
+                "before": {
+                  "scrollTop": 5266,
+                  "scrollHeight": 5634,
+                  "clientHeight": 352,
+                  "composer": "closed",
+                  "sessionId": "7ae39415-41c3-49ac-8f3d-1835b638d75d"
+                },
+                "after": {
+                  "scrollTop": 5351,
+                  "scrollHeight": 5676,
+                  "clientHeight": 164,
+                  "composer": "open",
+                  "sessionId": "7ae39415-41c3-49ac-8f3d-1835b638d75d"
+                }
+              },
+              {
+                "action": "return-bottom",
+                "taskId": "83270e32-9e20-4eaf-85a7-808d15a91e67",
+                "scheduledMs": 800,
+                "startedMs": 1550.5925809999899,
+                "finishedMs": 2193.2939479999914,
+                "before": {
+                  "scrollTop": 5351,
+                  "scrollHeight": 5676,
+                  "clientHeight": 164,
+                  "composer": "open",
+                  "sessionId": "7ae39415-41c3-49ac-8f3d-1835b638d75d"
+                },
+                "after": {
+                  "scrollTop": 5594,
+                  "scrollHeight": 5782,
+                  "clientHeight": 164,
+                  "composer": "open",
+                  "sessionId": "7ae39415-41c3-49ac-8f3d-1835b638d75d"
+                }
+              },
+              {
+                "action": "leave-tile",
+                "taskId": "83270e32-9e20-4eaf-85a7-808d15a91e67",
+                "scheduledMs": 1200,
+                "startedMs": 2409.3861479999905,
+                "finishedMs": 3022.543558999998,
+                "before": {
+                  "scrollTop": 5659,
+                  "scrollHeight": 5824,
+                  "clientHeight": 164,
+                  "composer": "open",
+                  "sessionId": "7ae39415-41c3-49ac-8f3d-1835b638d75d"
+                },
+                "after": {
+                  "scrollTop": 5506,
+                  "scrollHeight": 5824,
+                  "clientHeight": 318,
+                  "composer": "closed",
+                  "sessionId": "7ae39415-41c3-49ac-8f3d-1835b638d75d"
+                }
+              },
+              {
+                "action": "hover-tile",
+                "taskId": "83270e32-9e20-4eaf-85a7-808d15a91e67",
+                "scheduledMs": 1600,
+                "startedMs": 3054.961395999999,
+                "finishedMs": 3662.043378000002,
+                "before": {
+                  "scrollTop": 5493,
+                  "scrollHeight": 5824,
+                  "clientHeight": 331,
+                  "composer": "closed",
+                  "sessionId": "7ae39415-41c3-49ac-8f3d-1835b638d75d"
+                },
+                "after": {
+                  "scrollTop": 5660,
+                  "scrollHeight": 5824,
+                  "clientHeight": 164,
+                  "composer": "open",
+                  "sessionId": "7ae39415-41c3-49ac-8f3d-1835b638d75d"
+                }
+              }
+            ],
+            []
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "scripted columns",
+      "report": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792849177223.json",
+        "sha256": "ac05db1cbadaa84c2754f6ae00f34508294f36d990acd299fabf6da5aa7b396d"
+      },
+      "log": "scripted-columns-pnpm9-logs/kandev-run.e2e.fd2PLnsN.log",
+      "builds": {
+        "baseline": {
+          "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+          "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+          "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+          "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+        },
+        "candidate": {
+          "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+          "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "590010efe61225b25e160854f8386332d2f4457786f878724039179f6f0fd0e0"
+        }
+      },
+      "fixtureWorkload": {
+        "layout": "columns",
+        "extraBusyHeaders": 0,
+        "tasks": 10,
+        "columns": 8,
+        "messages": 10,
+        "durationMs": 2000
+      },
+      "interactionMode": "scripted-scroll-v1",
+      "samples": [
+        {
+          "sample": "baseline-1x-0",
+          "scheduledUpdates": 60,
+          "verificationErrors": [],
+          "offscreenCatchup": [
+            {
+              "taskId": "abf4e625-0c6e-4581-b9e2-e950238e9dc7",
+              "ticks": 10,
+              "at": 1792849203297
+            },
+            {
+              "taskId": "4173321a-423b-4314-bbd4-41bdba91da0a",
+              "ticks": 10,
+              "at": 1792849203589
+            }
+          ],
+          "columnTraversal": {
+            "columnCount": 8,
+            "order": [
+              "85e0d7f6-67a6-49db-84cc-8f932eee473f",
+              "6d1b0b01-0245-4089-820a-47ae5aed02ef",
+              "3590d0da-7ddb-4bf0-ba56-9f67d9f0b540",
+              "129adae5-0ded-47b0-8e80-e2b70a1c1966",
+              "abf4e625-0c6e-4581-b9e2-e950238e9dc7",
+              "4173321a-423b-4314-bbd4-41bdba91da0a",
+              "4cee72b6-107c-4c90-9b3c-9f81bf5df850",
+              "db80d957-6afd-4577-a51f-278bd75668a6"
+            ],
+            "visits": [
+              {
+                "position": 0,
+                "taskId": "85e0d7f6-67a6-49db-84cc-8f932eee473f",
+                "sessionId": "f4fb5dbf-e414-418a-91fd-7f8adaecf21a",
+                "loadedMessages": 14
+              },
+              {
+                "position": 3,
+                "taskId": "129adae5-0ded-47b0-8e80-e2b70a1c1966",
+                "sessionId": "44aa26f4-1d14-4b05-b87d-02c83e928efa",
+                "loadedMessages": 14
+              },
+              {
+                "position": 7,
+                "taskId": "db80d957-6afd-4577-a51f-278bd75668a6",
+                "sessionId": "39c71dde-4b1a-495f-8b97-de69ca86f2d0",
+                "loadedMessages": 10
+              },
+              {
+                "position": 0,
+                "taskId": "85e0d7f6-67a6-49db-84cc-8f932eee473f",
+                "sessionId": "f4fb5dbf-e414-418a-91fd-7f8adaecf21a",
+                "loadedMessages": 14
+              }
+            ]
+          },
+          "interactions": [
+            [],
+            [
+              {
+                "action": "scroll-up",
+                "taskId": "85e0d7f6-67a6-49db-84cc-8f932eee473f",
+                "scheduledMs": 400,
+                "startedMs": 399.9852580000006,
+                "finishedMs": 1358.0597800000032,
+                "before": {
+                  "scrollTop": 4846,
+                  "scrollHeight": 5655,
+                  "clientHeight": 804,
+                  "composer": "closed",
+                  "sessionId": "f4fb5dbf-e414-418a-91fd-7f8adaecf21a"
+                },
+                "after": {
+                  "scrollTop": 4942,
+                  "scrollHeight": 5740,
+                  "clientHeight": 616,
+                  "composer": "open",
+                  "sessionId": "f4fb5dbf-e414-418a-91fd-7f8adaecf21a"
+                }
+              },
+              {
+                "action": "return-bottom",
+                "taskId": "85e0d7f6-67a6-49db-84cc-8f932eee473f",
+                "scheduledMs": 800,
+                "startedMs": 1369.5466310000047,
+                "finishedMs": 1683.457838000002,
+                "before": {
+                  "scrollTop": 4942,
+                  "scrollHeight": 5761,
+                  "clientHeight": 616,
+                  "composer": "open",
+                  "sessionId": "f4fb5dbf-e414-418a-91fd-7f8adaecf21a"
+                },
+                "after": {
+                  "scrollTop": 5166,
+                  "scrollHeight": 5782,
+                  "clientHeight": 616,
+                  "composer": "open",
+                  "sessionId": "f4fb5dbf-e414-418a-91fd-7f8adaecf21a"
+                }
+              },
+              {
+                "action": "leave-tile",
+                "taskId": "85e0d7f6-67a6-49db-84cc-8f932eee473f",
+                "scheduledMs": 1200,
+                "startedMs": 1690.8732260000033,
+                "finishedMs": 2122.767811000005,
+                "before": {
+                  "scrollTop": 5166,
+                  "scrollHeight": 5782,
+                  "clientHeight": 616,
+                  "composer": "open",
+                  "sessionId": "f4fb5dbf-e414-418a-91fd-7f8adaecf21a"
+                },
+                "after": {
+                  "scrollTop": 5041,
+                  "scrollHeight": 5824,
+                  "clientHeight": 783,
+                  "composer": "closed",
+                  "sessionId": "f4fb5dbf-e414-418a-91fd-7f8adaecf21a"
+                }
+              },
+              {
+                "action": "hover-tile",
+                "taskId": "85e0d7f6-67a6-49db-84cc-8f932eee473f",
+                "scheduledMs": 1600,
+                "startedMs": 2178.5339250000034,
+                "finishedMs": 2707.7162670000034,
+                "before": {
+                  "scrollTop": 5031,
+                  "scrollHeight": 5824,
+                  "clientHeight": 793,
+                  "composer": "closed",
+                  "sessionId": "f4fb5dbf-e414-418a-91fd-7f8adaecf21a"
+                },
+                "after": {
+                  "scrollTop": 5208,
+                  "scrollHeight": 5824,
+                  "clientHeight": 616,
+                  "composer": "open",
+                  "sessionId": "f4fb5dbf-e414-418a-91fd-7f8adaecf21a"
+                }
+              }
+            ],
+            []
+          ]
+        },
+        {
+          "sample": "candidate-1x-0",
+          "scheduledUpdates": 60,
+          "verificationErrors": [],
+          "offscreenCatchup": [
+            {
+              "taskId": "abf4e625-0c6e-4581-b9e2-e950238e9dc7",
+              "ticks": 10,
+              "at": 1792849232944
+            },
+            {
+              "taskId": "4173321a-423b-4314-bbd4-41bdba91da0a",
+              "ticks": 10,
+              "at": 1792849233297
+            }
+          ],
+          "columnTraversal": {
+            "columnCount": 8,
+            "order": [
+              "85e0d7f6-67a6-49db-84cc-8f932eee473f",
+              "6d1b0b01-0245-4089-820a-47ae5aed02ef",
+              "3590d0da-7ddb-4bf0-ba56-9f67d9f0b540",
+              "129adae5-0ded-47b0-8e80-e2b70a1c1966",
+              "abf4e625-0c6e-4581-b9e2-e950238e9dc7",
+              "4173321a-423b-4314-bbd4-41bdba91da0a",
+              "4cee72b6-107c-4c90-9b3c-9f81bf5df850",
+              "db80d957-6afd-4577-a51f-278bd75668a6"
+            ],
+            "visits": [
+              {
+                "position": 0,
+                "taskId": "85e0d7f6-67a6-49db-84cc-8f932eee473f",
+                "sessionId": "f4fb5dbf-e414-418a-91fd-7f8adaecf21a",
+                "loadedMessages": 14
+              },
+              {
+                "position": 3,
+                "taskId": "129adae5-0ded-47b0-8e80-e2b70a1c1966",
+                "sessionId": "44aa26f4-1d14-4b05-b87d-02c83e928efa",
+                "loadedMessages": 14
+              },
+              {
+                "position": 7,
+                "taskId": "db80d957-6afd-4577-a51f-278bd75668a6",
+                "sessionId": "39c71dde-4b1a-495f-8b97-de69ca86f2d0",
+                "loadedMessages": 10
+              },
+              {
+                "position": 0,
+                "taskId": "85e0d7f6-67a6-49db-84cc-8f932eee473f",
+                "sessionId": "f4fb5dbf-e414-418a-91fd-7f8adaecf21a",
+                "loadedMessages": 14
+              }
+            ]
+          },
+          "interactions": [
+            [],
+            [
+              {
+                "action": "scroll-up",
+                "taskId": "85e0d7f6-67a6-49db-84cc-8f932eee473f",
+                "scheduledMs": 400,
+                "startedMs": 399.48193300000275,
+                "finishedMs": 1275.018345999997,
+                "before": {
+                  "scrollTop": 4829,
+                  "scrollHeight": 5634,
+                  "clientHeight": 804,
+                  "composer": "closed",
+                  "sessionId": "f4fb5dbf-e414-418a-91fd-7f8adaecf21a"
+                },
+                "after": {
+                  "scrollTop": 4942,
+                  "scrollHeight": 5740,
+                  "clientHeight": 616,
+                  "composer": "open",
+                  "sessionId": "f4fb5dbf-e414-418a-91fd-7f8adaecf21a"
+                }
+              },
+              {
+                "action": "return-bottom",
+                "taskId": "85e0d7f6-67a6-49db-84cc-8f932eee473f",
+                "scheduledMs": 800,
+                "startedMs": 1295.022324999998,
+                "finishedMs": 1543.1367299999984,
+                "before": {
+                  "scrollTop": 4942,
+                  "scrollHeight": 5740,
+                  "clientHeight": 616,
+                  "composer": "open",
+                  "sessionId": "f4fb5dbf-e414-418a-91fd-7f8adaecf21a"
+                },
+                "after": {
+                  "scrollTop": 5145,
+                  "scrollHeight": 5761,
+                  "clientHeight": 616,
+                  "composer": "open",
+                  "sessionId": "f4fb5dbf-e414-418a-91fd-7f8adaecf21a"
+                }
+              },
+              {
+                "action": "leave-tile",
+                "taskId": "85e0d7f6-67a6-49db-84cc-8f932eee473f",
+                "scheduledMs": 1200,
+                "startedMs": 1557.9096839999984,
+                "finishedMs": 1961.496597999998,
+                "before": {
+                  "scrollTop": 5145,
+                  "scrollHeight": 5761,
+                  "clientHeight": 616,
+                  "composer": "open",
+                  "sessionId": "f4fb5dbf-e414-418a-91fd-7f8adaecf21a"
+                },
+                "after": {
+                  "scrollTop": 5031,
+                  "scrollHeight": 5824,
+                  "clientHeight": 793,
+                  "composer": "closed",
+                  "sessionId": "f4fb5dbf-e414-418a-91fd-7f8adaecf21a"
+                }
+              },
+              {
+                "action": "hover-tile",
+                "taskId": "85e0d7f6-67a6-49db-84cc-8f932eee473f",
+                "scheduledMs": 1600,
+                "startedMs": 2062.8348780000088,
+                "finishedMs": 2611.6260210000037,
+                "before": {
+                  "scrollTop": 5020,
+                  "scrollHeight": 5824,
+                  "clientHeight": 804,
+                  "composer": "closed",
+                  "sessionId": "f4fb5dbf-e414-418a-91fd-7f8adaecf21a"
+                },
+                "after": {
+                  "scrollTop": 5208,
+                  "scrollHeight": 5824,
+                  "clientHeight": 616,
+                  "composer": "open",
+                  "sessionId": "f4fb5dbf-e414-418a-91fd-7f8adaecf21a"
+                }
+              }
+            ],
+            []
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "quiet default regression",
+      "report": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792849272322.json",
+        "sha256": "febc317fcdf45dc13cf8b483fc92b8ab1b5e92295d402c4862b9b7dd5e30572b"
+      },
+      "log": "scripted-default-and-visibility-logs/kandev-run.e2e.A3Bkxa9F.log",
+      "builds": {
+        "baseline": {
+          "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+          "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+          "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+          "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+        },
+        "candidate": {
+          "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+          "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "590010efe61225b25e160854f8386332d2f4457786f878724039179f6f0fd0e0"
+        }
+      },
+      "fixtureWorkload": {
+        "layout": "grid",
+        "extraBusyHeaders": 0,
+        "tasks": 10,
+        "columns": 6,
+        "messages": 10,
+        "durationMs": 2000
+      },
+      "interactionMode": "quiet",
+      "samples": [
+        {
+          "sample": "baseline-1x-0",
+          "scheduledUpdates": 60,
+          "verificationErrors": [],
+          "offscreenCatchup": [],
+          "columnTraversal": null,
+          "interactions": [
+            [],
+            [],
+            []
+          ]
+        },
+        {
+          "sample": "candidate-1x-0",
+          "scheduledUpdates": 60,
+          "verificationErrors": [],
+          "offscreenCatchup": [],
+          "columnTraversal": null,
+          "interactions": [
+            [],
+            [],
+            []
+          ]
+        }
+      ]
+    }
+  ],
+  "failures": [
+    {
+      "report": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792848814669.json",
+        "sha256": "ad5f568f47bf2c3cd9ec286610b0086164f4e3ec7ced881503e08a8411ff95e8"
+      },
+      "log": "scripted-grid-smoke-logs/kandev-run.e2e.sppRFwqI.log",
+      "artifacts": "scripted-grid-scroll-failure",
+      "finding": "Opening the composer changes transcript bounds. The initial wheel target did not establish upward transcript movement. Retargeting the native pointer to the transcript after disclosure passes both builds; application code and scroll assertion are unchanged."
+    },
+    {
+      "log": "scripted-columns-smoke-logs/kandev-run.e2e.4wrzrms8.log",
+      "finding": "Global pnpm11 failed to open its local database before browser launch. The repository specifies pnpm9.15.9. Installing that version in a disposable tool directory and using it passes the guarded caller. No package or lockfile changed."
+    }
+  ],
+  "summaryTests": {
+    "passed": 32,
+    "log": "/tmp/kandev-scripted-harness-all-summary-tests.log",
+    "redLogs": [
+      "/tmp/kandev-dense-interactions-summary-red.log",
+      "/tmp/kandev-dense-interactions-idle-red.log"
+    ],
+    "scope": "Reject mode/timing/action-order mismatches; preserve quiet compatibility and distinguish later scripted idle windows."
+  },
+  "lint": {
+    "status": "passed",
+    "log": "/tmp/kandev-scripted-harness-lint.log"
+  },
+  "nativeVisibilityCapability": {
+    "raw": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/native-visibility-capability/performance-native-visibil-5bb6b-rriding-document-properties-chromium/native-visibility-capability.json",
+      "sha256": "74af7e6a83fd32c897383823607a5b36b26e3ca67d2ce1c3f583d5b3af40624f"
+    },
+    "probe": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/native-visibility-capability/probe.spec.ts",
+      "sha256": "3df4f225375324848831a5f4c19716043358d9f658d43a9b1c7c0656604c8715"
+    },
+    "observations": {
+      "browser": "149.0.7827.55",
+      "snapshots": [
+        {
+          "step": "initial",
+          "state": "visible",
+          "hidden": false,
+          "timeOrigin": 1792849325360.9,
+          "events": []
+        },
+        {
+          "step": "second-tab-front",
+          "state": "visible",
+          "hidden": false,
+          "timeOrigin": 1792849325360.9,
+          "events": []
+        },
+        {
+          "step": "first-tab-restored",
+          "state": "visible",
+          "hidden": false,
+          "timeOrigin": 1792849325360.9,
+          "events": []
+        },
+        {
+          "step": "window-minimized",
+          "state": "visible",
+          "hidden": false,
+          "timeOrigin": 1792849325360.9,
+          "events": []
+        },
+        {
+          "step": "window-restored",
+          "state": "visible",
+          "hidden": false,
+          "timeOrigin": 1792849325360.9,
+          "events": []
+        }
+      ],
+      "errors": [
+        {
+          "step": "minimize",
+          "error": "TimeoutError: page.waitForFunction: Timeout 3000ms exceeded."
+        }
+      ]
+    },
+    "conclusion": "Headless Chromium149 did not expose native document hiding through tab selection or Browser.setWindowBounds minimization. Every snapshot stayed visible with no visibilitychange event. The bounded hidden wait timed out. This is a capability observation, not a passing application hide/restore test. Actual document hiding requires a headed/native environment; synthetic document-property overrides remain separate."
+  },
+  "limitations": [
+    "Two-second rehearsal windows are shorter than the complete action sequence in some samples. Late action times remain recorded. These runs validate harness behavior, not input latency or CPU gains.",
+    "The first/middle/last traversal is outside timing. The eight-column run includes a non-producer last column and verifies its original fixture content.",
+    "No production code or visual style changed. Full six-pair grid and reference-column measurements remain pending."
+  ]
+}

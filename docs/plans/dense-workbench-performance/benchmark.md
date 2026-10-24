@@ -440,3 +440,30 @@ frontend subscription reference counts. The control records its old API
 behavior; the candidate must release the API and panels. Speed summaries
 reject this mode. See [the cleanup evidence](evidence/dockview-api-release.json)
 for the small control/candidate validation and post-GC observations.
+
+### Scripted Threads inputs and full-column traversal
+
+Set `KANDEV_DENSE_INTERACTIONS=1` to select `scripted-scroll-v1`. The default
+remains `quiet`. During the streaming window, the caller schedules four native
+pointer/wheel actions at 20%, 40%, 60%, and 80% of the fixed duration: hover and
+scroll up, return to the bottom, leave the tile to close the composer, and hover
+to reopen it. Composer disclosure changes transcript bounds, so the pointer
+must target the transcript again after disclosure before wheel input.
+
+Record each action's scheduled, start, and finish times, task/session identity,
+scroll geometry, and composer state. Preserve late actions; a short rehearsal
+does not establish that inputs ran on schedule. Wait for both the fixed duration
+and the action sequence before recording the deadline. A failure preserves its
+partial observations. No document visibility property is overridden.
+
+The summary rejects mixed or unknown interaction modes, incomplete or reordered
+actions, offscreen targets, and invalid timing witnesses. It labels all warm
+windows with the scripted mode, including reduced-motion idle after the pointer
+sequence. Do not pool them with quiet measurements. Cold loads remain separate.
+
+After timing in columns mode, visit the first, middle, last, and first pinned
+columns. Resolve this order from the rendered deck, compare it with every seeded
+eligible task, and verify active session identity, visible fixture content, and
+loaded messages at each stop. This includes non-producer columns. The existing
+exact-tick checks still verify previously offscreen streaming producers. Grid
+mode omits column traversal. These visits are correctness checks outside timing.
