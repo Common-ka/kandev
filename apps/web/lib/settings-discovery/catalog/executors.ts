@@ -1,3 +1,4 @@
+import { SSH_CONNECTIONS_SETTINGS_HREF } from "@/lib/settings/ssh-connection-settings-routes";
 import type { SettingsDiscoveryDefinition } from "../types";
 import { GENERAL_SETTINGS_TARGETS } from "./preferences";
 
@@ -9,7 +10,8 @@ export const EXECUTOR_DISCOVERY_DEFINITIONS: SettingsDiscoveryDefinition[] = [
     kind: "page",
     labelKey: "settings:sshManager.title",
     groupId: "agents",
-    href: "/settings/ssh-connections",
+    href: SSH_CONNECTIONS_SETTINGS_HREF,
+    parentId: "executors",
     order: 401,
     requires: "sshConnections",
   },

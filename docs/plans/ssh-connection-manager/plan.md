@@ -23,8 +23,12 @@ The continuation adds disposable SSH enrollment/restart coverage, UI submission
 and secret-lifetime fixes, and preserved hop diagnostics. Authorized Docker/Buildx
 installation removed the OpenSSH environment blocker. Real executor, restart,
 and direct/bastion adoption checks now have fresh evidence. All work orders remain
-in progress until their remaining acceptance checks pass. No commit or remote
-publication is authorized.
+in progress until their remaining acceptance checks pass. The user subsequently
+authorized the local commit `b386a0d3d1c2365194ceacb7c6cac82082d1179b`; no remote
+publication is authorized. The 2026-10-23 [navigation follow-up](../ssh-connections-executor-navigation/plan.md)
+moves management under Executors and completes contextual setup. Its two work
+orders are implemented and locally verified; they do not close the remaining
+checks in this package.
 
 ## Overview
 
@@ -104,7 +108,7 @@ drift; do not implement IdentitiesOnly or silently broaden this package to fix i
 
 ### UI-01: Identity creation, desktop and phone
 
-Entry: Settings > SSH connections > Identities. Empty or selected identity.
+Entry: Settings > Executors > SSH connections > Identities. Empty or selected identity.
 
 ```text
 Desktop
@@ -133,7 +137,7 @@ allows an explicit retry. No private-key reveal/export action exists.
 
 ### UI-02: Connection setup, desktop and phone
 
-Entry: Settings > SSH connections > New connection, or an executor-editor link.
+Entry: Settings > Executors > SSH connections > New connection, or an executor-editor link.
 State shown: target saved; host trust pending. Existing list rows show name,
 remote user/host, identity, and readiness; tapping a phone row opens its route.
 

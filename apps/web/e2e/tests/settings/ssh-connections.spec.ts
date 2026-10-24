@@ -1,3 +1,8 @@
+import {
+  exerciseSSHContextSetup,
+  exerciseSSHConcurrentEdit,
+  exerciseSSHExplicitSelection,
+} from "../../helpers/ssh-context-setup";
 import { randomUUID } from "node:crypto";
 import { test, expect } from "../../fixtures/test-base";
 import { assertNoDocumentHorizontalOverflow } from "../../helpers/layout-assertions";
@@ -19,7 +24,7 @@ for (const width of [390, 767, 768, 1280]) {
         }),
       });
       expect(response.ok).toBe(true);
-      await testPage.goto("/settings/ssh-connections?tab=connections&new=1");
+      await testPage.goto("/settings/executors/ssh-connections?tab=connections&new=1");
       await testPage.getByLabel("Name", { exact: true }).fill(`Browser target ${width}`);
       await testPage.getByLabel("Host", { exact: true }).fill("example.invalid");
       await testPage.getByLabel("SSH user", { exact: true }).fill("deploy");
@@ -53,6 +58,45 @@ test("managed SSH identity creation, protected import, and cancellation", async 
   const release = await backend.useEnv({ KANDEV_FEATURES_SSH_CONNECTION_MANAGER: "true" });
   try {
     await exerciseSSHIdentitySetup(testPage, backend.baseUrl, false);
+  } finally {
+    await testPage.close();
+    await release();
+  }
+});
+
+// @covers AC-EXECUTORS-SSH-CONNECTIONS-004.7
+test("creates an identity in context and returns to the executor draft", async ({
+  backend,
+  testPage,
+}) => {
+  const release = await backend.useEnv({ KANDEV_FEATURES_SSH_CONNECTION_MANAGER: "true" });
+  try {
+    await exerciseSSHContextSetup(testPage, false);
+  } finally {
+    await testPage.close();
+    await release();
+  }
+});
+
+// @covers AC-EXECUTORS-SSH-CONNECTIONS-004.7
+test("explicit connection selection requires a new executor check (UI fixtures)", async ({
+  backend,
+  testPage,
+}) => {
+  const release = await backend.useEnv({ KANDEV_FEATURES_SSH_CONNECTION_MANAGER: "true" });
+  try {
+    await exerciseSSHExplicitSelection(testPage, false);
+  } finally {
+    await testPage.close();
+    await release();
+  }
+});
+
+// @covers AC-EXECUTORS-SSH-CONNECTIONS-004.7
+test("reconciles a changed executor after setup (UI fixtures)", async ({ backend, testPage }) => {
+  const release = await backend.useEnv({ KANDEV_FEATURES_SSH_CONNECTION_MANAGER: "true" });
+  try {
+    await exerciseSSHConcurrentEdit(testPage);
   } finally {
     await testPage.close();
     await release();

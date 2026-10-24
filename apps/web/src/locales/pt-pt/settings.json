@@ -1028,5 +1028,11 @@
   "sshManager.errors.ssh_managed_key_unavailable": "O armazenamento protegido da chave não está disponível. Restaure a base de dados e a chave mestra correspondente em conjunto.",
   "sshManager.errors.ssh_enrollment_account_unavailable": "A conta remota não tem um diretório pessoal acessível. Verifique a conta antes de tentar novamente.",
   "sshManager.errors.ssh_enrollment_unsafe_files": "O registo recusou propriedade, permissões ou ligações simbólicas inseguras no diretório SSH remoto. Corrija-as antes de tentar novamente.",
-  "sshManager.errors.ssh_enrollment_locked": "Existe outro bloqueio de registo. Confirme que nenhum registo está ativo antes de remover um bloqueio obsoleto na conta remota."
+  "sshManager.errors.ssh_enrollment_locked": "Existe outro bloqueio de registo. Confirme que nenhum registo está ativo antes de remover um bloqueio obsoleto na conta remota.",
+  "sshManager.createIdentityForConnection": "Guardar rascunho e criar identidade",
+  "sshManager.recordUnavailable": "A ligação ou identidade já não está disponível. Volte à lista e selecione outra.",
+  "sshManager.binding.returnToExecutor": "Voltar ao executor",
+  "sshManager.binding.useConnection": "Usar ligação",
+  "sshManager.binding.draftConflict": "As definições do executor foram alteradas enquanto estava ausente. Descarte este rascunho para carregar as definições atuais.",
+  "sshManager.binding.reloadDraft": "Descartar rascunho e recarregar"
 }

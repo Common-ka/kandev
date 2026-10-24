@@ -144,7 +144,7 @@ modes retain their current contract.
 **Intent:** Desktop and phone users can complete the same setup and recovery flow.
 
 - **AC-EXECUTORS-SSH-CONNECTIONS-004.1:** Settings shall expose SSH connections
-  and identities, with a discoverable path from the executor editor. Setup
+  and identities under Executors, with a discoverable path from the executor editor. Setup
   shall guide target selection, host trust, identity selection/creation,
   authorization, and authentication checking, preserving non-secret drafts.
 - **AC-EXECUTORS-SSH-CONNECTIONS-004.2:** Preflight shall distinguish locally
@@ -165,6 +165,20 @@ modes retain their current contract.
 - **AC-EXECUTORS-SSH-CONNECTIONS-004.5:** Executor setup shall separately report
   connection readiness and executor-specific checks. A successful SSH login
   alone shall not claim that an agent or Docker daemon is ready.
+- **AC-EXECUTORS-SSH-CONNECTIONS-004.6:** SSH connections shall be a child of
+  Executors, without a separate top-level settings entry. Authorized administrators
+  shall reach it from the Executors page even when no executor profile exists,
+  from SSH executor setup, and from settings search. Breadcrumbs and the active
+  settings entry shall identify Executors as its parent on desktop and phone.
+- **AC-EXECUTORS-SSH-CONNECTIONS-004.7:** Connection setup shall offer identity
+  selection and creation at the identity field, with advanced identity management
+  available within SSH connections. Creating or cancelling an identity shall
+  return to the connection with its saved non-secret details intact. Returning
+  from connection management to the initiating managed SSH executor editor in
+  the same browser session shall preserve its non-secret draft. Only an explicit
+  selection may change the draft connection; executor testing and saving shall
+  remain separate actions. Reload may discard unsaved executor drafts; secrets
+  shall never be included in navigation or draft recovery state.
 
 ### REQ-EXECUTORS-SSH-CONNECTIONS-005: Compatibility and rollout
 
@@ -195,6 +209,11 @@ modes retain their current contract.
   matching protection key shall leave identities unavailable and explain the
   recovery requirement. Decryption failure shall never replace an existing
   identity or result in a successful connection status.
+- **AC-EXECUTORS-SSH-CONNECTIONS-005.6:** Existing SSH management bookmarks
+  shall open the equivalent nested settings view, preserving the selected tab,
+  entity, creation state, and pending adoption or bastion-return context. The
+  redirect shall not create records, trust hosts, enroll keys, or bind profiles.
+  Feature and administrator restrictions shall apply at both locations.
 
 ## Out of scope
 
@@ -211,3 +230,4 @@ remains [#3710](https://github.com/kdlbs/kandev/issues/3710).
 
 - [System design](../system-design/ssh-connection-manager.md)
 - [Implementation plan](../../../plans/ssh-connection-manager/plan.md)
+- [Executor navigation follow-up](../../../plans/ssh-connections-executor-navigation/plan.md)

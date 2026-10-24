@@ -387,7 +387,7 @@ it("shows managed SSH settings only when management is enabled for the caller", 
     false,
   );
   context.showSSHConnections = true;
-  expect(resolveSettingsDiscovery(context).some((item) => item.id === "ssh-connections")).toBe(
-    true,
-  );
+  const item = resolveSettingsDiscovery(context).find((item) => item.id === "ssh-connections");
+  expect(item?.href).toBe("/settings/executors/ssh-connections");
+  expect(item?.breadcrumb).toContain("common:executors");
 });

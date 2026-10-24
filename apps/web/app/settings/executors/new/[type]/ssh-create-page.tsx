@@ -1,5 +1,6 @@
 "use client";
 
+import { useSSHSetupContinuation } from "@/components/settings/ssh-connections/setup-continuation";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { executorProfileSettingsPath } from "@/lib/settings/executor-settings-routes";
@@ -35,7 +36,10 @@ const EXECUTORS_ROUTE = "/settings/executors";
 export function SSHCreatePage() {
   const router = useRouter();
   const store = useAppStoreApi();
-  const [owner, setOwner] = useState("");
+  const flow = useSSHSetupContinuation();
+  const [owner, setOwner] = useState(
+    flow.draft?.editor === "/settings/executors/new/ssh" ? flow.draft.ownerUserId : "",
+  );
 
   const handleSave = useCallback(
     async (cfg: SSHExecutorConfig) => {
@@ -82,7 +86,7 @@ export function SSHCreatePage() {
     <div className="space-y-8">
       <SSHCreateHeader />
       <ExecutorOwnerChoice value={owner} onChange={setOwner} creating baseline="" />
-      <SSHConnectionEditor onSave={handleSave} />
+      <SSHConnectionEditor onSave={handleSave} ownerUserId={owner} />
     </div>
   );
 }

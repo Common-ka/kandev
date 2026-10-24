@@ -19,8 +19,7 @@ Executors owns connections and identity metadata. The existing secrets package
 owns encryption, authz owns authorization, and task/runtime services retain
 control of task admission, lifetime, and recovery.
 
-This is a proposed design. New packages, types, tables, and routes below are
-explicit proposals, not existing APIs. Implementation must preserve the
+Implementation status is tracked in the linked plans. Preserve the
 [legacy SSH contract](ssh-executor.md) until a profile is explicitly converted.
 
 ## Requirement mapping
@@ -365,13 +364,9 @@ revisions and the unchanged original executor config digest are verified.
 Chained/unsupported settings leave the original profile untouched.
 Unconverted resumable runtimes keep their legacy metadata path.
 
-Remote Docker is a future consumer of the same dial interface. The present
-checkout's `RemoteDockerExecutor` is a stub. Do not implement it here or copy
-its contributor branch. Before implementation recheck #3783: if it has landed,
-include its existing transport call sites in this resolver migration and its
-connection selector tests; otherwise document the interface handoff. Existing
-key discovery from that PR is a chooser for external file identities, never
-implicit import. #3747 reachability results are separate from auth readiness.
+Remote Docker now uses the shared transport. Preserve its external file/agent
+behavior; managed Remote Docker binding is outside this package. External key
+discovery never implies import. Reachability remains separate from authentication.
 
 ## Persistence, audit, and failure recovery
 
@@ -413,59 +408,81 @@ connection_changed. Success time never substitutes for a fresh failed probe.
 
 ## Settings and mobile composition
 
-Add Settings > SSH connections, `/settings/ssh-connections`, with connection
-list/detail routes and an Identities tab. Executor editor links here while
-preserving its own draft. Connections can be drafts; profiles cannot bind an
-unfinished one. Show admin-only management; non-admin executor consumers see
-the binding name/readiness but not credential inputs or management actions.
+The 2026-10-23 navigation revision places management under Settings > Executors >
+SSH connections. Keep the accepted installation-wide custody and administrator
+boundary. This changes navigation and setup continuity, not SSH configuration,
+API paths, storage, runtime resolution, or feature defaults. The existing local
+implementation is recorded in the [original plan](../../../plans/ssh-connection-manager/plan.md);
+the [follow-up plan](../../../plans/ssh-connections-executor-navigation/plan.md)
+owns implementation of this revision. Its two work orders are pending.
 
-Use `SettingsLayoutClient`, settings discovery/navigation, existing tabs,
-`useSettingsSaveContributor`, and the shared Save changes bar for editable
-metadata. Generate/import/enroll/test/trust are explicitly named commands with
-their own effect confirmation, not hidden side effects of typing or Save.
-A setup transition first saves the current draft via the coordinator; remote
-commands operate on the acknowledged revision. Errors keep the form and mark
-which revision was checked. No automatic testing while the user types.
+### Navigation and compatibility
 
-Desktop: list then detail, with target/trust/identity/access steps and one
-current primary command. Phone: direct navigation from Settings to a full-page
-list, then one focused setup step with Back/Continue. Do not squeeze a desktop
-table or nest enrollment dialogs. Use a bottom Drawer only for temporary
-identity or bastion selection. The target step offers Direct or Via bastion,
-and lists only direct bastion records. Display separate Bastion and Destination
-trust/identity summaries and route-specific errors. Create bastion opens its
-own direct setup page, preserves the destination non-secret draft, and returns
-to it after the bastion is ready. Do not stack two trust dialogs on a phone. Exemplar `components/kanban/mobile-menu-sheet.tsx` supplies
-inset Drawer geometry/focus; `components/settings/settings-layout-client.tsx`
-supplies direct phone settings navigation, its sole scroll region, and safe-area
-space for the existing save control. Both were inspected for this package.
+Use `/settings/executors/ssh-connections` as the canonical page. Register it as a
+static route; exclude its segment from dynamic profile matching. Replace the
+old `/settings/ssh-connections` renderer with the existing `SettingsRedirect`
+using only the canonical pathname: its query/hash merge preserves old tab, id,
+new, adoption, and return parameters. Replace history so Back skips the alias.
+The redirect performs no API mutation. Both entry paths resolve through the
+existing feature/admin gate before mounting management data hooks.
 
-Use `useResponsiveBreakpoint` (phone below 768px) and shared state/hooks across
-compositions. Maintain one scroll owner; viewport-bound pickers use dynamic
-height and safe-area insets. Ordinary desktop fields/actions remain 28px;
-phone/coarse targets are at least 44px. Back navigation is guarded for metadata
-but immediately clears secret inputs. Restore focus to selection/opening control;
-announce asynchronous step status via an accessible live region. Fingerprints
-and public keys wrap/scroll within their own bounded region, not the document.
+Remove the peer SSH row from `settings-menu-sections.ts`. Keep Executors active;
+add a gated SSH connections navigation row inside the Executors page, visible
+with an empty profile list. Do not add a second sidebar peer or a speculative
+Connections category. Settings discovery keeps its stable `ssh-connections` ID,
+adds parent `executors`, and uses the canonical href. Breadcrumbs include the
+Executors parent. Centralize href/query construction for manager, binding,
+adoption, and setup-return callers in a small frontend route helper.
 
-Serialize management mutations before the next React render. Only the newest
-list request may publish data or errors. A dismissed identity form must not
-navigate when its pending request completes. Scope enrollment input to the
-approved route stamp, clear its password when confirmation closes, and show an
-enrollment outcome only for its recorded route stamp.
+### Setup continuity
 
-Empty, missing-agent, wrong-password, changed-host, and installed-unverified
-states appear in the [plan previews](../../../plans/ssh-connection-manager/plan.md#ascii-ui-preview).
-Translations cover en, pt-pt, zh-cn, zh-hk, zh-tw; generate Traditional Chinese
-using the existing command. Public keys and fingerprints are opaque values,
-not translated or used as English plural fragments.
+Keep Connections and Identities within the manager. At the connection identity
+field, add an explicit Save draft and create identity action. Save metadata
+through the current coordinator, then open the existing identity form with a
+connection-return context. Save failure stays on the connection. Success returns
+the new identity as an unsaved selection; Cancel returns without changing it.
+Generation/import remains an explicit command. Never save credentials as draft
+metadata. Preserve outer adoption and bastion-return context across this detour.
+
+Manage connections in the managed executor editor carries a typed, in-memory
+continuation with the editor route, draft name, selected connection ID, new-profile
+owner ID, and baseline binding evidence. Keep it outside the pathname-keyed save
+provider; never persist it or put it in URLs.
+Clear it on save, discard, exit from the flow, logout, or reload. Return restores
+metadata, reloads current records and clears executor-check success. A changed
+baseline requires reload/reconciliation instead of overwriting the new record.
+Return to executor preserves selection; Use connection is explicit and offered
+only for a ready route. Final binding still requires an executor check and Save.
+Missing continuation opens the normal editor without fabricated draft state.
+
+### Desktop, phone, and interaction states
+
+Reuse `SettingsLayoutClient`, `SettingsPageTemplate`, the save coordinator and
+shared control classes. Desktop uses the existing list/detail composition.
+Phone uses Executors page > connection list > focused detail or identity form;
+Back returns one level. Temporary identity/bastion selection uses the existing
+inset Drawer, not a nested setup dialog. The inspected precedents are
+`settings-layout-client.tsx` and `kanban/mobile-menu-sheet.tsx`.
+
+Use `useResponsiveBreakpoint` below 768px, one settings scroll owner and safe-area
+space for Save. Ordinary fine-pointer controls stay 28px; touch targets are at
+least 44px, including coarse tablets. Restore focus to the opening field/row,
+announce asynchronous status, and contain long fingerprints within their region.
+Use current tokens and keyboard focus styles; no new animation system.
+
+Keep empty, loading, retry, denied/disabled, stale-version and cancelled states
+explicit. Preserve metadata on errors. Serialize mutation submissions; ignore
+late responses after dismissal and clear secret inputs on completion, navigation
+and dismissal. Guard metadata navigation through the existing coordinator;
+never replay generate/import/enroll/test/trust via Save. No route transition
+performs host authentication or enrollment. Localize all new copy in en, pt-pt,
+zh-cn, zh-hk, zh-tw, ja and ko; generate the Traditional Chinese pair.
 
 ## Rollout
 
 Proposed identity: `features.sshConnectionManager`, environment
 `KANDEV_FEATURES_SSH_CONNECTION_MANAGER`, config field `SSHConnectionManager`,
-JSON key `sshConnectionManager`. These identities are not present or retired
-at authoring. Add through the typed registry/config and frontend defaults;
+JSON key `sshConnectionManager`. Keep the typed registry/config and frontend defaults;
 prod/dev/e2e defaults are false. Metadata declares restart required because
 startup wires services and recovery. Tests explicitly enable in disposable
 instances; do not enable the whole E2E profile.

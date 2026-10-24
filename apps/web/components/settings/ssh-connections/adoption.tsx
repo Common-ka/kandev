@@ -1,4 +1,5 @@
 "use client";
+import { sshConnectionSettingsPath } from "@/lib/settings/ssh-connection-settings-routes";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@kandev/ui/button";
@@ -47,7 +48,7 @@ export function AdoptionLauncher({ executorId }: { executorId: string }) {
         adopt_digest: preview.config_digest,
         adopt_connection: route.destination.id,
       });
-      router.push(`/settings/ssh-connections?${query}`);
+      router.push(sshConnectionSettingsPath(query));
     } catch (error) {
       setError(true);
       throw error;

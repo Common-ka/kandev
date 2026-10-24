@@ -8,7 +8,7 @@ import { exerciseSSHEnrollmentConfirmation } from "./ssh-enrollment";
 export async function exerciseSSHIdentitySetup(page: Page, baseUrl: string, touch: boolean) {
   const generatedName = `Generated browser key ${randomUUID()}`;
   await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
-  await page.goto("/settings/ssh-connections?tab=identities&new=1");
+  await page.goto("/settings/executors/ssh-connections?tab=identities&new=1");
   await page.getByLabel("Name", { exact: true }).fill(generatedName);
   const create = page.getByRole("button", { name: "Create identity", exact: true });
   const height = (await requireBox(create, "create identity")).height;
@@ -30,7 +30,7 @@ export async function exerciseSSHIdentitySetup(page: Page, baseUrl: string, touc
     publicKeyEncoding: { type: "spki", format: "pem" },
   });
   const importedName = `Imported browser key ${randomUUID()}`;
-  await page.goto("/settings/ssh-connections?tab=identities&new=1");
+  await page.goto("/settings/executors/ssh-connections?tab=identities&new=1");
   await page.getByLabel("Name", { exact: true }).fill(importedName);
   await page.getByLabel("Identity source", { exact: true }).selectOption("import");
   const material = page.getByLabel("Private key", { exact: true });
@@ -59,7 +59,7 @@ export async function exerciseSSHIdentitySetup(page: Page, baseUrl: string, touc
   await expect(password).toHaveCount(0);
   await assertNoDocumentHorizontalOverflow(page);
 
-  await page.goto("/settings/ssh-connections?tab=identities&new=1");
+  await page.goto("/settings/executors/ssh-connections?tab=identities&new=1");
   await page.getByLabel("Identity source", { exact: true }).selectOption("import");
   await material.fill(privateKey);
   await password.fill(passphrase);

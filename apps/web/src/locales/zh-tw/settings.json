@@ -1028,5 +1028,11 @@
   "sshManager.errors.ssh_managed_key_unavailable": "受保護的金鑰儲存不可用。請一起恢復資料庫及其對應的主金鑰。",
   "sshManager.errors.ssh_enrollment_account_unavailable": "遠端帳戶沒有可存取的主目錄。重試前請檢查該帳戶。",
   "sshManager.errors.ssh_enrollment_unsafe_files": "註冊因遠端 SSH 目錄的所有權、權限或符號連結不安全而被拒絕。請修正後重試。",
-  "sshManager.errors.ssh_enrollment_locked": "存在另一個註冊鎖。請確認沒有正在進行的註冊，再移除遠端帳戶上的過期鎖。"
+  "sshManager.errors.ssh_enrollment_locked": "存在另一個註冊鎖。請確認沒有正在進行的註冊，再移除遠端帳戶上的過期鎖。",
+  "sshManager.createIdentityForConnection": "儲存草稿並建立身分",
+  "sshManager.recordUnavailable": "連線或身分已不可用。請返回清單並選擇其他項。",
+  "sshManager.binding.returnToExecutor": "返回執行器",
+  "sshManager.binding.useConnection": "使用連線",
+  "sshManager.binding.draftConflict": "您離開期間執行器設定已更改。請放棄此草稿以載入目前設定。",
+  "sshManager.binding.reloadDraft": "放棄草稿並重新載入"
 }

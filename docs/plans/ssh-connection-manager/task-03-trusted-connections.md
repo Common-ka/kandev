@@ -54,7 +54,7 @@ retain the same structure and state rules in the rendered result.
 
 ### UI-02: Connection setup, desktop and phone
 
-Entry: Settings > SSH connections > New connection, or an executor-editor link.
+Entry: Settings > Executors > SSH connections > New connection, or an executor-editor link.
 State shown: target saved; host trust pending. Existing list rows show name,
 remote user/host, identity, and readiness; tapping a phone row opens its route.
 

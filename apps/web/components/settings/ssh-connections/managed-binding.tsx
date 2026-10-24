@@ -1,20 +1,23 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@kandev/ui/button";
 import { Input } from "@kandev/ui/input";
 import { Label } from "@kandev/ui/label";
-import { useRouter } from "@/lib/routing/client-router";
+import { usePathname, useRouter } from "@/lib/routing/client-router";
 import { useSSHConnections } from "@/hooks/domains/settings/use-ssh-connections";
 import { testSSHConnection } from "@/lib/api/domains/ssh-api";
 import type { SSHConnectionCardProps } from "../ssh-connection-card";
 import { SettingsPageTemplate } from "../settings-page-template";
 import { settingsActionClassName, settingsControlClassName } from "../settings-control";
 import { ConnectionPicker } from "./picker";
-const managerPath = "/settings/ssh-connections";
-export function ManagedBinding(props: SSHConnectionCardProps) {
+import { flushSync } from "react-dom";
+import { useSettingsSaveCoordinator } from "../settings-save-provider";
+import { useSSHSetupContinuation, type SSHSetupDraft } from "./setup-continuation";
+import { SSH_CONNECTIONS_SETTINGS_HREF } from "@/lib/settings/ssh-connection-settings-routes";
+type ManagedBindingProps = SSHConnectionCardProps & { ownerUserId?: string };
+export function ManagedBinding(props: ManagedBindingProps) {
   const { t } = useTranslation();
-  const router = useRouter();
   const manager = useSSHConnections();
   const {
     name,
@@ -29,6 +32,9 @@ export function ManagedBinding(props: SSHConnectionCardProps) {
     ready,
     canSave,
     dirty,
+    suspended,
+    conflict,
+    manage,
     test,
     save,
     discard,
@@ -39,7 +45,7 @@ export function ManagedBinding(props: SSHConnectionCardProps) {
       showPageChrome={false}
       saveId={props.coordinatedSaveId}
       saveRevision={`${name}:${selected}:${route?.stamp ?? ""}:${checked}`}
-      isDirty={Boolean(props.coordinatedSaveId) && dirty}
+      isDirty={Boolean(props.coordinatedSaveId) && dirty && !suspended}
       canSave={canSave}
       saveStatus={busy ? "loading" : "idle"}
       onSave={save}
@@ -56,34 +62,25 @@ export function ManagedBinding(props: SSHConnectionCardProps) {
             onChange={(event) => setName(event.target.value)}
           />
         </div>
-        <ConnectionPicker
-          id="managed-executor-connection"
-          label={t("settings:sshManager.binding.connection")}
-          value={selected}
-          disabled={busy || manager.busy}
+        <BindingPicker
+          selected={selected}
+          manager={manager}
+          busy={busy}
           onChange={(value) => {
             setSelected(value);
             setChecked("");
           }}
-          options={[
-            { value: "", label: t("settings:sshManager.selectConnection") },
-            ...manager.routes
-              .filter(
-                (item) =>
-                  item.destination.verified_route === item.stamp ||
-                  item.destination.id === selected,
-              )
-              .map((item) => ({ value: item.destination.id, label: item.destination.name })),
-          ]}
         />
         <Button
           type="button"
           variant="outline"
           className={settingsActionClassName()}
-          onClick={() => router.push(managerPath)}
+          onClick={manage}
+          disabled={busy || manager.busy || conflict}
         >
           {t("settings:sshManager.binding.manage")}
         </Button>
+        {conflict && <DraftConflict onDiscard={discard} />}
         {route && (
           <p className="break-all text-sm">
             {route.destination.user}@{route.destination.host}:{route.destination.port}
@@ -101,7 +98,7 @@ export function ManagedBinding(props: SSHConnectionCardProps) {
         )}
         <BindingActions
           busy={busy}
-          ready={ready}
+          ready={ready && !conflict}
           canSave={canSave}
           coordinated={Boolean(props.coordinatedSaveId)}
           test={test}
@@ -113,24 +110,20 @@ export function ManagedBinding(props: SSHConnectionCardProps) {
 }
 
 function useManagedBinding(
-  props: SSHConnectionCardProps,
+  props: ManagedBindingProps,
   manager: ReturnType<typeof useSSHConnections>,
 ) {
-  const initial = initialBinding(props);
-  const [name, setName] = useState(initial.name);
-  const [selected, setSelected] = useState(initial.connection);
+  const draft = useBindingDraft(props);
+  const { name, selected, conflict, initial, flow } = draft;
   const [checked, setChecked] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
   const route = manager.routes.find((item) => item.destination.id === selected);
   const ready = route?.destination.verified_route === route?.stamp && Boolean(route);
-  const canSave = Boolean(name.trim()) && ready && checked === route?.stamp && !busy;
-  const dirty =
-    name !== initial.name ||
-    selected !== initial.connection ||
-    Boolean(route && initial.stamp !== route.stamp);
+  const canSave = Boolean(name.trim()) && ready && checked === route?.stamp && !busy && !conflict;
+  const dirty = draft.changed || Boolean(route && initial.stamp !== route.stamp);
   const test = async () => {
-    if (!route) return;
+    if (!route || conflict) return;
     setBusy(true);
     setError(false);
     setChecked("");
@@ -159,6 +152,7 @@ function useManagedBinding(
         connection_id: selected,
         connection_stamp: route.stamp,
       });
+      flow.clear();
     } catch (error) {
       setError(true);
       throw error;
@@ -166,11 +160,15 @@ function useManagedBinding(
       setBusy(false);
     }
   };
+  const manage = useManageConnections(
+    props,
+    manager.busy || busy,
+    draft.snapshot,
+    draft.setSuspended,
+    setError,
+  );
   return {
-    name,
-    setName,
-    selected,
-    setSelected,
+    ...draft,
     checked,
     setChecked,
     busy,
@@ -179,11 +177,11 @@ function useManagedBinding(
     ready,
     canSave,
     dirty,
+    manage,
     test,
     save,
     discard: () => {
-      setName(initial.name);
-      setSelected(initial.connection);
+      draft.discard();
       setChecked("");
     },
   };
@@ -239,5 +237,132 @@ function initialBinding(props: SSHConnectionCardProps) {
     name: props.initial?.name ?? "",
     connection: props.initial?.connection_id ?? "",
     stamp: props.initial?.connection_stamp ?? "",
+  };
+}
+
+function useManageConnections(
+  props: ManagedBindingProps,
+  busy: boolean,
+  draft: SSHSetupDraft,
+  setSuspended: (value: boolean) => void,
+  setError: (value: boolean) => void,
+) {
+  const flow = useSSHSetupContinuation();
+  const router = useRouter();
+  const coordinator = useSettingsSaveCoordinator();
+  return () => {
+    if (busy || coordinator.exclusiveBusy || coordinator.status === "saving") return;
+    if (
+      coordinator.contributorStates.some(
+        (item) => item.isDirty && item.id !== props.coordinatedSaveId,
+      )
+    ) {
+      setError(true);
+      return;
+    }
+    flushSync(() => {
+      flow.begin(draft);
+      setSuspended(true);
+    });
+    let navigated = false;
+    router.push(SSH_CONNECTIONS_SETTINGS_HREF, {
+      onNavigated: () => {
+        navigated = true;
+      },
+    });
+    if (!navigated) {
+      coordinator.cancelPendingNavigation();
+      flow.clear();
+      setSuspended(false);
+      setError(true);
+    }
+  };
+}
+
+function DraftConflict({ onDiscard }: { onDiscard: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <div role="alert" className="space-y-2 text-sm text-destructive">
+      <p>{t("settings:sshManager.binding.draftConflict")}</p>
+      <Button
+        type="button"
+        variant="outline"
+        className={settingsActionClassName()}
+        onClick={onDiscard}
+      >
+        {t("settings:sshManager.binding.reloadDraft")}
+      </Button>
+    </div>
+  );
+}
+
+function BindingPicker({
+  selected,
+  manager,
+  busy,
+  onChange,
+}: {
+  selected: string;
+  manager: ReturnType<typeof useSSHConnections>;
+  busy: boolean;
+  onChange: (id: string) => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <ConnectionPicker
+      id="managed-executor-connection"
+      label={t("settings:sshManager.binding.connection")}
+      value={selected}
+      disabled={busy || manager.busy}
+      onChange={onChange}
+      options={[
+        { value: "", label: t("settings:sshManager.selectConnection") },
+        ...manager.routes
+          .filter(
+            (item) =>
+              item.destination.verified_route === item.stamp || item.destination.id === selected,
+          )
+          .map((item) => ({ value: item.destination.id, label: item.destination.name })),
+      ]}
+    />
+  );
+}
+
+function useBindingDraft(props: ManagedBindingProps) {
+  const initial = initialBinding(props);
+  const flow = useSSHSetupContinuation();
+  const editor = usePathname();
+  const restored = flow.draft?.editor === editor ? flow.draft : null;
+  const baseline = JSON.stringify(initial);
+  const conflict = Boolean(restored && restored.baseline !== baseline);
+  const [name, setName] = useState(restored?.name ?? initial.name);
+  const [selected, setSelected] = useState(restored?.connection ?? initial.connection);
+  const [suspended, setSuspended] = useState(false);
+  useEffect(() => {
+    if (restored) document.getElementById("managed-executor-connection")?.focus();
+  }, [restored]);
+  return {
+    initial,
+    flow,
+    name,
+    setName,
+    selected,
+    setSelected,
+    conflict,
+    suspended,
+    setSuspended,
+    changed: name !== initial.name || selected !== initial.connection,
+    snapshot: {
+      editor,
+      name,
+      connection: selected,
+      baseline,
+      ownerUserId: props.ownerUserId ?? "",
+    },
+    discard: () => {
+      flow.clear();
+      setName(initial.name);
+      setSelected(initial.connection);
+    },
   };
 }

@@ -53,7 +53,7 @@ retain the same structure and state rules in the rendered result.
 
 ### UI-01: Identity creation, desktop and phone
 
-Entry: Settings > SSH connections > Identities. Empty or selected identity.
+Entry: Settings > Executors > SSH connections > Identities. Empty or selected identity.
 
 ```text
 Desktop

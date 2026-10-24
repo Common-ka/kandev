@@ -8,7 +8,9 @@ import { SSHConnectionCard, type SSHConnectionCardProps } from "../ssh-connectio
 import { settingsActionClassName } from "../settings-control";
 import { AdoptionLauncher } from "./adoption";
 import { ManagedBinding } from "./managed-binding";
-export function SSHConnectionEditor(props: SSHConnectionCardProps & { executorId?: string }) {
+export function SSHConnectionEditor(
+  props: SSHConnectionCardProps & { executorId?: string; ownerUserId?: string },
+) {
   const enabled = useFeature("sshConnectionManager");
   const admin = useIsAdmin();
   const { t } = useTranslation();

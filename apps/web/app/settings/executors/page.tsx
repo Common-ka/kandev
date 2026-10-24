@@ -3,7 +3,11 @@
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "@/lib/routing/client-router";
-import { IconPlus, IconTrash } from "@tabler/icons-react";
+import { useFeature } from "@/hooks/domains/features/use-feature";
+import { useIsAdmin } from "@/hooks/domains/auth/use-is-admin";
+import Link from "@/components/routing/app-link";
+import { SSH_CONNECTIONS_SETTINGS_HREF } from "@/lib/settings/ssh-connection-settings-routes";
+import { IconPlus, IconTrash, IconChevronRight, IconKey } from "@tabler/icons-react";
 import { Badge } from "@kandev/ui/badge";
 import { Button } from "@kandev/ui/button";
 import { Card, CardContent } from "@kandev/ui/card";
@@ -281,6 +285,7 @@ export default function ExecutorsHubPage() {
         <h2 className="text-2xl font-bold">{t("common:executors")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t("executors:hubDescription")}</p>
       </div>
+      <SSHConnectionsEntry />
       <Separator />
       {!canManageKubernetes && <KubernetesReadOnlyNotice />}
       {builtInProfiles.length > 0 && (
@@ -336,5 +341,27 @@ export default function ExecutorsHubPage() {
         deleting={deleting}
       />
     </div>
+  );
+}
+
+function SSHConnectionsEntry() {
+  const { t } = useTranslation();
+  const enabled = useFeature("sshConnectionManager");
+  const admin = useIsAdmin();
+  if (!enabled || !admin) return null;
+  return (
+    <Button
+      variant="outline"
+      className={settingsActionClassName("w-full justify-between md:w-auto md:gap-4")}
+      asChild
+    >
+      <Link href={SSH_CONNECTIONS_SETTINGS_HREF}>
+        <span className="flex items-center gap-2">
+          <IconKey className="size-4" aria-hidden />
+          {t("settings:sshManager.title")}
+        </span>
+        <IconChevronRight className="size-4" aria-hidden />
+      </Link>
+    </Button>
   );
 }

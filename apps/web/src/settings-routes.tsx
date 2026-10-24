@@ -1,3 +1,4 @@
+import { SSH_CONNECTIONS_SETTINGS_HREF } from "@/lib/settings/ssh-connection-settings-routes";
 import type { ReactNode } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -139,7 +140,8 @@ const SETTINGS_ROUTES: Record<string, RouteRenderer> = {
   "/settings/workspaces": () => <WorkspacesPage />,
   "/settings/workspace": () => <SettingsRedirect to={WORKSPACES_SETTINGS_HREF} />,
   "/settings/secrets": () => <SecretsSettings />,
-  "/settings/ssh-connections": () => <SSHConnectionsSettings />,
+  "/settings/ssh-connections": () => <SettingsRedirect to={SSH_CONNECTIONS_SETTINGS_HREF} />,
+  "/settings/executors/ssh-connections": () => <SSHConnectionsSettings />,
   "/settings/agents": () => <AgentsSettingsPage />,
   "/settings/agents/browse": () => <AgentsBrowsePage />,
   "/settings/automations": () => <ActiveWorkspaceSectionRedirect section="automations" />,
@@ -362,7 +364,8 @@ function renderExecutorSettingsRoute(pathname: string): ReactNode {
     return <LegacyExecutorSettingsRoute executorId={executorId} />;
   }
   const profileId = matchSingle(pathname, /^\/settings\/executors\/([^/]+)$/);
-  if (profileId) return <ProfileEditPage profileId={profileId} />;
+  if (profileId && profileId !== "ssh-connections")
+    return <ProfileEditPage profileId={profileId} />;
   const executorType = matchSingle(pathname, /^\/settings\/executors\/new\/([^/]+)$/);
   if (executorType) return <CreateProfilePage executorType={executorType} />;
   const sshExecutorId = matchSingle(pathname, /^\/settings\/executors\/ssh\/([^/]+)$/);

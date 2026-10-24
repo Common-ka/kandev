@@ -1028,5 +1028,11 @@
   "sshManager.errors.ssh_managed_key_unavailable": "受保护的密钥存储不可用。请一起恢复数据库及其对应的主密钥。",
   "sshManager.errors.ssh_enrollment_account_unavailable": "远程账户没有可访问的主目录。重试前请检查该账户。",
   "sshManager.errors.ssh_enrollment_unsafe_files": "注册因远程 SSH 目录的所有权、权限或符号链接不安全而被拒绝。请修正后重试。",
-  "sshManager.errors.ssh_enrollment_locked": "存在另一个注册锁。请确认没有正在进行的注册，再移除远程账户上的过期锁。"
+  "sshManager.errors.ssh_enrollment_locked": "存在另一个注册锁。请确认没有正在进行的注册，再移除远程账户上的过期锁。",
+  "sshManager.createIdentityForConnection": "保存草稿并创建身份",
+  "sshManager.recordUnavailable": "连接或身份已不可用。请返回列表并选择其他项。",
+  "sshManager.binding.returnToExecutor": "返回执行器",
+  "sshManager.binding.useConnection": "使用连接",
+  "sshManager.binding.draftConflict": "您离开期间执行器设置已更改。请放弃此草稿以加载当前设置。",
+  "sshManager.binding.reloadDraft": "放弃草稿并重新加载"
 }

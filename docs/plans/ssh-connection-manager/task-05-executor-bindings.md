@@ -32,6 +32,10 @@ system_design:
 
 ## Summary
 
+The [navigation follow-up](../ssh-connections-executor-navigation/plan.md) owns
+the completed contextual manager return and draft-preservation refinement. This
+order retains backend binding/adoption acceptance and its current status.
+
 Connect the new manager to real SSH task execution and make legacy adoption explicit. Bound executor settings cannot substitute another target or identity.
 
 ## In scope

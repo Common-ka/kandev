@@ -1028,5 +1028,11 @@
   "sshManager.errors.ssh_managed_key_unavailable": "保護された鍵ストレージを利用できません。データベースと対応するマスターキーを一緒に復元してください。",
   "sshManager.errors.ssh_enrollment_account_unavailable": "リモートアカウントのホームディレクトリにアクセスできません。再試行する前にアカウントを確認してください。",
   "sshManager.errors.ssh_enrollment_unsafe_files": "リモート SSH ディレクトリの所有者、権限、またはシンボリックリンクが安全でないため登録を拒否しました。修正してから再試行してください。",
-  "sshManager.errors.ssh_enrollment_locked": "別の登録ロックが存在します。リモートアカウントの古いロックを削除する前に、登録処理が実行中でないことを確認してください。"
+  "sshManager.errors.ssh_enrollment_locked": "別の登録ロックが存在します。リモートアカウントの古いロックを削除する前に、登録処理が実行中でないことを確認してください。",
+  "sshManager.createIdentityForConnection": "下書きを保存して認証情報を作成",
+  "sshManager.recordUnavailable": "接続または認証情報を利用できなくなりました。一覧に戻り、別の項目を選択してください。",
+  "sshManager.binding.returnToExecutor": "実行環境に戻る",
+  "sshManager.binding.useConnection": "この接続を使用",
+  "sshManager.binding.draftConflict": "別の画面を開いている間に実行環境の設定が変更されました。この下書きを破棄して現在の設定を読み込んでください。",
+  "sshManager.binding.reloadDraft": "下書きを破棄して再読み込み"
 }

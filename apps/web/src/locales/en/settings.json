@@ -1028,5 +1028,11 @@
   "sshManager.errors.ssh_managed_key_unavailable": "Protected key storage is unavailable. Restore the database and its matching master key together.",
   "sshManager.errors.ssh_enrollment_account_unavailable": "The remote account has no accessible home directory. Check that account before retrying.",
   "sshManager.errors.ssh_enrollment_unsafe_files": "Enrollment refused unsafe ownership, permissions, or symlinks in the remote SSH directory. Correct them before retrying.",
-  "sshManager.errors.ssh_enrollment_locked": "Another enrollment lock exists. Confirm no enrollment is active before removing a stale lock on the remote account."
+  "sshManager.errors.ssh_enrollment_locked": "Another enrollment lock exists. Confirm no enrollment is active before removing a stale lock on the remote account.",
+  "sshManager.createIdentityForConnection": "Save draft and create identity",
+  "sshManager.recordUnavailable": "The connection or identity is no longer available. Return to the list and select another.",
+  "sshManager.binding.returnToExecutor": "Return to executor",
+  "sshManager.binding.useConnection": "Use connection",
+  "sshManager.binding.draftConflict": "The executor settings changed while you were away. Discard this draft to load the current settings.",
+  "sshManager.binding.reloadDraft": "Discard draft and reload"
 }

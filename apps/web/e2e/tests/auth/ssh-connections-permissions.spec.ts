@@ -77,10 +77,12 @@ test("only administrators can read or manage SSH identities and connections", as
         ).status(),
       ).toBe(403);
     }
-    await page.goto(`${backend.frontendUrl}/settings/ssh-connections`);
-    await expect(
-      page.getByText("SSH connection management is not available.", { exact: true }),
-    ).toBeVisible();
+    for (const path of ["/settings/ssh-connections", "/settings/executors/ssh-connections"]) {
+      await page.goto(`${backend.frontendUrl}${path}`);
+      await expect(
+        page.getByText("SSH connection management is not available.", { exact: true }),
+      ).toBeVisible();
+    }
     await expect(page.getByRole("button", { name: "New identity", exact: true })).toHaveCount(0);
     await expect(page.getByText("Administrator SSH key", { exact: true })).toHaveCount(0);
     const adminPage = await admin.newPage();

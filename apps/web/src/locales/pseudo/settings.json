@@ -1028,5 +1028,11 @@
   "sshManager.errors.ssh_managed_key_unavailable": "Ƥŕōţēćţēď ķēŷ śţōŕàĝē ĩś ũńàvàĩĺàƀĺē. Ŕēśţōŕē ţĥē ďàţàƀàśē àńď ĩţś ḿàţćĥĩńĝ ḿàśţēŕ ķēŷ ţōĝēţĥēŕ.",
   "sshManager.errors.ssh_enrollment_account_unavailable": "Ţĥē ŕēḿōţē àććōũńţ ĥàś ńō àććēśśĩƀĺē ĥōḿē ďĩŕēćţōŕŷ. Ćĥēćķ ţĥàţ àććōũńţ ƀēƒōŕē ŕēţŕŷĩńĝ.",
   "sshManager.errors.ssh_enrollment_unsafe_files": "Ēńŕōĺĺḿēńţ ŕēƒũśēď ũńśàƒē ōŵńēŕśĥĩƥ, ƥēŕḿĩśśĩōńś, ōŕ śŷḿĺĩńķś ĩń ţĥē ŕēḿōţē ŚŚĤ ďĩŕēćţōŕŷ. Ćōŕŕēćţ ţĥēḿ ƀēƒōŕē ŕēţŕŷĩńĝ.",
-  "sshManager.errors.ssh_enrollment_locked": "Àńōţĥēŕ ēńŕōĺĺḿēńţ ĺōćķ ēxĩśţś. Ćōńƒĩŕḿ ńō ēńŕōĺĺḿēńţ ĩś àćţĩvē ƀēƒōŕē ŕēḿōvĩńĝ à śţàĺē ĺōćķ ōń ţĥē ŕēḿōţē àććōũńţ."
+  "sshManager.errors.ssh_enrollment_locked": "Àńōţĥēŕ ēńŕōĺĺḿēńţ ĺōćķ ēxĩśţś. Ćōńƒĩŕḿ ńō ēńŕōĺĺḿēńţ ĩś àćţĩvē ƀēƒōŕē ŕēḿōvĩńĝ à śţàĺē ĺōćķ ōń ţĥē ŕēḿōţē àććōũńţ.",
+  "sshManager.createIdentityForConnection": "Śàvē ďŕàƒţ àńď ćŕēàţē ĩďēńţĩţŷ",
+  "sshManager.recordUnavailable": "Ţĥē ćōńńēćţĩōń ōŕ ĩďēńţĩţŷ ĩś ńō ĺōńĝēŕ àvàĩĺàƀĺē. Ŕēţũŕń ţō ţĥē ĺĩśţ àńď śēĺēćţ àńōţĥēŕ.",
+  "sshManager.binding.returnToExecutor": "Ŕēţũŕń ţō ēxēćũţōŕ",
+  "sshManager.binding.useConnection": "Ũśē ćōńńēćţĩōń",
+  "sshManager.binding.draftConflict": "Ţĥē ēxēćũţōŕ śēţţĩńĝś ćĥàńĝēď ŵĥĩĺē ŷōũ ŵēŕē àŵàŷ. Ďĩśćàŕď ţĥĩś ďŕàƒţ ţō ĺōàď ţĥē ćũŕŕēńţ śēţţĩńĝś.",
+  "sshManager.binding.reloadDraft": "Ďĩśćàŕď ďŕàƒţ àńď ŕēĺōàď"
 }

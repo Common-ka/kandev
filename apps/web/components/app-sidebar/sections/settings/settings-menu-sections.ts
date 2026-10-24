@@ -155,12 +155,6 @@ export const SETTINGS_MENU_SECTIONS: SettingsMenuSection[] = [
         countKey: "agents",
       },
       {
-        href: "/settings/ssh-connections",
-        labelKey: "settings:sshManager.title",
-        icon: IconKey,
-        requires: "sshConnections",
-      },
-      {
         href: EXECUTORS_SETTINGS_HREF,
         labelKey: "common:executors",
         icon: IconCpu,

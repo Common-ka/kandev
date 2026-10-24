@@ -1,5 +1,6 @@
 "use client";
-import { useRouter, useSearchParams } from "@/lib/routing/client-router";
+import { useManagerNavigation, type ManagerNavigation } from "./use-manager-navigation";
+import { SetupReturnActions } from "./setup-return-actions";
 import { useTranslation } from "react-i18next";
 import { Button } from "@kandev/ui/button";
 import { useFeature } from "@/hooks/domains/features/use-feature";
@@ -11,8 +12,8 @@ import { settingsActionClassName } from "../settings-control";
 import { IdentityForm } from "./identity-form";
 import { IdentityDetails } from "./identity-details";
 import { ConnectionDetails } from "./connection-details";
+import type { SSHRoute } from "@/lib/types/http-ssh-connections";
 import { AdoptionFinish } from "./adoption";
-const path = "/settings/ssh-connections";
 export function SSHConnectionsSettings() {
   const enabled = useFeature("sshConnectionManager");
   const admin = useIsAdmin();
@@ -20,39 +21,6 @@ export function SSHConnectionsSettings() {
   if (!enabled || !admin) return <p>{t("settings:sshManager.unavailable")}</p>;
   return <SSHConnectionsContent />;
 }
-function useManagerNavigation() {
-  const router = useRouter();
-  const search = useSearchParams();
-  const identities = search.get("tab") === "identities";
-  const query = new URLSearchParams();
-  for (const key of ["adopt_executor", "adopt_digest", "adopt_connection", "return_connection"]) {
-    const value = search.get(key);
-    if (value) query.set(key, value);
-  }
-  const suffix = query.size ? `&${query}` : "";
-  const base = `${path}?tab=${identities ? "identities" : "connections"}${suffix}`;
-  return {
-    identities,
-    selected: search.get("id"),
-    creating: search.get("new") === "1",
-    adoptExecutor: search.get("adopt_executor"),
-    adoptDigest: search.get("adopt_digest"),
-    adoptConnection: search.get("adopt_connection"),
-    returnConnection: search.get("return_connection"),
-    select: (id: string) => router.push(`${base}&id=${encodeURIComponent(id)}`),
-    back: () => router.push(base),
-    create: () => router.push(`${base}&new=1`),
-    showConnections: () => router.push(`${path}?tab=connections${suffix}`),
-    showIdentities: () => router.push(`${path}?tab=identities${suffix}`),
-    createBastion: (id: string) =>
-      router.push(`${path}?tab=connections&new=1&return_connection=${encodeURIComponent(id)}`),
-    returnToDestination: () =>
-      router.push(
-        `${path}?tab=connections&id=${encodeURIComponent(search.get("return_connection") ?? "")}`,
-      ),
-  };
-}
-type ManagerNavigation = ReturnType<typeof useManagerNavigation>;
 function SSHConnectionsContent() {
   const manager = useSSHConnections();
   const navigation = useManagerNavigation();
@@ -66,6 +34,7 @@ function SSHConnectionsContent() {
         title={t("settings:sshManager.title")}
         description={t("settings:sshManager.description")}
       />
+      <ManagerReturn navigation={navigation} route={route} busy={manager.busy} />
       <ManagerTabs navigation={navigation} />
       <ManagerError manager={manager} />
       {!manager.loaded && !manager.error && <p role="status">{t("settings:sshManager.loading")}</p>}
@@ -78,16 +47,7 @@ function SSHConnectionsContent() {
           {t("settings:sshManager.returnToDestination")}
         </Button>
       )}
-      {route &&
-        route.destination.id === navigation.adoptConnection &&
-        navigation.adoptExecutor &&
-        navigation.adoptDigest && (
-          <AdoptionFinish
-            executorId={navigation.adoptExecutor}
-            digest={navigation.adoptDigest}
-            route={route}
-          />
-        )}
+      <ManagerAdoption navigation={navigation} route={route} />
       {manager.loaded && (
         <div className="grid min-w-0 gap-5 md:grid-cols-[14rem_minmax(0,1fr)]">
           {(!isMobile || !details) && <ManagerList manager={manager} navigation={navigation} />}
@@ -213,7 +173,7 @@ function ManagerDetail({
       return (
         <IdentityForm
           manager={manager}
-          onCreated={(identity) => n.select(identity.id)}
+          onCreated={(identity) => n.identityCreated(identity.id)}
           onCancel={n.back}
         />
       );
@@ -243,9 +203,40 @@ function ManagerDetail({
         onSaved={(saved) => n.select(saved.destination.id)}
         onDeleted={n.back}
         onCreateBastion={(saved) => n.createBastion(saved.destination.id)}
+        onCreateIdentity={(saved) => n.createIdentity(saved.destination.id)}
       />
     );
   return (
-    <p className="text-sm text-muted-foreground">{t("settings:sshManager.selectConnection")}</p>
+    <p role={n.selected ? "alert" : undefined} className="text-sm text-muted-foreground">
+      {t(
+        n.selected
+          ? "settings:sshManager.recordUnavailable"
+          : "settings:sshManager.selectConnection",
+      )}
+    </p>
   );
+}
+
+function ManagerReturn({
+  navigation: n,
+  route,
+  busy,
+}: {
+  navigation: ManagerNavigation;
+  route?: SSHRoute;
+  busy: boolean;
+}) {
+  const selectable = !n.identities && !n.creating && !n.returnConnection;
+  return <SetupReturnActions route={selectable ? route : undefined} busy={busy} />;
+}
+function ManagerAdoption({
+  navigation: n,
+  route,
+}: {
+  navigation: ManagerNavigation;
+  route?: SSHRoute;
+}) {
+  if (!route || route.destination.id !== n.adoptConnection || !n.adoptExecutor || !n.adoptDigest)
+    return null;
+  return <AdoptionFinish executorId={n.adoptExecutor} digest={n.adoptDigest} route={route} />;
 }

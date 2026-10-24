@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@kandev/ui/button";
@@ -12,6 +12,8 @@ import type {
 } from "@/lib/types/http-ssh-connections";
 import type { SSHManager } from "@/hooks/domains/settings/use-ssh-connections";
 import { generateUUID } from "@/lib/uuid";
+import { useReturnedIdentity } from "./use-returned-identity";
+import { useSettingsSaveCoordinator } from "../settings-save-provider";
 import { SettingsPageTemplate } from "../settings-page-template";
 import { settingsActionClassName, settingsControlClassName } from "../settings-control";
 import { ConnectionPicker } from "./picker";
@@ -39,12 +41,14 @@ export function ConnectionDetails({
   onSaved,
   onDeleted,
   onCreateBastion,
+  onCreateIdentity,
 }: {
   route?: SSHRoute;
   manager: SSHManager;
   onSaved: (route: SSHRoute) => void;
   onDeleted: () => void;
   onCreateBastion?: (route: SSHRoute) => void;
+  onCreateIdentity?: (route: SSHRoute) => void;
 }) {
   const { t } = useTranslation();
   const { form, requestId, dirty, update, saveDraft, discard } = useConnectionDraft(route, manager);
@@ -53,11 +57,11 @@ export function ConnectionDetails({
     const saved = await saveDraft();
     onSaved(saved);
   };
-  const createBastion = () => {
-    void saveDraft()
-      .then((saved) => onCreateBastion?.(saved))
-      .catch(() => undefined);
-  };
+  const createRelated = useCreateRelated(saveDraft);
+  const unavailableIdentity = useReturnedIdentity(manager.identities, (id) =>
+    update("identity_id", id),
+  );
+  const savedAndClean = Boolean(route) && !dirty;
   return (
     <SettingsPageTemplate
       title={t("settings:sshManager.connections")}
@@ -70,14 +74,24 @@ export function ConnectionDetails({
       onSave={save}
       onDiscard={discard}
     >
-      <ConnectionFields form={form} manager={manager} update={update} />
+      <ConnectionFields
+        form={form}
+        manager={manager}
+        update={update}
+        createIdentity={onCreateIdentity ? () => createRelated(onCreateIdentity) : undefined}
+      />
+      {unavailableIdentity && (
+        <p role="alert" className="text-sm text-destructive">
+          {t("settings:sshManager.recordUnavailable")}
+        </p>
+      )}
       {onCreateBastion && (
         <Button
           type="button"
           variant="outline"
           className={settingsActionClassName("mt-4")}
           disabled={manager.busy || !form.name.trim()}
-          onClick={createBastion}
+          onClick={() => createRelated(onCreateBastion)}
         >
           {t("settings:sshManager.createBastion")}
         </Button>
@@ -92,8 +106,12 @@ export function ConnectionDetails({
           setObservation={setObservation}
         />
       )}
-      {route && !dirty && <PrerequisitePanel route={route} manager={manager} />}
-      {route && !dirty && <EnrollmentPanel route={route} manager={manager} />}
+      {savedAndClean && route && (
+        <>
+          <PrerequisitePanel route={route} manager={manager} />
+          <EnrollmentPanel route={route} manager={manager} />
+        </>
+      )}
       {route && (
         <div className="mt-6">
           <ManagerConfirmation
@@ -201,10 +219,12 @@ function ConnectionFields({
   form,
   manager,
   update,
+  createIdentity,
 }: {
   form: ManagedSSHConnection;
   manager: SSHManager;
   update: (key: keyof ManagedSSHConnection, value: string | number) => void;
+  createIdentity?: () => void;
 }) {
   const { t } = useTranslation();
   return (
@@ -265,6 +285,12 @@ function ConnectionFields({
           ...manager.identities.map((identity) => ({ value: identity.id, label: identity.label })),
         ]}
       />
+      {createIdentity && (
+        <CreateIdentityAction
+          disabled={manager.busy || !form.name.trim()}
+          onClick={createIdentity}
+        />
+      )}
       <ConnectionPicker
         id="ssh-managed-bastion"
         label={t("settings:sshManager.bastion")}
@@ -315,4 +341,38 @@ function useConnectionDraft(route: SSHRoute | undefined, manager: SSHManager) {
     return saved;
   };
   return { form, requestId, dirty, update, saveDraft, discard: () => setForm(baseline) };
+}
+
+function useCreateRelated(saveDraft: () => Promise<SSHRoute>) {
+  const coordinator = useSettingsSaveCoordinator();
+  const active = useRef(true);
+  useEffect(() => {
+    active.current = true;
+    return () => {
+      active.current = false;
+    };
+  }, []);
+  return (navigate: (route: SSHRoute) => void) => {
+    void coordinator
+      .runExclusive(async () => {
+        const saved = await saveDraft();
+        if (active.current) navigate(saved);
+      })
+      .catch(() => undefined);
+  };
+}
+
+function CreateIdentityAction({ disabled, onClick }: { disabled: boolean; onClick: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      className={settingsActionClassName()}
+      disabled={disabled}
+      onClick={onClick}
+    >
+      {t("settings:sshManager.createIdentityForConnection")}
+    </Button>
+  );
 }

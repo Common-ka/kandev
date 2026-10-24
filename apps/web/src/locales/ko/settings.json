@@ -1028,5 +1028,11 @@
   "sshManager.errors.ssh_managed_key_unavailable": "보호된 키 저장소를 사용할 수 없습니다. 데이터베이스와 해당 마스터 키를 함께 복원하세요.",
   "sshManager.errors.ssh_enrollment_account_unavailable": "원격 계정에 액세스할 수 있는 홈 디렉터리가 없습니다. 다시 시도하기 전에 해당 계정을 확인하세요.",
   "sshManager.errors.ssh_enrollment_unsafe_files": "원격 SSH 디렉터리의 안전하지 않은 소유권, 권한 또는 심볼릭 링크로 인해 등록을 거부했습니다. 수정한 후 다시 시도하세요.",
-  "sshManager.errors.ssh_enrollment_locked": "다른 등록 잠금이 존재합니다. 원격 계정에서 오래된 잠금을 제거하기 전에 진행 중인 등록이 없는지 확인하세요."
+  "sshManager.errors.ssh_enrollment_locked": "다른 등록 잠금이 존재합니다. 원격 계정에서 오래된 잠금을 제거하기 전에 진행 중인 등록이 없는지 확인하세요.",
+  "sshManager.createIdentityForConnection": "초안을 저장하고 인증 정보 만들기",
+  "sshManager.recordUnavailable": "연결 또는 인증 정보를 더 이상 사용할 수 없습니다. 목록으로 돌아가 다른 항목을 선택하세요.",
+  "sshManager.binding.returnToExecutor": "실행기로 돌아가기",
+  "sshManager.binding.useConnection": "연결 사용",
+  "sshManager.binding.draftConflict": "다른 화면을 보는 동안 실행기 설정이 변경되었습니다. 이 초안을 삭제하여 현재 설정을 불러오세요.",
+  "sshManager.binding.reloadDraft": "초안을 삭제하고 다시 불러오기"
 }
