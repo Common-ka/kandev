@@ -481,3 +481,10 @@ The small plugin RED/GREEN and default core caller regression pass. See
 [validation and animation ownership](evidence/dockview-cpu-attribution-harness.json).
 The four residual candidate animations belong to shared host loading indicators
 on plugin composer buttons. This identifies their owner, not their CPU cost.
+
+## MacBook Air confirmation
+
+[The Mac reproduction procedure](mac-reproduction.md) uses the same disposable
+fixture and guarded runner. Record device and power settings with each report.
+Linux CPU throttling does not replace testing on the M2 Air. Native document
+hide/restore remains a separate headed-browser correctness check.
