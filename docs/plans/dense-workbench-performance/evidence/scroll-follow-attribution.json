@@ -1,0 +1,3403 @@
+{
+  "status": "diagnostic passed; full-reference failure not reproduced",
+  "scope": "One instrumented sample per frozen build. 1000 tasks, 30 columns, 120 primary messages and 100 per sibling, 9600 stored messages. Six producers retain 300 ordered updates each. Not the full-reference 36000-message workload or a paired speed result.",
+  "runner": {
+    "exitCode": 0,
+    "durationMinutes": 15.5,
+    "log": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/scroll-follow-attribution-logs/kandev-run.e2e.kejTMO1q.log",
+      "sha256": "2c108326c4d768b03ba9b2d1ee8dfb14fd5b3c1ee5b7079ddaaf5c10c2009783"
+    },
+    "artifacts": "scroll-follow-attribution-artifacts"
+  },
+  "rawReport": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/scroll-follow-attribution-1792872672436.json",
+    "sha256": "24624330461262b5de6e0f24ed5c97f51eb5ac20ff2679e0e17a54bd10b93057"
+  },
+  "source": {
+    "path": "apps/web/e2e/tests/performance/dense-scroll-follow.local.spec.ts",
+    "sha256": "5dd9298fb2c57857f80d1116752b197d4bdc3770a17c00c2a40932b7e355895f",
+    "archivedCopy": ".kandev/diagnostics/dense-workbench-performance/scroll-follow-attribution-source.ts",
+    "content": "import fs from \"node:fs\";\nimport path from \"node:path\";\nimport { execFileSync } from \"node:child_process\";\nimport type { Page } from \"@playwright/test\";\nimport { test, expect } from \"../../fixtures/test-base\";\nimport { DENSE_WORKLOAD, seedDenseWorkbench } from \"../../helpers/dense-workbench-fixture\";\nimport { prepareDenseStream } from \"../../helpers/dense-canonical-stream\";\nimport { captureDenseTraffic } from \"../../helpers/dense-measurement\";\nimport { loadDenseCold } from \"../../helpers/dense-cold-load\";\nimport { hashAssetTree, sha256File, snapshotDatabase } from \"../../helpers/dense-snapshot\";\nimport { runDenseInteractions } from \"../../helpers/dense-interactions\";\nimport { dwell } from \"../../helpers/causal-waits\";\nimport { seedThreadPresentation } from \"../task/threads-presentation-helpers\";\n\nasync function readScroll(page: Page, taskId: string) {\n  return page\n    .getByTestId(`thread-column-${taskId}`)\n    .locator(\".chat-message-list\")\n    .evaluate((el) => ({\n      scrollTop: el.scrollTop,\n      scrollHeight: el.scrollHeight,\n      clientHeight: el.clientHeight,\n      bottomDistance: el.scrollHeight - el.scrollTop - el.clientHeight,\n      bodyTail: Array.from(el.querySelectorAll(\"[data-agent-message-body]\"))\n        .at(-1)\n        ?.textContent?.slice(-160),\n    }));\n}\n\nasync function installProbe(page: Page, taskId: string) {\n  await page.evaluate((id) => {\n    const tile = document.querySelector(`[data-testid=\"thread-column-${id}\"]`)!;\n    const transcript = tile.querySelector<HTMLElement>(\".chat-message-list\")!;\n    const records: unknown[] = [];\n    let dropped = 0;\n    const observe = (event: Event) => {\n      if (!tile.contains(event.target as Node)) return;\n      if (event.type === \"scroll\" && event.target !== transcript) return;\n      if (records.length >= 1000) {\n        dropped++;\n        return;\n      }\n      const wheel = event instanceof WheelEvent ? event : null;\n      const hit = wheel ? document.elementFromPoint(wheel.clientX, wheel.clientY) : null;\n      records.push({\n        at: performance.now(),\n        type: event.type,\n        trusted: event.isTrusted,\n        deltaY: wheel?.deltaY,\n        targetTranscript: event.composedPath().includes(transcript),\n        hitTranscript: hit ? transcript.contains(hit) : null,\n        scrollTop: transcript.scrollTop,\n        scrollHeight: transcript.scrollHeight,\n        clientHeight: transcript.clientHeight,\n        bottomDistance: transcript.scrollHeight - transcript.scrollTop - transcript.clientHeight,\n      });\n    };\n    document.addEventListener(\"wheel\", observe, { capture: true, passive: true });\n    document.addEventListener(\"scroll\", observe, { capture: true, passive: true });\n    (window as Window & { __scrollFollowDiagnostic?: unknown }).__scrollFollowDiagnostic = {\n      collect() {\n        document.removeEventListener(\"wheel\", observe, true);\n        document.removeEventListener(\"scroll\", observe, true);\n        return { records, dropped, transcriptStillConnected: transcript.isConnected };\n      },\n    };\n  }, taskId);\n}\n\nasync function compareInputs(page: Page, taskId: string, started: number) {\n  let interactionFailure: unknown;\n  let wheelError: string | undefined;\n  let actions: unknown;\n  try {\n    actions = await runDenseInteractions({\n      page,\n      taskId,\n      started,\n      durationMs: DENSE_WORKLOAD.durationMs,\n      checkpoint: (value) => {\n        interactionFailure = value;\n      },\n    });\n  } catch (error) {\n    wheelError = String(error);\n  }\n  const afterWheel = await readScroll(page, taskId);\n  const tile = page.getByTestId(`thread-column-${taskId}`);\n  const transcript = tile.locator(\".chat-message-list\");\n  await transcript.hover();\n  await expect(tile.locator(\".thread-composer-disclosure\")).toHaveAttribute(\"data-state\", \"open\");\n  await transcript.hover();\n  await page.mouse.wheel(0, -300);\n  await expect.poll(async () => (await readScroll(page, taskId)).bottomDistance).toBeGreaterThan(3);\n  const beforeButton = await readScroll(page, taskId);\n  const buttonStartedMs = performance.now() - started;\n  let buttonError: string | undefined;\n  try {\n    await tile.getByTestId(\"jump-to-latest-button\").click();\n    await expect\n      .poll(async () => (await readScroll(page, taskId)).bottomDistance)\n      .toBeLessThanOrEqual(3);\n  } catch (error) {\n    buttonError = String(error);\n  }\n  return {\n    actions,\n    interactionFailure,\n    wheelError,\n    afterWheel,\n    beforeButton,\n    buttonStartedMs,\n    buttonFinishedMs: performance.now() - started,\n    buttonError,\n    afterButton: await readScroll(page, taskId),\n  };\n}\n\ntest(\"attributes native wheel and explicit live-edge following on both frozen builds\", async ({\n  browser,\n  testPage,\n  apiClient: api,\n  seedData: seed,\n  backend,\n}, info) => {\n  test.setTimeout(1_800_000);\n  expect(DENSE_WORKLOAD).toMatchObject({\n    tasks: 1000,\n    columns: 30,\n    messages: 120,\n    durationMs: 60000,\n    layout: \"columns\",\n  });\n  const baseline = process.env.KANDEV_DENSE_BASELINE_ROOT!;\n  expect(baseline).toBeTruthy();\n  const root = path.resolve(process.cwd(), \"../..\");\n  const directory = path.join(root, \".kandev/diagnostics/dense-workbench-performance\");\n  const output = path.join(directory, `scroll-follow-attribution-${Date.now()}.json`);\n  const builds = Object.fromEntries(\n    Object.entries({ baseline, candidate: root }).map(([arm, location]) => {\n      const binary = path.join(location, \"apps/backend/bin/kandev\");\n      const assets = path.join(location, \"apps/web/dist\");\n      return [\n        arm,\n        { binary, assets, binarySha256: sha256File(binary), assetsSha256: hashAssetTree(assets) },\n      ];\n    }),\n  );\n  const fixture = await seedDenseWorkbench(api, seed, true);\n  await seedThreadPresentation(api, { layout: \"columns\", maxChats: null, autoHideComposer: true });\n  await testPage.close();\n  const snapshot = path.join(backend.tmpDir, \"scroll-follow-base.db\");\n  snapshotDatabase(path.join(backend.tmpDir, \"kandev.db\"), snapshot);\n  const report = {\n    measurementKind: \"scroll-attribution, excluded from speed comparisons\",\n    instrumentation:\n      \"Passive wheel/scroll listeners read geometry. Diagnostic overhead is present.\",\n    sourceRevision: execFileSync(\"git\", [\"rev-parse\", \"HEAD\"], {\n      encoding: \"utf8\",\n      cwd: root,\n    }).trim(),\n    sourceSha256: sha256File(info.file),\n    builds,\n    workload: DENSE_WORKLOAD,\n    databaseSha256: sha256File(snapshot),\n    fixtureManifest: fixture.manifest,\n    samples: [] as Array<Record<string, unknown>>,\n    error: undefined as string | undefined,\n  };\n  const save = () => fs.writeFileSync(output, JSON.stringify(report, null, 2));\n  save();\n  try {\n    for (const arm of [\"baseline\", \"candidate\"]) {\n      const database = path.join(backend.tmpDir, `scroll-follow-${arm}.db`);\n      fs.copyFileSync(snapshot, database);\n      expect(sha256File(database)).toBe(report.databaseSha256);\n      await backend.restart(\n        {\n          KANDEV_DATABASE_PATH: database,\n          KANDEV_HOME_DIR: path.join(backend.tmpDir, `scroll-follow-${arm}-home`),\n          KANDEV_WEB_DIST_DIR: builds[arm].assets,\n          KANDEV_LOG_LEVEL: \"warn\",\n        },\n        builds[arm].binary,\n      );\n      const threads = fixture.threads.slice(0, 6);\n      const stream = await prepareDenseStream(api, seed, backend, threads, `scroll-follow-${arm}`);\n      const context = await browser.newContext({\n        baseURL: backend.frontendUrl,\n        viewport: { width: 1470, height: 956 },\n        deviceScaleFactor: 2,\n        locale: \"en-US\",\n        reducedMotion: \"no-preference\",\n      });\n      const page = await context.newPage();\n      const result: Record<string, unknown> = { arm, browser: browser.version() };\n      report.samples.push(result);\n      save();\n      try {\n        await page.addInitScript((port) => {\n          localStorage.setItem(\"kandev.onboarding.completed\", \"true\");\n          window.__KANDEV_API_PORT = port;\n          window.__KANDEV_E2E_EXPOSE_STORE__ = true;\n        }, String(backend.port));\n        const cold = await loadDenseCold({\n          page,\n          workspaceId: seed.workspaceId,\n          threads,\n          warmup: stream.warmup,\n          layout: \"columns\",\n          totalColumns: 30,\n          traffic: captureDenseTraffic(page),\n        });\n        const taskId = cold.visibleTaskIds[0];\n        result.visibleTaskIds = cold.visibleTaskIds;\n        await installProbe(page, taskId);\n        const started = performance.now();\n        stream.release();\n        result.inputs = await compareInputs(page, taskId, started);\n        save();\n        await dwell(\n          Math.max(0, started + DENSE_WORKLOAD.durationMs - performance.now()),\n          \"clock-separation\",\n          \"retain the full canonical producer window during scroll attribution\",\n        );\n        await stream.waitForVisible(page, cold.visibleTaskIds);\n        result.afterStream = await readScroll(page, taskId);\n        await stream.verify();\n        result.scheduledUpdates = stream.scheduledUpdates;\n        result.verificationErrors = stream.verificationErrors;\n        result.orderedVerification = \"passed\";\n      } catch (error) {\n        result.error = String(error);\n      } finally {\n        if (!page.isClosed())\n          result.events = await page.evaluate(() =>\n            (\n              window as Window & { __scrollFollowDiagnostic?: { collect: () => unknown } }\n            ).__scrollFollowDiagnostic?.collect(),\n          );\n        save();\n        await context.close();\n        await stream.finish();\n      }\n    }\n    expect(report.samples).toHaveLength(2);\n    for (const result of report.samples) {\n      expect(result.error).toBeUndefined();\n      expect((result.inputs as { buttonError?: string }).buttonError).toBeUndefined();\n      expect(result.orderedVerification).toBe(\"passed\");\n    }\n  } catch (error) {\n    report.error = String(error);\n    save();\n    throw error;\n  } finally {\n    const log = path.join(backend.tmpDir, \"backend-process.log\");\n    if (fs.existsSync(log)) fs.copyFileSync(log, output + \".backend.log\");\n    await info.attach(\"scroll-follow-attribution\", {\n      path: output,\n      contentType: \"application/json\",\n    });\n  }\n});\n"
+  },
+  "report": {
+    "measurementKind": "scroll-attribution, excluded from speed comparisons",
+    "instrumentation": "Passive wheel/scroll listeners read geometry. Diagnostic overhead is present.",
+    "sourceRevision": "a414ded7a4d54ea3e87def9d7b99173a67cba594",
+    "sourceSha256": "5dd9298fb2c57857f80d1116752b197d4bdc3770a17c00c2a40932b7e355895f",
+    "builds": {
+      "baseline": {
+        "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+        "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+        "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+        "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+      },
+      "candidate": {
+        "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+        "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+        "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+        "assetsSha256": "9f2b7a961b623e0e4074fdfd0e253b10b65ccf979e110223af6b88b9121dbea8"
+      }
+    },
+    "workload": {
+      "layout": "columns",
+      "extraBusyHeaders": 0,
+      "tasks": 1000,
+      "columns": 30,
+      "messages": 120,
+      "durationMs": 60000
+    },
+    "databaseSha256": "76e21e8f4a8a50491c8d34e3dd5eaf7e29479fa590f1340d40028e8d0e9db2d3",
+    "fixtureManifest": [
+      {
+        "title": "Dense task 0000",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0001",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0002",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0003",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0004",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0005",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0006",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0007",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0008",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0009",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0010",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0011",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0012",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0013",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0014",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0015",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0016",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0017",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0018",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0019",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0020",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0021",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0022",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0023",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0024",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0025",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0026",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0027",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0028",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      },
+      {
+        "title": "Dense task 0029",
+        "messages": 120,
+        "siblings": 2,
+        "siblingMessages": [
+          100,
+          100
+        ]
+      }
+    ],
+    "samples": [
+      {
+        "arm": "baseline",
+        "browser": "149.0.7827.55",
+        "visibleTaskIds": [
+          "276df4fd-4ebb-43a5-854b-bc407d6cf1d3",
+          "a237ec04-7c61-4d93-bfb3-4532572df3ad",
+          "d7b85588-c019-4e32-aa59-e5b469da30ef",
+          "bdd6319d-ad07-4099-bd78-3d2508085dc4"
+        ],
+        "inputs": {
+          "actions": [
+            {
+              "action": "scroll-up",
+              "taskId": "276df4fd-4ebb-43a5-854b-bc407d6cf1d3",
+              "scheduledMs": 12000,
+              "startedMs": 12003.761803000001,
+              "finishedMs": 20023.85881200002,
+              "before": {
+                "scrollTop": 51152,
+                "scrollHeight": 51956,
+                "clientHeight": 804,
+                "composer": "closed",
+                "sessionId": "3e32a8a1-c456-4694-b626-0a46b618d0a0"
+              },
+              "after": {
+                "scrollTop": 51871,
+                "scrollHeight": 52843,
+                "clientHeight": 616,
+                "composer": "open",
+                "sessionId": "3e32a8a1-c456-4694-b626-0a46b618d0a0"
+              }
+            },
+            {
+              "action": "return-bottom",
+              "taskId": "276df4fd-4ebb-43a5-854b-bc407d6cf1d3",
+              "scheduledMs": 24000,
+              "startedMs": 23999.733023999957,
+              "finishedMs": 29501.655669,
+              "before": {
+                "scrollTop": 51871,
+                "scrollHeight": 53202,
+                "clientHeight": 616,
+                "composer": "open",
+                "sessionId": "3e32a8a1-c456-4694-b626-0a46b618d0a0"
+              },
+              "after": {
+                "scrollTop": 53178,
+                "scrollHeight": 53794,
+                "clientHeight": 616,
+                "composer": "open",
+                "sessionId": "3e32a8a1-c456-4694-b626-0a46b618d0a0"
+              }
+            },
+            {
+              "action": "leave-tile",
+              "taskId": "276df4fd-4ebb-43a5-854b-bc407d6cf1d3",
+              "scheduledMs": 36000,
+              "startedMs": 35999.485537,
+              "finishedMs": 37307.583904,
+              "before": {
+                "scrollTop": 53875,
+                "scrollHeight": 54533,
+                "clientHeight": 616,
+                "composer": "open",
+                "sessionId": "3e32a8a1-c456-4694-b626-0a46b618d0a0"
+              },
+              "after": {
+                "scrollTop": 53835,
+                "scrollHeight": 54639,
+                "clientHeight": 804,
+                "composer": "closed",
+                "sessionId": "3e32a8a1-c456-4694-b626-0a46b618d0a0"
+              }
+            },
+            {
+              "action": "hover-tile",
+              "taskId": "276df4fd-4ebb-43a5-854b-bc407d6cf1d3",
+              "scheduledMs": 48000,
+              "startedMs": 47999.98483800003,
+              "finishedMs": 50747.553762999945,
+              "before": {
+                "scrollTop": 54891,
+                "scrollHeight": 55780,
+                "clientHeight": 804,
+                "composer": "closed",
+                "sessionId": "3e32a8a1-c456-4694-b626-0a46b618d0a0"
+              },
+              "after": {
+                "scrollTop": 55395,
+                "scrollHeight": 56033,
+                "clientHeight": 616,
+                "composer": "open",
+                "sessionId": "3e32a8a1-c456-4694-b626-0a46b618d0a0"
+              }
+            }
+          ],
+          "afterWheel": {
+            "scrollTop": 55436,
+            "scrollHeight": 56075,
+            "clientHeight": 616,
+            "bottomDistance": 23,
+            "bodyTail": "l tick 245\nDense canonical tick 246\nDense canonical tick 247\nDense canonical tick 248\nDense canonical tick 249\nDense canonical tick 250\nDense canonical tick 251"
+          },
+          "beforeButton": {
+            "scrollTop": 55476,
+            "scrollHeight": 56582,
+            "clientHeight": 616,
+            "bottomDistance": 490,
+            "bodyTail": "l tick 269\nDense canonical tick 270\nDense canonical tick 271\nDense canonical tick 272\nDense canonical tick 273\nDense canonical tick 274\nDense canonical tick 275"
+          },
+          "buttonStartedMs": 56911.109136999934,
+          "buttonFinishedMs": 58660.97862299997,
+          "afterButton": {
+            "scrollTop": 56262,
+            "scrollHeight": 56920,
+            "clientHeight": 616,
+            "bottomDistance": 42,
+            "bodyTail": "l tick 285\nDense canonical tick 286\nDense canonical tick 287\nDense canonical tick 288\nDense canonical tick 289\nDense canonical tick 290\nDense canonical tick 291"
+          }
+        },
+        "afterStream": {
+          "scrollTop": 56473,
+          "scrollHeight": 57089,
+          "clientHeight": 616,
+          "bottomDistance": 0,
+          "bodyTail": "l tick 293\nDense canonical tick 294\nDense canonical tick 295\nDense canonical tick 296\nDense canonical tick 297\nDense canonical tick 298\nDense canonical tick 299"
+        },
+        "scheduledUpdates": 1800,
+        "verificationErrors": [],
+        "orderedVerification": "passed",
+        "events": {
+          "records": [
+            {
+              "at": 29405,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 49988,
+              "scrollHeight": 50794,
+              "clientHeight": 804,
+              "bottomDistance": 2
+            },
+            {
+              "at": 29523.900000035763,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 49990,
+              "scrollHeight": 50794,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 30039,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50025,
+              "scrollHeight": 50836,
+              "clientHeight": 804,
+              "bottomDistance": 7
+            },
+            {
+              "at": 30138.600000023842,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50032,
+              "scrollHeight": 50836,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 30448.80000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50075,
+              "scrollHeight": 50879,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 31045.900000035763,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50115,
+              "scrollHeight": 50921,
+              "clientHeight": 804,
+              "bottomDistance": 2
+            },
+            {
+              "at": 31149.100000023842,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50117,
+              "scrollHeight": 50921,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 31648.100000023842,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50170,
+              "scrollHeight": 50984,
+              "clientHeight": 804,
+              "bottomDistance": 10
+            },
+            {
+              "at": 31747.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50180,
+              "scrollHeight": 50984,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 32125.69999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50241,
+              "scrollHeight": 51048,
+              "clientHeight": 804,
+              "bottomDistance": 3
+            },
+            {
+              "at": 32247.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50244,
+              "scrollHeight": 51048,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 32643.100000023842,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50280,
+              "scrollHeight": 51090,
+              "clientHeight": 804,
+              "bottomDistance": 6
+            },
+            {
+              "at": 32844.30000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50286,
+              "scrollHeight": 51090,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 33281.40000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50348,
+              "scrollHeight": 51153,
+              "clientHeight": 804,
+              "bottomDistance": 1
+            },
+            {
+              "at": 33940.5,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50412,
+              "scrollHeight": 51217,
+              "clientHeight": 804,
+              "bottomDistance": 1
+            },
+            {
+              "at": 34584.80000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50460,
+              "scrollHeight": 51280,
+              "clientHeight": 804,
+              "bottomDistance": 16
+            },
+            {
+              "at": 34629.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50476,
+              "scrollHeight": 51280,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 35086.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50539,
+              "scrollHeight": 51343,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 35698.10000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50603,
+              "scrollHeight": 51407,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 36288.80000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50656,
+              "scrollHeight": 51470,
+              "clientHeight": 804,
+              "bottomDistance": 10
+            },
+            {
+              "at": 36419.10000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50666,
+              "scrollHeight": 51470,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 36926.80000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50708,
+              "scrollHeight": 51512,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 38081.10000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50772,
+              "scrollHeight": 51576,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 38643.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50899,
+              "scrollHeight": 51703,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 39814,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50962,
+              "scrollHeight": 51766,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 40761,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51068,
+              "scrollHeight": 51872,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 41851.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51152,
+              "scrollHeight": 51956,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 43095.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51279,
+              "scrollHeight": 52083,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 44584.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51339,
+              "scrollHeight": 52146,
+              "clientHeight": 804,
+              "bottomDistance": 3
+            },
+            {
+              "at": 44817.10000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51342,
+              "scrollHeight": 52146,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 45097.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51530,
+              "scrollHeight": 52146,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 45597.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51627,
+              "scrollHeight": 52357,
+              "clientHeight": 616,
+              "bottomDistance": 114
+            },
+            {
+              "at": 45809.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51741,
+              "scrollHeight": 52357,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 46367.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51868,
+              "scrollHeight": 52484,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 47172.10000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51952,
+              "scrollHeight": 52569,
+              "clientHeight": 616,
+              "bottomDistance": 1
+            },
+            {
+              "at": 47790.80000001192,
+              "type": "wheel",
+              "trusted": true,
+              "deltaY": -80,
+              "targetTranscript": true,
+              "hitTranscript": true,
+              "scrollTop": 52031,
+              "scrollHeight": 52674,
+              "clientHeight": 616,
+              "bottomDistance": 27
+            },
+            {
+              "at": 47794.10000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 52031,
+              "scrollHeight": 52674,
+              "clientHeight": 616,
+              "bottomDistance": 27
+            },
+            {
+              "at": 48019.40000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51871,
+              "scrollHeight": 52674,
+              "clientHeight": 616,
+              "bottomDistance": 187
+            },
+            {
+              "at": 57334.5,
+              "type": "wheel",
+              "trusted": true,
+              "deltaY": 500000,
+              "targetTranscript": true,
+              "hitTranscript": true,
+              "scrollTop": 51871,
+              "scrollHeight": 53562,
+              "clientHeight": 616,
+              "bottomDistance": 1075
+            },
+            {
+              "at": 57510.5,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 52946,
+              "scrollHeight": 53562,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 57951.30000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53030,
+              "scrollHeight": 53646,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 58611.40000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53178,
+              "scrollHeight": 53794,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 59679.10000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53238,
+              "scrollHeight": 53857,
+              "clientHeight": 616,
+              "bottomDistance": 3
+            },
+            {
+              "at": 59800.80000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53241,
+              "scrollHeight": 53857,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 60290.40000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53362,
+              "scrollHeight": 53984,
+              "clientHeight": 616,
+              "bottomDistance": 6
+            },
+            {
+              "at": 60453.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53368,
+              "scrollHeight": 53984,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 60919.80000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53430,
+              "scrollHeight": 54047,
+              "clientHeight": 616,
+              "bottomDistance": 1
+            },
+            {
+              "at": 61724.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53494,
+              "scrollHeight": 54111,
+              "clientHeight": 616,
+              "bottomDistance": 1
+            },
+            {
+              "at": 62483,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53575,
+              "scrollHeight": 54195,
+              "clientHeight": 616,
+              "bottomDistance": 4
+            },
+            {
+              "at": 62545.80000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53579,
+              "scrollHeight": 54195,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 62979,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53663,
+              "scrollHeight": 54280,
+              "clientHeight": 616,
+              "bottomDistance": 1
+            },
+            {
+              "at": 63754.5,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53727,
+              "scrollHeight": 54343,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 64340.5,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53756,
+              "scrollHeight": 54407,
+              "clientHeight": 616,
+              "bottomDistance": 35
+            },
+            {
+              "at": 64463.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53791,
+              "scrollHeight": 54407,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 64883.5,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53871,
+              "scrollHeight": 54491,
+              "clientHeight": 616,
+              "bottomDistance": 4
+            },
+            {
+              "at": 64992.40000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53875,
+              "scrollHeight": 54491,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 65416.40000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53915,
+              "scrollHeight": 54533,
+              "clientHeight": 616,
+              "bottomDistance": 2
+            },
+            {
+              "at": 65549.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53917,
+              "scrollHeight": 54533,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 65982.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53956,
+              "scrollHeight": 54576,
+              "clientHeight": 616,
+              "bottomDistance": 4
+            },
+            {
+              "at": 66079.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53777,
+              "scrollHeight": 54576,
+              "clientHeight": 799,
+              "bottomDistance": 0
+            },
+            {
+              "at": 66282.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53772,
+              "scrollHeight": 54576,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 66652.5,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53801,
+              "scrollHeight": 54639,
+              "clientHeight": 804,
+              "bottomDistance": 34
+            },
+            {
+              "at": 66749.5,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53835,
+              "scrollHeight": 54639,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 67220.80000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53846,
+              "scrollHeight": 54681,
+              "clientHeight": 804,
+              "bottomDistance": 31
+            },
+            {
+              "at": 67318.30000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53877,
+              "scrollHeight": 54681,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 67780.69999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53935,
+              "scrollHeight": 54745,
+              "clientHeight": 804,
+              "bottomDistance": 6
+            },
+            {
+              "at": 67886.40000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 53941,
+              "scrollHeight": 54745,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 68157.80000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54018,
+              "scrollHeight": 54829,
+              "clientHeight": 804,
+              "bottomDistance": 7
+            },
+            {
+              "at": 68262.5,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54025,
+              "scrollHeight": 54829,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 68653,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54085,
+              "scrollHeight": 54892,
+              "clientHeight": 804,
+              "bottomDistance": 3
+            },
+            {
+              "at": 68748.40000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54088,
+              "scrollHeight": 54892,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 69104.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54094,
+              "scrollHeight": 54914,
+              "clientHeight": 804,
+              "bottomDistance": 16
+            },
+            {
+              "at": 69168.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54109,
+              "scrollHeight": 54914,
+              "clientHeight": 804,
+              "bottomDistance": 1
+            },
+            {
+              "at": 69518,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54148,
+              "scrollHeight": 54956,
+              "clientHeight": 804,
+              "bottomDistance": 4
+            },
+            {
+              "at": 69627.40000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54150,
+              "scrollHeight": 54956,
+              "clientHeight": 804,
+              "bottomDistance": 2
+            },
+            {
+              "at": 69649.10000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54152,
+              "scrollHeight": 54956,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 69995.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54192,
+              "scrollHeight": 54998,
+              "clientHeight": 804,
+              "bottomDistance": 2
+            },
+            {
+              "at": 70122.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54194,
+              "scrollHeight": 54998,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 70501.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54257,
+              "scrollHeight": 55061,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 71085.5,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54298,
+              "scrollHeight": 55104,
+              "clientHeight": 804,
+              "bottomDistance": 2
+            },
+            {
+              "at": 71181.69999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54300,
+              "scrollHeight": 55104,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 71434.5,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54360,
+              "scrollHeight": 55167,
+              "clientHeight": 804,
+              "bottomDistance": 3
+            },
+            {
+              "at": 71552.80000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54363,
+              "scrollHeight": 55167,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 71838,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54423,
+              "scrollHeight": 55230,
+              "clientHeight": 804,
+              "bottomDistance": 3
+            },
+            {
+              "at": 71957.80000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54425,
+              "scrollHeight": 55230,
+              "clientHeight": 804,
+              "bottomDistance": 1
+            },
+            {
+              "at": 72341.40000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54446,
+              "scrollHeight": 55252,
+              "clientHeight": 804,
+              "bottomDistance": 2
+            },
+            {
+              "at": 72441.10000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54448,
+              "scrollHeight": 55252,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 72866.10000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54505,
+              "scrollHeight": 55315,
+              "clientHeight": 804,
+              "bottomDistance": 6
+            },
+            {
+              "at": 72986.30000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54510,
+              "scrollHeight": 55315,
+              "clientHeight": 804,
+              "bottomDistance": 1
+            },
+            {
+              "at": 73294.10000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54568,
+              "scrollHeight": 55378,
+              "clientHeight": 804,
+              "bottomDistance": 6
+            },
+            {
+              "at": 73409.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54574,
+              "scrollHeight": 55378,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 73803.30000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54594,
+              "scrollHeight": 55399,
+              "clientHeight": 804,
+              "bottomDistance": 1
+            },
+            {
+              "at": 74322.40000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54637,
+              "scrollHeight": 55442,
+              "clientHeight": 804,
+              "bottomDistance": 1
+            },
+            {
+              "at": 75305,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54758,
+              "scrollHeight": 55568,
+              "clientHeight": 804,
+              "bottomDistance": 6
+            },
+            {
+              "at": 75418.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54764,
+              "scrollHeight": 55568,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 75706.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54803,
+              "scrollHeight": 55611,
+              "clientHeight": 804,
+              "bottomDistance": 4
+            },
+            {
+              "at": 75798.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54807,
+              "scrollHeight": 55611,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 76230.69999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54845,
+              "scrollHeight": 55653,
+              "clientHeight": 804,
+              "bottomDistance": 4
+            },
+            {
+              "at": 76346.80000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54849,
+              "scrollHeight": 55653,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 76763.69999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54887,
+              "scrollHeight": 55695,
+              "clientHeight": 804,
+              "bottomDistance": 4
+            },
+            {
+              "at": 76869.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54891,
+              "scrollHeight": 55695,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 77255.40000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54969,
+              "scrollHeight": 55780,
+              "clientHeight": 804,
+              "bottomDistance": 7
+            },
+            {
+              "at": 77372.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 54975,
+              "scrollHeight": 55780,
+              "clientHeight": 804,
+              "bottomDistance": 1
+            },
+            {
+              "at": 77730.5,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55029,
+              "scrollHeight": 55843,
+              "clientHeight": 804,
+              "bottomDistance": 10
+            },
+            {
+              "at": 77808.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55036,
+              "scrollHeight": 55843,
+              "clientHeight": 804,
+              "bottomDistance": 3
+            },
+            {
+              "at": 77857.30000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55039,
+              "scrollHeight": 55843,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 78244,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55099,
+              "scrollHeight": 55906,
+              "clientHeight": 804,
+              "bottomDistance": 3
+            },
+            {
+              "at": 78374.69999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55102,
+              "scrollHeight": 55906,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 78593.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55281,
+              "scrollHeight": 55906,
+              "clientHeight": 616,
+              "bottomDistance": 9
+            },
+            {
+              "at": 78737.40000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55290,
+              "scrollHeight": 55949,
+              "clientHeight": 616,
+              "bottomDistance": 43
+            },
+            {
+              "at": 78918.10000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55333,
+              "scrollHeight": 55949,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 79600.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55395,
+              "scrollHeight": 56012,
+              "clientHeight": 616,
+              "bottomDistance": 1
+            },
+            {
+              "at": 80219.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55405,
+              "scrollHeight": 56033,
+              "clientHeight": 616,
+              "bottomDistance": 12
+            },
+            {
+              "at": 80312.40000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55417,
+              "scrollHeight": 56033,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 80829.10000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55436,
+              "scrollHeight": 56075,
+              "clientHeight": 616,
+              "bottomDistance": 23
+            },
+            {
+              "at": 80943.40000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55459,
+              "scrollHeight": 56075,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 81519.80000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55520,
+              "scrollHeight": 56139,
+              "clientHeight": 616,
+              "bottomDistance": 3
+            },
+            {
+              "at": 81681.5,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55523,
+              "scrollHeight": 56139,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 82143.30000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55542,
+              "scrollHeight": 56181,
+              "clientHeight": 616,
+              "bottomDistance": 23
+            },
+            {
+              "at": 82296.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55565,
+              "scrollHeight": 56181,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 83531.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55772,
+              "scrollHeight": 56392,
+              "clientHeight": 616,
+              "bottomDistance": 4
+            },
+            {
+              "at": 83678.80000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55776,
+              "scrollHeight": 56392,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 83841.10000002384,
+              "type": "wheel",
+              "trusted": true,
+              "deltaY": -150,
+              "targetTranscript": true,
+              "hitTranscript": true,
+              "scrollTop": 55776,
+              "scrollHeight": 56392,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 84031.30000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55476,
+              "scrollHeight": 56477,
+              "clientHeight": 616,
+              "bottomDistance": 385
+            },
+            {
+              "at": 86545.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56135,
+              "scrollHeight": 56751,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 87139.69999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56199,
+              "scrollHeight": 56815,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 87637.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56259,
+              "scrollHeight": 56878,
+              "clientHeight": 616,
+              "bottomDistance": 3
+            },
+            {
+              "at": 87793.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56262,
+              "scrollHeight": 56878,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 88327.5,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56304,
+              "scrollHeight": 56920,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 88909.5,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56382,
+              "scrollHeight": 57005,
+              "clientHeight": 616,
+              "bottomDistance": 7
+            },
+            {
+              "at": 89052.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56389,
+              "scrollHeight": 57005,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 89500,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56449,
+              "scrollHeight": 57068,
+              "clientHeight": 616,
+              "bottomDistance": 3
+            },
+            {
+              "at": 89554.10000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56452,
+              "scrollHeight": 57068,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 90048.5,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56470,
+              "scrollHeight": 57089,
+              "clientHeight": 616,
+              "bottomDistance": 3
+            },
+            {
+              "at": 90138.40000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56473,
+              "scrollHeight": 57089,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            }
+          ],
+          "dropped": 0,
+          "transcriptStillConnected": true
+        }
+      },
+      {
+        "arm": "candidate",
+        "browser": "149.0.7827.55",
+        "visibleTaskIds": [
+          "276df4fd-4ebb-43a5-854b-bc407d6cf1d3",
+          "a237ec04-7c61-4d93-bfb3-4532572df3ad",
+          "d7b85588-c019-4e32-aa59-e5b469da30ef",
+          "bdd6319d-ad07-4099-bd78-3d2508085dc4"
+        ],
+        "inputs": {
+          "actions": [
+            {
+              "action": "scroll-up",
+              "taskId": "276df4fd-4ebb-43a5-854b-bc407d6cf1d3",
+              "scheduledMs": 12000,
+              "startedMs": 12000.043249999988,
+              "finishedMs": 38524.55552299996,
+              "before": {
+                "scrollTop": 51363,
+                "scrollHeight": 52167,
+                "clientHeight": 804,
+                "composer": "closed",
+                "sessionId": "3e32a8a1-c456-4694-b626-0a46b618d0a0"
+              },
+              "after": {
+                "scrollTop": 51668,
+                "scrollHeight": 54554,
+                "clientHeight": 616,
+                "composer": "open",
+                "sessionId": "3e32a8a1-c456-4694-b626-0a46b618d0a0"
+              }
+            },
+            {
+              "action": "return-bottom",
+              "taskId": "276df4fd-4ebb-43a5-854b-bc407d6cf1d3",
+              "scheduledMs": 24000,
+              "startedMs": 40196.560247999965,
+              "finishedMs": 53133.30389699992,
+              "before": {
+                "scrollTop": 51668,
+                "scrollHeight": 54871,
+                "clientHeight": 616,
+                "composer": "open",
+                "sessionId": "3e32a8a1-c456-4694-b626-0a46b618d0a0"
+              },
+              "after": {
+                "scrollTop": 55755,
+                "scrollHeight": 56413,
+                "clientHeight": 616,
+                "composer": "open",
+                "sessionId": "3e32a8a1-c456-4694-b626-0a46b618d0a0"
+              }
+            },
+            {
+              "action": "leave-tile",
+              "taskId": "276df4fd-4ebb-43a5-854b-bc407d6cf1d3",
+              "scheduledMs": 36000,
+              "startedMs": 54519.23571799998,
+              "finishedMs": 57438.53888899996,
+              "before": {
+                "scrollTop": 55966,
+                "scrollHeight": 56582,
+                "clientHeight": 616,
+                "composer": "open",
+                "sessionId": "3e32a8a1-c456-4694-b626-0a46b618d0a0"
+              },
+              "after": {
+                "scrollTop": 55969,
+                "scrollHeight": 56773,
+                "clientHeight": 804,
+                "composer": "closed",
+                "sessionId": "3e32a8a1-c456-4694-b626-0a46b618d0a0"
+              }
+            },
+            {
+              "action": "hover-tile",
+              "taskId": "276df4fd-4ebb-43a5-854b-bc407d6cf1d3",
+              "scheduledMs": 48000,
+              "startedMs": 58856.876009,
+              "finishedMs": 64301.845147999935,
+              "before": {
+                "scrollTop": 56095,
+                "scrollHeight": 56920,
+                "clientHeight": 804,
+                "composer": "closed",
+                "sessionId": "3e32a8a1-c456-4694-b626-0a46b618d0a0"
+              },
+              "after": {
+                "scrollTop": 56473,
+                "scrollHeight": 57089,
+                "clientHeight": 616,
+                "composer": "open",
+                "sessionId": "3e32a8a1-c456-4694-b626-0a46b618d0a0"
+              }
+            }
+          ],
+          "afterWheel": {
+            "scrollTop": 56473,
+            "scrollHeight": 57089,
+            "clientHeight": 616,
+            "bottomDistance": 0,
+            "bodyTail": "l tick 293\nDense canonical tick 294\nDense canonical tick 295\nDense canonical tick 296\nDense canonical tick 297\nDense canonical tick 298\nDense canonical tick 299"
+          },
+          "beforeButton": {
+            "scrollTop": 56173,
+            "scrollHeight": 57089,
+            "clientHeight": 616,
+            "bottomDistance": 300,
+            "bodyTail": "l tick 293\nDense canonical tick 294\nDense canonical tick 295\nDense canonical tick 296\nDense canonical tick 297\nDense canonical tick 298\nDense canonical tick 299"
+          },
+          "buttonStartedMs": 64734.76423999993,
+          "buttonFinishedMs": 64982.826825,
+          "afterButton": {
+            "scrollTop": 56473,
+            "scrollHeight": 57089,
+            "clientHeight": 616,
+            "bottomDistance": 0,
+            "bodyTail": "l tick 293\nDense canonical tick 294\nDense canonical tick 295\nDense canonical tick 296\nDense canonical tick 297\nDense canonical tick 298\nDense canonical tick 299"
+          }
+        },
+        "afterStream": {
+          "scrollTop": 56473,
+          "scrollHeight": 57089,
+          "clientHeight": 616,
+          "bottomDistance": 0,
+          "bodyTail": "l tick 293\nDense canonical tick 294\nDense canonical tick 295\nDense canonical tick 296\nDense canonical tick 297\nDense canonical tick 298\nDense canonical tick 299"
+        },
+        "scheduledUpdates": 1800,
+        "verificationErrors": [],
+        "orderedVerification": "passed",
+        "events": {
+          "records": [
+            {
+              "at": 29615.80000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 49948,
+              "scrollHeight": 50752,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 30551.100000023842,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50011,
+              "scrollHeight": 50815,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 31158.80000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50074,
+              "scrollHeight": 50879,
+              "clientHeight": 804,
+              "bottomDistance": 1
+            },
+            {
+              "at": 31782.5,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50117,
+              "scrollHeight": 50942,
+              "clientHeight": 804,
+              "bottomDistance": 21
+            },
+            {
+              "at": 32090.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50159,
+              "scrollHeight": 50963,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 32746.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50201,
+              "scrollHeight": 51027,
+              "clientHeight": 804,
+              "bottomDistance": 22
+            },
+            {
+              "at": 33056.40000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50223,
+              "scrollHeight": 51048,
+              "clientHeight": 804,
+              "bottomDistance": 21
+            },
+            {
+              "at": 33392.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50244,
+              "scrollHeight": 51069,
+              "clientHeight": 804,
+              "bottomDistance": 21
+            },
+            {
+              "at": 33702.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50265,
+              "scrollHeight": 51111,
+              "clientHeight": 804,
+              "bottomDistance": 42
+            },
+            {
+              "at": 34020.80000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50307,
+              "scrollHeight": 51111,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 34524.5,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50349,
+              "scrollHeight": 51153,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 34992.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50391,
+              "scrollHeight": 51196,
+              "clientHeight": 804,
+              "bottomDistance": 1
+            },
+            {
+              "at": 35509.30000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50434,
+              "scrollHeight": 51259,
+              "clientHeight": 804,
+              "bottomDistance": 21
+            },
+            {
+              "at": 35801.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50455,
+              "scrollHeight": 51280,
+              "clientHeight": 804,
+              "bottomDistance": 21
+            },
+            {
+              "at": 36149.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50473,
+              "scrollHeight": 51322,
+              "clientHeight": 804,
+              "bottomDistance": 45
+            },
+            {
+              "at": 36313.10000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50518,
+              "scrollHeight": 51365,
+              "clientHeight": 804,
+              "bottomDistance": 43
+            },
+            {
+              "at": 36623.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50566,
+              "scrollHeight": 51386,
+              "clientHeight": 804,
+              "bottomDistance": 16
+            },
+            {
+              "at": 36803.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50582,
+              "scrollHeight": 51428,
+              "clientHeight": 804,
+              "bottomDistance": 42
+            },
+            {
+              "at": 37112.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50635,
+              "scrollHeight": 51449,
+              "clientHeight": 804,
+              "bottomDistance": 10
+            },
+            {
+              "at": 37304.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50645,
+              "scrollHeight": 51470,
+              "clientHeight": 804,
+              "bottomDistance": 21
+            },
+            {
+              "at": 37647.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50661,
+              "scrollHeight": 51491,
+              "clientHeight": 804,
+              "bottomDistance": 26
+            },
+            {
+              "at": 37822.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50687,
+              "scrollHeight": 51491,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 38327.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50708,
+              "scrollHeight": 51534,
+              "clientHeight": 804,
+              "bottomDistance": 22
+            },
+            {
+              "at": 38652.69999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50740,
+              "scrollHeight": 51555,
+              "clientHeight": 804,
+              "bottomDistance": 11
+            },
+            {
+              "at": 38785.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50751,
+              "scrollHeight": 51555,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 39364.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50835,
+              "scrollHeight": 51639,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 39931.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50899,
+              "scrollHeight": 51745,
+              "clientHeight": 804,
+              "bottomDistance": 42
+            },
+            {
+              "at": 40291.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50941,
+              "scrollHeight": 51766,
+              "clientHeight": 804,
+              "bottomDistance": 21
+            },
+            {
+              "at": 40615.69999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 50962,
+              "scrollHeight": 51787,
+              "clientHeight": 804,
+              "bottomDistance": 21
+            },
+            {
+              "at": 40969.10000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51004,
+              "scrollHeight": 51808,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 41458.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51046,
+              "scrollHeight": 51872,
+              "clientHeight": 804,
+              "bottomDistance": 22
+            },
+            {
+              "at": 41767.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51068,
+              "scrollHeight": 51893,
+              "clientHeight": 804,
+              "bottomDistance": 21
+            },
+            {
+              "at": 42097.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51089,
+              "scrollHeight": 51914,
+              "clientHeight": 804,
+              "bottomDistance": 21
+            },
+            {
+              "at": 42442.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51110,
+              "scrollHeight": 51935,
+              "clientHeight": 804,
+              "bottomDistance": 21
+            },
+            {
+              "at": 42871.40000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51152,
+              "scrollHeight": 51956,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 43417.30000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51173,
+              "scrollHeight": 51977,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 43942.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51194,
+              "scrollHeight": 52019,
+              "clientHeight": 804,
+              "bottomDistance": 21
+            },
+            {
+              "at": 44462.5,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51215,
+              "scrollHeight": 52041,
+              "clientHeight": 804,
+              "bottomDistance": 22
+            },
+            {
+              "at": 44896.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51237,
+              "scrollHeight": 52041,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 45690,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51279,
+              "scrollHeight": 52083,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 46220.30000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51319,
+              "scrollHeight": 52125,
+              "clientHeight": 804,
+              "bottomDistance": 2
+            },
+            {
+              "at": 46382.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51321,
+              "scrollHeight": 52125,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 47101,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51337,
+              "scrollHeight": 52146,
+              "clientHeight": 804,
+              "bottomDistance": 5
+            },
+            {
+              "at": 47247.40000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51342,
+              "scrollHeight": 52167,
+              "clientHeight": 804,
+              "bottomDistance": 21
+            },
+            {
+              "at": 47615.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51363,
+              "scrollHeight": 52188,
+              "clientHeight": 804,
+              "bottomDistance": 21
+            },
+            {
+              "at": 48050,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51384,
+              "scrollHeight": 52188,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 48593.5,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51406,
+              "scrollHeight": 52210,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 49213.69999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51427,
+              "scrollHeight": 52252,
+              "clientHeight": 804,
+              "bottomDistance": 21
+            },
+            {
+              "at": 49679.69999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51448,
+              "scrollHeight": 52252,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 51005.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51466,
+              "scrollHeight": 52273,
+              "clientHeight": 804,
+              "bottomDistance": 3
+            },
+            {
+              "at": 51174.30000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51469,
+              "scrollHeight": 52294,
+              "clientHeight": 804,
+              "bottomDistance": 21
+            },
+            {
+              "at": 51505.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51511,
+              "scrollHeight": 52315,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 52049.69999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51551,
+              "scrollHeight": 52357,
+              "clientHeight": 804,
+              "bottomDistance": 2
+            },
+            {
+              "at": 52230.40000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51553,
+              "scrollHeight": 52379,
+              "clientHeight": 804,
+              "bottomDistance": 22
+            },
+            {
+              "at": 52559.5,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51575,
+              "scrollHeight": 52400,
+              "clientHeight": 804,
+              "bottomDistance": 21
+            },
+            {
+              "at": 52898.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51617,
+              "scrollHeight": 52442,
+              "clientHeight": 804,
+              "bottomDistance": 21
+            },
+            {
+              "at": 53210.5,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51638,
+              "scrollHeight": 52463,
+              "clientHeight": 804,
+              "bottomDistance": 21
+            },
+            {
+              "at": 53590.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51680,
+              "scrollHeight": 52505,
+              "clientHeight": 804,
+              "bottomDistance": 21
+            },
+            {
+              "at": 53935.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51701,
+              "scrollHeight": 52505,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 54606.69999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51786,
+              "scrollHeight": 52590,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 55193,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51807,
+              "scrollHeight": 52632,
+              "clientHeight": 804,
+              "bottomDistance": 21
+            },
+            {
+              "at": 55584.69999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51828,
+              "scrollHeight": 52632,
+              "clientHeight": 616,
+              "bottomDistance": 188
+            },
+            {
+              "at": 65875.60000002384,
+              "type": "wheel",
+              "trusted": true,
+              "deltaY": -80,
+              "targetTranscript": true,
+              "hitTranscript": true,
+              "scrollTop": 51828,
+              "scrollHeight": 53794,
+              "clientHeight": 616,
+              "bottomDistance": 1350
+            },
+            {
+              "at": 66031.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 51668,
+              "scrollHeight": 53815,
+              "clientHeight": 616,
+              "bottomDistance": 1531
+            },
+            {
+              "at": 78363.10000002384,
+              "type": "wheel",
+              "trusted": true,
+              "deltaY": 500000,
+              "targetTranscript": true,
+              "hitTranscript": true,
+              "scrollTop": 51668,
+              "scrollHeight": 55716,
+              "clientHeight": 616,
+              "bottomDistance": 3432
+            },
+            {
+              "at": 78518.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55100,
+              "scrollHeight": 55716,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 79055.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55185,
+              "scrollHeight": 55801,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 79551.10000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55204,
+              "scrollHeight": 55885,
+              "clientHeight": 616,
+              "bottomDistance": 65
+            },
+            {
+              "at": 79714.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55269,
+              "scrollHeight": 55906,
+              "clientHeight": 616,
+              "bottomDistance": 21
+            },
+            {
+              "at": 79982.30000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55279,
+              "scrollHeight": 55906,
+              "clientHeight": 616,
+              "bottomDistance": 11
+            },
+            {
+              "at": 80127.30000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55290,
+              "scrollHeight": 55906,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 80551.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55415,
+              "scrollHeight": 56054,
+              "clientHeight": 616,
+              "bottomDistance": 23
+            },
+            {
+              "at": 80713.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55438,
+              "scrollHeight": 56075,
+              "clientHeight": 616,
+              "bottomDistance": 21
+            },
+            {
+              "at": 81007.10000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55458,
+              "scrollHeight": 56118,
+              "clientHeight": 616,
+              "bottomDistance": 44
+            },
+            {
+              "at": 81162.10000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55502,
+              "scrollHeight": 56118,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 81715.5,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55544,
+              "scrollHeight": 56181,
+              "clientHeight": 616,
+              "bottomDistance": 21
+            },
+            {
+              "at": 81972.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55562,
+              "scrollHeight": 56181,
+              "clientHeight": 616,
+              "bottomDistance": 3
+            },
+            {
+              "at": 82151.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55565,
+              "scrollHeight": 56223,
+              "clientHeight": 616,
+              "bottomDistance": 42
+            },
+            {
+              "at": 82442.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55607,
+              "scrollHeight": 56266,
+              "clientHeight": 616,
+              "bottomDistance": 43
+            },
+            {
+              "at": 82760.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55671,
+              "scrollHeight": 56287,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 83363.30000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55692,
+              "scrollHeight": 56371,
+              "clientHeight": 616,
+              "bottomDistance": 63
+            },
+            {
+              "at": 83736.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55755,
+              "scrollHeight": 56371,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 84296,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55774,
+              "scrollHeight": 56413,
+              "clientHeight": 616,
+              "bottomDistance": 23
+            },
+            {
+              "at": 84441.5,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55797,
+              "scrollHeight": 56413,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 84916.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55839,
+              "scrollHeight": 56498,
+              "clientHeight": 616,
+              "bottomDistance": 43
+            },
+            {
+              "at": 85241.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55903,
+              "scrollHeight": 56540,
+              "clientHeight": 616,
+              "bottomDistance": 21
+            },
+            {
+              "at": 85603.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55945,
+              "scrollHeight": 56561,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 86156.80000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55966,
+              "scrollHeight": 56604,
+              "clientHeight": 616,
+              "bottomDistance": 22
+            },
+            {
+              "at": 86502.10000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56009,
+              "scrollHeight": 56625,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 86979.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56030,
+              "scrollHeight": 56646,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 87431.19999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55884,
+              "scrollHeight": 56688,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 87944,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55894,
+              "scrollHeight": 56730,
+              "clientHeight": 804,
+              "bottomDistance": 32
+            },
+            {
+              "at": 88096.40000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55926,
+              "scrollHeight": 56730,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 88452.5,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55967,
+              "scrollHeight": 56773,
+              "clientHeight": 804,
+              "bottomDistance": 2
+            },
+            {
+              "at": 88618.40000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55969,
+              "scrollHeight": 56773,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 89101.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 55990,
+              "scrollHeight": 56815,
+              "clientHeight": 804,
+              "bottomDistance": 21
+            },
+            {
+              "at": 89404.80000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56009,
+              "scrollHeight": 56857,
+              "clientHeight": 804,
+              "bottomDistance": 44
+            },
+            {
+              "at": 89580.69999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56053,
+              "scrollHeight": 56857,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 90021.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56074,
+              "scrollHeight": 56878,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 90486.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56095,
+              "scrollHeight": 56920,
+              "clientHeight": 804,
+              "bottomDistance": 21
+            },
+            {
+              "at": 90839.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56138,
+              "scrollHeight": 56942,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 91465.10000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56158,
+              "scrollHeight": 56984,
+              "clientHeight": 804,
+              "bottomDistance": 22
+            },
+            {
+              "at": 91785.90000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56180,
+              "scrollHeight": 57005,
+              "clientHeight": 804,
+              "bottomDistance": 21
+            },
+            {
+              "at": 92001.10000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56201,
+              "scrollHeight": 57005,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 92496.60000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56222,
+              "scrollHeight": 57047,
+              "clientHeight": 804,
+              "bottomDistance": 21
+            },
+            {
+              "at": 92826.69999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56240,
+              "scrollHeight": 57068,
+              "clientHeight": 804,
+              "bottomDistance": 24
+            },
+            {
+              "at": 93001,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56263,
+              "scrollHeight": 57089,
+              "clientHeight": 804,
+              "bottomDistance": 22
+            },
+            {
+              "at": 93333.40000003576,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56280,
+              "scrollHeight": 57089,
+              "clientHeight": 804,
+              "bottomDistance": 5
+            },
+            {
+              "at": 93416.80000001192,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56285,
+              "scrollHeight": 57089,
+              "clientHeight": 804,
+              "bottomDistance": 0
+            },
+            {
+              "at": 93766.10000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56450,
+              "scrollHeight": 57089,
+              "clientHeight": 621,
+              "bottomDistance": 18
+            },
+            {
+              "at": 93820.10000002384,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56468,
+              "scrollHeight": 57089,
+              "clientHeight": 616,
+              "bottomDistance": 5
+            },
+            {
+              "at": 93864,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56473,
+              "scrollHeight": 57089,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 94246.19999998808,
+              "type": "wheel",
+              "trusted": true,
+              "deltaY": -150,
+              "targetTranscript": true,
+              "hitTranscript": true,
+              "scrollTop": 56473,
+              "scrollHeight": 57089,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            },
+            {
+              "at": 94274.69999998808,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56173,
+              "scrollHeight": 57089,
+              "clientHeight": 616,
+              "bottomDistance": 300
+            },
+            {
+              "at": 94487,
+              "type": "scroll",
+              "trusted": true,
+              "targetTranscript": true,
+              "hitTranscript": null,
+              "scrollTop": 56473,
+              "scrollHeight": 57089,
+              "clientHeight": 616,
+              "bottomDistance": 0
+            }
+          ],
+          "dropped": 0,
+          "transcriptStillConnected": true
+        }
+      }
+    ]
+  },
+  "observations": [
+    {
+      "arm": "baseline",
+      "wheelInputs": 3,
+      "allWheelInputsTrustedAndTargetTranscript": true,
+      "wheelBoundPassed": true,
+      "buttonBoundPassed": true,
+      "buttonStartedMs": 56911.109136999934,
+      "buttonFinishedMs": 58660.97862299997,
+      "afterWheelGapPx": 23,
+      "afterButtonGapPx": 42,
+      "afterStreamGapPx": 0,
+      "scheduledOrderedUpdates": 1800,
+      "verificationErrors": [],
+      "recordedEvents": 135
+    },
+    {
+      "arm": "candidate",
+      "wheelInputs": 3,
+      "allWheelInputsTrustedAndTargetTranscript": true,
+      "wheelBoundPassed": true,
+      "buttonBoundPassed": true,
+      "buttonStartedMs": 64734.76423999993,
+      "buttonFinishedMs": 64982.826825,
+      "afterWheelGapPx": 0,
+      "afterButtonGapPx": 0,
+      "afterStreamGapPx": 0,
+      "scheduledOrderedUpdates": 1800,
+      "verificationErrors": [],
+      "recordedEvents": 115
+    }
+  ],
+  "findings": [
+    "Both scripted-v1 wheel sequences pass. The full-reference wheel failure remains unconfirmed.",
+    "Every observed wheel event is trusted and targets the intended transcript in this diagnostic. This does not prove the target of either earlier uninstrumented failure.",
+    "Both explicit live-edge button checks meet the unchanged five-second, three-pixel poll. Both transcripts are exactly at the bottom after all ordered updates.",
+    "The baseline has 23 px bottom distance in the read after its completed wheel sequence. The read after its successful button poll has 42 px while content continues to grow. These are separate observations from the successful poll instant.",
+    "Candidate button activation occurs after its final tick is already present. It verifies a static jump, not restoration of follow during an active candidate stream.",
+    "The browser event deltas are -80, 500000 and -150 with the declared scale-2 context; the driver requests -160, 1000000 and -300. Preserve the requested and observed values. The conversion is not investigated."
+  ],
+  "limits": [
+    "Passive observers read geometry and affect execution. No CPU, frame-gap, input latency, availability, or M2 gain is claimed.",
+    "The shorter stored history and one sample per arm cannot explain or invalidate the full-reference failures.",
+    "Late actions remain in the raw report; the diagnostic does not establish on-schedule execution.",
+    "The wheel-failure root cause remains open."
+  ],
+  "nextStep": "Validate a separately versioned scripted series that requests follow with the existing Jump to latest control. Preserve the original wheel series and its failures; keep the final position bound unchanged."
+}

@@ -601,3 +601,24 @@ verification is credited. The raw failure remains intact and the summary
 rejects it. See [evidence](evidence/final-scripted-columns-failed-attempt.json).
 The retained-build combined desktop suite is running. A focused scroll
 reproduction is needed before another dense scripted timing attempt.
+
+## Final targeted correctness passed
+
+All 33 desktop checks pass in 7.8 minutes and all 17 phone checks pass in
+4.7 minutes on the retained `9f2b...` build. The sequential guarded suites
+cover recovery, canonical delivery, native hide/restore, drafts/navigation,
+layouts/owner release, hidden Changes state, editor loading, and motion/input
+behavior. Selected desktop and phone captures were inspected. See
+[complete evidence](evidence/final-targeted-correctness.json). Dense timing,
+scroll diagnosis, 4x stress, and dense retention remain open.
+
+## Focused scroll-input attribution
+
+The one-off diagnostic passes both builds with 1,000 tasks, 30 columns, and
+120 primary messages. Both wheel sequences pass, so the full-reference failure
+is not reproduced. All observed wheel events are trusted and target the transcript;
+3,600 ordered updates and final bottom position pass. The candidate button check
+runs after its stream finishes, which limits live-follow evidence. Source, all
+events, late actions, and the limits are retained in
+[the evidence](evidence/scroll-follow-attribution.json). No speed claim follows.
+A separately versioned explicit-follow script remains to be validated.

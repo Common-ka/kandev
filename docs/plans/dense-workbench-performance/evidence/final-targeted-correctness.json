@@ -1,0 +1,304 @@
+{
+  "status": "targeted final correctness passed",
+  "scope": "Retained production assets, sequential guarded one-worker desktop and phone suites. These are functional tests, not dense speed, CPU, retention, or M2 measurements.",
+  "totalChecks": 50,
+  "productionRevision": "7808415cf2e373f85486101c271dc63a121fe1f1",
+  "sourceHeadAfterRuns": "a414ded7a4d54ea3e87def9d7b99173a67cba594",
+  "desktopSourceHeadAtStart": "e41ee2a95a5ebb6f067b02f17539000317b4ded2",
+  "sourceTransitionNote": "Only the four columns-failure documentation/evidence files changed in HEAD during desktop execution. Selected test files match the delivered HEAD. Phone execution uses the same production build; the separate untracked scroll diagnostic is not one of its selected files.",
+  "nonTestApplicationChangesSinceProductionFreeze": [],
+  "build": {
+    "parentDeliveredRevision": "1c84e0f69dfc72add70e67ac527972d0c3adc7b7",
+    "parentProductionRevision": "f5c8fb8f6ab55417749a6c980095a7570d7300e8",
+    "productionFiles": [
+      {
+        "path": "apps/packages/ui/src/spinner.tsx",
+        "sha256": "2627c864e61521f5da43558d902353fe46457cae61b1fd75d7641ae220d41232"
+      }
+    ],
+    "root": "/tmp/kandev-dense-spinner-motion-5936a872",
+    "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+    "assetsSha256": "9f2b7a961b623e0e4074fdfd0e253b10b65ccf979e110223af6b88b9121dbea8",
+    "agentctlSha256": "6e768aef1a1692630fe109c25e23ac31ab461b691800c2059e6dfdd5cf0b4d0a",
+    "mockAgentSha256": "c69f05ee9f5622cc5bce83405c2e9240b537f3e79a21da65765d9867592288c1",
+    "lockSha256": "9d5a03a9086f28c93752fce491f896047fbcdbc64abfafe3b3aa53261199c554"
+  },
+  "buildIdentitySource": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792871550233.json",
+    "sha256": "5e41dccdcc7edbc6ef1c58e0af385d722c730f0852a5e1e2b02f8a3cedf65666"
+  },
+  "suites": {
+    "desktop": {
+      "status": "passed",
+      "runnerExitCode": 0,
+      "project": "chromium",
+      "specFiles": 15,
+      "checks": 33,
+      "durationMinutes": 7.8,
+      "log": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/final-combined-desktop-logs/kandev-run.e2e.YF9SjjVp.log",
+        "sha256": "e7399a538fa1c7555369737db3010af3cff9e4a3d479b0f7b7f92ffaeb3ffdde"
+      },
+      "command": [
+        "pnpm",
+        "--dir",
+        "apps/web",
+        "e2e:run",
+        "--host",
+        "--no-build",
+        "--project",
+        "chromium",
+        "e2e/tests/performance/dense-workbench-correctness.spec.ts",
+        "e2e/tests/performance/dense-navigation-correctness.spec.ts",
+        "e2e/tests/performance/dense-dockview-stream.spec.ts",
+        "e2e/tests/performance/lazy-monaco.spec.ts",
+        "e2e/tests/plugins/conversation-recovery.spec.ts",
+        "e2e/tests/plugins/plugin-action-motion.spec.ts",
+        "e2e/tests/task/task-switch-efficiency.spec.ts",
+        "e2e/tests/task/threads-composer-disclosure.spec.ts",
+        "e2e/tests/task/threads-status-motion.spec.ts",
+        "e2e/tests/chat/chat-motion.spec.ts",
+        "e2e/tests/chat/persistent-animation-motion.spec.ts",
+        "e2e/tests/chat/native-document-lifecycle.spec.ts",
+        "e2e/tests/layout/changes-panel-hidden-lifecycle.spec.ts",
+        "e2e/tests/layout/saved-layout-arrangement.spec.ts",
+        "e2e/tests/layout/dockview-owner-release.spec.ts"
+      ],
+      "env": {
+        "E2E_PORT_OFFSET": "27",
+        "KANDEV_DENSE_WINDOW_MS": "2000"
+      },
+      "passedCases": [
+        "\u2713   1 [chromium] \u203a e2e/tests/chat/chat-motion-helpers.ts:92:7 \u203a chat motion preference previews, resets and persists on this device (8.4s)",
+        "\u2713   2 [chromium] \u203a e2e/tests/chat/chat-motion-helpers.ts:131:7 \u203a live prose and rows animate, history and reduced motion stay static (15.5s)",
+        "\u2713   3 [chromium] \u203a e2e/tests/chat/native-document-lifecycle.spec.ts:131:7 \u203a restores native content, draft and scroll after real document hiding (26.4s)",
+        "\u2713   4 [chromium] \u203a e2e/tests/chat/native-document-lifecycle.spec.ts:131:7 \u203a restores plugin and native content, draft and scroll after real document hiding (28.5s)",
+        "\u2713   5 [chromium] \u203a e2e/tests/chat/persistent-animation-motion.spec.ts:11:5 \u203a keeps the busy task composer glow animated until the turn settles (15.6s)",
+        "\u2713   6 [chromium] \u203a e2e/tests/chat/persistent-animation-motion.spec.ts:81:5 \u203a keeps static status visible with reduced motion in the CSS fallback (16.1s)",
+        "\u2713   7 [chromium] \u203a e2e/tests/layout/changes-panel-hidden-lifecycle.spec.ts:76:5 \u203a retains the Changes row through hidden updates and visible unfocused updates (18.7s)",
+        "\u2713   8 [chromium] \u203a e2e/tests/layout/dockview-owner-release.spec.ts:10:5 \u203a releases the departed Dockview API without losing drafts on return or responsive changes (8.6s)",
+        "\u2713   9 [chromium] \u203a e2e/tests/layout/saved-layout-arrangement.spec.ts:11:5 \u203a restores different task arrangements with identical panels and preserves both drafts (17.4s)",
+        "\u2713  10 [chromium] \u203a e2e/tests/performance/dense-dockview-stream.spec.ts:9:5 \u203a observes canonical streams in two Dockview chats with a retained hidden sibling (25.1s)",
+        "\u2713  11 [chromium] \u203a e2e/tests/performance/dense-navigation-correctness.spec.ts:4:5 \u203a preserves file actions, context, and drafts through A-B-A navigation (15.7s)",
+        "\u2713  12 [chromium] \u203a e2e/tests/performance/dense-workbench-correctness.spec.ts:4:5 \u203a delivers committed agent stream updates without resetting the conversation (11.1s)",
+        "\u2713  13 [chromium] \u203a e2e/tests/performance/lazy-monaco.spec.ts:4:5 \u203a loads Monaco when the file editor first opens (9.7s)",
+        "\u2713  14 [chromium] \u203a e2e/tests/plugins/conversation-recovery.spec.ts:39:7 \u203a Conversation recovery \u203a repairs core messages and turns after a multi-event gap on the live socket (5.1s)",
+        "\u2713  15 [chromium] \u203a e2e/tests/plugins/conversation-recovery.spec.ts:119:7 \u203a Conversation recovery \u203a repairs a missed plugin change and keeps paging without remount (7.1s)",
+        "\u2713  16 [chromium] \u203a e2e/tests/plugins/plugin-action-motion.spec.ts:9:5 \u203a respects reduced motion while keeping plugin busy actions visible and usable (9.8s)",
+        "\u2713  17 [chromium] \u203a e2e/tests/task/task-switch-efficiency.spec.ts:15:7 \u203a progressive task navigation \u203a reveals the selected desktop task while optional session enrichment is held (8.1s)",
+        "\u2713  18 [chromium] \u203a e2e/tests/task/task-switch-efficiency.spec.ts:75:7 \u203a progressive task navigation \u203a keeps the destination available while PR feedback is held and refreshes its checks (8.7s)",
+        "\u2713  19 [chromium] \u203a e2e/tests/task/task-switch-efficiency.spec.ts:164:7 \u203a progressive task navigation \u203a shares unconfigured integration health across desktop task consumers (7.7s)",
+        "\u2713  20 [chromium] \u203a e2e/tests/task/threads-composer-disclosure.spec.ts:28:9 \u203a scrolls long required questions through the Grid footer (zoom 1, auto-hide false) (19.5s)",
+        "\u2713  21 [chromium] \u203a e2e/tests/task/threads-composer-disclosure.spec.ts:28:9 \u203a scrolls long required questions through the Grid footer (zoom 1, auto-hide true) (17.1s)",
+        "\u2713  22 [chromium] \u203a e2e/tests/task/threads-composer-disclosure.spec.ts:28:9 \u203a scrolls long required questions through the Grid footer (zoom 0.9, auto-hide false) (20.5s)",
+        "\u2713  23 [chromium] \u203a e2e/tests/task/threads-composer-disclosure.spec.ts:28:9 \u203a scrolls long required questions through the Grid footer (zoom 0.9, auto-hide true) (17.8s)",
+        "\u2713  24 [chromium] \u203a e2e/tests/task/threads-composer-disclosure.spec.ts:124:7 \u203a answers a long required question with keyboard navigation (18.1s)",
+        "\u2713  25 [chromium] \u203a e2e/tests/task/threads-composer-disclosure.spec.ts:124:7 \u203a keeps long required answers usable in Columns (11.5s)",
+        "\u2713  26 [chromium] \u203a e2e/tests/task/threads-composer-disclosure.spec.ts:193:5 \u203a surfaces a live permission without hover and retains the existing approval path (7.0s)",
+        "\u2713  27 [chromium] \u203a e2e/tests/task/threads-composer-disclosure.spec.ts:233:5 \u203a hides the whole composer except CI and preserves drafts through hover and keyboard reveal (10.0s)",
+        "\u2713  28 [chromium] \u203a e2e/tests/task/threads-composer-disclosure.spec.ts:299:5 \u203a reveals and collapses immediately with reduced motion (5.5s)",
+        "\u2713  29 [chromium] \u203a e2e/tests/task/threads-composer-disclosure.spec.ts:330:5 \u203a preserves history and bottom following while the footer changes height (13.9s)",
+        "\u2713  30 [chromium] \u203a e2e/tests/task/threads-composer-disclosure.spec.ts:411:5 \u203a only the selected session's required question forces its composer open (9.4s)",
+        "\u2713  31 [chromium] \u203a e2e/tests/task/threads-composer-disclosure.spec.ts:454:5 \u203a preserves a rejected draft and native cancellation feedback after retry (15.7s)",
+        "\u2713  32 [chromium] \u203a e2e/tests/task/threads-composer-disclosure.spec.ts:509:5 \u203a keeps the native model picker and attachment-only draft available after pointer exit (9.7s)",
+        "\u2713  33 [chromium] \u203a e2e/tests/task/threads-status-motion-helpers.ts:9:7 \u203a preserves Threads status through reduced-motion changes (7.6s)"
+      ],
+      "testSourceFiles": [
+        {
+          "path": "apps/web/e2e/tests/performance/dense-workbench-correctness.spec.ts",
+          "sha256": "b99e2a98e168bedbfe534affdd7b4fd992ec945e42e007e4e4d9b3c6f6500d58"
+        },
+        {
+          "path": "apps/web/e2e/tests/performance/dense-navigation-correctness.spec.ts",
+          "sha256": "e0f8841f5de5668bacd0af9dcd57a462ca8c9ea49db268af3f2ddb0bbe9ff93d"
+        },
+        {
+          "path": "apps/web/e2e/tests/performance/dense-dockview-stream.spec.ts",
+          "sha256": "6f517f6068ea36c9cf4938bab9a34ef278483b70e8bac6fc25b3138cc488b5c6"
+        },
+        {
+          "path": "apps/web/e2e/tests/performance/lazy-monaco.spec.ts",
+          "sha256": "49bba2887bfb317ef0607ec3a3f620f9191b79c197584698cd6f6b405eca3406"
+        },
+        {
+          "path": "apps/web/e2e/tests/plugins/conversation-recovery.spec.ts",
+          "sha256": "51647088ed7e6514fd2a0bddab81e7d58bc460e1a8f479be1406a000df5365f5"
+        },
+        {
+          "path": "apps/web/e2e/tests/plugins/plugin-action-motion.spec.ts",
+          "sha256": "b8ac0bc913d5719a8ba2402fb5c1cd79eaa38bc50982dcf6b4d75c9169a9a317"
+        },
+        {
+          "path": "apps/web/e2e/tests/task/task-switch-efficiency.spec.ts",
+          "sha256": "3709b9a52bce2f80e4ac07b8af9129949f69bcbb47df12fad997a6d3b59e8520"
+        },
+        {
+          "path": "apps/web/e2e/tests/task/threads-composer-disclosure.spec.ts",
+          "sha256": "fcc64b406fe1665292adcca01b520928f76244d5732d331d447429d65ed8168a"
+        },
+        {
+          "path": "apps/web/e2e/tests/task/threads-status-motion.spec.ts",
+          "sha256": "aba69e175f5bc5ffe8119f38696039bc407d815a68f4b51e32a60ea3983861ef"
+        },
+        {
+          "path": "apps/web/e2e/tests/chat/chat-motion.spec.ts",
+          "sha256": "1f4d9d8db69d58e270ed0dc1821b56ec045ca17947880e74b2ead19c22ff957c"
+        },
+        {
+          "path": "apps/web/e2e/tests/chat/persistent-animation-motion.spec.ts",
+          "sha256": "07a779af2a74b0c21e768b40fd55e065d0360dd1863693457975fbb428806013"
+        },
+        {
+          "path": "apps/web/e2e/tests/chat/native-document-lifecycle.spec.ts",
+          "sha256": "f4602dabd6d15110db58955e6e07b40001504348cc1b54448621ae50c0aee855"
+        },
+        {
+          "path": "apps/web/e2e/tests/layout/changes-panel-hidden-lifecycle.spec.ts",
+          "sha256": "ab0487e3d228f9f5e4f5612cf21ffcdeaeb9943ce514d1249c48b6e288cf48c6"
+        },
+        {
+          "path": "apps/web/e2e/tests/layout/saved-layout-arrangement.spec.ts",
+          "sha256": "f4846ad455f1cc4240e85e6320c60474d49870a763d05eae1dbef896fc141dfc"
+        },
+        {
+          "path": "apps/web/e2e/tests/layout/dockview-owner-release.spec.ts",
+          "sha256": "a13d758f09f2a251d6c106d73367c3a2ec677e8f814443297373c6636f1dfecc"
+        }
+      ],
+      "artifacts": "final-combined-desktop-artifacts"
+    },
+    "phone": {
+      "status": "passed",
+      "runnerExitCode": 0,
+      "project": "mobile-chrome",
+      "specFiles": 9,
+      "checks": 17,
+      "durationMinutes": 4.7,
+      "log": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/final-combined-phone-logs/kandev-run.e2e.Trwt8oOj.log",
+        "sha256": "ff99eb8a0f29e39ad511e73668bebf7273f91905baf6f293fb93a0aaba75b599"
+      },
+      "command": [
+        "pnpm",
+        "--dir",
+        "apps/web",
+        "e2e:run",
+        "--host",
+        "--no-build",
+        "--project",
+        "mobile-chrome",
+        "e2e/tests/performance/mobile-dense-workbench-correctness.spec.ts",
+        "e2e/tests/performance/mobile-dense-navigation-correctness.spec.ts",
+        "e2e/tests/performance/mobile-lazy-monaco.spec.ts",
+        "e2e/tests/plugins/mobile-plugin-action-motion.spec.ts",
+        "e2e/tests/task/mobile-task-switch-efficiency.spec.ts",
+        "e2e/tests/task/mobile-threads-composer-disclosure.spec.ts",
+        "e2e/tests/task/mobile-threads-status-motion.spec.ts",
+        "e2e/tests/chat/mobile-chat-motion.spec.ts",
+        "e2e/tests/chat/mobile-persistent-animation-motion.spec.ts"
+      ],
+      "env": {
+        "E2E_PORT_OFFSET": "27"
+      },
+      "passedCases": [
+        "\u2713   1 [mobile-chrome] \u203a e2e/tests/chat/chat-motion-helpers.ts:92:7 \u203a chat motion preference previews, resets and persists on this device (6.8s)",
+        "\u2713   2 [mobile-chrome] \u203a e2e/tests/chat/chat-motion-helpers.ts:131:7 \u203a live prose and rows animate, history and reduced motion stay static (20.9s)",
+        "\u2713   3 [mobile-chrome] \u203a e2e/tests/chat/mobile-persistent-animation-motion.spec.ts:11:5 \u203a keeps the mobile composer pulse contained until the turn settles (22.0s)",
+        "\u2713   4 [mobile-chrome] \u203a e2e/tests/chat/mobile-persistent-animation-motion.spec.ts:84:5 \u203a keeps static status visible with reduced motion in the CSS fallback (26.9s)",
+        "\u2713   5 [mobile-chrome] \u203a e2e/tests/performance/mobile-dense-navigation-correctness.spec.ts:4:5 \u203a preserves file actions, context, and drafts through A-B-A navigation (24.0s)",
+        "\u2713   6 [mobile-chrome] \u203a e2e/tests/performance/mobile-dense-workbench-correctness.spec.ts:4:5 \u203a delivers committed agent stream updates without resetting the conversation (12.3s)",
+        "\u2713   7 [mobile-chrome] \u203a e2e/tests/performance/mobile-lazy-monaco.spec.ts:4:5 \u203a opens the native phone viewer without loading Monaco (9.7s)",
+        "\u2713   8 [mobile-chrome] \u203a e2e/tests/plugins/mobile-plugin-action-motion.spec.ts:9:5 \u203a respects reduced motion while keeping phone plugin busy actions visible and usable (9.6s)",
+        "\u2713   9 [mobile-chrome] \u203a e2e/tests/task/mobile-task-switch-efficiency.spec.ts:23:7 \u203a mobile progressive task navigation \u203a reveals the selected task while optional session enrichment is held (8.7s)",
+        "\u2713  10 [mobile-chrome] \u203a e2e/tests/task/mobile-task-switch-efficiency.spec.ts:88:7 \u203a mobile progressive task navigation \u203a keeps the destination available while mobile PR feedback is held and refreshes checks (12.7s)",
+        "\u2713  11 [mobile-chrome] \u203a e2e/tests/task/mobile-task-switch-efficiency.spec.ts:191:7 \u203a mobile progressive task navigation \u203a shares unconfigured integration health across mobile task consumers (9.3s)",
+        "\u2713  12 [mobile-chrome] \u203a e2e/tests/task/mobile-threads-composer-disclosure.spec.ts:20:7 \u203a scrolls and submits a long required question by touch (Pixel 5) (18.7s)",
+        "\u2713  13 [mobile-chrome] \u203a e2e/tests/task/mobile-threads-composer-disclosure.spec.ts:20:7 \u203a scrolls and submits a long required question by touch (short phone) (26.8s)",
+        "\u2713  14 [mobile-chrome] \u203a e2e/tests/task/mobile-threads-composer-disclosure.spec.ts:73:5 \u203a keeps the touch composer visible and restores drafts through single-chat navigation (17.5s)",
+        "\u2713  15 [mobile-chrome] \u203a e2e/tests/task/mobile-threads-composer-disclosure.spec.ts:133:5 \u203a keeps required answers reachable above a short mobile viewport (9.6s)",
+        "\u2713  16 [mobile-chrome] \u203a e2e/tests/task/mobile-threads-composer-disclosure.spec.ts:165:5 \u203a keeps native model, cancellation and attachment controls usable by touch (19.4s)",
+        "\u2713  17 [mobile-chrome] \u203a e2e/tests/task/threads-status-motion-helpers.ts:9:7 \u203a preserves Threads status through reduced-motion changes (8.8s)"
+      ],
+      "testSourceFiles": [
+        {
+          "path": "apps/web/e2e/tests/performance/mobile-dense-workbench-correctness.spec.ts",
+          "sha256": "b99e2a98e168bedbfe534affdd7b4fd992ec945e42e007e4e4d9b3c6f6500d58"
+        },
+        {
+          "path": "apps/web/e2e/tests/performance/mobile-dense-navigation-correctness.spec.ts",
+          "sha256": "c664a8c23defe7d457ebfc7e63299ef6f773bcdfe29bce95b26d8684e092e043"
+        },
+        {
+          "path": "apps/web/e2e/tests/performance/mobile-lazy-monaco.spec.ts",
+          "sha256": "c330817e40b4885cdfc9a24cfcf412395129f3ca6a363413e588082b20948c5f"
+        },
+        {
+          "path": "apps/web/e2e/tests/plugins/mobile-plugin-action-motion.spec.ts",
+          "sha256": "5d22df0adea5bcddbd3c92362aa0cfd9067e883865725b28fe4cf645c7bdee9f"
+        },
+        {
+          "path": "apps/web/e2e/tests/task/mobile-task-switch-efficiency.spec.ts",
+          "sha256": "414608cc9b84d41987e6bb02f89c77180934e25d2f5bc976e7ac72453e954ebc"
+        },
+        {
+          "path": "apps/web/e2e/tests/task/mobile-threads-composer-disclosure.spec.ts",
+          "sha256": "acb6c83a8da1d7a341aa1f08cb0dad7d2c3bca978e3f1f840bcd95e386a5c7c8"
+        },
+        {
+          "path": "apps/web/e2e/tests/task/mobile-threads-status-motion.spec.ts",
+          "sha256": "aba69e175f5bc5ffe8119f38696039bc407d815a68f4b51e32a60ea3983861ef"
+        },
+        {
+          "path": "apps/web/e2e/tests/chat/mobile-chat-motion.spec.ts",
+          "sha256": "9e65dcdcd3791c512bbf7a0f024518b99447811ab0137fe219640ee49c226ffb"
+        },
+        {
+          "path": "apps/web/e2e/tests/chat/mobile-persistent-animation-motion.spec.ts",
+          "sha256": "ea6c2b93e1a1fc5d21238ce7c7c9467becd6d295634df9ab02aec8d84ee78991"
+        }
+      ],
+      "artifacts": "final-combined-phone-artifacts"
+    }
+  },
+  "inspectedCaptures": [
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/final-combined-desktop-artifacts/plugins-plugin-action-moti-33b12--actions-visible-and-usable-chromium/plugin-busy-actions-reduced-motion.png",
+      "sha256": "d05ce6a52cd8e6eb6cc2cff948cf48c0fc12c83df863418062d01ed4f331a363",
+      "inspection": "Shared busy controls remain visible with the reduced-motion preference. Motion and action behavior are verified by the browser case."
+    },
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/final-combined-desktop-artifacts/task-threads-composer-disc-bd1f0-h-hover-and-keyboard-reveal-chromium/grid-revealed-draft.png",
+      "sha256": "7b536d4418e98a66c231f4d25ea1ed93562dbee6ebb3badde1e0478f67e298b1",
+      "inspection": "Revealed composer retains the exact draft and existing tile arrangement."
+    },
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/final-combined-phone-artifacts/plugins-mobile-plugin-acti-e9306--actions-visible-and-usable-mobile-chrome/plugin-busy-actions-reduced-motion.png",
+      "sha256": "01d1063570a6d3cebfbc40bf19ed33b12eeaa3f027817f236b9b074cb21eee51",
+      "inspection": "Native phone composition retains static busy controls. The fixture contribution toolbar remains crowded; no visual redesign is claimed."
+    },
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/final-combined-phone-artifacts/task-mobile-threads-compos-3bf33-ough-single-chat-navigation-mobile-chrome/phone-visible-composer-short-height.png",
+      "sha256": "48799cab168a23b8aef672e94a8e532802f85329e410852ece1397ff39aef52c",
+      "inspection": "Short phone viewport keeps the composer, model and attachment controls, and cancellation action visible."
+    }
+  ],
+  "verifiedBehaviors": [
+    "Committed canonical agent updates apply without conversation resets on desktop and phone.",
+    "Core and plugin gap recovery converge; plugin paging survives recovery.",
+    "Real core and plugin document hide/restore retains content, draft, scroll, and expansion within the same document.",
+    "A-B-A navigation retains draft, file actions and context; optional enrichment and PR feedback stay panel-local.",
+    "Saved arrangements with identical panel inventories restore correctly; departed Dockview owners release and drafts survive return and responsive changes.",
+    "Hidden Changes updates retain the row anchor; visible unfocused updates preserve the reader and editor focus.",
+    "Optional Monaco loads on desktop first use; the phone native viewer opens without loading Monaco.",
+    "Normal/reduced motion and CSS fallback preserve visible status and usable plugin actions.",
+    "Desktop hover, keyboard, permissions, attachments, cancellation and disclosure keep the active composer usable.",
+    "Native phone touch, long questions, short viewports and single-chat navigation retain their input controls and drafts."
+  ],
+  "limits": [
+    "The 50 cases are targeted correctness gates, not the full repository E2E suite.",
+    "The Dockview stream regression uses a two-second correctness window; full 60-second dense comparisons remain separate.",
+    "Passing correctness does not resolve the scripted control wheel failure or candidate frame-gap regressions.",
+    "The earlier unexplained phone deep-tree failure remains historical evidence. A passing final run does not establish its original cause.",
+    "No M2 Air, field INP, battery, total-process availability, or leak claim follows."
+  ]
+}

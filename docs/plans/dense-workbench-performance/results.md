@@ -7,6 +7,40 @@ plugin Dockview series is also complete; core/plugin regressions still need attr
 `feature/evaluate-live-thread-bc0`; the frozen baseline is
 `595df36ed5c1cf02fd90cb972b623ad6edc53df8`.
 
+## Final targeted correctness
+
+The retained `7808415cf2e` production build passes all 50 targeted browser
+checks: 33 desktop cases in 7.8 minutes and 17 phone cases in 4.7 minutes.
+The guarded suites run sequentially with one worker and the frozen `9f2b...`
+assets. They cover canonical delivery, core/plugin recovery, actual document
+hide/restore, drafts, task navigation, saved layouts, owner release, hidden
+Changes anchors, lazy editor loading, normal/reduced motion, and native phone
+input. Desktop and phone captures are preserved; selected states were inspected.
+
+These are correctness gates. The Dockview regression uses a two-second stream
+window, and the cases do not establish dense speed or memory gains. Scripted
+control wheel failures, final dense comparisons, and stress/retention coverage
+remain separate. [Complete evidence](evidence/final-targeted-correctness.json)
+records every case, command, source identity, log hash, and inspected capture.
+
+## Focused scroll-input diagnosis
+
+A separate instrumented run passes on both frozen builds with 1,000 tasks,
+30 columns, and 120 messages per primary session. Both wheel sequences pass;
+the full-reference failure is not reproduced. All observed wheel events are
+trusted and hit the intended transcript. Each arm verifies 1,800 ordered updates
+and finishes at the bottom.
+
+Both explicit Jump to latest checks pass the same five-second, three-pixel
+poll. However, the candidate check runs after its final tick is already present,
+so it does not establish live-follow recovery during an active candidate stream.
+The baseline's next geometry reads can be 23 or 42 px from the moving edge after
+a successful bound check. This does not establish the earlier failure's cause.
+The shorter history, geometry observers, and late actions remain explicit.
+See [complete diagnostic evidence](evidence/scroll-follow-attribution.json).
+A separate interaction version can test the existing explicit follow control;
+the original wheel failures remain unresolved and are not pooled with that series.
+
 ## Final scripted columns attempt (incomplete)
 
 The full reference columns run stops after 21.7 minutes in its first control
