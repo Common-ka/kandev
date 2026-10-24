@@ -187,6 +187,18 @@ are in `fair-queue-warm-4x-failure/`, and the log is
 `fair-queue-warm-4x-logs/kandev-run.e2e.tPkvZVx6.log`. The timestamp correctness
 fix and the validated measurement helpers remain in the branch.
 
+## Retained-build navigation remeasurement
+
+Six alternating pairs with the current retained build passed all 480 timed
+switches. Switch-readiness p50/p95 were essentially neutral (0.08%/0.32% slower
+across paired changes), while main-thread/renderer CPU were 2.48%/2.30% higher
+and increased in five pairs. Both versions retained one editor and three panels
+after the separate 100-switch checks. No navigation-speed or leak claim follows.
+The first preparation attempt failed before timing; the unchanged retry passed.
+See [results](results.md#current-retained-build-navigation-comparison) and
+[paired evidence](evidence/current-navigation-1x.json). Remaining scenario and
+stress work stays open.
+
 ## Summary
 
 Attribute and reduce repeated work during dense Dockview and task switching. Continue the existing session-efficiency Task 05 investigation, with no speculative layout or editor rewrite.

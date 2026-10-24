@@ -1,0 +1,1157 @@
+{
+  "status": "complete: no demonstrated switch-readiness gain; CPU higher in five pairs",
+  "rawReport": "matched-navigation-1792808464087.json",
+  "rawSha256": "3fc915606964dd2cb2233a1c248540d33f5e421fca6455a18ff965b8067c2f21",
+  "sourceRevision": "04cb2eb13179abf1b9cd7b4b2699e9fc6103ce1e",
+  "sourcePatchBytes": 0,
+  "builds": {
+    "baseline": {
+      "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+      "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+      "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+      "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+    },
+    "candidate": {
+      "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+      "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "8379f62eb1bf4935c6b18d4616f732191cdefc17159c02367a54c05701f7a160"
+    }
+  },
+  "machine": {
+    "revision": "04cb2eb13179abf1b9cd7b4b2699e9fc6103ce1e",
+    "cpu": "11th Gen Intel(R) Core(TM) i7-11700T @ 1.40GHz",
+    "cores": 16,
+    "load": [
+      4.64,
+      4.74,
+      3.85
+    ],
+    "totalMemory": 33303863296,
+    "freeMemory": 16057217024,
+    "platform": "linux 6.18.49"
+  },
+  "databaseSha256": "178804f4029e2557d7f1613dcba9d9778a0004ad5928ea7c3a31c07df9302d73",
+  "fixture": [
+    {
+      "marker": "navigation-available/000-Navigation-A.txt",
+      "profileFiles": 630,
+      "changedFiles": 73,
+      "messageCount": 1000
+    },
+    {
+      "marker": "navigation-available/000-Navigation-B.txt",
+      "profileFiles": 630,
+      "changedFiles": 73,
+      "messageCount": 1000
+    }
+  ],
+  "timingDefinition": "Driver selection start to destination file marker and two requestAnimationFrame callbacks. This is a DOM readiness upper bound, not INP or screen presentation.",
+  "samples": [
+    {
+      "arm": "baseline",
+      "pair": 0,
+      "cpuRate": 1,
+      "switches": 40,
+      "retention": {
+        "switches": 100,
+        "heapBefore": {
+          "usedSize": 92946496,
+          "totalSize": 96817152,
+          "embedderHeapUsedSize": 15835400,
+          "backingStorageSize": 17530374
+        },
+        "heapAfter": {
+          "usedSize": 99620784,
+          "totalSize": 106516480,
+          "embedderHeapUsedSize": 16581560,
+          "backingStorageSize": 17530754
+        },
+        "ownersBefore": {
+          "editors": 1,
+          "panels": 3
+        },
+        "ownersAfter": {
+          "editors": 1,
+          "panels": 3
+        }
+      }
+    },
+    {
+      "arm": "candidate",
+      "pair": 0,
+      "cpuRate": 1,
+      "switches": 40,
+      "retention": {
+        "switches": 100,
+        "heapBefore": {
+          "usedSize": 85820592,
+          "totalSize": 94785536,
+          "embedderHeapUsedSize": 15856248,
+          "backingStorageSize": 13545757
+        },
+        "heapAfter": {
+          "usedSize": 90253200,
+          "totalSize": 95571968,
+          "embedderHeapUsedSize": 16744728,
+          "backingStorageSize": 13555136
+        },
+        "ownersBefore": {
+          "editors": 1,
+          "panels": 3
+        },
+        "ownersAfter": {
+          "editors": 1,
+          "panels": 3
+        }
+      }
+    },
+    {
+      "arm": "candidate",
+      "pair": 1,
+      "cpuRate": 1,
+      "switches": 40,
+      "retention": null
+    },
+    {
+      "arm": "baseline",
+      "pair": 1,
+      "cpuRate": 1,
+      "switches": 40,
+      "retention": null
+    },
+    {
+      "arm": "baseline",
+      "pair": 2,
+      "cpuRate": 1,
+      "switches": 40,
+      "retention": null
+    },
+    {
+      "arm": "candidate",
+      "pair": 2,
+      "cpuRate": 1,
+      "switches": 40,
+      "retention": null
+    },
+    {
+      "arm": "candidate",
+      "pair": 3,
+      "cpuRate": 1,
+      "switches": 40,
+      "retention": null
+    },
+    {
+      "arm": "baseline",
+      "pair": 3,
+      "cpuRate": 1,
+      "switches": 40,
+      "retention": null
+    },
+    {
+      "arm": "baseline",
+      "pair": 4,
+      "cpuRate": 1,
+      "switches": 40,
+      "retention": null
+    },
+    {
+      "arm": "candidate",
+      "pair": 4,
+      "cpuRate": 1,
+      "switches": 40,
+      "retention": null
+    },
+    {
+      "arm": "candidate",
+      "pair": 5,
+      "cpuRate": 1,
+      "switches": 40,
+      "retention": null
+    },
+    {
+      "arm": "baseline",
+      "pair": 5,
+      "cpuRate": 1,
+      "switches": 40,
+      "retention": null
+    }
+  ],
+  "comparisons": [
+    {
+      "group": "1x/task-switch",
+      "metric": "elapsedMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 49405.95233300002,
+        "min": 45605.293028000044,
+        "max": 56004.87735600001,
+        "values": [
+          47799.83851500001,
+          45605.293028000044,
+          49427.147568000015,
+          49384.75709800003,
+          56004.87735600001,
+          53501.74829899985
+        ]
+      },
+      "candidate": {
+        "median": 51814.89320600004,
+        "min": 42291.62408400001,
+        "max": 64996.57792800001,
+        "values": [
+          64996.57792800001,
+          42291.62408400001,
+          50850.042237999965,
+          49734.86354099994,
+          64000.09142499999,
+          52779.74417400011
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -17196.739413000003,
+        3313.6689440000337,
+        -1422.8946699999506,
+        -350.10644299990963,
+        -7995.21406899998,
+        722.0041249997448
+      ],
+      "pairedPercentReduction": [
+        -35.97656382793744,
+        7.265974460388968,
+        -2.878771565853331,
+        -0.7089362458645931,
+        -14.275924609525857,
+        1.3494963210636646
+      ],
+      "medianPairedPercentReduction": -1.793853905858962
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "mainThreadMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 45882.921,
+        "min": 43228.78,
+        "max": 50654.242,
+        "values": [
+          47172.138000000006,
+          43228.78,
+          46402.659,
+          44251.337,
+          50654.242,
+          45363.183000000005
+        ]
+      },
+      "candidate": {
+        "median": 46508.8545,
+        "min": 40337.912,
+        "max": 64093.583999999995,
+        "values": [
+          64093.583999999995,
+          40337.912,
+          47327.002,
+          45538.41099999999,
+          56801.212,
+          45690.707
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -16921.44599999999,
+        2890.868000000002,
+        -924.3430000000008,
+        -1287.0739999999932,
+        -6146.970000000001,
+        -327.5239999999976
+      ],
+      "pairedPercentReduction": [
+        -35.87169612706549,
+        6.6873689241287915,
+        -1.9920043806110352,
+        -2.9085539268564773,
+        -12.135153458618532,
+        -0.7220040092865564
+      ],
+      "medianPairedPercentReduction": -2.4502791537337565
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "mainThreadMsPerSecond",
+      "pairs": 6,
+      "baseline": {
+        "median": 921.6352116573604,
+        "min": 847.8822551084376,
+        "max": 986.8681456987972,
+        "values": [
+          986.8681456987972,
+          947.889534959441,
+          938.8091622354084,
+          896.0525392923736,
+          904.4612610793124,
+          847.8822551084376
+        ]
+      },
+      "candidate": {
+        "median": 923.170293630588,
+        "min": 865.6864051741227,
+        "max": 986.1070542975307,
+        "values": [
+          986.1070542975307,
+          953.8038056869243,
+          930.7170636848122,
+          915.6235235763639,
+          887.5176696671415,
+          865.6864051741227
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0.7610914012665262,
+        -5.914270727483313,
+        8.092098550596234,
+        -19.570984283990356,
+        16.943591412170917,
+        -17.80415006568512
+      ],
+      "pairedPercentReduction": [
+        0.07712189359679865,
+        -0.6239409244808655,
+        0.8619535126103853,
+        -2.1841335664810306,
+        1.87333522631492,
+        -2.0998375609839965
+      ],
+      "medianPairedPercentReduction": -0.2734095154420334
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "mainThreadCpuMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 44741.8355,
+        "min": 42165.526,
+        "max": 49161.685,
+        "values": [
+          45978.5,
+          42165.526,
+          45170.496999999996,
+          43163.380000000005,
+          49161.685,
+          44313.174
+        ]
+      },
+      "candidate": {
+        "median": 45289.962,
+        "min": 39415.43199999999,
+        "max": 62295.474,
+        "values": [
+          62295.474,
+          39415.43199999999,
+          46110.968,
+          44407.274,
+          52719.609,
+          44468.956
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -16316.974000000002,
+        2750.0940000000046,
+        -940.471000000005,
+        -1243.893999999993,
+        -3557.923999999999,
+        -155.78199999999924
+      ],
+      "pairedPercentReduction": [
+        -35.48826951727438,
+        6.522138488204807,
+        -2.082047049426986,
+        -2.8818271414333,
+        -7.2371888799173565,
+        -0.35154782638679694
+      ],
+      "medianPairedPercentReduction": -2.481937095430143
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "rendererCpuMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 58580,
+        "min": 56560,
+        "max": 64870.00000000001,
+        "values": [
+          61150.00000000001,
+          56560,
+          59870,
+          57290,
+          64870.00000000001,
+          57150.00000000001
+        ]
+      },
+      "candidate": {
+        "median": 59935,
+        "min": 52379.99999999999,
+        "max": 82789.99999999999,
+        "values": [
+          82789.99999999999,
+          52379.99999999999,
+          61170,
+          58700,
+          66440,
+          57599.99999999999
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -21639.999999999978,
+        4180.000000000007,
+        -1300,
+        -1410,
+        -1569.9999999999927,
+        -449.99999999998545
+      ],
+      "pairedPercentReduction": [
+        -35.38838920686831,
+        7.3903818953324025,
+        -2.1713713044930683,
+        -2.461162506545645,
+        -2.420225065515635,
+        -0.787401574803124
+      ],
+      "medianPairedPercentReduction": -2.295798185004352
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "scriptMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 29780.6195,
+        "min": 28058.614,
+        "max": 33005.443,
+        "values": [
+          31084.885,
+          28058.614,
+          30244.987999999998,
+          28838.940000000002,
+          33005.443,
+          29316.251
+        ]
+      },
+      "candidate": {
+        "median": 30034.940499999997,
+        "min": 26253.475,
+        "max": 41898.554,
+        "values": [
+          41898.554,
+          26253.475,
+          30667.603999999996,
+          29402.277,
+          36186.59299999999,
+          29224.992000000002
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -10813.668999999998,
+        1805.1390000000029,
+        -422.61599999999817,
+        -563.3369999999959,
+        -3181.149999999994,
+        91.2589999999982
+      ],
+      "pairedPercentReduction": [
+        -34.7875470666853,
+        6.433457475839693,
+        -1.3973092004533054,
+        -1.9533901037971433,
+        -9.638258756290574,
+        0.31129150859022936
+      ],
+      "medianPairedPercentReduction": -1.6753496521252242
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "styleMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 6160.199999999999,
+        "min": 5807.448,
+        "max": 6749.035,
+        "values": [
+          6235.448,
+          5807.448,
+          6176.373,
+          5937.442,
+          6749.035,
+          6144.026999999999
+        ]
+      },
+      "candidate": {
+        "median": 6194.7119999999995,
+        "min": 5345.981999999999,
+        "max": 8420.020999999999,
+        "values": [
+          8420.020999999999,
+          5345.981999999999,
+          6270.188999999999,
+          6070.3820000000005,
+          7543.8099999999995,
+          6119.235
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -2184.5729999999985,
+        461.46600000000126,
+        -93.8159999999998,
+        -132.9400000000005,
+        -794.7749999999996,
+        24.79199999999946
+      ],
+      "pairedPercentReduction": [
+        -35.0347400860371,
+        7.946106448133521,
+        -1.5189497136911876,
+        -2.2390113452897813,
+        -11.776127994594779,
+        0.40351385174576
+      ],
+      "medianPairedPercentReduction": -1.8789805294904844
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "layoutMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 434.48349999999994,
+        "min": 406.09799999999996,
+        "max": 462.552,
+        "values": [
+          451.72200000000004,
+          406.09799999999996,
+          441.6359999999999,
+          412.856,
+          462.552,
+          427.33099999999996
+        ]
+      },
+      "candidate": {
+        "median": 449.5,
+        "min": 385.29299999999995,
+        "max": 604.474,
+        "values": [
+          604.474,
+          385.29299999999995,
+          449.01300000000003,
+          443.777,
+          509.2399999999999,
+          449.98699999999997
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -152.752,
+        20.805000000000007,
+        -7.377000000000123,
+        -30.920999999999992,
+        -46.687999999999874,
+        -22.656000000000006
+      ],
+      "pairedPercentReduction": [
+        -33.8154882870438,
+        5.123147614615195,
+        -1.6703801320544802,
+        -7.489536303214679,
+        -10.093567858316442,
+        -5.301745017328489
+      ],
+      "medianPairedPercentReduction": -6.395640660271584
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "styleRecalculations",
+      "pairs": 6,
+      "baseline": {
+        "median": 2271.5,
+        "min": 2104,
+        "max": 2400,
+        "values": [
+          2104,
+          2212,
+          2243,
+          2300,
+          2354,
+          2400
+        ]
+      },
+      "candidate": {
+        "median": 2287,
+        "min": 2177,
+        "max": 2496,
+        "values": [
+          2231,
+          2177,
+          2273,
+          2301,
+          2496,
+          2401
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -127,
+        35,
+        -30,
+        -1,
+        -142,
+        -1
+      ],
+      "pairedPercentReduction": [
+        -6.0361216730038025,
+        1.5822784810126582,
+        -1.3374944271065536,
+        -0.043478260869565216,
+        -6.032285471537808,
+        -0.041666666666666664
+      ],
+      "medianPairedPercentReduction": -0.6904863439880594
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "layouts",
+      "pairs": 6,
+      "baseline": {
+        "median": 1003,
+        "min": 968,
+        "max": 1014,
+        "values": [
+          968,
+          1012,
+          1010,
+          1014,
+          993,
+          996
+        ]
+      },
+      "candidate": {
+        "median": 1001,
+        "min": 943,
+        "max": 1027,
+        "values": [
+          943,
+          993,
+          1027,
+          1021,
+          995,
+          1007
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        25,
+        19,
+        -17,
+        -7,
+        -2,
+        -11
+      ],
+      "pairedPercentReduction": [
+        2.5826446280991737,
+        1.8774703557312253,
+        -1.683168316831683,
+        -0.6903353057199211,
+        -0.2014098690835851,
+        -1.104417670682731
+      ],
+      "medianPairedPercentReduction": -0.44587258740175306
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "frameGapP95Ms",
+      "pairs": 6,
+      "baseline": {
+        "median": 150,
+        "min": 133.3000000000029,
+        "max": 166.70000000000073,
+        "values": [
+          166.70000000000073,
+          149.90000000000146,
+          150.09999999999854,
+          133.40000000000146,
+          150.09999999999854,
+          133.3000000000029
+        ]
+      },
+      "candidate": {
+        "median": 141.70000000000073,
+        "min": 133.3000000000029,
+        "max": 183.29999999999927,
+        "values": [
+          183.29999999999927,
+          133.3000000000029,
+          150,
+          133.40000000000146,
+          150,
+          133.3000000000029
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -16.599999999998545,
+        16.599999999998545,
+        0.09999999999854481,
+        0,
+        0.09999999999854481,
+        0
+      ],
+      "pairedPercentReduction": [
+        -9.95800839831942,
+        11.074049366243084,
+        0.06662225183114309,
+        0,
+        0.06662225183114309,
+        0
+      ],
+      "medianPairedPercentReduction": 0.033311125915571546
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "frameGapMaxMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 491.7000000000007,
+        "min": 383.40000000000146,
+        "max": 766.7000000000007,
+        "values": [
+          550.0999999999985,
+          383.40000000000146,
+          500,
+          483.40000000000146,
+          466.6999999999971,
+          766.7000000000007
+        ]
+      },
+      "candidate": {
+        "median": 566.6000000000004,
+        "min": 383.2000000000007,
+        "max": 1166.7000000000044,
+        "values": [
+          666.5,
+          383.2000000000007,
+          466.7000000000007,
+          433.3000000000011,
+          1166.7000000000044,
+          766.7000000000044
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -116.40000000000146,
+        0.2000000000007276,
+        33.29999999999927,
+        50.100000000000364,
+        -700.0000000000073,
+        -3.637978807091713e-12
+      ],
+      "pairedPercentReduction": [
+        -21.15978912924955,
+        0.05216484089742484,
+        6.6599999999998545,
+        10.364087712039762,
+        -149.98928647953966,
+        -4.744983444752457e-13
+      ],
+      "medianPairedPercentReduction": 0.026082420448475172
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "longTasks",
+      "pairs": 6,
+      "baseline": {
+        "median": 136,
+        "min": 128,
+        "max": 152,
+        "values": [
+          139,
+          128,
+          143,
+          132,
+          152,
+          133
+        ]
+      },
+      "candidate": {
+        "median": 137.5,
+        "min": 120,
+        "max": 178,
+        "values": [
+          176,
+          120,
+          137,
+          129,
+          178,
+          138
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -37,
+        8,
+        6,
+        3,
+        -26,
+        -5
+      ],
+      "pairedPercentReduction": [
+        -26.618705035971225,
+        6.25,
+        4.195804195804196,
+        2.272727272727273,
+        -17.105263157894736,
+        -3.7593984962406015
+      ],
+      "medianPairedPercentReduction": -0.7433356117566643
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "longTaskMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 20984,
+        "min": 19436,
+        "max": 23943,
+        "values": [
+          21697,
+          19436,
+          21742,
+          20065,
+          23943,
+          20271
+        ]
+      },
+      "candidate": {
+        "median": 21369,
+        "min": 17453,
+        "max": 31612,
+        "values": [
+          31612,
+          17453,
+          21922,
+          20591,
+          29065,
+          20816
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -9915,
+        1983,
+        -180,
+        -526,
+        -5122,
+        -545
+      ],
+      "pairedPercentReduction": [
+        -45.69756187491358,
+        10.20271660835563,
+        -0.8278907184251679,
+        -2.6214801893845006,
+        -21.392473791922484,
+        -2.6885698781510534
+      ],
+      "medianPairedPercentReduction": -2.655025033767777
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "domNodes",
+      "pairs": 6,
+      "baseline": {
+        "median": 6097,
+        "min": 6095,
+        "max": 6097,
+        "values": [
+          6097,
+          6097,
+          6097,
+          6097,
+          6095,
+          6095
+        ]
+      },
+      "candidate": {
+        "median": 6116,
+        "min": 6114,
+        "max": 6116,
+        "values": [
+          6116,
+          6116,
+          6114,
+          6116,
+          6116,
+          6114
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -19,
+        -19,
+        -17,
+        -19,
+        -21,
+        -19
+      ],
+      "pairedPercentReduction": [
+        -0.31162866983762505,
+        -0.31162866983762505,
+        -0.2788256519599803,
+        -0.31162866983762505,
+        -0.3445447087776866,
+        -0.3117309269893355
+      ],
+      "medianPairedPercentReduction": -0.31162866983762505
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "mountedEditors",
+      "pairs": 6,
+      "baseline": {
+        "median": 1,
+        "min": 1,
+        "max": 1,
+        "values": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "candidate": {
+        "median": 1,
+        "min": 1,
+        "max": 1,
+        "values": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "runningAnimations",
+      "pairs": 6,
+      "baseline": {
+        "median": 1,
+        "min": 1,
+        "max": 5,
+        "values": [
+          5,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "candidate": {
+        "median": 1,
+        "min": 1,
+        "max": 4,
+        "values": [
+          4,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        1,
+        -3,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        20,
+        -300,
+        0,
+        0,
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "selectionP50Ms",
+      "pairs": 6,
+      "baseline": {
+        "median": 1154.369047999964,
+        "min": 1102.727600000042,
+        "max": 1341.917732500122,
+        "values": [
+          1157.7099884999916,
+          1102.727600000042,
+          1151.0281074999366,
+          1147.9075424999464,
+          1341.917732500122,
+          1258.0594619999174
+        ]
+      },
+      "candidate": {
+        "median": 1201.34531600005,
+        "min": 1023.7022890000371,
+        "max": 1604.9484389999998,
+        "values": [
+          1604.9484389999998,
+          1023.7022890000371,
+          1224.5855470000533,
+          1204.2049835000653,
+          1166.4058694998967,
+          1198.4856485000346
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -447.2384505000082,
+        79.02531100000488,
+        -73.55743950011674,
+        -56.29744100011885,
+        175.51186300022528,
+        59.57381349988282
+      ],
+      "pairedPercentReduction": [
+        -38.631302739253464,
+        7.1663492416442525,
+        -6.390585861529085,
+        -4.904353261545146,
+        13.079182035491087,
+        4.73537343021762
+      ],
+      "medianPairedPercentReduction": -0.08448991566376307
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "selectionP95Ms",
+      "pairs": 6,
+      "baseline": {
+        "median": 1559.4119795000297,
+        "min": 1234.1246269999538,
+        "max": 1733.9484739999752,
+        "values": [
+          1508.8061399999424,
+          1234.1246269999538,
+          1560.217479999992,
+          1558.6064790000673,
+          1733.9484739999752,
+          1603.6600389999803
+        ]
+      },
+      "candidate": {
+        "median": 1588.2563494999777,
+        "min": 1162.1738030000124,
+        "max": 2762.9643279998563,
+        "values": [
+          1840.0548810000182,
+          1162.1738030000124,
+          1478.889686999959,
+          1385.4294999999693,
+          2762.9643279998563,
+          1697.6230119999964
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -331.2487410000758,
+        71.95082399994135,
+        81.32779300003313,
+        173.17697900009807,
+        -1029.015853999881,
+        -93.96297300001606
+      ],
+      "pairedPercentReduction": [
+        -21.95436061786496,
+        5.830110057429722,
+        5.212593375125725,
+        11.11101367365037,
+        -59.34523830607759,
+        -5.85928256082318
+      ],
+      "medianPairedPercentReduction": -0.3233445928487275
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "requests",
+      "pairs": 6,
+      "baseline": {
+        "median": 1445,
+        "min": 1443,
+        "max": 1447,
+        "values": [
+          1443,
+          1444,
+          1447,
+          1445,
+          1445,
+          1446
+        ]
+      },
+      "candidate": {
+        "median": 1444.5,
+        "min": 1441,
+        "max": 1445,
+        "values": [
+          1445,
+          1444,
+          1445,
+          1441,
+          1443,
+          1445
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -2,
+        0,
+        2,
+        4,
+        2,
+        1
+      ],
+      "pairedPercentReduction": [
+        -0.1386001386001386,
+        0,
+        0.138217000691085,
+        0.2768166089965398,
+        0.1384083044982699,
+        0.06915629322268327
+      ],
+      "medianPairedPercentReduction": 0.10368664695688413
+    }
+  ],
+  "notes": [
+    "mainThreadMs and mainThreadMsPerSecond use TaskDuration with timeTicks: elapsed time in main-thread tasks, not thread CPU time. Script, style, and layout durations use the same elapsed-time domain.",
+    "mainThreadCpuMs uses ThreadTime (renderer main-thread CPU). rendererCpuMs uses ProcessTime (renderer-process CPU); it excludes separate browser, GPU, and backend processes.",
+    "Positive reduction means a lower candidate value. Counts such as mounted editors are observations, not optimization scores.",
+    "Streaming duration includes the wait for final visible content. Fixed-deadline traffic is retained in the raw report.",
+    "Frame gaps and driver DOM readiness are not INP. Linux CPU throttling is not an M2 Air simulation.",
+    "History decoded bytes include captured requests and responses. They are not compressed network transfer."
+  ],
+  "excludedPreparationAttempt": {
+    "log": "current-navigation-six-pair-logs/kandev-run.e2e.x9zZWfvE.log",
+    "durationMinutes": 4.2,
+    "completeSamples": 0,
+    "reason": "Changes marker readiness failed during fixture preparation. Error snapshot showed Loading changes; subsequent failure screenshot showed the correct marker and 73 changed files. Unchanged retry passed.",
+    "artifacts": "current-navigation-preparation-failure/"
+  }
+}

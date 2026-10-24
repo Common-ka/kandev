@@ -5,6 +5,48 @@ and the remaining stress/scenario matrix are in progress. The branch is
 `feature/evaluate-live-thread-bc0`; the frozen baseline is
 `595df36ed5c1cf02fd90cb972b623ad6edc53df8`.
 
+## Current retained-build navigation comparison
+
+The retained build at `04cb2eb13179abf1b9cd7b4b2699e9fc6103ce1e` completed six
+alternating pairs against the original baseline in 24.1 minutes. This includes
+the selection and timestamp repairs added after the earlier navigation reference.
+There was no source patch. Both versions used the same database snapshot:
+1,000 tasks, two conversations with 1,000 seeded messages each, and a 630-file
+fixture tree with 73 changed files per task. All 480 timed switches passed the
+destination file-marker gate. These are stored-history counts, not a claim that
+all 1,000 messages were visible during each switch.
+
+Switch-readiness p50 was 0.08% slower and p95 was 0.32% slower across paired
+changes; both had mixed directions. This is no demonstrated readiness gain.
+Main-thread CPU was 2.48% higher and renderer CPU was 2.30% higher, with five of
+six pairs higher. Keep both slow candidate samples: pair 1 p95 was 1,840 ms
+against 1,509 ms; pair 5 was 2,763 ms against 1,734 ms. All per-pair values are
+in the [committed evidence](evidence/current-navigation-1x.json). The earlier
+reference remains historical evidence; it is not replaced or pooled with this
+run.
+
+The separate first-pair retention checks made 100 additional switches per
+version. Both retained one editor and three Dockview panels. Post-GC used heap
+rose from 92.95 to 99.62 MB in baseline and 85.82 to 90.25 MB in candidate. These
+observations do not establish a leak or a memory improvement. Timing ends at
+the destination file marker plus two animation frames; it is not INP, screen
+presentation, or full conversation/composer readiness.
+
+The first attempt failed during preparation before any timed sample
+(`current-navigation-six-pair-logs/kandev-run.e2e.x9zZWfvE.log`, 4.2 minutes).
+The error snapshot showed Loading changes; the later screenshot contained the
+correct task-specific marker and all 73 changed files. The unchanged retry
+passed. No timeout, workload, or readiness criterion changed. Failure artifacts
+remain in `current-navigation-preparation-failure/`.
+
+Raw report: `matched-navigation-1792808464087.json`; summary:
+`current-navigation-six-pair-summary.json`; log:
+`current-navigation-six-pair-retry-logs/kandev-run.e2e.C4KJfsUn.log`; host samples:
+`current-navigation-six-pair-retry-host-load.jsonl`. Candidate assets:
+`8379f62eb1bf4935c6b18d4616f732191cdefc17159c02367a54c05701f7a160`;
+candidate backend:
+`b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9`.
+
 ## Direct SVG offscreen visibility: rejected
 
 Two alternating columns pairs passed with 1,000 tasks, 30 headers, four visible
