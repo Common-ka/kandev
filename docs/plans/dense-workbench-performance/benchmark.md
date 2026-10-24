@@ -467,3 +467,17 @@ eligible task, and verify active session identity, visible fixture content, and
 loaded messages at each stop. This includes non-producer columns. The existing
 exact-tick checks still verify previously offscreen streaming producers. Grid
 mode omits column traversal. These visits are correctness checks outside timing.
+
+## Optional Dockview CPU attribution
+
+Set `KANDEV_DENSE_DOCKVIEW_PROFILE=1` with the Dockview comparison caller.
+Each sample writes separate idle, streaming, and reduced-motion idle CPU profiles
+beside the raw report. The caller checks sample structure, profile duration, and
+application frames. It records animation targets after each measured window.
+These reports use `measurementKind: "cpu-attribution"`; the speed summary rejects
+them. Leave this option unset for paired performance comparisons.
+
+The small plugin RED/GREEN and default core caller regression pass. See
+[validation and animation ownership](evidence/dockview-cpu-attribution-harness.json).
+The four residual candidate animations belong to shared host loading indicators
+on plugin composer buttons. This identifies their owner, not their CPU cost.

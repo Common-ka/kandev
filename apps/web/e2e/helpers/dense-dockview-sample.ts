@@ -1,4 +1,5 @@
-import { expect, type Browser, type Page } from "@playwright/test";
+import fs from "node:fs";
+import { expect, type Browser, type CDPSession, type Page } from "@playwright/test";
 import type { BackendContext } from "../fixtures/backend";
 import type { SeedData } from "../fixtures/test-base";
 import type { ApiClient } from "./api-client";
@@ -20,6 +21,43 @@ import { SessionPage } from "../pages/session-page";
 type Stream = Awaited<ReturnType<typeof prepareDenseStream>>;
 type Checkpoint = (evidence: Record<string, unknown>) => void;
 const HIDDEN_DRAFT = "Keep this hidden Dockview draft while streams update";
+
+async function startDockviewProfile(cdp: CDPSession, profilePath?: string) {
+  if (!profilePath) return;
+  await cdp.send("Profiler.enable");
+  await cdp.send("Profiler.start");
+}
+
+async function saveDockviewProfile(cdp: CDPSession, profilePath?: string) {
+  if (!profilePath) return;
+  const { profile } = await cdp.send("Profiler.stop");
+  fs.writeFileSync(profilePath, JSON.stringify(profile));
+}
+
+async function inspectDockviewProfileAnimations(page: Page, profilePath?: string) {
+  if (!profilePath) return;
+  return page.evaluate(() => ({
+    reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
+    visibilityState: document.visibilityState,
+    animations: document.getAnimations().map((animation) => {
+      const effect = animation.effect instanceof KeyframeEffect ? animation.effect : null;
+      const ancestors = [];
+      let element = effect?.target ?? null;
+      for (let depth = 0; element && depth < 7; depth++, element = element.parentElement)
+        ancestors.push({
+          tag: element.tagName,
+          className: element.getAttribute("class"),
+          testId: element.getAttribute("data-testid"),
+        });
+      return {
+        name: animation instanceof CSSAnimation ? animation.animationName : null,
+        playState: animation.playState,
+        iterations: String(effect?.getTiming().iterations),
+        ancestors,
+      };
+    }),
+  }));
+}
 
 async function waitForDockviewStream(
   page: Page,
@@ -109,6 +147,7 @@ export async function runDenseDockviewSample(options: {
   fixture: DenseDockviewFixture;
   sample: string;
   cpuRate: number;
+  profilePrefix?: string;
   checkpoint?: Checkpoint;
 }) {
   const { browser, backend, api, seed, fixture, sample, cpuRate, checkpoint } = options;
@@ -157,6 +196,10 @@ export async function runDenseDockviewSample(options: {
       const layoutBefore = await inspectDenseDockviewLayout(page);
       traffic.reset();
       pluginTraffic.reset();
+      const profilePath = options.profilePrefix
+        ? `${options.profilePrefix}.${scenario}.cpuprofile`
+        : undefined;
+      await startDockviewProfile(cdp, profilePath);
       const before = await beginDenseWindow(page, cdp);
       if (scenario === "streaming") stream.release();
       await dwell(
@@ -179,6 +222,7 @@ export async function runDenseDockviewSample(options: {
       if (scenario === "streaming")
         await waitForDockviewStream(page, stream, fixture.dockview.visibleSessionIds, checkpoint);
       const measured = await endDenseWindow(page, cdp, before);
+      await saveDockviewProfile(cdp, profilePath);
       const delivery = traffic.snapshot();
       const pluginDelivery = pluginTraffic.snapshot();
       const layoutAfter = await inspectDenseDockviewLayout(page);
@@ -190,6 +234,7 @@ export async function runDenseDockviewSample(options: {
         pluginTraffic: pluginDelivery,
         layoutBefore,
         layoutAfter,
+        animationDiagnostics: await inspectDockviewProfileAnimations(page, options.profilePrefix),
       });
       checkpoint?.({ runs });
       if (scenario === "streaming") {
@@ -204,6 +249,7 @@ export async function runDenseDockviewSample(options: {
     const hiddenCatchup = await revealHiddenStream(page, fixture, stream);
     return {
       sample,
+      profilePrefix: options.profilePrefix,
       workbenchSurface: "dockview",
       finalVisibilityProbe: DENSE_VISIBILITY_PROBE,
       plugin,

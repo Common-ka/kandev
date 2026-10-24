@@ -514,3 +514,12 @@ all pairs, HTTP failures, retries, plugin request counts, build identities,
 and host observations. Shared-host load rose as high as 14.89; this does not
 establish the cause of any regression. No cold-entry, M2 Air, INP, battery, or
 leak claim follows. The core and full-plugin results remain separate.
+
+## Dockview attribution harness validated
+
+The optional profiler passes a meaningful browser RED/GREEN, nine summary tests,
+strict lint, and the unchanged default caller on both frozen builds. All three
+windows produce validated profiles; profiled reports are excluded from speed
+comparisons. Candidate reduced-motion diagnostics identify four shared host
+Spinner instances on plugin composer buttons. The repair and its CPU effect
+remain pending. See [evidence](evidence/dockview-cpu-attribution-harness.json).

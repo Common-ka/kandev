@@ -9,6 +9,34 @@ import { runDenseDockviewSample } from "../../helpers/dense-dockview-sample";
 import { hashAssetTree, sha256File, snapshotDatabase } from "../../helpers/dense-snapshot";
 import { profileMachine } from "../task/task-navigation-profile-helpers";
 
+function dockviewMeasurementKind() {
+  if (process.env.KANDEV_DENSE_DOCKVIEW_PROFILE === "1") return "cpu-attribution";
+  return process.env.KANDEV_DENSE_TASKS ? "harness-rehearsal" : "reference-workload";
+}
+
+function verifyDockviewProfile(
+  output: string,
+  sample: string,
+  measurementKind: string,
+  result: Awaited<ReturnType<typeof runDenseDockviewSample>>,
+) {
+  if (process.env.KANDEV_DENSE_DOCKVIEW_PROFILE !== "1") return;
+  expect(measurementKind).toBe("cpu-attribution");
+  let sawAssetFrame = false;
+  for (const run of result.runs) {
+    const profile = JSON.parse(
+      fs.readFileSync(`${output}.${sample}.${run.scenario}.cpuprofile`, "utf8"),
+    );
+    expect(profile.samples.length).toBeGreaterThan(0);
+    expect(profile.timeDeltas).toHaveLength(profile.samples.length);
+    expect((profile.endTime - profile.startTime) / 1000).toBeGreaterThanOrEqual(run.elapsedMs);
+    sawAssetFrame ||= profile.nodes.some((node: { callFrame: { url: string } }) =>
+      node.callFrame.url.includes("/assets/"),
+    );
+  }
+  expect(sawAssetFrame).toBe(true);
+}
+
 test.skip(
   process.env.KANDEV_DENSE_DOCKVIEW_COMPARE !== "1",
   "opt-in matched dense Dockview benchmark",
@@ -67,9 +95,7 @@ test("compares frozen builds on identical dense Dockview snapshots", async ({
   const directory = path.join(candidateRoot, ".kandev/diagnostics/dense-workbench-performance");
   fs.mkdirSync(directory, { recursive: true });
   const output = path.join(directory, `matched-dockview-${Date.now()}.json`);
-  const measurementKind = process.env.KANDEV_DENSE_TASKS
-    ? "harness-rehearsal"
-    : "reference-workload";
+  const measurementKind = dockviewMeasurementKind();
   const report = {
     machine: profileMachine(),
     sourceRevision: execFileSync("git", ["rev-parse", "HEAD"], {
@@ -134,11 +160,14 @@ test("compares frozen builds on identical dense Dockview snapshots", async ({
             fixture,
             sample,
             cpuRate,
+            profilePrefix:
+              process.env.KANDEV_DENSE_DOCKVIEW_PROFILE === "1" ? `${output}.${sample}` : undefined,
             checkpoint: (evidence) => {
               report.checkpoints[sample] = { ...report.checkpoints[sample], ...evidence };
               save();
             },
           });
+          verifyDockviewProfile(output, sample, measurementKind, result);
           report.samples.push({ arm, pair, ...result });
           save();
         }

@@ -33,7 +33,8 @@ change, but rises 21.21% and 27.22% in two pairs. Reduced-motion idle main-threa
 CPU falls 12.35%, with two roughly 7% regressions. Its maximum frame gaps worsen
 in five pairs, despite mostly neutral or better p95 values. Four animations
 remain running in every candidate reduced-motion sample; the core-only build
-had zero. Their source and CPU contribution still need attribution. The full
+had zero. A separate short profile now identifies these as shared host loading indicators on
+plugin composer buttons. Their CPU contribution still needs a controlled comparison. The full
 plugin adds a hidden review pane as well as its visible conversation pane.
 
 The baseline records 260 HTTP 409 conversation consistency conflicts and 797
@@ -86,8 +87,7 @@ attribution run is required before claiming a cause or a uniform frame gain.
 [Complete evidence](evidence/final-dockview-core-six-pair-1x.json) preserves all
 pairs, errors, build and harness identities, loaded-history checks, and host
 observations. Setup is outside timing. No cold-entry, MacBook Air M2, field INP,
-battery, or leak claim follows. The full-plugin series remains separate and
-pending.
+battery, or leak claim follows. The full-plugin series remains separate; its results appear above.
 
 ## Final session-tab comparison (1x)
 
