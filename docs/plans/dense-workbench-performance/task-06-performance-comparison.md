@@ -30,6 +30,15 @@ system_design:
 
 # Task 06: Matched comparison and regression evidence
 
+## Dockview measurement harness
+
+Session-specific stream targeting now passes its two-chat browser regression,
+with a real shared environment, retained hidden tab, ordered updates, and draft.
+The Threads-only lookup fails first; the new optional surface passes without
+changing the default Threads behavior or deadline. Three progress tests, strict
+lint, and a small original-baseline/final Threads comparison pass. Full dense
+Dockview timing remains open. See [evidence](evidence/dockview-stream-targets.json).
+
 ## Final session-tab comparison (1x)
 
 Six alternating pairs compare the original baseline with production `72085e06b49`.

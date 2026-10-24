@@ -6,8 +6,23 @@ import type { SeedData } from "../fixtures/test-base";
 import type { ApiClient } from "./api-client";
 import { DENSE_WORKLOAD, type DenseThread } from "./dense-workbench-fixture";
 import { waitForAgentMessage, waitForSessionDone } from "./session";
-import { inspectDenseStreamProgress } from "./dense-stream-progress";
+import {
+  denseStreamSelector,
+  inspectDenseStreamProgress,
+  type DenseStreamSurface,
+} from "./dense-stream-progress";
 import { waitForDenseVisible } from "./dense-visible";
+
+function visibleStreamThreads(
+  threads: DenseThread[],
+  visibleIds: string[] | undefined,
+  surface: DenseStreamSurface,
+) {
+  if (!visibleIds) return threads;
+  return threads.filter((thread) =>
+    visibleIds.includes(surface === "dockview" ? thread.sessionId : thread.taskId),
+  );
+}
 
 export async function prepareDenseStream(
   api: ApiClient,
@@ -50,22 +65,31 @@ export async function prepareDenseStream(
     lastMarker,
     scheduledUpdates: updatesPerSession * threads.length,
     release: () => fs.writeFileSync(release, "start"),
-    inspect: (page: Page) => inspectDenseStreamProgress(page, api, threads),
-    async waitForVisible(page: Page, visibleTaskIds = threads.map((thread) => thread.taskId)) {
-      for (const thread of threads.filter((thread) => visibleTaskIds.includes(thread.taskId))) {
+    inspect: (page: Page, surface: DenseStreamSurface = "threads") =>
+      inspectDenseStreamProgress(page, api, threads, surface),
+    async waitForVisible(
+      page: Page,
+      visibleIds?: string[],
+      surface: DenseStreamSurface = "threads",
+    ) {
+      for (const thread of visibleStreamThreads(threads, visibleIds, surface)) {
         await waitForDenseVisible(
           page
-            .getByTestId(`thread-column-${thread.taskId}`)
+            .locator(denseStreamSelector(thread, surface))
             .locator("[data-agent-message-body]")
             .filter({ hasText: lastMarker }),
         );
       }
     },
-    async assertVisible(page: Page, visibleTaskIds = threads.map((thread) => thread.taskId)) {
-      for (const thread of threads.filter((thread) => visibleTaskIds.includes(thread.taskId))) {
+    async assertVisible(
+      page: Page,
+      visibleIds?: string[],
+      surface: DenseStreamSurface = "threads",
+    ) {
+      for (const thread of visibleStreamThreads(threads, visibleIds, surface)) {
         await expect(
           page
-            .getByTestId(`thread-column-${thread.taskId}`)
+            .locator(denseStreamSelector(thread, surface))
             .locator("[data-agent-message-body]")
             .filter({ hasText: lastMarker }),
         ).toBeVisible({ timeout: 30_000 });

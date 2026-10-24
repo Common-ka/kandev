@@ -1,0 +1,102 @@
+{
+  "scope": "Test-harness support for canonical stream observation in Dockview. No production source or bundled assets changed. This small fixture is not the full dense Dockview benchmark.",
+  "productionRevision": "72085e06b4902b7ccbaae1a84be0048e5a9b6f11",
+  "sourceFiles": [
+    {
+      "path": "apps/web/e2e/helpers/dense-canonical-stream.ts",
+      "sha256": "a8a70541cee203a5bf153486b298f84e84ed6cde6c59ae408fa9b69901860f97"
+    },
+    {
+      "path": "apps/web/e2e/helpers/dense-stream-progress.ts",
+      "sha256": "7ce7827f582f34df032202b8bc339a97bcc9b461a010403b3e171d28bb5ab107"
+    },
+    {
+      "path": "apps/web/e2e/tests/performance/dense-dockview-stream.spec.ts",
+      "sha256": "6f517f6068ea36c9cf4938bab9a34ef278483b70e8bac6fc25b3138cc488b5c6"
+    }
+  ],
+  "change": "waitForVisible, assertVisible, and inspect accept an optional Dockview surface. Dockview selectors and optional visible IDs use session identity; Threads remains the default and uses task identity. The fixed producer, durable ordered-tick verification, boolean polling, and 30-second visibility bound are unchanged.",
+  "fixture": {
+    "workspaceTasks": 2,
+    "selectedTaskSessions": 3,
+    "sharedEnvironment": "Nonempty ID equality asserted for real prepared siblings. All use the original prepared session agent profile.",
+    "visibleChats": 2,
+    "hiddenSiblingTabs": 1,
+    "seededMessagesPerSession": 10,
+    "streamWindowMs": 2000,
+    "updatesPerVisibleSession": 10,
+    "draft": "Retained while both sessions stream.",
+    "progress": "Both visible session DOMs report 10 ticks, 10 unique ticks, and final tick 9. Stored message verification checks exact ordered ticks and durable delivery."
+  },
+  "validation": {
+    "setupFailure": {
+      "log": "dockview-stream-target-red-logs/kandev-run.e2e.eY6UnL6l.log",
+      "durationSeconds": 4.9,
+      "reason": "Navigation fixture profile differed from the stream launch profile. Launch failed while clearing the previous execution profile, before visibility was tested. Fixture now uses one profile across prepared and started sessions.",
+      "artifacts": "dockview-stream-profile-mismatch-failure/"
+    },
+    "red": {
+      "log": "dockview-stream-target-red-corrected-logs/kandev-run.e2e.itsco538.log",
+      "durationSeconds": 40.4,
+      "reason": "The existing helper searched Threads tiles and exhausted the unchanged 30-second visibility timeout. Inspected screenshot shows both Dockview chats at final tick 9 and the retained draft.",
+      "artifacts": "dockview-stream-target-red-failure/"
+    },
+    "green": {
+      "log": "dockview-stream-target-green-logs/kandev-run.e2e.erAK5o9G.log",
+      "durationSeconds": 24.5,
+      "passed": 2,
+      "cases": [
+        "dense-dockview-stream.spec.ts",
+        "dense-visible.spec.ts"
+      ]
+    },
+    "unit": {
+      "command": "node --test e2e/scripts/dense-stream-progress.test.mjs",
+      "passed": 3
+    },
+    "lint": {
+      "log": "/tmp/kandev-dockview-stream-target-lint.log",
+      "status": "passed with zero warnings"
+    },
+    "threadsCaller": {
+      "log": "dockview-target-threads-regression-logs/kandev-run.e2e.zKXUCcXG.log",
+      "durationMinutes": 1.2,
+      "status": "passed",
+      "report": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792839323146.json",
+      "sha256": "24a8ce75fc0807db53c90a05c235dc5490c804c8a6c56e79af9e52ddd453ba4f",
+      "measurementKind": "harness-rehearsal",
+      "samples": 2,
+      "tasks": 10,
+      "columns": 6,
+      "messagesPerPrimarySession": 10,
+      "windowMs": 2000,
+      "scheduledUpdatesPerArm": 60,
+      "verificationErrorsPerArm": [
+        [],
+        []
+      ],
+      "builds": {
+        "baseline": {
+          "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+          "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+          "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+          "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+        },
+        "candidate": {
+          "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+          "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "d83bd02b59785cf6c806178f3f0e15d0443dbac7f104998347cb6580371a9f94"
+        }
+      },
+      "summary": "dockview-target-threads-regression-summary.json"
+    }
+  },
+  "remaining": [
+    "Full dense Dockview fixture and paired caller.",
+    "Structural plan/files/changes panels and fixed plugin source arm.",
+    "Six alternating pairs, visibility/composer modes, long-history and 4x stress.",
+    "Separate API panel and subscription ownership retention."
+  ],
+  "documentationImpact": "No public behavior, commands, configuration, or terminology changed. Only internal benchmark instructions and evidence are updated."
+}

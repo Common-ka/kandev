@@ -330,3 +330,20 @@ the recorded profiles. Do not put those assertions back inside measured windows.
 Reports and samples record `finalVisibilityProbe: boolean-poll`. Missing metadata
 means the historical `locator-assertion` probe. Do not pool the two series; the
 summary rejects mixed probe versions. See the [attribution record](evidence/visibility-probe-attribution.json).
+
+## Dockview stream targeting
+
+The canonical stream helper accepts an optional `"dockview"` surface on
+`waitForVisible(page, visibleIds, surface)`, `assertVisible`, and `inspect`.
+Dockview targets use session IDs, so two sessions in the same task remain
+distinct. Optional visibility lists contain session IDs for Dockview and task
+IDs for the default Threads surface. The producer, durable ordered-tick checks,
+boolean visibility polling, and 30-second visibility bound remain unchanged.
+
+`dense-dockview-stream.spec.ts` validates two real visible sibling chats, one
+retained hidden sibling, and a draft during streaming. All sessions use one
+prepared agent profile and one nonempty environment. Local validation uses
+`KANDEV_DENSE_WINDOW_MS=2000`; the default remains the normal workload window.
+This fixture validates targeting only. It does not replace the required dense
+Dockview idle/streaming, structural-panel, plugin, visibility, or stress cases.
+See [the harness evidence](evidence/dockview-stream-targets.json).
