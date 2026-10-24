@@ -30,6 +30,23 @@ system_design:
 
 # Task 06: Matched comparison and regression evidence
 
+## Busy-header harness validation
+
+The optional columns variant seeds extra non-producer session states through
+the existing backend test API. It does not create additional live executions
+or change canonical producer count. Three helper regressions and three summary
+regressions failed first, then passed. All 17 selected summary tests and three
+helper tests pass. Strict scoped lint passes. A duplicate legacy probe string
+was extracted into a constant while checking the touched summary file.
+
+The busy eight-column caller passed both arms in 1.1 minutes; both retained
+eight icons and verified all 30 ordered updates. The candidate paused four
+offscreen icons. The default one-column caller passed both arms in 30.3 seconds
+and verified all five ordered updates per arm. These are harness smokes, not
+CPU results. [Evidence](evidence/busy-header-harness-smokes.json) records both
+workloads and build hashes. The motion production candidate remains pending
+full paired measurements.
+
 ## Timed navigation profile validation
 
 The opt-in navigation CPU profile now covers the measured switch window,

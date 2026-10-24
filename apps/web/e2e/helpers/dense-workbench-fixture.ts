@@ -1,3 +1,4 @@
+import { parseDenseExtraBusyHeaders } from "./dense-busy-headers";
 import { createHash, randomUUID } from "node:crypto";
 import { expect } from "@playwright/test";
 import { dwell } from "./causal-waits";
@@ -9,6 +10,11 @@ if (layout !== "grid" && layout !== "columns") throw new Error("Unknown dense la
 
 export const DENSE_WORKLOAD = {
   layout,
+  extraBusyHeaders: parseDenseExtraBusyHeaders(
+    process.env.KANDEV_DENSE_EXTRA_BUSY_HEADERS,
+    layout,
+    Number(process.env.KANDEV_DENSE_COLUMNS ?? 30),
+  ),
   tasks: Number(process.env.KANDEV_DENSE_TASKS ?? 1_000),
   columns: Number(process.env.KANDEV_DENSE_COLUMNS ?? 30),
   messages: Number(process.env.KANDEV_DENSE_MESSAGES ?? 1_000),

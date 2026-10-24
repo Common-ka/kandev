@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
 
+const LEGACY_VISIBILITY_PROBE = "locator-assertion";
+
 function median(values) {
   if (!values.length) return null;
   const sorted = [...values].sort((a, b) => a - b);
@@ -104,11 +106,18 @@ function sampleLayoutPrefix(report, sample) {
   return layout === "columns" ? "columns-" : "";
 }
 
+function sampleBusyHeaderPrefix(report, sample) {
+  const count = report.extraBusyHeaders ?? 0;
+  if (!Number.isInteger(count) || count < 0 || (sample.extraBusyHeaders ?? 0) !== count)
+    throw new Error("Samples must use the report's extra busy-header count");
+  return count > 0 ? `busy-${count}-` : "";
+}
+
 function checkVisibilityProbe(report, sample) {
-  const probe = report.finalVisibilityProbe ?? "locator-assertion";
+  const probe = report.finalVisibilityProbe ?? LEGACY_VISIBILITY_PROBE;
   if (
-    !["boolean-poll", "locator-assertion"].includes(probe) ||
-    (sample.finalVisibilityProbe ?? "locator-assertion") !== probe
+    !["boolean-poll", LEGACY_VISIBILITY_PROBE].includes(probe) ||
+    (sample.finalVisibilityProbe ?? LEGACY_VISIBILITY_PROBE) !== probe
   )
     throw new Error("Samples must use the report's final visibility probe");
 }
@@ -121,7 +130,8 @@ export function summarizeReport(report) {
   for (const sample of report.samples) {
     checkVisibilityProbe(report, sample);
     const throttling = sampleThrottling(report, sample);
-    const layoutPrefix = sampleLayoutPrefix(report, sample);
+    const layoutPrefix =
+      sampleLayoutPrefix(report, sample) + sampleBusyHeaderPrefix(report, sample);
     const identity = { arm: sample.arm, pair: sample.pair, cpuRate: sample.cpuRate };
     if (sample.cold) {
       const assets = sample.cold.resources.filter((resource) => /\.(js|css)$/.test(resource.path));
@@ -170,14 +180,16 @@ export function summarizeReport(report) {
       comparisons.push({ group, metric, ...summarizePairs(rows, (row) => row.values[metric]) });
   return {
     measurementKind: report.measurementKind,
-    finalVisibilityProbe: report.finalVisibilityProbe ?? "locator-assertion",
+    finalVisibilityProbe: report.finalVisibilityProbe ?? LEGACY_VISIBILITY_PROBE,
     layout: report.layout ?? "grid",
+    extraBusyHeaders: report.extraBusyHeaders ?? 0,
     throttleAfterLoad: Boolean(report.throttleAfterLoad),
     machine: report.machine,
     builds: report.builds,
     sampleCount: report.samples.length,
     comparisons,
     notes: [
+      "Extra busy headers are backend-seeded status rows, not additional live executions. The six canonical stream producers remain unchanged. Busy-header variants must not be pooled with the default workload.",
       ...(report.throttleAfterLoad
         ? [
             "Warm stress loads at 1x before applying the recorded CPU rate. It is not a throttled cold-load measurement.",

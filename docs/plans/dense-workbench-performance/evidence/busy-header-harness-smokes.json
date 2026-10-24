@@ -1,0 +1,189 @@
+{
+  "busy": {
+    "rawReport": "matched-dense-1792820559785.json",
+    "sha256": "2cf7179436eb90e69c22f207be784af03a943eed6e7b573bbc8d893a3fc4840b",
+    "measurementKind": "harness-rehearsal",
+    "extraBusyHeaders": 2,
+    "workload": {
+      "layout": "columns",
+      "extraBusyHeaders": 2,
+      "tasks": 10,
+      "columns": 8,
+      "messages": 10,
+      "durationMs": 1000
+    },
+    "builds": {
+      "baseline": {
+        "binary": "/tmp/kandev-dense-timestamp-5936a872/apps/backend/bin/kandev",
+        "assets": "/tmp/kandev-dense-timestamp-5936a872/apps/web/dist",
+        "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+        "assetsSha256": "8379f62eb1bf4935c6b18d4616f732191cdefc17159c02367a54c05701f7a160"
+      },
+      "candidate": {
+        "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+        "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+        "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+        "assetsSha256": "085df3998be95fbe3df28366479b06bdcec1f2edc18925e8fcfb01164b215041"
+      }
+    },
+    "samples": [
+      {
+        "sample": "baseline-1x-0",
+        "scheduledUpdates": 30,
+        "verificationErrors": [],
+        "headerMotion": [
+          {
+            "scenario": "idle",
+            "targets": 8,
+            "running": 8,
+            "paused": 0
+          },
+          {
+            "scenario": "streaming",
+            "targets": 8,
+            "running": 8,
+            "paused": 0
+          },
+          {
+            "scenario": "reduced-motion-idle",
+            "targets": 8,
+            "running": 0,
+            "paused": 0
+          }
+        ],
+        "offscreenCatchup": [
+          {
+            "taskId": "c0c8e42b-9a54-4547-81ea-ce33c5ab426d",
+            "ticks": 5,
+            "at": 1792820581154
+          },
+          {
+            "taskId": "6299210a-ab09-40b5-8d68-0ec53745348f",
+            "ticks": 5,
+            "at": 1792820581613
+          }
+        ]
+      },
+      {
+        "sample": "candidate-1x-0",
+        "scheduledUpdates": 30,
+        "verificationErrors": [],
+        "headerMotion": [
+          {
+            "scenario": "idle",
+            "targets": 8,
+            "running": 4,
+            "paused": 4
+          },
+          {
+            "scenario": "streaming",
+            "targets": 8,
+            "running": 4,
+            "paused": 4
+          },
+          {
+            "scenario": "reduced-motion-idle",
+            "targets": 8,
+            "running": 0,
+            "paused": 0
+          }
+        ],
+        "offscreenCatchup": [
+          {
+            "taskId": "c0c8e42b-9a54-4547-81ea-ce33c5ab426d",
+            "ticks": 5,
+            "at": 1792820603938
+          },
+          {
+            "taskId": "6299210a-ab09-40b5-8d68-0ec53745348f",
+            "ticks": 5,
+            "at": 1792820604384
+          }
+        ]
+      }
+    ]
+  },
+  "default": {
+    "rawReport": "matched-dense-1792820633595.json",
+    "sha256": "c5718f78418a2cdef0775f5305f4609b293532db4c1e77645671f696aa029cac",
+    "measurementKind": "harness-rehearsal",
+    "extraBusyHeaders": 0,
+    "workload": {
+      "layout": "grid",
+      "extraBusyHeaders": 0,
+      "tasks": 10,
+      "columns": 1,
+      "messages": 10,
+      "durationMs": 1000
+    },
+    "builds": {
+      "baseline": {
+        "binary": "/tmp/kandev-dense-timestamp-5936a872/apps/backend/bin/kandev",
+        "assets": "/tmp/kandev-dense-timestamp-5936a872/apps/web/dist",
+        "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+        "assetsSha256": "8379f62eb1bf4935c6b18d4616f732191cdefc17159c02367a54c05701f7a160"
+      },
+      "candidate": {
+        "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+        "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+        "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+        "assetsSha256": "085df3998be95fbe3df28366479b06bdcec1f2edc18925e8fcfb01164b215041"
+      }
+    },
+    "samples": [
+      {
+        "sample": "baseline-1x-0",
+        "scheduledUpdates": 5,
+        "verificationErrors": [],
+        "headerMotion": [
+          {
+            "scenario": "idle",
+            "targets": 1,
+            "running": 1,
+            "paused": 0
+          },
+          {
+            "scenario": "streaming",
+            "targets": 1,
+            "running": 1,
+            "paused": 0
+          },
+          {
+            "scenario": "reduced-motion-idle",
+            "targets": 1,
+            "running": 0,
+            "paused": 0
+          }
+        ],
+        "offscreenCatchup": []
+      },
+      {
+        "sample": "candidate-1x-0",
+        "scheduledUpdates": 5,
+        "verificationErrors": [],
+        "headerMotion": [
+          {
+            "scenario": "idle",
+            "targets": 1,
+            "running": 1,
+            "paused": 0
+          },
+          {
+            "scenario": "streaming",
+            "targets": 1,
+            "running": 1,
+            "paused": 0
+          },
+          {
+            "scenario": "reduced-motion-idle",
+            "targets": 1,
+            "running": 0,
+            "paused": 0
+          }
+        ],
+        "offscreenCatchup": []
+      }
+    ]
+  },
+  "conclusion": "Caller validation only. Short observation windows do not establish a CPU gain. Extra busy headers use backend-seeded status rows; canonical mock streams remain real and ordered."
+}

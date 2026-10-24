@@ -1,3 +1,4 @@
+import { inspectDenseBusyHeaderMotion } from "./dense-busy-headers";
 import { DENSE_VISIBILITY_PROBE } from "./dense-visible";
 import fs from "node:fs";
 import { expect, type Browser, type CDPSession, type Locator, type Page } from "@playwright/test";
@@ -181,7 +182,9 @@ export async function runDenseSample(options: {
       await saveDenseProfile(cdp, options.profilePath);
       await checkComposerFocus(editor);
       const delivery = traffic.snapshot();
-      runs.push({ scenario, selectionBefore, deadline, ...measured, delivery });
+      const headerMotion = await inspectDenseBusyHeaderMotion(page);
+      expect(headerMotion.targets).toBe(threads.length + DENSE_WORKLOAD.extraBusyHeaders);
+      runs.push({ scenario, selectionBefore, deadline, ...measured, delivery, headerMotion });
       options.checkpoint?.({ cold, runs, historyMode, initialLoadedHistory });
       if (scenario === "streaming") {
         try {
@@ -209,6 +212,7 @@ export async function runDenseSample(options: {
       sample,
       finalVisibilityProbe: DENSE_VISIBILITY_PROBE,
       layout: DENSE_WORKLOAD.layout,
+      extraBusyHeaders: DENSE_WORKLOAD.extraBusyHeaders,
       offscreenCatchup,
       animationDiagnostics,
       historyMode,

@@ -123,6 +123,29 @@ After 100 switches and released owners, measure retained editor/subscription
 counts and post-GC heap in a separate retention arm. Compare with the same
 state after warm-up. An increasing single heap sample is not proof of a leak.
 
+## Extra busy-header rendering stress
+
+The default columns fixture has six real mock stream producers. Its remaining
+headers have waiting sessions. To exercise a full busy deck, add
+`KANDEV_DENSE_LAYOUT=columns KANDEV_DENSE_COLUMNS=30
+KANDEV_DENSE_EXTRA_BUSY_HEADERS=24`. The existing backend test API changes only
+the specified non-producer sessions to `RUNNING` after each backend restart.
+These are seeded status rows, not 24 additional live executions. The six real
+canonical stream producers and their ordered-update checks remain unchanged.
+Both arms still restore the same database snapshot before the same mutations.
+
+Reports and samples retain `extraBusyHeaders`. The summary rejects mismatched,
+negative, fractional, or non-numeric counts and labels this series
+`columns-busy-24-*`. Never pool it with the default workload. Each timed window
+is followed by an untimed icon snapshot; its target count must equal the real
+producer count plus the seeded-header count. Running/paused counts establish
+motion state, not a CPU gain. Offscreen stream catch-up remains outside timing.
+
+Before a full run, use the small caller with 10 tasks, eight columns, ten seeded
+messages, two extra busy headers, one-second windows, one pair, and 1x CPU.
+Also rerun the default one-column smoke without the extra-header flag. Both
+versions must preserve every icon and pass every ordered stream check.
+
 ## Navigation CPU attribution
 
 Set `KANDEV_DENSE_NAV_PROFILE=1` with the normal navigation comparison flags

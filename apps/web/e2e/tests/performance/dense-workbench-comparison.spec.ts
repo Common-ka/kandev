@@ -1,3 +1,4 @@
+import { seedDenseBusyHeaders } from "../../helpers/dense-busy-headers";
 import { DENSE_VISIBILITY_PROBE } from "../../helpers/dense-visible";
 import fs from "node:fs";
 import path from "node:path";
@@ -91,6 +92,7 @@ test("compares frozen builds on identical dense conversation snapshots", async (
     measurementKind,
     finalVisibilityProbe: DENSE_VISIBILITY_PROBE,
     layout: DENSE_WORKLOAD.layout,
+    extraBusyHeaders: DENSE_WORKLOAD.extraBusyHeaders,
     throttleAfterLoad: process.env.KANDEV_DENSE_THROTTLE_AFTER_LOAD === "1",
     candidateFirst: process.env.KANDEV_DENSE_CANDIDATE_FIRST === "1",
     builds,
@@ -135,6 +137,9 @@ test("compares frozen builds on identical dense conversation snapshots", async (
             },
             arms[arm].binary,
           );
+          const busyHeaders = fixture.threads.slice(6, 6 + DENSE_WORKLOAD.extraBusyHeaders);
+          expect(busyHeaders).toHaveLength(DENSE_WORKLOAD.extraBusyHeaders);
+          await seedDenseBusyHeaders(api, busyHeaders);
           const result = await runDenseSample({
             browser,
             backend,
