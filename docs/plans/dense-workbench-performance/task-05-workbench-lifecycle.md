@@ -67,6 +67,19 @@ Evidence under the diagnostic directory: `matched-dense-1792793604258.json`,
 `containment-benchmark-logs/kandev-run.e2e.qMzO7hcR.log`. The ordered-update
 assertion remains as benchmark validation; no containment production code remains.
 
+## Deferred confirmation preparation experiment (rejected)
+
+Closed desktop file rows performed unused confirmation preparation. A deferred
+candidate passed 87 unit tests, strict lint, typecheck/build, and desktop,
+phone, and tablet deletion checks. An initial two-pair result showed lower
+p50/CPU but mixed p95. Six alternating pairs then passed 480 switches and
+established no useful gain: p50 was essentially neutral, CPU was neutral, and
+p95 was 2.34% slower across paired changes. The candidate is removed. Both
+series and the interrupted preparation attempt remain in the
+[paired evidence](evidence/rejected-deferred-file-confirmation-navigation-1x.json).
+The preliminary gain is not a retained result. Existing retention checks kept
+one editor and three panels in both versions; no leak claim follows.
+
 ## Local reveal compaction experiment (rejected)
 
 A second Markdown parse at reveal cleanup was reproduced with the real parser.

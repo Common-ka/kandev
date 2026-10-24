@@ -5,6 +5,45 @@ and the remaining stress/scenario matrix are in progress. The branch is
 `feature/evaluate-live-thread-bc0`; the frozen baseline is
 `595df36ed5c1cf02fd90cb972b623ad6edc53df8`.
 
+## Deferred file-confirmation preparation: rejected
+
+The timed profile identified repeated file-row confirmation preparation. A
+candidate deferred fine-pointer desktop preparation until the confirmation was
+requested, then retained the boundary across closes and pointer changes.
+Phone and coarse-pointer actions stayed available immediately. Two translation
+regressions failed first. A phone-with-mouse regression caught an initial
+capability error; the corrected candidate passed all 87 related unit tests,
+strict lint, typecheck, production build, two desktop deletion checks, and two
+phone/tablet checks.
+
+The first two alternating pairs passed 160 timed switches and 100 additional
+retention switches per version in 13.7 minutes. P50 readiness improved 17.53%,
+and main-thread/renderer CPU fell 12.18%/12.33% by median paired change. P95 was
+mixed, including a 2,607 ms candidate against 1,390 ms baseline. These were
+preliminary results and prompted six pairs rather than a retention decision.
+Both versions retained one editor and three panels. Post-GC used heap grew
+about 3.5 MB in each, which establishes neither a leak nor a memory gain.
+
+The six-pair validation passed all 480 timed switches in 16.4 minutes with
+1,000 tasks, two stored 1,000-message conversations, and the 630-file / 73-change
+fixture per task. P50 readiness was 0.62% faster, with mixed directions. P95 was
+2.34% slower across paired changes, with four pairs slower. Main-thread CPU was
+0.04% higher and renderer CPU was 0.05% lower; both were mixed. The preliminary
+gain did not reproduce. No useful navigation-speed or CPU gain is established.
+
+The candidate and its specific test edits are removed. Production assets are
+restored to the validated timestamp build. Keep the patch, built candidate,
+and both complete series. The first six-pair attempt was interrupted during
+preparation by the model/session interruption; its execution handles were
+missing and no measured report had been created. The unchanged restart uses
+separate logs and host samples. Its restricted execution environment is
+recorded; it is not pooled with the preliminary series.
+
+[Full evidence](evidence/rejected-deferred-file-confirmation-navigation-1x.json)
+records all paired values, build hashes, validation, retention, and interruption
+information. Six-pair report: `matched-navigation-1792817682151.json`; log:
+`deferred-file-confirmation-six-pair-resumed-logs/kandev-run.e2e.FkBInRpT.log`.
+
 ## Timed navigation CPU attribution
 
 The current retained build completed two identical-build profiles with 40 timed

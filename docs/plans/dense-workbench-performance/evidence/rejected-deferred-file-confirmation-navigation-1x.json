@@ -1,0 +1,753 @@
+{
+  "status": "rejected",
+  "rawReport": "matched-navigation-1792817682151.json",
+  "rawSha256": "8cc15b1281f6a5734eabc8f5aa1941c153187e4c76d1cc775b243584c696e14d",
+  "sourceRevision": "c7c639e1cc09d6783121529c0a7e45c516b62d69",
+  "builds": {
+    "baseline": {
+      "binary": "/tmp/kandev-dense-timestamp-5936a872/apps/backend/bin/kandev",
+      "assets": "/tmp/kandev-dense-timestamp-5936a872/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "8379f62eb1bf4935c6b18d4616f732191cdefc17159c02367a54c05701f7a160"
+    },
+    "candidate": {
+      "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+      "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "c691939576df708108176f7947105a6cf19b4f27ff76e06d79bcefc54341dfd6"
+    }
+  },
+  "measurementKind": "reference-workload",
+  "timingDefinition": "Driver selection start to destination file marker and two requestAnimationFrame callbacks. This is a DOM readiness upper bound, not INP or screen presentation.",
+  "fixture": {
+    "tasks": 1000,
+    "storedMessagesPerConversation": 1000,
+    "trackedFilesPerTask": 630,
+    "changedFilesPerTask": 73,
+    "pairs": 6,
+    "switchesPerSample": 40,
+    "timedSwitches": 480
+  },
+  "comparisons": [
+    {
+      "group": "1x/task-switch",
+      "metric": "elapsedMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 40708.710645000014,
+        "min": 38177.68667799997,
+        "max": 43831.54017099994,
+        "values": [
+          38177.68667799997,
+          38830.528119000024,
+          39264.27368100005,
+          42526.79857099999,
+          42153.14760899998,
+          43831.54017099994
+        ]
+      },
+      "candidate": {
+        "median": 41259.573545499996,
+        "min": 38201.31116099999,
+        "max": 43460.18778000004,
+        "values": [
+          38201.31116099999,
+          38225.67668199999,
+          40449.665304999915,
+          42069.48178600008,
+          42943.14840599999,
+          43460.18778000004
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -23.624483000021428,
+        604.8514370000339,
+        -1185.3916239998653,
+        457.3167849999154,
+        -790.0007970000152,
+        371.35239099990577
+      ],
+      "pairedPercentReduction": [
+        -0.06188034177994112,
+        1.5576698703309066,
+        -3.019008153902196,
+        1.075361420014744,
+        -1.8741205385842759,
+        0.8472264254259583
+      ],
+      "medianPairedPercentReduction": 0.39267304182300855
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "mainThreadCpuMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 37659.293000000005,
+        "min": 36546.203,
+        "max": 38965.068,
+        "values": [
+          36546.203,
+          37048.885,
+          37336.449,
+          38965.068,
+          38053.639,
+          37982.137
+        ]
+      },
+      "candidate": {
+        "median": 37998.798,
+        "min": 36495.862,
+        "max": 39171.081,
+        "values": [
+          36502.623999999996,
+          36495.862,
+          38037.64200000001,
+          39171.081,
+          38103.797999999995,
+          37959.954
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        43.57900000000518,
+        553.023000000001,
+        -701.1930000000066,
+        -206.012999999999,
+        -50.158999999992375,
+        22.18300000000454
+      ],
+      "pairedPercentReduction": [
+        0.1192435777801737,
+        1.492684597660634,
+        -1.8780388033152444,
+        -0.5287120248320856,
+        -0.13181130981978456,
+        0.058403770172290564
+      ],
+      "medianPairedPercentReduction": -0.036703769823747
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "rendererCpuMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 50350,
+        "min": 49229.99999999999,
+        "max": 52030,
+        "values": [
+          49229.99999999999,
+          49800,
+          50060,
+          52030,
+          50640,
+          50890
+        ]
+      },
+      "candidate": {
+        "median": 50610,
+        "min": 48860,
+        "max": 52400,
+        "values": [
+          49120.00000000001,
+          48860,
+          51080,
+          52400,
+          50700,
+          50520
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        109.99999999998545,
+        940,
+        -1020,
+        -370,
+        -60,
+        370
+      ],
+      "pairedPercentReduction": [
+        0.223440991265459,
+        1.8875502008032128,
+        -2.0375549340791053,
+        -0.7111281952719585,
+        -0.11848341232227488,
+        0.7270583611711535
+      ],
+      "medianPairedPercentReduction": 0.052478789471592055
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "frameGapP95Ms",
+      "pairs": 6,
+      "baseline": {
+        "median": 133.34999999999718,
+        "min": 116.80000000000109,
+        "max": 133.40000000000146,
+        "values": [
+          133.40000000000146,
+          133.40000000000146,
+          133.39999999999418,
+          133.30000000000018,
+          116.80000000000109,
+          133.29999999999927
+        ]
+      },
+      "candidate": {
+        "median": 133.349999999999,
+        "min": 133.29999999999563,
+        "max": 133.40000000000146,
+        "values": [
+          133.30000000000018,
+          133.39999999999782,
+          133.40000000000146,
+          133.40000000000146,
+          133.29999999999563,
+          133.29999999999927
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0.10000000000127329,
+        3.637978807091713e-12,
+        -7.275957614183426e-12,
+        -0.10000000000127329,
+        -16.499999999994543,
+        0
+      ],
+      "pairedPercentReduction": [
+        0.07496251874158336,
+        2.727120545046232e-12,
+        -5.454241090092761e-12,
+        -0.07501875468962728,
+        -14.12671232876232,
+        0
+      ],
+      "medianPairedPercentReduction": -2.7271205450463805e-12
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "longTaskMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 16454,
+        "min": 15639,
+        "max": 17478,
+        "values": [
+          15639,
+          16079,
+          15954,
+          17478,
+          16829,
+          16896
+        ]
+      },
+      "candidate": {
+        "median": 16811.5,
+        "min": 15367,
+        "max": 17269,
+        "values": [
+          15570,
+          15367,
+          16662,
+          17269,
+          17239,
+          16961
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        69,
+        712,
+        -708,
+        209,
+        -410,
+        -65
+      ],
+      "pairedPercentReduction": [
+        0.44120468060617685,
+        4.428136078114311,
+        -4.437758555848063,
+        1.1957889918755007,
+        -2.436270723156456,
+        -0.3847064393939394
+      ],
+      "medianPairedPercentReduction": 0.028249120606118727
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "selectionP50Ms",
+      "pairs": 6,
+      "baseline": {
+        "median": 994.4522834999952,
+        "min": 939.8628709999903,
+        "max": 1077.0452004999388,
+        "values": [
+          939.8628709999903,
+          962.5794394999975,
+          961.0292464999948,
+          1042.4261360000237,
+          1026.325127499993,
+          1077.0452004999388
+        ]
+      },
+      "candidate": {
+        "median": 1007.3343744999438,
+        "min": 938.3926109999884,
+        "max": 1062.7351295000408,
+        "values": [
+          938.3926109999884,
+          943.2046775000053,
+          983.60170749994,
+          1031.0670414999477,
+          1048.19310699997,
+          1062.7351295000408
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        1.470260000001872,
+        19.374761999992188,
+        -22.57246099994518,
+        11.359094500076026,
+        -21.867979499977082,
+        14.310070999898016
+      ],
+      "pairedPercentReduction": [
+        0.1564334591106416,
+        2.01279616049728,
+        -2.348779819360607,
+        1.0896785976283088,
+        -2.1307068212628586,
+        1.3286416385547812
+      ],
+      "medianPairedPercentReduction": 0.6230560283694752
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "selectionP95Ms",
+      "pairs": 6,
+      "baseline": {
+        "median": 1072.8905004999542,
+        "min": 992.5741590000107,
+        "max": 1132.9892879999243,
+        "values": [
+          1018.8024619999924,
+          992.5741590000107,
+          1040.1527379999752,
+          1132.9892879999243,
+          1105.6282629999332,
+          1127.635369000025
+        ]
+      },
+      "candidate": {
+        "median": 1096.3309869999648,
+        "min": 993.7703329999931,
+        "max": 1156.4591939999955,
+        "values": [
+          993.7703329999931,
+          1013.6295249999966,
+          1078.2948549999855,
+          1114.367118999944,
+          1144.025445999927,
+          1156.4591939999955
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        25.03212899999926,
+        -21.055365999985952,
+        -38.14211700001033,
+        18.622168999980204,
+        -38.397182999993674,
+        -28.823824999970384
+      ],
+      "pairedPercentReduction": [
+        2.4570149694042893,
+        -2.121288954489669,
+        -3.666972705696155,
+        1.6436315150740815,
+        -3.472883634125767,
+        -2.5561299150745014
+      ],
+      "medianPairedPercentReduction": -2.338709434782085
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "requests",
+      "pairs": 6,
+      "baseline": {
+        "median": 1442,
+        "min": 1440,
+        "max": 1445,
+        "values": [
+          1440,
+          1440,
+          1443,
+          1444,
+          1441,
+          1445
+        ]
+      },
+      "candidate": {
+        "median": 1444,
+        "min": 1439,
+        "max": 1445,
+        "values": [
+          1439,
+          1445,
+          1443,
+          1444,
+          1444,
+          1444
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        1,
+        -5,
+        0,
+        0,
+        -3,
+        1
+      ],
+      "pairedPercentReduction": [
+        0.06944444444444445,
+        -0.3472222222222222,
+        0,
+        0,
+        -0.2081887578070784,
+        0.06920415224913495
+      ],
+      "medianPairedPercentReduction": 0
+    }
+  ],
+  "log": "deferred-file-confirmation-six-pair-resumed-logs/kandev-run.e2e.FkBInRpT.log",
+  "hostLoad": "deferred-file-confirmation-six-pair-resumed-host-load.jsonl",
+  "interruption": {
+    "observedAtMs": 1792817445596,
+    "runnerHandle": 72119,
+    "monitorHandle": 75089,
+    "observation": "Both execution handles are missing after the model/session interruption. No new six-pair matched-navigation report was written. The process namespace now differs, so host PID visibility is not used as independent proof.",
+    "classification": "Interrupted during fixture preparation; no completed measured samples.",
+    "retry": "Same six alternating pairs, 40 switches, builds, fixture size, and deadlines; new logs and host-monitor files."
+  },
+  "preliminaryTwoPair": {
+    "rawReport": "matched-navigation-1792816458173.json",
+    "rawSha256": "8ea55f554130888ececb50a8a2bcc92167caa25ca85c654bed0c69b49e132a98",
+    "comparisons": [
+      {
+        "group": "1x/task-switch",
+        "metric": "elapsedMs",
+        "pairs": 2,
+        "baseline": {
+          "median": 66288.03133900002,
+          "min": 50514.661481999996,
+          "max": 82061.40119600005,
+          "values": [
+            50514.661481999996,
+            82061.40119600005
+          ]
+        },
+        "candidate": {
+          "median": 56824.9928295,
+          "min": 50156.709877999965,
+          "max": 63493.27578100003,
+          "values": [
+            50156.709877999965,
+            63493.27578100003
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          357.9516040000308,
+          18568.125415000017
+        ],
+        "pairedPercentReduction": [
+          0.708609329447017,
+          22.6271123139256
+        ],
+        "medianPairedPercentReduction": 11.66786082168631
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "mainThreadCpuMs",
+        "pairs": 2,
+        "baseline": {
+          "median": 61107.5935,
+          "min": 48651.933,
+          "max": 73563.254,
+          "values": [
+            48651.933,
+            73563.254
+          ]
+        },
+        "candidate": {
+          "median": 52683.44,
+          "min": 46554.705,
+          "max": 58812.174999999996,
+          "values": [
+            46554.705,
+            58812.174999999996
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          2097.2279999999955,
+          14751.079000000005
+        ],
+        "pairedPercentReduction": [
+          4.310677645634338,
+          20.052238309088402
+        ],
+        "medianPairedPercentReduction": 12.18145797736137
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "rendererCpuMs",
+        "pairs": 2,
+        "baseline": {
+          "median": 79590,
+          "min": 64360.000000000015,
+          "max": 94820,
+          "values": [
+            64360.000000000015,
+            94820
+          ]
+        },
+        "candidate": {
+          "median": 68625,
+          "min": 61300,
+          "max": 75949.99999999999,
+          "values": [
+            61300,
+            75949.99999999999
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          3060.0000000000146,
+          18870.000000000015
+        ],
+        "pairedPercentReduction": [
+          4.7545059042884,
+          19.90086479645646
+        ],
+        "medianPairedPercentReduction": 12.32768535037243
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "frameGapP95Ms",
+        "pairs": 2,
+        "baseline": {
+          "median": 174.95000000000073,
+          "min": 166.59999999999854,
+          "max": 183.3000000000029,
+          "values": [
+            166.59999999999854,
+            183.3000000000029
+          ]
+        },
+        "candidate": {
+          "median": 166.65000000000146,
+          "min": 166.59999999999854,
+          "max": 166.70000000000437,
+          "values": [
+            166.59999999999854,
+            166.70000000000437
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          0,
+          16.599999999998545
+        ],
+        "pairedPercentReduction": [
+          0,
+          9.0561920349145
+        ],
+        "medianPairedPercentReduction": 4.52809601745725
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "longTaskMs",
+        "pairs": 2,
+        "baseline": {
+          "median": 33270,
+          "min": 23126,
+          "max": 43414,
+          "values": [
+            23126,
+            43414
+          ]
+        },
+        "candidate": {
+          "median": 27351.5,
+          "min": 23909,
+          "max": 30794,
+          "values": [
+            23909,
+            30794
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          -783,
+          12620
+        ],
+        "pairedPercentReduction": [
+          -3.385799532993168,
+          29.0689639286866
+        ],
+        "medianPairedPercentReduction": 12.841582197846716
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "selectionP50Ms",
+        "pairs": 2,
+        "baseline": {
+          "median": 1525.3713937499997,
+          "min": 1249.646513499989,
+          "max": 1801.0962740000105,
+          "values": [
+            1249.646513499989,
+            1801.0962740000105
+          ]
+        },
+        "candidate": {
+          "median": 1259.784216,
+          "min": 1022.5974324999843,
+          "max": 1496.9709995000158,
+          "values": [
+            1022.5974324999843,
+            1496.9709995000158
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          227.04908100000466,
+          304.1252744999947
+        ],
+        "pairedPercentReduction": [
+          18.169064495213885,
+          16.885564580319205
+        ],
+        "medianPairedPercentReduction": 17.527314537766543
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "selectionP95Ms",
+        "pairs": 2,
+        "baseline": {
+          "median": 2508.35796400001,
+          "min": 1390.2346529999922,
+          "max": 3626.4812750000274,
+          "values": [
+            1390.2346529999922,
+            3626.4812750000274
+          ]
+        },
+        "candidate": {
+          "median": 2370.3371574999765,
+          "min": 2133.9652469999855,
+          "max": 2606.7090679999674,
+          "values": [
+            2606.7090679999674,
+            2133.9652469999855
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          -1216.4744149999751,
+          1492.5160280000418
+        ],
+        "pairedPercentReduction": [
+          -87.50137341023263,
+          41.15603845217788
+        ],
+        "medianPairedPercentReduction": -23.172667479027375
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "requests",
+        "pairs": 2,
+        "baseline": {
+          "median": 1446,
+          "min": 1444,
+          "max": 1448,
+          "values": [
+            1444,
+            1448
+          ]
+        },
+        "candidate": {
+          "median": 1446,
+          "min": 1446,
+          "max": 1446,
+          "values": [
+            1446,
+            1446
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          -2,
+          2
+        ],
+        "pairedPercentReduction": [
+          -0.13850415512465375,
+          0.13812154696132597
+        ],
+        "medianPairedPercentReduction": -0.00019130408166388724
+      }
+    ],
+    "retention": [
+      {
+        "sample": "baseline-1x-0",
+        "switches": 100,
+        "heapBefore": {
+          "usedSize": 85872348,
+          "totalSize": 91377664,
+          "embedderHeapUsedSize": 15971632,
+          "backingStorageSize": 13540542
+        },
+        "heapAfter": {
+          "usedSize": 89376348,
+          "totalSize": 94261248,
+          "embedderHeapUsedSize": 16606632,
+          "backingStorageSize": 13540637
+        },
+        "ownersBefore": {
+          "editors": 1,
+          "panels": 3
+        },
+        "ownersAfter": {
+          "editors": 1,
+          "panels": 3
+        }
+      },
+      {
+        "sample": "candidate-1x-0",
+        "switches": 100,
+        "heapBefore": {
+          "usedSize": 85668492,
+          "totalSize": 98979840,
+          "embedderHeapUsedSize": 15630512,
+          "backingStorageSize": 13546254
+        },
+        "heapAfter": {
+          "usedSize": 89206248,
+          "totalSize": 95571968,
+          "embedderHeapUsedSize": 16509256,
+          "backingStorageSize": 13546378
+        },
+        "ownersBefore": {
+          "editors": 1,
+          "panels": 3
+        },
+        "ownersAfter": {
+          "editors": 1,
+          "panels": 3
+        }
+      }
+    ],
+    "log": "deferred-file-confirmation-navigation-logs/kandev-run.e2e.xd7kpz9s.log",
+    "conclusion": "The preliminary p50 and CPU improvement did not reproduce in six pairs. Keep both series separate; do not pool them."
+  },
+  "validation": {
+    "unitTests": 87,
+    "strictLint": "passed",
+    "typecheck": "passed",
+    "productionBuild": "passed",
+    "desktopBrowserChecks": 2,
+    "phoneTabletBrowserChecks": 2,
+    "redEvidence": "Two unused-title regressions failed first. The phone-with-mouse case failed under the initial candidate and passed after gating only fine-pointer desktop. These candidate changes are now removed."
+  },
+  "conclusion": "Six pairs establish no useful navigation-speed or CPU gain for this candidate. Remove it. No M2, INP, battery, or leak claim follows.",
+  "patch": "rejected-deferred-file-confirmation.patch",
+  "candidateAssets": "/tmp/kandev-dense-rejected-deferred-confirmation-5936a872-dist"
+}
