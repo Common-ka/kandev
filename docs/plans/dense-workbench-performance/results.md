@@ -5,6 +5,40 @@ and the remaining stress/scenario matrix are in progress. The branch is
 `feature/evaluate-live-thread-bc0`; the frozen baseline is
 `595df36ed5c1cf02fd90cb972b623ad6edc53df8`.
 
+## Owned Threads status visibility: retained
+
+The six-pair repeat passed all 12 samples in 48.0 minutes. Normal-idle
+main-thread CPU fell in every pair, by 70.29–71.48% (median paired reduction
+70.69%). Renderer CPU fell 55.95–59.96% (median 56.98%). Streaming main-thread
+CPU fell 1.69–2.36% and renderer CPU fell 1.87–3.36%, with median reductions of
+2.09% and 2.67%. Streaming frame-gap p95 remained about 50 ms in both versions.
+
+All samples verified 1,800 ordered updates; both offscreen producer chats caught
+up with all 300 ticks. Post-window snapshots found 30 running header animations
+in the control and four running plus 26 paused in the candidate. Both had zero
+running header animations in reduced-motion windows. The 24 additional busy
+headers are seeded session states; six real mock producers supply the stream.
+The separate default six-busy-header two-pair result below remains essentially
+neutral for streaming and is not pooled with this stress variant.
+
+Reduced-motion CPU results are mixed: median main-thread CPU increased 0.08%
+and renderer CPU fell 0.73%. Maximum frame gaps are also mixed. Streaming has
+one 61 ms baseline long task and one 52 ms candidate long task in different
+pairs. One baseline cold-readiness outlier is 21.254 seconds. Keep all samples;
+no reduced-motion, maximum-frame-gap, long-task, or cold-readiness gain follows.
+
+Retain the owned visibility change. All six production source hashes match the
+measured build; formatting also passes. The existing 148-unit, typecheck, strict
+lint, production build, and desktop/phone lifecycle evidence remains valid.
+There is no icon, wrapper, animation-engine, or layout change. The shared helper
+uses the board's geometric visibility and avoids observers for hidden owners.
+The separate requirement 001 HTML-target migration remains outside this fix.
+
+[Six-pair evidence](evidence/owned-thread-motion-six-pair-1x.json) retains every
+metric, sample, source/build identity, and limitation. Raw report:
+`matched-dense-1792824364604.json`; log:
+`owned-thread-motion-busy-six-pair-logs/kandev-run.e2e.yoqh9ksN.log`.
+
 ## Owned Threads status visibility: preliminary
 
 A new candidate reuses the board's existing geometric visibility signal to
@@ -27,8 +61,8 @@ gain. Neither series had a long task in its measured windows. All eight
 samples verified 1,800 ordered updates and both offscreen chats caught up with
 all 300 ticks. Each uses 1,000 tasks, 30 columns, and 9,600 stored messages.
 
-The production candidate is not yet retained. Six alternating busy-header
-pairs must reproduce the large idle gain. The 148 related unit checks,
+At this preliminary checkpoint, production retention awaited six alternating
+busy-header pairs. The completed repeat above now confirms the idle gain. The 148 related unit checks,
 typecheck, strict scoped lint, build, and desktop/phone motion checks pass.
 The first phone whole-column test moved horizontally; native scrolling kept
 the icon visible. The corrected test moves vertically and asserts actual

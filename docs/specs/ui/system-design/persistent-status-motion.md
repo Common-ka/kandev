@@ -269,6 +269,15 @@ Cancel old handles before replacement. Disconnect observers and listeners on
 unmount. If observation is unavailable, assume intersection and retain document
 visibility gating. Preserve each primitive's existing reduced-motion policy.
 
+The legacy Threads status SVG uses this same helper directly for requirements
+004 and 006. It retains its current transform target while the separate 001
+HTML-target migration remains unresolved. The board passes geometric column
+visibility, independently of detail activation or preload eligibility. A known
+hidden owner pauses before paint and allocates no intersection observer. A
+visible owner also checks the icon's intersection. Unknown board geometry
+retains the intersection/document fallback. Retired observer callbacks cannot
+change current eligibility. This path adds no wrapper or animation engine.
+
 Domain updates and subscriptions continue while presentation motion pauses.
 Do not unmount editors, transcripts, terminals, or panels to pause an indicator.
 Do not introduce settings, persistence, backend changes, or plugin controls.

@@ -1,7 +1,7 @@
 ---
 id: "03-motion-eligibility"
 title: "Persistent motion eligibility"
-status: in_progress
+status: done
 wave: 3
 depends_on: 
   - "01-dense-baseline"
@@ -24,12 +24,12 @@ system_design:
 
 # Task 03: Persistent motion eligibility
 
-## Owned board visibility candidate: validation in progress
+## Owned board visibility: retained
 
-The current candidate routes geometric column visibility to desktop and phone
-status icons. It retains direct SVG intersection and document checks only for
-visible owners; hidden owners allocate no observer. Unknown geometry remains
-eligible. This implements the existing 004/006 lifecycle scope. It does not
+The retained change routes geometric column visibility to desktop and phone
+status icons. Every icon retains document visibility checks. Visible owners
+also use direct SVG intersection; hidden owners allocate no observer. Unknown
+geometry remains eligible. This implements the existing 004/006 lifecycle scope. It does not
 claim the separate 001 HTML-target migration or introduce a wrapper or pool.
 
 Six initial unit regressions failed first. The corrected candidate passes 148
@@ -45,8 +45,14 @@ Two alternating busy-header pairs show a large normal-idle CPU reduction.
 A separate default six-busy-header two-pair comparison has essentially neutral
 streaming CPU and unchanged frame-gap p95. All samples preserve ordered
 updates and offscreen catch-up. See [results](results.md#owned-threads-status-visibility-preliminary)
-and [evidence](evidence/owned-thread-motion-preliminary-1x.json). Production
-retention awaits the six-pair busy-header repeat.
+and [evidence](evidence/owned-thread-motion-preliminary-1x.json).
+
+The six-pair repeat now passes all 12 samples, with normal-idle main-thread
+CPU lower by 70.29–71.48% and renderer CPU lower by 55.95–59.96%. Streaming CPU
+is also lower in every pair, with essentially unchanged frame-gap p95. Every
+sample preserves 1,800 ordered updates and both offscreen chats catch up with
+300 ticks. Reduced-motion CPU is mixed. See the [complete evidence](evidence/owned-thread-motion-six-pair-1x.json).
+The measured production files and formatting were verified before retention.
 
 ## Observer geometry attribution
 
@@ -101,7 +107,8 @@ The production candidate and its specific tests are removed. No grid follow-up
 is needed for this rejected candidate. The patch remains in
 `rejected-direct-svg-visibility.patch`; candidate assets remain at
 `/tmp/kandev-dense-rejected-direct-svg-5936a872-dist`. Current assets are restored
-from the validated timestamp build. Offscreen ownership remains unresolved.
+from the validated timestamp build. Offscreen ownership remained unresolved at that checkpoint; the retained
+owned-board change above closes it.
 
 [Committed evidence](evidence/rejected-direct-svg-visibility-1x.json) retains
 all paired metrics, source/build hashes, and catch-up results. Raw report:
@@ -297,7 +304,8 @@ rejected candidate assets:
 Apply `motion-reduce:animate-none` to the existing icon. This candidate changes
 only the reduced-motion path and implements requirement 006; it leaves the
 existing normal rotation target unchanged. Efficient rotation under requirement
-001 and offscreen motion ownership remain unresolved for this legacy target.
+001 remains unresolved for this legacy target. Offscreen ownership was still
+open at this earlier checkpoint and is closed by the retained change above.
 The regression retains initial/runtime reduced motion, normal one-second CSS
 rotation, unchanged label/14px geometry, and task settlement on desktop and
 phone. The CSS-only path has one test per device rather than duplicate cases
@@ -320,7 +328,8 @@ Candidate assets:
 `01e8b16fd50096caa2f324e177e53e555e9475578006facde9a2962ba1aef39e`.
 The backend and control assets match the rejected wrapper experiment.
 
-Keep the narrow CSS correction. Offscreen motion ownership for this legacy
-SVG remains open; this work order is not marked complete. The public animation
+Keep the narrow CSS correction. The later owned-board change above completes
+this work order's 004/006 scope, including offscreen ownership for the legacy
+SVG. It does not claim the separate 001 migration. The public animation
 guide already documents the reduced-motion contract, so no new product copy or
 public documentation change is required.

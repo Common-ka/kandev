@@ -44,8 +44,10 @@ eight icons and verified all 30 ordered updates. The candidate paused four
 offscreen icons. The default one-column caller passed both arms in 30.3 seconds
 and verified all five ordered updates per arm. These are harness smokes, not
 CPU results. [Evidence](evidence/busy-header-harness-smokes.json) records both
-workloads and build hashes. The motion production candidate remains pending
-full paired measurements.
+workloads and build hashes. The later six-pair busy-header comparison passes all 12 samples and confirms
+the normal-idle CPU gain. A separate default two-pair check is essentially
+neutral for streaming. See [retained results](results.md#owned-threads-status-visibility-retained);
+the remaining package matrix stays open.
 
 ## Timed navigation profile validation
 
@@ -78,9 +80,9 @@ the stream deadline. The corrected timed gate preserves visibility and timeout
 semantics through boolean polling; full locator assertions run after timing.
 The browser regression, 14 report tests, scoped lint, and full-caller smokes
 pass. Probe-version metadata prevents pooling old and corrected series. See
-[results](results.md#final-visibility-probe-overhead). Corrected dense profiling
-and final comparisons are still pending; no product gain follows from this
-harness repair.
+[results](results.md#final-visibility-probe-overhead). Corrected dense profiling confirms zero sampled ARIA assertion stacks. The
+owned-status comparisons use the corrected probe. Final original-baseline
+comparisons remain pending; no product gain follows from the harness repair.
 
 ## Summary
 

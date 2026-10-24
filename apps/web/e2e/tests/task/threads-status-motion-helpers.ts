@@ -56,11 +56,28 @@ export function threadsStatusMotionScenarios() {
           };
         }),
       ).toEqual({ engine: "CSSAnimation", duration: 1000, iterations: "Infinity" });
+      await icon.evaluate((element) => {
+        element.parentElement!.style.transform = "translateX(200vw)";
+      });
+      await expect.poll(running).toBe(0);
+      await expect(icon).toHaveCSS("animation-play-state", "paused");
       await page.emulateMedia({ reducedMotion: "reduce" });
       await expect.poll(running).toBe(0);
+      await icon.evaluate((element) => {
+        element.parentElement!.style.removeProperty("transform");
+      });
       await expect(icon).toBeVisible();
       await expect(icon).toHaveAttribute("aria-label", label!);
       await page.emulateMedia({ reducedMotion: "no-preference" });
+      await expect.poll(running).toBe(1);
+      await column.evaluate((element) => {
+        element.style.transform = "translateY(200vh)";
+      });
+      await expect(column).not.toBeInViewport();
+      await expect.poll(running).toBe(0);
+      await expect(icon).toHaveCSS("animation-play-state", "paused");
+      await column.evaluate((element) => element.style.removeProperty("transform"));
+      await expect(column).toBeInViewport();
       await expect.poll(running).toBe(1);
       fs.writeFileSync(finish, "finish");
       await waitForSessionDone(
