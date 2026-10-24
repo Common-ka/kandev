@@ -9,6 +9,7 @@ import type { ApiClient } from "../../helpers/api-client";
 import type { CreateTaskResponse } from "../../../lib/types/http";
 import { GitHelper, makeGitEnv } from "../../helpers/git-helper";
 import { NavigationResponseGate } from "../../helpers/navigation-response-hold";
+import { waitForNavigationLayout } from "../../helpers/navigation-layout";
 import { armNavigationReadiness } from "../../helpers/navigation-browser-readiness";
 import { SessionPage } from "../../pages/session-page";
 import {
@@ -116,7 +117,7 @@ export async function measureSelection(
   page: Page,
   gate: NavigationResponseGate,
   item: Awaited<ReturnType<typeof prepareProfileTask>>,
-  options: { browserReadiness?: boolean } = {},
+  options: { browserReadiness?: boolean; expectedLayoutColumns?: number } = {},
 ) {
   const readiness = options.browserReadiness
     ? await armNavigationReadiness(page, {
@@ -134,6 +135,11 @@ export async function measureSelection(
     const selectedMs = performance.now() - start;
     await new SessionPage(page).clickTab("Files");
     await expect(new SessionPage(page).fileTreeNode(item.marker)).toBeVisible();
+    const layout = await waitForNavigationLayout(
+      page,
+      item.task.session_id!,
+      options.expectedLayoutColumns,
+    );
     const usableDomMs = performance.now() - start;
     const browserEventReadiness = await readiness?.finish();
     await page.evaluate(
@@ -162,6 +168,7 @@ export async function measureSelection(
       restoredMs,
       counts,
       keys,
+      ...(layout ? { layout } : {}),
       ...(browserEventReadiness ? { browserEventReadiness } : {}),
     };
   } finally {

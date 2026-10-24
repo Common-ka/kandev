@@ -43,13 +43,27 @@ function navigationSample(arm, navigationScenario = "task-switch") {
 }
 
 function navigationReport(navigationScenario = "task-switch") {
+  const samples = [
+    navigationSample("baseline", navigationScenario),
+    navigationSample("candidate", navigationScenario),
+  ];
+  if (navigationScenario === "incompatible-layout") {
+    for (const sample of samples) {
+      sample.selections.push(structuredClone(sample.selections[0]));
+      sample.selections.forEach((selection, index) => {
+        selection.browserEventReadiness.sessionId = `session-${index}`;
+        selection.layout = {
+          rootColumns: 2 + index,
+          orientation: "HORIZONTAL",
+          sessionId: `session-${index}`,
+        };
+      });
+    }
+  }
   return {
     navigationScenario,
     navigationReadiness: "pointerdown-raf-v1",
-    samples: [
-      navigationSample("baseline", navigationScenario),
-      navigationSample("candidate", navigationScenario),
-    ],
+    samples,
   };
 }
 
@@ -99,5 +113,26 @@ test("rejects mixed, incomplete, untrusted, and invalid browser readiness", () =
     const report = navigationReport();
     mutate(report.samples[1]);
     assert.throws(() => summarizeReport(report), /readiness/);
+  }
+});
+
+test("rejects missing, unchanged, or wrongly owned incompatible layouts", () => {
+  for (const mutate of [
+    (selection) => {
+      delete selection.layout;
+    },
+    (selection) => {
+      selection.layout.rootColumns = 3;
+    },
+    (selection) => {
+      selection.layout.orientation = "VERTICAL";
+    },
+    (selection) => {
+      selection.layout.sessionId = "wrong-session";
+    },
+  ]) {
+    const report = navigationReport("incompatible-layout");
+    mutate(report.samples[1].selections[0]);
+    assert.throws(() => summarizeReport(report), /layout/);
   }
 });

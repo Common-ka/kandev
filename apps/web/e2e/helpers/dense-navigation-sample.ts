@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import { expect, type Browser, type BrowserContext } from "@playwright/test";
+import { expect, type Browser, type BrowserContext, type Page } from "@playwright/test";
 import type { BackendContext } from "../fixtures/backend";
 import { routeNavigationResponses } from "./navigation-response-hold";
 import { beginDenseWindow, endDenseWindow } from "./dense-measurement";
@@ -13,6 +13,11 @@ import type { ApiClient } from "./api-client";
 import type { SeedData } from "../fixtures/test-base";
 import { waitForSessionDone } from "./session";
 import { BROWSER_READINESS_VERSION } from "./navigation-browser-readiness";
+import {
+  persistNavigationLayout,
+  prepareThreeColumnLayout,
+  type NavigationScenario,
+} from "./navigation-layout";
 import { SessionPage } from "../pages/session-page";
 
 export async function runDenseNavigationSample(options: {
@@ -28,6 +33,7 @@ export async function runDenseNavigationSample(options: {
   sample: string;
   profileFile: string;
   profileTimedSwitches?: boolean;
+  navigationScenario: NavigationScenario;
   navigationReadiness: "driver" | typeof BROWSER_READINESS_VERSION;
 }) {
   const {
@@ -42,8 +48,12 @@ export async function runDenseNavigationSample(options: {
     profileFile,
     profileTimedSwitches,
     navigationReadiness,
+    navigationScenario,
   } = options;
-  const selectionOptions = { browserReadiness: navigationReadiness === BROWSER_READINESS_VERSION };
+  const selectionOptions = (index: number) => ({
+    browserReadiness: navigationReadiness === BROWSER_READINESS_VERSION,
+    expectedLayoutColumns: navigationScenario === "incompatible-layout" ? 2 + index : undefined,
+  });
   for (const item of items) {
     await options.api.launchSession({
       task_id: item.task.id,
@@ -86,19 +96,11 @@ export async function runDenseNavigationSample(options: {
     await cdp.send("Emulation.setCPUThrottlingRate", { rate: cpuRate });
     await page.goto(`/t/${items[0].task.id}`);
     await new SessionPage(page).waitForLoad();
-    for (const item of items) {
-      await selectNavigationTask(page, item.task.title);
-      const session = new SessionPage(page);
-      await session.clickTab("Files");
-      await expect(session.fileTreeNode("navigation-available")).toBeVisible();
-      await saveExpandedPaths(page, item.task.session_id!, PROFILE_FOLDERS);
-      await page.reload();
-      await session.waitForLoad();
-      await session.clickTab("Files");
-      await expect(session.fileTreeNode(item.marker)).toBeVisible();
-    }
+    await preloadNavigationFiles(page, items, navigationScenario);
+    if (navigationScenario === "incompatible-layout")
+      await prepareThreeColumnLayout(page, items[1].task.session_id!);
     for (let i = 0; i < 5; i++)
-      await measureSelection(page, gate, items[(i + 1) % 2], selectionOptions);
+      await measureSelection(page, gate, items[(i + 1) % 2], selectionOptions((i + 1) % 2));
     if (profileTimedSwitches) {
       await cdp.send("Profiler.enable");
       await cdp.send("Profiler.start");
@@ -107,7 +109,7 @@ export async function runDenseNavigationSample(options: {
     const selections = [];
     const switchCount = Number(process.env.KANDEV_DENSE_NAV_SWITCHES ?? 40);
     for (let i = 0; i < switchCount; i++)
-      selections.push(await measureSelection(page, gate, items[i % 2], selectionOptions));
+      selections.push(await measureSelection(page, gate, items[i % 2], selectionOptions(i % 2)));
     const measured = await endDenseWindow(page, cdp, before);
     if (profileTimedSwitches) {
       const profile = await cdp.send("Profiler.stop");
@@ -123,7 +125,7 @@ export async function runDenseNavigationSample(options: {
     let retention;
     if (pair === 0 && cpuRate === 1 && !process.env.KANDEV_DENSE_NAV_SWITCHES) {
       for (let i = 0; i < 100; i++)
-        await measureSelection(page, gate, items[i % 2], selectionOptions);
+        await measureSelection(page, gate, items[i % 2], selectionOptions(i % 2));
       await cdp.send("HeapProfiler.collectGarbage");
       retention = {
         switches: 100,
@@ -146,7 +148,7 @@ export async function runDenseNavigationSample(options: {
     return {
       cpuRate,
       sample,
-      navigationScenario: "task-switch",
+      navigationScenario,
       navigationReadiness,
       browser: browser.version(),
       selections,
@@ -157,5 +159,25 @@ export async function runDenseNavigationSample(options: {
     };
   } finally {
     await context.close();
+  }
+}
+
+async function preloadNavigationFiles(
+  page: Page,
+  items: Awaited<ReturnType<typeof prepareProfileTask>>[],
+  scenario: NavigationScenario,
+) {
+  for (const item of items) {
+    await selectNavigationTask(page, item.task.title);
+    const session = new SessionPage(page);
+    await session.clickTab("Files");
+    await expect(session.fileTreeNode("navigation-available")).toBeVisible();
+    await saveExpandedPaths(page, item.task.session_id!, PROFILE_FOLDERS);
+    await page.reload();
+    await session.waitForLoad();
+    await session.clickTab("Files");
+    await expect(session.fileTreeNode(item.marker)).toBeVisible();
+    if (scenario === "incompatible-layout")
+      await persistNavigationLayout(page, item.task.session_id!, 2);
   }
 }

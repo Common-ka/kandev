@@ -17,7 +17,7 @@ builds, fixtures, and probes; they do not automatically verify the final build.
 | Final grid cold, idle, streaming, and reduced-motion comparison | Earlier six pairs use older assets and the old final-visible assertion | Six alternating pairs on original baseline versus final retained build with corrected probe |
 | Final columns idle, streaming, and fixed first/middle/last traversal | Targeted owned-header series use 120 primary messages, not the full reference history | Full reference fixture, six pairs, traversal and offscreen catch-up evidence |
 | Dockview idle and streaming | Correctness covers focus, saved layouts, and visible unfocused Changes; navigation timing covers Files-active task switches | Two visible chats, retained hidden tabs, plan/files/changes panels, six paired observations, and core/plugin arms |
-| Switching scenarios | Existing task-to-task Files-active timing and draft/context correctness | Separate same-environment tabs, compatible-layout tasks, and incompatible-layout restoration with 40 selections after five warmups; browser-event readiness markers where specified. The opt-in recorder now passes its browser regression and both caller modes; dense runs and additional scenarios remain pending |
+| Switching scenarios | Existing task-to-task Files-active timing and draft/context correctness | Separate same-environment tabs, compatible-layout tasks, and incompatible-layout restoration with 40 selections after five warmups; browser-event readiness markers where specified. The opt-in recorder now passes its browser regression and both caller modes; the incompatible-layout regression and full caller now pass ([evidence](evidence/navigation-layout-rebuild.json)); dense runs and the session-tab scenario remain pending |
 | Expanded/collapsed composers and visibility | Existing motion correctness and targeted attribution | Audit scenario records for normal/reduced motion, offscreen columns, hidden Dockview tabs, and actual document hide/restore; state browser limitations explicitly |
 | Long-history stress | Earlier all-history attempt failed within the unchanged 360-second load bound | Final-build attempts with verified loaded counts; report overload if a full sample cannot complete |
 | 4x CPU stress | Earlier cold and warm attempts contain failures and incomplete samples | Same final desktop scenarios, with cold and throttle-after-load modes kept separate; retain every failed attempt |
@@ -46,6 +46,18 @@ owned-motion bundle lacked its relative mock-agent executable. The same
 mock-agent and agentctl helpers as the candidate were added and hash-checked.
 The retained application binary and assets were unchanged. This was fixture
 setup failure, not a measured product regression.
+
+## Saved-layout arrangement finding
+
+The new layout benchmark exposed an existing restoration issue: moving Files
+into a third column in task B leaves that arrangement in task A after switching
+back. Explicit persistence of both environments reproduces the failure.
+`layout-manager/comparator.ts:savedLayoutMatchesLive` compares structural panel
+counts without checking arrangement. The failure artifacts are retained under
+`navigation-layout-inherited-failure` and `navigation-layout-persisted-failure`.
+This is an unresolved correctness finding. The rebuild benchmark uses distinct
+panel inventories to exercise the actual rebuild path on both versions; it does
+not establish that same-inventory arrangement restoration works.
 
 ## Completion rule
 

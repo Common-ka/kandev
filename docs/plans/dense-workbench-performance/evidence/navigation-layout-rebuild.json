@@ -1,0 +1,119 @@
+{
+  "purpose": "Validate a distinct saved-layout rebuild navigation scenario. This is harness correctness evidence, not a speed comparison.",
+  "productionChanged": false,
+  "productionRevision": "90a440a9747179629f507b8bb2f24bf5f0f3b8f0",
+  "files": [
+    {
+      "path": "apps/web/e2e/helpers/navigation-layout.ts",
+      "sha256": "dc0b3b8bd734f51d9b20635341fffc8066aaeb4a4f5b043f3f2171f2d68105cb"
+    },
+    {
+      "path": "apps/web/e2e/helpers/dense-navigation-sample.ts",
+      "sha256": "83c5b76d4acc7e7f9c141425b8ec8120a2e999e7e5268778768499eeb88a4869"
+    },
+    {
+      "path": "apps/web/e2e/tests/task/task-navigation-profile-helpers.ts",
+      "sha256": "7fb20b70979df0525fac88c67622d02f0854470522ea0bd88dc142df556b144d"
+    },
+    {
+      "path": "apps/web/e2e/tests/performance/dense-navigation-layout.spec.ts",
+      "sha256": "4328a8f96de6e68a0f46b9f08c95887cc0f08d36cfbe1065b08df21db8e86404"
+    },
+    {
+      "path": "apps/web/e2e/tests/performance/dense-navigation-comparison.spec.ts",
+      "sha256": "f512f3ff95ba3d13f1a56c20b4f8f2bc20a9c8cc1639dfffeda037f2c1cb2fd1"
+    },
+    {
+      "path": "apps/web/e2e/scripts/summarize-dense-performance.mjs",
+      "sha256": "3e3def5e9750a6a1300f13a6b9b86bc7e3cab064db1166eca189c879a60c4591"
+    },
+    {
+      "path": "apps/web/e2e/scripts/summarize-dense-navigation-readiness.test.mjs",
+      "sha256": "7e0497c728031747c14556e41a8ac68ee92b532dfdd2afd22109746d08447929"
+    }
+  ],
+  "validation": {
+    "browserRed": "navigation-layout-red-logs: missing layout witness",
+    "summaryRed": "/tmp/kandev-navigation-layout-summary-red.log: missing layout rejection",
+    "summaryGreen": "/tmp/kandev-navigation-layout-summary-green.log: 21 passed",
+    "browserGreen": "navigation-layout-rebuild-green-logs/kandev-run.e2e.DbUm8BTh.log: passed, four restored layouts",
+    "strictLint": "/tmp/kandev-navigation-layout-lint-final.log: passed",
+    "fullCaller": "navigation-layout-caller-smoke-logs/kandev-run.e2e.ZEQosaAY.log: passed, 54.7 seconds"
+  },
+  "caller": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/matched-navigation-1792833137972.json",
+    "sha256": "62d6a9aebdce3cb144dd3aaf3317dd26abf3b0868f223cae5df275c41c79cf96",
+    "measurementKind": "harness-rehearsal",
+    "builds": {
+      "baseline": {
+        "binary": "/tmp/kandev-dense-owned-motion-5936a872/apps/backend/bin/kandev",
+        "assets": "/tmp/kandev-dense-owned-motion-5936a872/apps/web/dist",
+        "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+        "assetsSha256": "085df3998be95fbe3df28366479b06bdcec1f2edc18925e8fcfb01164b215041"
+      },
+      "candidate": {
+        "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+        "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+        "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+        "assetsSha256": "131a69e7d91ef0781e6dc3b612aedc69f7f2a3f51cceeca427e053a398a39a12"
+      }
+    },
+    "sampleCount": 2,
+    "samples": [
+      {
+        "arm": "baseline",
+        "navigationScenario": "incompatible-layout",
+        "navigationReadiness": "pointerdown-raf-v1",
+        "selections": [
+          {
+            "layout": {
+              "rootColumns": 2,
+              "orientation": "HORIZONTAL",
+              "sessionId": "1ed0e7ac-a51b-4448-825d-c296fc51eaf3"
+            },
+            "trusted": true
+          },
+          {
+            "layout": {
+              "rootColumns": 3,
+              "orientation": "HORIZONTAL",
+              "sessionId": "bddd360a-5492-4b87-8ae2-04b75eef63b7"
+            },
+            "trusted": true
+          }
+        ]
+      },
+      {
+        "arm": "candidate",
+        "navigationScenario": "incompatible-layout",
+        "navigationReadiness": "pointerdown-raf-v1",
+        "selections": [
+          {
+            "layout": {
+              "rootColumns": 2,
+              "orientation": "HORIZONTAL",
+              "sessionId": "1ed0e7ac-a51b-4448-825d-c296fc51eaf3"
+            },
+            "trusted": true
+          },
+          {
+            "layout": {
+              "rootColumns": 3,
+              "orientation": "HORIZONTAL",
+              "sessionId": "bddd360a-5492-4b87-8ae2-04b75eef63b7"
+            },
+            "trusted": true
+          }
+        ]
+      }
+    ]
+  },
+  "preservedFinding": {
+    "description": "Equal panel counts bypass arrangement restoration. Moving Files alone retains task B arrangement in A. Explicit persistence reproduces it. Distinct terminal inventory forces the intended rebuild workload.",
+    "failures": [
+      "navigation-layout-green-logs/kandev-run.e2e.A2oG69Q4.log",
+      "navigation-layout-persisted-logs/kandev-run.e2e.z90id3JP.log"
+    ],
+    "status": "unresolved; no production fix in this increment"
+  }
+}

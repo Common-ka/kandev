@@ -180,8 +180,28 @@ function browserReadinessMetrics(selections, readiness) {
   );
 }
 
+function validateNavigationLayouts(sample, scenario) {
+  if (scenario !== "incompatible-layout") return;
+  const layouts = sample.selections.map((selection, index) => {
+    const layout = selection.layout;
+    if (
+      !layout ||
+      layout.rootColumns !== 2 + (index % 2) ||
+      layout.orientation !== "HORIZONTAL" ||
+      !layout.sessionId ||
+      (selection.browserEventReadiness &&
+        layout.sessionId !== selection.browserEventReadiness.sessionId)
+    )
+      throw new Error("Invalid or incomplete incompatible-layout restoration measurement");
+    return layout.rootColumns;
+  });
+  if (new Set(layouts).size !== 2)
+    throw new Error("Incompatible-layout samples must restore both layouts");
+}
+
 function navigationMetrics(report, sample) {
   const { scenario, readiness } = navigationIdentity(report, sample);
+  validateNavigationLayouts(sample, scenario);
   return {
     scenario: readiness === "driver" ? scenario : `${readiness}-${scenario}`,
     values: {

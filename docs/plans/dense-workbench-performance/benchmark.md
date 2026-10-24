@@ -185,9 +185,31 @@ and 1x CPU. Run both with and without `KANDEV_DENSE_NAV_READINESS=1`. The new
 browser regression and summary regressions must also pass. The initial paired
 smokes pass in both modes; [measurement evidence](evidence/navigation-browser-readiness.json)
 records the source, failures before implementation, and both caller reports.
-They establish correctness only. The task-switch caller remains the current
-implemented scenario; the session-tab and incompatible-layout scenarios remain
+They establish correctness only. Same-environment session-tab measurements remain
 open in the [completion audit](completion-audit.md).
+
+### Incompatible saved layouts
+
+Set `KANDEV_DENSE_NAV_SCENARIO=incompatible-layout` to alternate between task A's
+two-column layout and task B's three-column layout. Task B moves Files to the
+left of chat and closes the default terminal. The different panel inventory
+forces the saved-layout rebuild path on both builds. Both layouts are persisted
+before warmup. Each selection waits for the destination chat owner and expected
+root column count through Dockview's API. The driver duration includes this
+check; the browser header/transcript/composer spans retain their own definitions.
+
+The report includes the actual root count, orientation, and session owner for
+every measured selection. The summary rejects missing or incorrect witnesses,
+wrong owners, and samples that do not exercise both layouts. Unsupported scenario
+names fail before fixture setup. The default `task-switch` path does not add
+layout checks. Run the same small caller smoke with the scenario flag before
+collecting dense comparisons. Use at least two measured selections.
+
+Moving Files alone does not force a rebuild in the current product: the saved-layout
+fast path compares structural component counts but ignores their arrangement.
+The initial browser regression reproduced the inherited arrangement even after
+explicit persistence. Those failures are preserved separately; closing the
+terminal creates the intended rebuild workload and does not resolve that issue.
 
 ## Run order and comparison
 

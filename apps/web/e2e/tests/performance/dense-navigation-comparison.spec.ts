@@ -3,6 +3,7 @@ import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { test, expect } from "../../fixtures/test-base";
 import { hashAssetTree, sha256File, snapshotDatabase } from "../../helpers/dense-snapshot";
+import { readNavigationScenario } from "../../helpers/navigation-layout";
 import { BROWSER_READINESS_VERSION } from "../../helpers/navigation-browser-readiness";
 import { runDenseNavigationSample } from "../../helpers/dense-navigation-sample";
 import { exposeNavigationStore } from "../task/task-navigation-helpers";
@@ -27,6 +28,7 @@ test("compares dense task switches and retained Dockview owners", async ({
   backend,
 }, info) => {
   test.setTimeout(7_200_000);
+  const navigationScenario = readNavigationScenario();
   const baseline = process.env.KANDEV_DENSE_BASELINE_ROOT;
   if (!baseline) throw new Error("KANDEV_DENSE_BASELINE_ROOT must name the frozen checkout");
   const candidate = path.resolve(process.cwd(), "../..");
@@ -71,7 +73,7 @@ test("compares dense task switches and retained Dockview owners", async ({
     process.env.KANDEV_DENSE_NAV_READINESS === "1" ? BROWSER_READINESS_VERSION : "driver";
   const report = {
     measurementKind: navigationMeasurementKind(profileTimedSwitches),
-    navigationScenario: "task-switch",
+    navigationScenario,
     navigationReadiness,
     profileWindow: profileTimedSwitches ? "timed-switches" : "post-timing-selection",
     machine: profileMachine(),
@@ -123,6 +125,7 @@ test("compares dense task switches and retained Dockview owners", async ({
             sample,
             profileTimedSwitches,
             navigationReadiness,
+            navigationScenario,
             profileFile: path.join(
               directory,
               `${path.basename(output, ".json")}-${sample}.cpuprofile`,
