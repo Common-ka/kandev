@@ -1,0 +1,1067 @@
+{
+  "measurementKind": "reference-workload",
+  "machine": {
+    "revision": "39c0b5de256aa0fbdbd5005a8145bbdc62398b3c",
+    "cpu": "11th Gen Intel(R) Core(TM) i7-11700T @ 1.40GHz",
+    "cores": 16,
+    "load": [
+      6.01,
+      8.7,
+      7.47
+    ],
+    "totalMemory": 33303863296,
+    "freeMemory": 17634193408,
+    "platform": "linux 6.18.49"
+  },
+  "builds": {
+    "baseline": {
+      "binary": "baseline/apps/backend/bin/kandev",
+      "assets": "baseline/apps/web/dist",
+      "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+      "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+    },
+    "candidate": {
+      "binary": "candidate/apps/backend/bin/kandev",
+      "assets": "candidate/apps/web/dist",
+      "binarySha256": "0e2002e46253097d7b18eb5b3b86e20b828755db198b1769b6f264cda008d5ed",
+      "assetsSha256": "5bba7ed1b49106391fd67407f547076b823afe57e7aa49dd52218888a78987cc"
+    }
+  },
+  "sampleCount": 12,
+  "comparisons": [
+    {
+      "group": "1x/task-switch",
+      "metric": "elapsedMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 56535.585070000016,
+        "min": 50001.204410000006,
+        "max": 85699.18156599998,
+        "values": [
+          55410.535657,
+          67237.435313,
+          85699.18156599998,
+          50001.204410000006,
+          54071.82052800013,
+          57660.63448300003
+        ]
+      },
+      "candidate": {
+        "median": 56247.72752649989,
+        "min": 54983.07380100002,
+        "max": 99907.37870600005,
+        "values": [
+          54983.07380100002,
+          77630.42865999998,
+          99907.37870600005,
+          56176.37121399981,
+          56319.08383899997,
+          55415.87611999991
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        427.4618559999799,
+        -10392.993346999981,
+        -14208.197140000062,
+        -6175.166803999804,
+        -2247.2633109998424,
+        2244.7583630001172
+      ],
+      "pairedPercentReduction": [
+        0.7714450887932875,
+        -15.457153144850176,
+        -16.579151492897076,
+        -12.350036117859592,
+        -4.1560711088618465,
+        3.893051790232962
+      ],
+      "medianPairedPercentReduction": -8.25305361336072
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "mainThreadMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 51989.44500000001,
+        "min": 44777.348000000005,
+        "max": 82082.788,
+        "values": [
+          54877.149000000005,
+          64633.977999999996,
+          82082.788,
+          44777.348000000005,
+          48012.575,
+          49101.741
+        ]
+      },
+      "candidate": {
+        "median": 52836.6125,
+        "min": 47690.528,
+        "max": 95187.22600000001,
+        "values": [
+          54184.35399999999,
+          75628.001,
+          95187.22600000001,
+          51488.87100000001,
+          49617.28,
+          47690.528
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        692.7950000000128,
+        -10994.023000000008,
+        -13104.43800000001,
+        -6711.523000000001,
+        -1604.7050000000017,
+        1411.2130000000034
+      ],
+      "pairedPercentReduction": [
+        1.262447143527833,
+        -17.00966479271941,
+        -15.96490362876077,
+        -14.988656764576588,
+        -3.342259814225756,
+        2.874058987032666
+      ],
+      "medianPairedPercentReduction": -9.165458289401172
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "mainThreadMsPerSecond",
+      "pairs": 6,
+      "baseline": {
+        "median": 926.663347044874,
+        "min": 851.5643547848329,
+        "max": 990.3739126381714,
+        "values": [
+          990.3739126381714,
+          961.279645767562,
+          957.8013056844088,
+          895.525388405339,
+          887.9407893273641,
+          851.5643547848329
+        ]
+      },
+      "candidate": {
+        "median": 934.6560769755633,
+        "min": 860.5932331869822,
+        "max": 985.473351237313,
+        "values": [
+          985.473351237313,
+          974.205634381203,
+          952.7547137445159,
+          916.5574402066107,
+          881.0029676946007,
+          860.5932331869822
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        4.900561400858464,
+        -12.925988613641039,
+        5.046591939892892,
+        -21.03205180127179,
+        6.937821632763416,
+        -9.028878402149303
+      ],
+      "pairedPercentReduction": [
+        0.4948193140310292,
+        -1.344664757082202,
+        0.5268934078437894,
+        -2.3485712491885398,
+        0.7813383185177222,
+        -1.060269649782447
+      ],
+      "medianPairedPercentReduction": -0.28272516787570895
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "mainThreadCpuMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 50601.719,
+        "min": 43760.585,
+        "max": 79182.401,
+        "values": [
+          53460.965,
+          62778.053,
+          79182.401,
+          43760.585,
+          46852.344000000005,
+          47742.473
+        ]
+      },
+      "candidate": {
+        "median": 51422.77099999999,
+        "min": 46485.738,
+        "max": 87809.068,
+        "values": [
+          52697.664000000004,
+          73579.577,
+          87809.068,
+          50147.87799999999,
+          48361.570999999996,
+          46485.738
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        763.3009999999922,
+        -10801.524000000005,
+        -8626.667000000001,
+        -6387.292999999991,
+        -1509.2269999999917,
+        1256.7350000000006
+      ],
+      "pairedPercentReduction": [
+        1.4277725813591136,
+        -17.205892001779674,
+        -10.894677214953361,
+        -14.595995460298328,
+        -3.221241182725013,
+        2.632320701108216
+      ],
+      "medianPairedPercentReduction": -7.057959198839187
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "rendererCpuMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 66595,
+        "min": 58040.00000000001,
+        "max": 101509.99999999999,
+        "values": [
+          69970,
+          82449.99999999999,
+          101509.99999999999,
+          58040.00000000001,
+          61840,
+          63220.00000000001
+        ]
+      },
+      "candidate": {
+        "median": 68145,
+        "min": 61550.00000000001,
+        "max": 109949.99999999999,
+        "values": [
+          69980,
+          95600,
+          109949.99999999999,
+          66310,
+          63730,
+          61550.00000000001
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -10,
+        -13150.000000000015,
+        -8440,
+        -8269.999999999993,
+        -1890,
+        1670
+      ],
+      "pairedPercentReduction": [
+        -0.014291839359725597,
+        -15.949060036385708,
+        -8.314451778149937,
+        -14.248793935217078,
+        -3.05627425614489,
+        2.641569123695033
+      ],
+      "medianPairedPercentReduction": -5.685363017147414
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "scriptMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 33545.1155,
+        "min": 29252.496,
+        "max": 52978.279,
+        "values": [
+          35539.596000000005,
+          42007.57300000001,
+          52978.279,
+          29252.496,
+          31393.617000000002,
+          31550.634999999995
+        ]
+      },
+      "candidate": {
+        "median": 34233.636,
+        "min": 30771.043999999998,
+        "max": 61091.59,
+        "values": [
+          35290.541,
+          49279.408,
+          61091.59,
+          33176.73100000001,
+          31977.335000000003,
+          30771.043999999998
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        249.05500000000757,
+        -7271.834999999992,
+        -8113.310999999994,
+        -3924.235000000008,
+        -583.7180000000008,
+        779.5909999999967
+      ],
+      "pairedPercentReduction": [
+        0.7007817421447546,
+        -17.310771560166042,
+        -15.31441026991457,
+        -13.415043283827842,
+        -1.859352491941278,
+        2.470920157391434
+      ],
+      "medianPairedPercentReduction": -7.63719788788456
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "styleMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 7136.7609999999995,
+        "min": 5988.8550000000005,
+        "max": 11044.919,
+        "values": [
+          7630.014999999999,
+          8763.929,
+          11044.919,
+          5988.8550000000005,
+          6363.687,
+          6643.507
+        ]
+      },
+      "candidate": {
+        "median": 7067.4615,
+        "min": 6325.884,
+        "max": 12618.695,
+        "values": [
+          7262.432000000001,
+          9855.331,
+          12618.695,
+          6872.491,
+          6572.692,
+          6325.884
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        367.5829999999987,
+        -1091.402,
+        -1573.7759999999998,
+        -883.6359999999995,
+        -209.0050000000001,
+        317.6229999999996
+      ],
+      "pairedPercentReduction": [
+        4.8175921017193115,
+        -12.453341417987298,
+        -14.248868642676328,
+        -14.75467347264209,
+        -3.2843381517664225,
+        4.7809537944341685
+      ],
+      "medianPairedPercentReduction": -7.86883978487686
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "layoutMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 484.95799999999997,
+        "min": 415.459,
+        "max": 745.809,
+        "values": [
+          527.045,
+          612.389,
+          745.809,
+          415.459,
+          441.862,
+          442.87100000000004
+        ]
+      },
+      "candidate": {
+        "median": 509.028,
+        "min": 441.129,
+        "max": 882.007,
+        "values": [
+          520.058,
+          716.548,
+          882.007,
+          497.998,
+          471.178,
+          441.129
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        6.986999999999966,
+        -104.15899999999999,
+        -136.19799999999998,
+        -82.53899999999999,
+        -29.315999999999974,
+        1.7420000000000186
+      ],
+      "pairedPercentReduction": [
+        1.3256932519993485,
+        -17.00863340131844,
+        -18.261780160872284,
+        -19.866942345694756,
+        -6.634650637529359,
+        0.3933425308950052
+      ],
+      "medianPairedPercentReduction": -11.8216420194239
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "styleRecalculations",
+      "pairs": 6,
+      "baseline": {
+        "median": 2334.5,
+        "min": 2124,
+        "max": 2506,
+        "values": [
+          2124,
+          2307,
+          2506,
+          2316,
+          2353,
+          2493
+        ]
+      },
+      "candidate": {
+        "median": 2376,
+        "min": 2181,
+        "max": 2627,
+        "values": [
+          2181,
+          2378,
+          2627,
+          2321,
+          2374,
+          2421
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -57,
+        -71,
+        -121,
+        -5,
+        -21,
+        72
+      ],
+      "pairedPercentReduction": [
+        -2.6836158192090394,
+        -3.0775899436497616,
+        -4.828411811652035,
+        -0.2158894645941278,
+        -0.8924776880577986,
+        2.888086642599278
+      ],
+      "medianPairedPercentReduction": -1.788046753633419
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "layouts",
+      "pairs": 6,
+      "baseline": {
+        "median": 981,
+        "min": 957,
+        "max": 1014,
+        "values": [
+          957,
+          957,
+          961,
+          1014,
+          1001,
+          1003
+        ]
+      },
+      "candidate": {
+        "median": 985.5,
+        "min": 949,
+        "max": 1012,
+        "values": [
+          949,
+          962,
+          964,
+          1009,
+          1012,
+          1007
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        8,
+        -5,
+        -3,
+        5,
+        -11,
+        -4
+      ],
+      "pairedPercentReduction": [
+        0.8359456635318704,
+        -0.522466039707419,
+        -0.31217481789802287,
+        0.4930966469428008,
+        -1.098901098901099,
+        -0.3988035892323031
+      ],
+      "medianPairedPercentReduction": -0.355489203565163
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "frameGapP95Ms",
+      "pairs": 6,
+      "baseline": {
+        "median": 158.35000000000036,
+        "min": 133.3000000000029,
+        "max": 200,
+        "values": [
+          166.70000000000073,
+          183.40000000000873,
+          200,
+          150,
+          150,
+          133.3000000000029
+        ]
+      },
+      "candidate": {
+        "median": 158.34999999999854,
+        "min": 133.39999999999964,
+        "max": 200,
+        "values": [
+          166.6999999999971,
+          200,
+          183.39999999999418,
+          150,
+          150,
+          133.39999999999964
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        3.637978807091713e-12,
+        -16.59999999999127,
+        16.60000000000582,
+        0,
+        0,
+        -0.09999999999672582
+      ],
+      "pairedPercentReduction": [
+        2.1823508140922e-12,
+        -9.051254089416837,
+        8.30000000000291,
+        0,
+        0,
+        -0.07501875468621429
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "frameGapMaxMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 541.6499999999978,
+        "min": 416.6999999999971,
+        "max": 1033.2000000000044,
+        "values": [
+          500,
+          783.3000000000011,
+          1033.2000000000044,
+          416.6999999999971,
+          433.3999999999942,
+          583.2999999999956
+        ]
+      },
+      "candidate": {
+        "median": 549.9500000000025,
+        "min": 450,
+        "max": 1249.8999999999942,
+        "values": [
+          516.7000000000044,
+          766.5999999999985,
+          1249.8999999999942,
+          583.2000000000007,
+          466.59999999999854,
+          450
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -16.700000000004366,
+        16.700000000002547,
+        -216.6999999999898,
+        -166.50000000000364,
+        -33.200000000004366,
+        133.29999999999563
+      ],
+      "pairedPercentReduction": [
+        -3.340000000000873,
+        2.132005617260631,
+        -20.973674022453437,
+        -39.956803455724696,
+        -7.660359944625014,
+        22.852734441967534
+      ],
+      "medianPairedPercentReduction": -5.500179972312944
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "longTasks",
+      "pairs": 6,
+      "baseline": {
+        "median": 145,
+        "min": 129,
+        "max": 273,
+        "values": [
+          145,
+          183,
+          273,
+          129,
+          145,
+          140
+        ]
+      },
+      "candidate": {
+        "median": 150,
+        "min": 133,
+        "max": 336,
+        "values": [
+          151,
+          215,
+          336,
+          142,
+          149,
+          133
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -6,
+        -32,
+        -63,
+        -13,
+        -4,
+        7
+      ],
+      "pairedPercentReduction": [
+        -4.137931034482759,
+        -17.48633879781421,
+        -23.076923076923077,
+        -10.077519379844961,
+        -2.7586206896551726,
+        5
+      ],
+      "medianPairedPercentReduction": -7.10772520716386
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "longTaskMs",
+      "pairs": 6,
+      "baseline": {
+        "median": 23865,
+        "min": 20158,
+        "max": 46915,
+        "values": [
+          25522,
+          32748,
+          46915,
+          20158,
+          22208,
+          21963
+        ]
+      },
+      "candidate": {
+        "median": 24581,
+        "min": 21537,
+        "max": 57549,
+        "values": [
+          25220,
+          39571,
+          57549,
+          23942,
+          23059,
+          21537
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        302,
+        -6823,
+        -10634,
+        -3784,
+        -851,
+        426
+      ],
+      "pairedPercentReduction": [
+        1.1832928453882925,
+        -20.83486014413094,
+        -22.666524565703934,
+        -18.771703542018056,
+        -3.8319524495677233,
+        1.9396257341893184
+      ],
+      "medianPairedPercentReduction": -11.30182799579289
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "domNodes",
+      "pairs": 6,
+      "baseline": {
+        "median": 6098,
+        "min": 6097,
+        "max": 6099,
+        "values": [
+          6097,
+          6097,
+          6097,
+          6099,
+          6099,
+          6099
+        ]
+      },
+      "candidate": {
+        "median": 6117,
+        "min": 6114,
+        "max": 6118,
+        "values": [
+          6116,
+          6116,
+          6114,
+          6118,
+          6118,
+          6118
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -19,
+        -19,
+        -17,
+        -19,
+        -19,
+        -19
+      ],
+      "pairedPercentReduction": [
+        -0.31162866983762505,
+        -0.31162866983762505,
+        -0.2788256519599803,
+        -0.3115264797507788,
+        -0.3115264797507788,
+        -0.3115264797507788
+      ],
+      "medianPairedPercentReduction": -0.3115264797507788
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "mountedEditors",
+      "pairs": 6,
+      "baseline": {
+        "median": 1,
+        "min": 1,
+        "max": 1,
+        "values": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "candidate": {
+        "median": 1,
+        "min": 1,
+        "max": 1,
+        "values": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "runningAnimations",
+      "pairs": 6,
+      "baseline": {
+        "median": 1,
+        "min": 1,
+        "max": 5,
+        "values": [
+          5,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "candidate": {
+        "median": 1,
+        "min": 1,
+        "max": 4,
+        "values": [
+          4,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        20,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "selectionP50Ms",
+      "pairs": 6,
+      "baseline": {
+        "median": 1357.8806520000144,
+        "min": 1214.3114320000168,
+        "max": 2007.7936540000373,
+        "values": [
+          1375.9273975000106,
+          1682.4917734999908,
+          2007.7936540000373,
+          1214.3114320000168,
+          1326.079568499932,
+          1339.8339065000182
+        ]
+      },
+      "candidate": {
+        "median": 1370.9645632499887,
+        "min": 1337.3875344999833,
+        "max": 2257.3429810000816,
+        "values": [
+          1350.230793500028,
+          1911.6149149999837,
+          2257.3429810000816,
+          1337.3875344999833,
+          1391.6983329999493,
+          1337.6687065000879
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        25.69660399998247,
+        -229.12314149999293,
+        -249.5493270000443,
+        -123.07610249996651,
+        -65.61876450001728,
+        2.165199999930337
+      ],
+      "pairedPercentReduction": [
+        1.8675842959935154,
+        -13.618083910351682,
+        -12.429032560336982,
+        -10.13546436742801,
+        -4.94832784236662,
+        0.16160212019013476
+      ],
+      "medianPairedPercentReduction": -7.541896104897315
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "selectionP95Ms",
+      "pairs": 6,
+      "baseline": {
+        "median": 1668.6792919998989,
+        "min": 1405.9378039999865,
+        "max": 2957.7635779998964,
+        "values": [
+          1517.3624240000208,
+          1974.4611499999883,
+          2957.7635779998964,
+          1405.9378039999865,
+          1517.9909569998272,
+          1819.3676269999705
+        ]
+      },
+      "candidate": {
+        "median": 1643.505300000077,
+        "min": 1550.2093270000187,
+        "max": 3804.3450019999873,
+        "values": [
+          1550.2093270000187,
+          2253.9810569999972,
+          3804.3450019999873,
+          1672.8780280000065,
+          1614.1325720001478,
+          1565.009687999962
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -32.84690299999784,
+        -279.51990700000897,
+        -846.5814240000909,
+        -266.94022400001995,
+        -96.1416150003206,
+        254.35793900000863
+      ],
+      "pairedPercentReduction": [
+        -2.1647368143866323,
+        -14.156769151928394,
+        -28.62234934181479,
+        -18.986631075752943,
+        -6.333477453010383,
+        13.980568590166124
+      ],
+      "medianPairedPercentReduction": -10.245123302469388
+    },
+    {
+      "group": "1x/task-switch",
+      "metric": "requests",
+      "pairs": 6,
+      "baseline": {
+        "median": 1444.5,
+        "min": 1441,
+        "max": 1446,
+        "values": [
+          1441,
+          1444,
+          1443,
+          1445,
+          1446,
+          1446
+        ]
+      },
+      "candidate": {
+        "median": 1446.5,
+        "min": 1446,
+        "max": 1451,
+        "values": [
+          1449,
+          1447,
+          1451,
+          1446,
+          1446,
+          1446
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -8,
+        -3,
+        -8,
+        -1,
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        -0.5551700208188758,
+        -0.2077562326869806,
+        -0.5544005544005544,
+        -0.06920415224913495,
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": -0.13848019246805776
+    }
+  ],
+  "notes": [
+    "mainThreadMs and mainThreadMsPerSecond use TaskDuration with timeTicks: elapsed time in main-thread tasks, not thread CPU time. Script, style, and layout durations use the same elapsed-time domain.",
+    "mainThreadCpuMs uses ThreadTime (renderer main-thread CPU). rendererCpuMs uses ProcessTime (renderer-process CPU); it excludes separate browser, GPU, and backend processes.",
+    "Positive reduction means a lower candidate value. Counts such as mounted editors are observations, not optimization scores.",
+    "Streaming duration includes the wait for final visible content. Fixed-deadline traffic is retained in the raw report.",
+    "Frame gaps and driver DOM readiness are not INP. Linux CPU throttling is not an M2 Air simulation.",
+    "History decoded bytes include captured requests and responses. They are not compressed network transfer."
+  ],
+  "provenance": {
+    "rawFile": "matched-navigation-1792778736500.json",
+    "rawSha256": "68202d859d12b1d04bd60a7e4621457d5813b6e62d1e78e3e2f9361bf4b3fcf2",
+    "sourceRevision": "39c0b5de256aa0fbdbd5005a8145bbdc62398b3c",
+    "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sourcePatchBytes": 0,
+    "timingDefinition": "Driver selection start to destination file marker and two requestAnimationFrame callbacks. This is a DOM readiness upper bound, not INP or screen presentation."
+  },
+  "validation": {
+    "selectionsPerSample": 40,
+    "completedSamples": 12
+  },
+  "retention": [
+    {
+      "arm": "baseline",
+      "pair": 0,
+      "cpuRate": 1,
+      "switches": 100,
+      "heapBefore": {
+        "usedSize": 93131240,
+        "totalSize": 97079296,
+        "embedderHeapUsedSize": 16962648,
+        "backingStorageSize": 17526807
+      },
+      "heapAfter": {
+        "usedSize": 96536020,
+        "totalSize": 100487168,
+        "embedderHeapUsedSize": 17574672,
+        "backingStorageSize": 17525448
+      },
+      "ownersBefore": {
+        "editors": 1,
+        "panels": 3
+      },
+      "ownersAfter": {
+        "editors": 1,
+        "panels": 3
+      }
+    },
+    {
+      "arm": "candidate",
+      "pair": 0,
+      "cpuRate": 1,
+      "switches": 100,
+      "heapBefore": {
+        "usedSize": 85695184,
+        "totalSize": 90066944,
+        "embedderHeapUsedSize": 16122272,
+        "backingStorageSize": 13545416
+      },
+      "heapAfter": {
+        "usedSize": 89883244,
+        "totalSize": 95571968,
+        "embedderHeapUsedSize": 16162520,
+        "backingStorageSize": 13551211
+      },
+      "ownersBefore": {
+        "editors": 1,
+        "panels": 3
+      },
+      "ownersAfter": {
+        "editors": 1,
+        "panels": 3
+      }
+    }
+  ]
+}

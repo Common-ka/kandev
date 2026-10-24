@@ -1,0 +1,1152 @@
+{
+  "notes": [
+    "Positive reduction means lower candidate cost. These are separate exploratory comparisons with their recorded intermediate controls, not one combined original-baseline comparison.",
+    "Task duration measures elapsed main-thread task time. ThreadTime and ProcessTime measure main-thread and renderer-process CPU time respectively."
+  ],
+  "experiments": [
+    {
+      "name": "wrapper",
+      "file": "matched-dense-1792795466229.json",
+      "builds": {
+        "baseline": {
+          "binary": "baseline/apps/backend/bin/kandev",
+          "assets": "baseline/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "4ff1054df16bebc5e35a9fd75f94484f45f03fb2b063cf1d219a6346b67c77ee"
+        },
+        "candidate": {
+          "binary": "candidate/apps/backend/bin/kandev",
+          "assets": "candidate/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "8cc45afce4d9359868d0bc6b731f77931546d516702f2b6f3230754574230468"
+        }
+      },
+      "sampleCount": 4,
+      "metrics": [
+        {
+          "group": "1x/idle",
+          "metric": "mainThreadMs",
+          "baseline": [
+            14523.273,
+            15321.381
+          ],
+          "candidate": [
+            16262.11,
+            15794.866
+          ],
+          "medianPairedPercentReduction": -7.531558598534051
+        },
+        {
+          "group": "1x/idle",
+          "metric": "mainThreadCpuMs",
+          "baseline": [
+            14875.752,
+            15647.914
+          ],
+          "candidate": [
+            16574.803000000004,
+            16116.235999999997
+          ],
+          "medianPairedPercentReduction": -7.2072429733900805
+        },
+        {
+          "group": "1x/idle",
+          "metric": "rendererCpuMs",
+          "baseline": [
+            22470,
+            23740.000000000004
+          ],
+          "candidate": [
+            25150.000000000004,
+            24630.000000000004
+          ],
+          "medianPairedPercentReduction": -7.837980360596876
+        },
+        {
+          "group": "1x/idle",
+          "metric": "frameGapP95Ms",
+          "baseline": [
+            16.70000000001164,
+            16.70000000001164
+          ],
+          "candidate": [
+            16.70000000001164,
+            16.70000000001164
+          ],
+          "medianPairedPercentReduction": 0
+        },
+        {
+          "group": "1x/streaming",
+          "metric": "mainThreadMs",
+          "baseline": [
+            61525.13500000001,
+            63666.55300000001
+          ],
+          "candidate": [
+            60303.575999999994,
+            60906.07399999999
+          ],
+          "medianPairedPercentReduction": 3.16065098524761
+        },
+        {
+          "group": "1x/streaming",
+          "metric": "mainThreadCpuMs",
+          "baseline": [
+            61641.29699999999,
+            63685.596999999994
+          ],
+          "candidate": [
+            60402.26299999999,
+            60943.244000000006
+          ],
+          "medianPairedPercentReduction": 3.158075825939444
+        },
+        {
+          "group": "1x/streaming",
+          "metric": "rendererCpuMs",
+          "baseline": [
+            76350,
+            78230
+          ],
+          "candidate": [
+            75130,
+            76070
+          ],
+          "medianPairedPercentReduction": 2.1794967419714557
+        },
+        {
+          "group": "1x/streaming",
+          "metric": "frameGapP95Ms",
+          "baseline": [
+            116.69999999999709,
+            133.29999999998836
+          ],
+          "candidate": [
+            116.60000000000582,
+            133.29999999998836
+          ],
+          "medianPairedPercentReduction": 0.04284490145298687
+        },
+        {
+          "group": "1x/reduced-motion-idle",
+          "metric": "mainThreadMs",
+          "baseline": [
+            9807.327000000001,
+            8681.851999999992
+          ],
+          "candidate": [
+            7373.402000000013,
+            6833.156000000003
+          ],
+          "medianPairedPercentReduction": 23.05560612728858
+        },
+        {
+          "group": "1x/reduced-motion-idle",
+          "metric": "mainThreadCpuMs",
+          "baseline": [
+            10179.861000000003,
+            9036.771000000002
+          ],
+          "candidate": [
+            7714.630999999998,
+            7153.743000000006
+          ],
+          "medianPairedPercentReduction": 22.52706702201552
+        },
+        {
+          "group": "1x/reduced-motion-idle",
+          "metric": "rendererCpuMs",
+          "baseline": [
+            17600.000000000007,
+            15879.999999999996
+          ],
+          "candidate": [
+            12899.99999999999,
+            12209.999999999995
+          ],
+          "medianPairedPercentReduction": 24.907688344401237
+        },
+        {
+          "group": "1x/reduced-motion-idle",
+          "metric": "frameGapP95Ms",
+          "baseline": [
+            16.70000000001164,
+            16.79999999998836
+          ],
+          "candidate": [
+            16.70000000001164,
+            16.70000000001164
+          ],
+          "medianPairedPercentReduction": 0.297619047549959
+        }
+      ],
+      "rawSha256": "73679bbb0ba487faf4bb79eb1da94fb328e262f5cf890450f6c4a94ee3e8d041",
+      "sourceRevision": "35042af00b8b7570947fac0d2e7d61ba3434ced3",
+      "sourcePatchSha256": "40572e537c9dc63c957bfbf7361545daea4a163338cc4a5410247f23ea365e3a"
+    },
+    {
+      "name": "containment",
+      "file": "matched-dense-1792793604258.json",
+      "builds": {
+        "baseline": {
+          "binary": "baseline/apps/backend/bin/kandev",
+          "assets": "baseline/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "4ff1054df16bebc5e35a9fd75f94484f45f03fb2b063cf1d219a6346b67c77ee"
+        },
+        "candidate": {
+          "binary": "candidate/apps/backend/bin/kandev",
+          "assets": "candidate/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "02893b6792a03c383ecd532d8ec634a4df765dc9f9d22a52f4437e325f5b45e4"
+        }
+      },
+      "sampleCount": 4,
+      "metrics": [
+        {
+          "group": "1x/idle",
+          "metric": "mainThreadMs",
+          "baseline": [
+            16006.167000000001,
+            15467.118
+          ],
+          "candidate": [
+            14263.205,
+            14496.443
+          ],
+          "medianPairedPercentReduction": 8.582524082707572
+        },
+        {
+          "group": "1x/idle",
+          "metric": "mainThreadCpuMs",
+          "baseline": [
+            16336.409,
+            15781.132
+          ],
+          "candidate": [
+            14571.521,
+            14835.382
+          ],
+          "medianPairedPercentReduction": 8.398159242704025
+        },
+        {
+          "group": "1x/idle",
+          "metric": "rendererCpuMs",
+          "baseline": [
+            24690.000000000004,
+            24020.000000000004
+          ],
+          "candidate": [
+            22619.999999999996,
+            23100
+          ],
+          "medianPairedPercentReduction": 6.107051333285467
+        },
+        {
+          "group": "1x/idle",
+          "metric": "frameGapP95Ms",
+          "baseline": [
+            16.799999999995634,
+            16.79999999998836
+          ],
+          "candidate": [
+            16.70000000001164,
+            16.79999999998836
+          ],
+          "medianPairedPercentReduction": 0.2976190475714848
+        },
+        {
+          "group": "1x/streaming",
+          "metric": "mainThreadMs",
+          "baseline": [
+            61628.10499999999,
+            60894.499
+          ],
+          "candidate": [
+            63477.96799999999,
+            62949.454000000005
+          ],
+          "medianPairedPercentReduction": -3.188135007033397
+        },
+        {
+          "group": "1x/streaming",
+          "metric": "mainThreadCpuMs",
+          "baseline": [
+            61628.46400000001,
+            60908.451
+          ],
+          "candidate": [
+            63449.36,
+            62934.319
+          ],
+          "medianPairedPercentReduction": -3.140360806296081
+        },
+        {
+          "group": "1x/streaming",
+          "metric": "rendererCpuMs",
+          "baseline": [
+            76660,
+            74169.99999999999
+          ],
+          "candidate": [
+            78920.00000000001,
+            78660
+          ],
+          "medianPairedPercentReduction": -4.500871475795765
+        },
+        {
+          "group": "1x/streaming",
+          "metric": "frameGapP95Ms",
+          "baseline": [
+            133.3000000000029,
+            83.39999999999418
+          ],
+          "candidate": [
+            133.39999999999418,
+            150
+          ],
+          "medianPairedPercentReduction": -39.965566931304174
+        },
+        {
+          "group": "1x/reduced-motion-idle",
+          "metric": "mainThreadMs",
+          "baseline": [
+            9821.214999999995,
+            8417.258000000003
+          ],
+          "candidate": [
+            8702.776,
+            7429.786000000007
+          ],
+          "medianPairedPercentReduction": 11.559753275198332
+        },
+        {
+          "group": "1x/reduced-motion-idle",
+          "metric": "mainThreadCpuMs",
+          "baseline": [
+            10188.884000000002,
+            8792.497999999994
+          ],
+          "candidate": [
+            9105.942,
+            7803.179
+          ],
+          "medianPairedPercentReduction": 10.940257578628202
+        },
+        {
+          "group": "1x/reduced-motion-idle",
+          "metric": "rendererCpuMs",
+          "baseline": [
+            16980.00000000002,
+            15030.000000000002
+          ],
+          "candidate": [
+            16299.999999999996,
+            13849.999999999995
+          ],
+          "medianPairedPercentReduction": 5.9278380811992895
+        },
+        {
+          "group": "1x/reduced-motion-idle",
+          "metric": "frameGapP95Ms",
+          "baseline": [
+            16.70000000001164,
+            16.70000000001164
+          ],
+          "candidate": [
+            16.70000000001164,
+            16.70000000001164
+          ],
+          "medianPairedPercentReduction": 0
+        }
+      ],
+      "rawSha256": "fd8ace2bd6b8f9cd67961d7b0ae99005d9cd831b1e294bc55fb7ce9bde10c56a",
+      "sourceRevision": "431903cabda884308d189d08fb2a4b4ee1ae34ca",
+      "sourcePatchSha256": "de591cef435dc74f82fdea4ccde7322dc35c3967e126575e595788b8cc318657"
+    },
+    {
+      "name": "composer",
+      "file": "matched-dense-1792786343231.json",
+      "builds": {
+        "baseline": {
+          "binary": "baseline/apps/backend/bin/kandev",
+          "assets": "baseline/apps/web/dist",
+          "binarySha256": "bac27bab7ed86eb0e5d8ee4f243c80db5ae2edc7b8c856036766ab12aee27e5e",
+          "assetsSha256": "4ff1054df16bebc5e35a9fd75f94484f45f03fb2b063cf1d219a6346b67c77ee"
+        },
+        "candidate": {
+          "binary": "candidate/apps/backend/bin/kandev",
+          "assets": "candidate/apps/web/dist",
+          "binarySha256": "38275abcf7acfe33aa1150d5ab7838d0a456bf959cdcfa3e00a2077ee7c7a9e0",
+          "assetsSha256": "a8df2da847af5076be7f1f5ec2febaefae82754939e1065d4f26d1ce51618881"
+        }
+      },
+      "sampleCount": 4,
+      "metrics": [
+        {
+          "group": "1x/idle",
+          "metric": "mainThreadMs",
+          "baseline": [
+            17073.282999999996,
+            15619.011999999999
+          ],
+          "candidate": [
+            17675.760000000002,
+            23574.749
+          ],
+          "medianPairedPercentReduction": -27.232503924504215
+        },
+        {
+          "group": "1x/idle",
+          "metric": "mainThreadCpuMs",
+          "baseline": [
+            16533.335000000003,
+            15916.140000000001
+          ],
+          "candidate": [
+            18089.371,
+            19600.276
+          ],
+          "medianPairedPercentReduction": -16.279338610544976
+        },
+        {
+          "group": "1x/idle",
+          "metric": "rendererCpuMs",
+          "baseline": [
+            22660.000000000004,
+            24269.999999999996
+          ],
+          "candidate": [
+            26510,
+            28580
+          ],
+          "medianPairedPercentReduction": -17.374420455954652
+        },
+        {
+          "group": "1x/idle",
+          "metric": "frameGapP95Ms",
+          "baseline": [
+            16.79999999998836,
+            16.79999999998836
+          ],
+          "candidate": [
+            16.799999999995634,
+            33.30000000000291
+          ],
+          "medianPairedPercentReduction": -49.107142857241854
+        },
+        {
+          "group": "1x/streaming",
+          "metric": "mainThreadMs",
+          "baseline": [
+            62169.071,
+            62167.801999999996
+          ],
+          "candidate": [
+            60293.967,
+            63570.12299999999
+          ],
+          "medianPairedPercentReduction": 0.38021669579751705
+        },
+        {
+          "group": "1x/streaming",
+          "metric": "mainThreadCpuMs",
+          "baseline": [
+            61412.188,
+            62089.344999999994
+          ],
+          "candidate": [
+            59890.823,
+            63241.655999999995
+          ],
+          "medianPairedPercentReduction": 0.31070485597596753
+        },
+        {
+          "group": "1x/streaming",
+          "metric": "rendererCpuMs",
+          "baseline": [
+            76440,
+            76889.99999999999
+          ],
+          "candidate": [
+            74240,
+            78730
+          ],
+          "medianPairedPercentReduction": 0.2425226520873267
+        },
+        {
+          "group": "1x/streaming",
+          "metric": "frameGapP95Ms",
+          "baseline": [
+            150,
+            133.40000000000873
+          ],
+          "candidate": [
+            133.39999999999418,
+            150.09999999999127
+          ],
+          "medianPairedPercentReduction": -0.72603698150035
+        },
+        {
+          "group": "1x/reduced-motion-idle",
+          "metric": "mainThreadMs",
+          "baseline": [
+            8914.405000000002,
+            8182.575999999997
+          ],
+          "candidate": [
+            11774.557999999999,
+            7785.3600000000115
+          ],
+          "medianPairedPercentReduction": -13.615103873139782
+        },
+        {
+          "group": "1x/reduced-motion-idle",
+          "metric": "mainThreadCpuMs",
+          "baseline": [
+            9024.205000000009,
+            8353.003
+          ],
+          "candidate": [
+            10456.84999999999,
+            8135.6300000000065
+          ],
+          "medianPairedPercentReduction": -6.636623863961746
+        },
+        {
+          "group": "1x/reduced-motion-idle",
+          "metric": "rendererCpuMs",
+          "baseline": [
+            14429.999999999993,
+            14910.000000000011
+          ],
+          "candidate": [
+            17479.99999999999,
+            15340.000000000018
+          ],
+          "medianPairedPercentReduction": -12.010245813062731
+        },
+        {
+          "group": "1x/reduced-motion-idle",
+          "metric": "frameGapP95Ms",
+          "baseline": [
+            16.79999999998836,
+            16.70000000001164
+          ],
+          "candidate": [
+            16.79999999998836,
+            16.70000000001164
+          ],
+          "medianPairedPercentReduction": 0
+        }
+      ],
+      "rawSha256": "9e1724b355dc3999c23c13e6a173201e6606f49184c4e47b7897d9e0c965b034",
+      "sourceRevision": "36695134b366600d4778f669d3ebf8c274875f16",
+      "sourcePatchSha256": "98ebc8b8ea0b7d489fb7382ba83891df39a50516fd024b2ed8dc2f5e5d3c22a4"
+    },
+    {
+      "name": "treeIdentity",
+      "file": "matched-navigation-1792782036354.json",
+      "builds": {
+        "baseline": {
+          "binary": "baseline/apps/backend/bin/kandev",
+          "assets": "baseline/apps/web/dist",
+          "binarySha256": "0e2002e46253097d7b18eb5b3b86e20b828755db198b1769b6f264cda008d5ed",
+          "assetsSha256": "5bba7ed1b49106391fd67407f547076b823afe57e7aa49dd52218888a78987cc"
+        },
+        "candidate": {
+          "binary": "candidate/apps/backend/bin/kandev",
+          "assets": "candidate/apps/web/dist",
+          "binarySha256": "f68636acf6f61ebb7bbc29a017de7900e9eb06b552d8ec815073a0ee73a992f1",
+          "assetsSha256": "093323d7aaafcc538b9208dfedd5c7e40df51ece3a2a49baa9ad14f8c314a4ad"
+        }
+      },
+      "sampleCount": 4,
+      "metrics": [
+        {
+          "group": "1x/task-switch",
+          "metric": "mainThreadMs",
+          "baseline": [
+            40999.466,
+            41324.322
+          ],
+          "candidate": [
+            53420.17999999999,
+            50416.861000000004
+          ],
+          "medianPairedPercentReduction": -26.148847084637595
+        },
+        {
+          "group": "1x/task-switch",
+          "metric": "mainThreadCpuMs",
+          "baseline": [
+            40004.117999999995,
+            40309.185999999994
+          ],
+          "candidate": [
+            50799.03899999999,
+            47937.644
+          ],
+          "medianPairedPercentReduction": -22.954693440135966
+        },
+        {
+          "group": "1x/task-switch",
+          "metric": "rendererCpuMs",
+          "baseline": [
+            53260.00000000001,
+            53640
+          ],
+          "candidate": [
+            65970,
+            62209.99999999999
+          ],
+          "medianPairedPercentReduction": -19.920473004967945
+        },
+        {
+          "group": "1x/task-switch",
+          "metric": "frameGapP95Ms",
+          "baseline": [
+            150,
+            150
+          ],
+          "candidate": [
+            199.90000000000146,
+            216.70000000000437
+          ],
+          "medianPairedPercentReduction": -38.86666666666861
+        },
+        {
+          "group": "1x/task-switch",
+          "metric": "selectionP95Ms",
+          "baseline": [
+            1189.2835830000113,
+            1186.522763999994
+          ],
+          "candidate": [
+            2775.6060099999886,
+            3027.566799000022
+          ],
+          "medianPairedPercentReduction": -144.27384183148286
+        }
+      ],
+      "rawSha256": "6b90c6ccfdf5483dbbad9bbdb575652ab477579063861ba40146dd3b27132422",
+      "sourceRevision": "39c0b5de256aa0fbdbd5005a8145bbdc62398b3c",
+      "sourcePatchSha256": "85ab2aefb7968d30ed887d05b241cbb9af7060b97ab6ad3a1adcc5be6b9c338d"
+    },
+    {
+      "name": "indexedRows",
+      "file": "matched-dense-1792776438660.json",
+      "builds": {
+        "baseline": {
+          "binary": "baseline/apps/backend/bin/kandev",
+          "assets": "baseline/apps/web/dist",
+          "binarySha256": "cfa940b4e9dd89c2ad1f5b9dcc02133ec8a3e0ce148833458c9d593335b810dd",
+          "assetsSha256": "5bba7ed1b49106391fd67407f547076b823afe57e7aa49dd52218888a78987cc"
+        },
+        "candidate": {
+          "binary": "candidate/apps/backend/bin/kandev",
+          "assets": "candidate/apps/web/dist",
+          "binarySha256": "cacc3c1b53a0c34b0016b19e0c340315c047c1f8a7d0a9104e1223008ade084b",
+          "assetsSha256": "0306ea233ba5f60b635071af66f5f3cdfb45200be89f58399e3057d5476aa705"
+        }
+      },
+      "sampleCount": 4,
+      "metrics": [
+        {
+          "group": "1x/idle",
+          "metric": "mainThreadMs",
+          "baseline": [
+            16080.125000000002,
+            14753.993
+          ],
+          "candidate": [
+            14839.563,
+            15163.157000000001
+          ],
+          "medianPairedPercentReduction": 2.4708176838129896
+        },
+        {
+          "group": "1x/idle",
+          "metric": "mainThreadCpuMs",
+          "baseline": [
+            16401.902,
+            15072.378999999999
+          ],
+          "candidate": [
+            15148.823,
+            15465.829999999998
+          ],
+          "medianPairedPercentReduction": 2.514714417980137
+        },
+        {
+          "group": "1x/idle",
+          "metric": "rendererCpuMs",
+          "baseline": [
+            24849.999999999996,
+            22220
+          ],
+          "candidate": [
+            23040,
+            23710
+          ],
+          "medianPairedPercentReduction": 0.28901582311147944
+        },
+        {
+          "group": "1x/idle",
+          "metric": "frameGapP95Ms",
+          "baseline": [
+            16.70000000001164,
+            16.70000000001164
+          ],
+          "candidate": [
+            16.70000000001164,
+            16.70000000001164
+          ],
+          "medianPairedPercentReduction": 0
+        },
+        {
+          "group": "1x/streaming",
+          "metric": "mainThreadMs",
+          "baseline": [
+            61161.736000000004,
+            62773.64
+          ],
+          "candidate": [
+            60373.03,
+            61588.082
+          ],
+          "medianPairedPercentReduction": 1.5890827518268185
+        },
+        {
+          "group": "1x/streaming",
+          "metric": "mainThreadCpuMs",
+          "baseline": [
+            61104.349,
+            62799.521
+          ],
+          "candidate": [
+            60411.95999999999,
+            61538.538
+          ],
+          "medianPairedPercentReduction": 1.5705377970215806
+        },
+        {
+          "group": "1x/streaming",
+          "metric": "rendererCpuMs",
+          "baseline": [
+            75399.99999999999,
+            79000
+          ],
+          "candidate": [
+            75290,
+            76230
+          ],
+          "medianPairedPercentReduction": 1.8261088540442438
+        },
+        {
+          "group": "1x/streaming",
+          "metric": "frameGapP95Ms",
+          "baseline": [
+            100.10000000000582,
+            150
+          ],
+          "candidate": [
+            116.60000000000582,
+            133.3000000000029
+          ],
+          "medianPairedPercentReduction": -2.6750915750920665
+        },
+        {
+          "group": "1x/reduced-motion-idle",
+          "metric": "mainThreadMs",
+          "baseline": [
+            10098.188999999991,
+            9970.650000000007
+          ],
+          "candidate": [
+            10296.179999999993,
+            9672.798999999997
+          ],
+          "medianPairedPercentReduction": 0.5133095847914322
+        },
+        {
+          "group": "1x/reduced-motion-idle",
+          "metric": "mainThreadCpuMs",
+          "baseline": [
+            10439.703999999992,
+            10326.170000000006
+          ],
+          "candidate": [
+            10646.546999999999,
+            10002.037999999999
+          ],
+          "medianPairedPercentReduction": 0.578813159139791
+        },
+        {
+          "group": "1x/reduced-motion-idle",
+          "metric": "rendererCpuMs",
+          "baseline": [
+            17570.000000000007,
+            17599.999999999993
+          ],
+          "candidate": [
+            17599.999999999993,
+            16620.000000000004
+          ],
+          "medianPairedPercentReduction": 2.69871811455478
+        },
+        {
+          "group": "1x/reduced-motion-idle",
+          "metric": "frameGapP95Ms",
+          "baseline": [
+            16.79999999998836,
+            16.70000000001164
+          ],
+          "candidate": [
+            16.79999999998836,
+            16.79999999998836
+          ],
+          "medianPairedPercentReduction": -0.29940119753487193
+        }
+      ],
+      "rawSha256": "eeb9744acb424aa39c3f258d582625de02def133592db798486aa69915e95daa",
+      "sourceRevision": "12bf1c266f3087d66b7b96d17b36d586efe5d4f6",
+      "sourcePatchSha256": "044fe4e31d9f3e736f8e273c5da3188ac73d69ce73a34b039daed13d2e36af96"
+    },
+    {
+      "name": "attributeRows",
+      "file": "matched-dense-1792775033729.json",
+      "builds": {
+        "baseline": {
+          "binary": "baseline/apps/backend/bin/kandev",
+          "assets": "baseline/apps/web/dist",
+          "binarySha256": "cfa940b4e9dd89c2ad1f5b9dcc02133ec8a3e0ce148833458c9d593335b810dd",
+          "assetsSha256": "5bba7ed1b49106391fd67407f547076b823afe57e7aa49dd52218888a78987cc"
+        },
+        "candidate": {
+          "binary": "candidate/apps/backend/bin/kandev",
+          "assets": "candidate/apps/web/dist",
+          "binarySha256": "1225a8831850103f77de0e70ed3e2c4a5e9bc8d0afb93949f70f1f8ae57778f4",
+          "assetsSha256": "0ab604c3d0936351bae4c1a750bda05ca0005ee993d9ee313d5590675eefabd0"
+        }
+      },
+      "sampleCount": 4,
+      "metrics": [
+        {
+          "group": "1x/idle",
+          "metric": "mainThreadMs",
+          "baseline": [
+            15345.082999999999,
+            16095.33
+          ],
+          "candidate": [
+            16017.283,
+            14776.945999999998
+          ],
+          "medianPairedPercentReduction": 1.9052700621256897
+        },
+        {
+          "group": "1x/idle",
+          "metric": "mainThreadCpuMs",
+          "baseline": [
+            15662.785000000002,
+            16418.652
+          ],
+          "candidate": [
+            16325.351,
+            15070.993999999999
+          ],
+          "medianPairedPercentReduction": 1.9889494239541303
+        },
+        {
+          "group": "1x/idle",
+          "metric": "rendererCpuMs",
+          "baseline": [
+            24060.000000000004,
+            24120.000000000004
+          ],
+          "candidate": [
+            24759.999999999996,
+            22670
+          ],
+          "medianPairedPercentReduction": 1.5511077199207841
+        },
+        {
+          "group": "1x/idle",
+          "metric": "frameGapP95Ms",
+          "baseline": [
+            16.79999999998836,
+            16.79999999998836
+          ],
+          "candidate": [
+            16.70000000001164,
+            16.70000000001164
+          ],
+          "medianPairedPercentReduction": 0.595238095099918
+        },
+        {
+          "group": "1x/streaming",
+          "metric": "mainThreadMs",
+          "baseline": [
+            60999.40099999999,
+            60389.269
+          ],
+          "candidate": [
+            61229.784,
+            60889.05300000001
+          ],
+          "medianPairedPercentReduction": -0.6026423741263849
+        },
+        {
+          "group": "1x/streaming",
+          "metric": "mainThreadCpuMs",
+          "baseline": [
+            61022.278999999995,
+            60459.286
+          ],
+          "candidate": [
+            61239.04,
+            60930.18800000001
+          ],
+          "medianPairedPercentReduction": -0.5670453649166183
+        },
+        {
+          "group": "1x/streaming",
+          "metric": "rendererCpuMs",
+          "baseline": [
+            75679.99999999999,
+            75110.00000000001
+          ],
+          "candidate": [
+            77090,
+            75970
+          ],
+          "medianPairedPercentReduction": -1.5040475871470258
+        },
+        {
+          "group": "1x/streaming",
+          "metric": "frameGapP95Ms",
+          "baseline": [
+            133.3000000000029,
+            116.69999999999709
+          ],
+          "candidate": [
+            116.69999999999709,
+            116.60000000000582
+          ],
+          "medianPairedPercentReduction": 6.269401540614824
+        },
+        {
+          "group": "1x/reduced-motion-idle",
+          "metric": "mainThreadMs",
+          "baseline": [
+            10409.164000000004,
+            9396.026000000005
+          ],
+          "candidate": [
+            10306.050999999996,
+            10398.12400000001
+          ],
+          "medianPairedPercentReduction": -4.837263794534919
+        },
+        {
+          "group": "1x/reduced-motion-idle",
+          "metric": "mainThreadCpuMs",
+          "baseline": [
+            10773.921999999999,
+            9765.982999999991
+          ],
+          "candidate": [
+            10682.930999999997,
+            10758.778000000006
+          ],
+          "medianPairedPercentReduction": -4.660649798487084
+        },
+        {
+          "group": "1x/reduced-motion-idle",
+          "metric": "rendererCpuMs",
+          "baseline": [
+            18110,
+            15930.000000000007
+          ],
+          "candidate": [
+            18169.99999999999,
+            18120.000000000004
+          ],
+          "medianPairedPercentReduction": -7.039477310139603
+        },
+        {
+          "group": "1x/reduced-motion-idle",
+          "metric": "frameGapP95Ms",
+          "baseline": [
+            16.70000000001164,
+            16.79999999998836
+          ],
+          "candidate": [
+            16.79999999998836,
+            16.79999999998836
+          ],
+          "medianPairedPercentReduction": -0.29940119753487193
+        }
+      ],
+      "rawSha256": "2b240678df96caf9d68bc88a1d59a5e2415fdec9852a579ecaf08faa069b5a8a",
+      "sourceRevision": "12bf1c266f3087d66b7b96d17b36d586efe5d4f6",
+      "sourcePatchSha256": "98c737300ba195ee6e45cbbb37862b6581257dfa2005a9f3eaa7bf2e920a1bd5"
+    },
+    {
+      "name": "batching",
+      "file": "matched-dense-1792760612169.json",
+      "builds": {
+        "baseline": {
+          "binary": "baseline/apps/backend/bin/kandev",
+          "assets": "baseline/apps/web/dist",
+          "binarySha256": "1a08a141503a95d3a004a34998851f82dfebcbfb51fdb5cfe22280361dc8af53",
+          "assetsSha256": "f11f83dfe886dc2fb6dffde3e31924e8cebf49713107c274802d15d78c6e3060"
+        },
+        "candidate": {
+          "binary": "candidate/apps/backend/bin/kandev",
+          "assets": "candidate/apps/web/dist",
+          "binarySha256": "23ddce0f2f4dd59eae9aea7fa1ef07f206316b2cd2bd5abcfd1fb00fea46ef22",
+          "assetsSha256": "5e4963743d1342dcd0887016d51dd515aefd3490fbe878de05af392da0d6b5af"
+        }
+      },
+      "sampleCount": 2,
+      "metrics": [
+        {
+          "group": "1x/idle",
+          "metric": "mainThreadMs",
+          "baseline": [
+            15958.072999999999
+          ],
+          "candidate": [
+            15124.981000000002
+          ],
+          "medianPairedPercentReduction": 5.220505007089496
+        },
+        {
+          "group": "1x/idle",
+          "metric": "mainThreadCpuMs",
+          "baseline": [
+            16250.244999999999
+          ],
+          "candidate": [
+            15439.542000000001
+          ],
+          "medianPairedPercentReduction": 4.988866321707751
+        },
+        {
+          "group": "1x/idle",
+          "metric": "rendererCpuMs",
+          "baseline": [
+            24780
+          ],
+          "candidate": [
+            23490.000000000004
+          ],
+          "medianPairedPercentReduction": 5.205811138014513
+        },
+        {
+          "group": "1x/idle",
+          "metric": "frameGapP95Ms",
+          "baseline": [
+            16.79999999998836
+          ],
+          "candidate": [
+            16.70000000001164
+          ],
+          "medianPairedPercentReduction": 0.595238095099918
+        },
+        {
+          "group": "1x/streaming",
+          "metric": "mainThreadMs",
+          "baseline": [
+            61370.49700000001
+          ],
+          "candidate": [
+            62084.994999999995
+          ],
+          "medianPairedPercentReduction": -1.164236945970936
+        },
+        {
+          "group": "1x/streaming",
+          "metric": "mainThreadCpuMs",
+          "baseline": [
+            60911.924999999996
+          ],
+          "candidate": [
+            61764.991
+          ],
+          "medianPairedPercentReduction": -1.4004909547678985
+        },
+        {
+          "group": "1x/streaming",
+          "metric": "rendererCpuMs",
+          "baseline": [
+            77190
+          ],
+          "candidate": [
+            79380.00000000001
+          ],
+          "medianPairedPercentReduction": -2.8371550719005243
+        },
+        {
+          "group": "1x/streaming",
+          "metric": "frameGapP95Ms",
+          "baseline": [
+            133.39999999999418
+          ],
+          "candidate": [
+            166.60000000000582
+          ],
+          "medianPairedPercentReduction": -24.88755622189887
+        },
+        {
+          "group": "1x/reduced-motion-idle",
+          "metric": "mainThreadMs",
+          "baseline": [
+            9837.357999999995
+          ],
+          "candidate": [
+            10082.255000000003
+          ],
+          "medianPairedPercentReduction": -2.4894590600444575
+        },
+        {
+          "group": "1x/reduced-motion-idle",
+          "metric": "mainThreadCpuMs",
+          "baseline": [
+            10166.126000000006
+          ],
+          "candidate": [
+            10418.756000000001
+          ],
+          "medianPairedPercentReduction": -2.485017399941683
+        },
+        {
+          "group": "1x/reduced-motion-idle",
+          "metric": "rendererCpuMs",
+          "baseline": [
+            16869.99999999999
+          ],
+          "candidate": [
+            17000
+          ],
+          "medianPairedPercentReduction": -0.7705986959099644
+        },
+        {
+          "group": "1x/reduced-motion-idle",
+          "metric": "frameGapP95Ms",
+          "baseline": [
+            16.79999999998836
+          ],
+          "candidate": [
+            16.79999999998836
+          ],
+          "medianPairedPercentReduction": 0
+        }
+      ],
+      "rawSha256": "7984d068fba061661b463c56b28085adbe4e77e433739e299ecbce00291cbb94",
+      "sourcePatchSha256": "e5be1b0485ea3116e47459f3952bf017d4e0d8a648a48f3892a6b6ad5097fc6b"
+    }
+  ]
+}

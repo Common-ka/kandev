@@ -95,6 +95,48 @@ and direct Chromium checks passed, including details in a closed disclosure
 and a closed-page diagnostic failure. The existing warmup and final-stream
 correctness gates remain unchanged. The next run starts with the candidate.
 
+### Candidate-first 4x retry
+
+The candidate-first retry (`matched-dense-1792800977298.json`, source
+`4348eee3946`) failed the unchanged 30-second final-visible gate after the
+scheduled stream window. Cold readiness passed in 38,726 ms. All six chats
+started with 100 loaded messages. Cold, idle, and stream-deadline captures had
+zero HTTP failures. The run took 21.7 minutes and saved no complete samples;
+it is overload evidence, not a paired timing result.
+
+Diagnostic storage reads at 2026-10-24 00:19:46.599–610 UTC found 300 unique
+ticks per chat with last tick 299. Browser inspection at 00:19:58.822–835 UTC,
+about 12.2 seconds later, found only 215–216 ticks per chat (last tick 214–215).
+The candidate therefore had a substantial display backlog after all updates
+were stored. This diagnostic count check does not replace the benchmark's
+ordered-sequence assertion, which was not reached.
+
+The raw report, backend log, launch receipt, host-load log, and failure captures
+remain under the diagnostic directory; captures are in
+`reference-grid-4x-candidate-first-failure/`. The next bounded experiment will
+schedule existing plain-agent updates fairly across sessions. New messages,
+user input, permission changes, deletes, and turn completion must preserve
+immediate ordering. The previous all-session frame batch remains rejected.
+
+## CPU audit of rejected experiments
+
+Recalculation from the captured CPU counters supports the previous decisions.
+The spinner wrapper increased normal-idle main-thread CPU by 7.21% and renderer
+CPU by 7.84% in median paired changes. Containment increased streaming CPU by
+3.14% and 4.50%, respectively. Composer changes had mixed streaming results
+and worse idle CPU. Tree identity changes increased switching CPU by 22.95%
+and 19.92%. Row lookup changes showed absent or small CPU gains with mixed
+frame results; all-session batching increased CPU and frame gaps. No rejected
+experiment was reinstated. See the [paired CPU audit and raw provenance](evidence/rejected-experiment-cpu-audit.json).
+
+The six-pair navigation comparison also now has [committed CPU and retention
+evidence](evidence/reference-navigation-1x.json). Main-thread CPU increased
+7.06%, and renderer CPU increased 5.69% in median paired changes. The existing
+p95 switching regression remains 10.25%. After the separate 100-switch arm,
+both builds retained one editor and three panels. Post-GC JS heap rose from
+93,131,240 to 96,536,020 bytes for baseline and 85,695,184 to 89,883,244 bytes
+for candidate. These isolated snapshots do not establish a leak or a memory fix.
+
 ## Kept Threads reduced-motion correction
 
 The Threads working-status SVGs now stop rotating when reduced motion is
