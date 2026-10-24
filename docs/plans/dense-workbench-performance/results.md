@@ -1157,4 +1157,30 @@ speed summaries and does not explain the separate scripted scroll failure.
 
 [Complete evidence](evidence/current-grid-render-cpu-attribution.json) retains
 profile hashes, mapped bundle locations, caller costs, and limitations. A
-separate stream-quiet cleanup experiment is still under test.
+separate stream-quiet cleanup experiment was rejected after two full-reference pairs.
+
+## Rejected stream-quiet cleanup experiment
+
+The experiment kept the 140 ms fade and delayed wrapper compaction until a
+300 ms quiet period. It passes 68 relevant unit checks, typecheck, lint, build,
+and four desktop/phone browser checks. Its new unit regression halves parses
+between regularly spaced appends, but that result does not establish a dense
+workbench speed gain.
+
+Two alternating full-reference pairs pass in 31.8 minutes, with 7,200 ordered
+updates, no HTTP failures, and no verification retries. Streaming main CPU
+changes by -0.17% and +0.23%; renderer CPU changes by -0.46% and +1.58%. Both
+builds nearly saturate the main thread. Streaming p95 changes from 100.1 to
+100 ms and from 116.6 to 100 ms. Maximum streaming gap is mixed: 133.4 to
+166.6 ms, then 166.7 to 150.1 ms.
+
+Reduced-motion idle CPU is mixed. Its maximum frame gap rises from 50 to about
+66.7 ms in both pairs; the cause is unconfirmed. Initial idle CPU is modestly
+lower and p95 is unchanged. These preliminary results do not show a repeatable
+streaming CPU gain. The experiment and its tests were removed. The retained
+production assets remain `9f2b7a96`.
+
+[Complete evidence](evidence/rejected-stream-quiet-cleanup-1x.json) preserves
+all paired metrics, exact builds, the rejected patch hash, correctness checks,
+and host observations. This is a separate 9f-to-experiment comparison, not the
+final original-baseline package comparison.

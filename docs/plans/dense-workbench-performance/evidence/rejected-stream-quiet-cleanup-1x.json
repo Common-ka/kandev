@@ -1,0 +1,3133 @@
+{
+  "status": "rejected",
+  "reason": "Two full-reference pairs do not establish a repeatable streaming CPU gain. Streaming frame results are mixed. The production change and its test changes were removed.",
+  "rawReport": "matched-dense-1792866523503.json",
+  "rawSha256": "f3ef82b1a7f0a180a18b08f753f3beef575933479c423ff9c4de24bc047363a8",
+  "sourceRevision": "0ab1fa83d1f48a3b6e6835bc063c3f00e836556c",
+  "sourcePatchSha256": "ad374a9ef8a7102d3a70579c1c11e458657d6a801510807d4a21090f810ff758",
+  "builds": {
+    "baseline": {
+      "binary": "/tmp/kandev-dense-spinner-motion-5936a872/apps/backend/bin/kandev",
+      "assets": "/tmp/kandev-dense-spinner-motion-5936a872/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "9f2b7a961b623e0e4074fdfd0e253b10b65ccf979e110223af6b88b9121dbea8"
+    },
+    "candidate": {
+      "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+      "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "3f0288f3268ae3d9b2f0abf0692513054d64af81db7da61b6f7c63c54a0a2c2f"
+    }
+  },
+  "lockfileSha256": "9d5a03a9086f28c93752fce491f896047fbcdbc64abfafe3b3aa53261199c554",
+  "machine": {
+    "revision": "0ab1fa83d1f48a3b6e6835bc063c3f00e836556c",
+    "cpu": "11th Gen Intel(R) Core(TM) i7-11700T @ 1.40GHz",
+    "cores": 16,
+    "load": [
+      1.58,
+      1.93,
+      2.03
+    ],
+    "totalMemory": 33303863296,
+    "freeMemory": 21851074560,
+    "platform": "linux 6.18.49"
+  },
+  "workload": {
+    "layout": "grid",
+    "extraBusyHeaders": 0,
+    "tasks": 1000,
+    "columns": 30,
+    "messages": 1000,
+    "durationMs": 60000
+  },
+  "storedMessages": 36000,
+  "interactionMode": "quiet",
+  "finalVisibilityProbe": "boolean-poll",
+  "comparisons": [
+    {
+      "group": "1x/cold",
+      "metric": "readyMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 15104.333184999996,
+        "min": 15068.563309999881,
+        "max": 15140.10306000011,
+        "values": [
+          15068.563309999881,
+          15140.10306000011
+        ]
+      },
+      "candidate": {
+        "median": 14846.856179499999,
+        "min": 14471.638877999969,
+        "max": 15222.073481000029,
+        "values": [
+          15222.073481000029,
+          14471.638877999969
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -153.51017100014724,
+        668.4641820001416
+      ],
+      "pairedPercentReduction": [
+        -1.0187445733348315,
+        4.415189112987034
+      ],
+      "medianPairedPercentReduction": 1.6982222698261011
+    },
+    {
+      "group": "1x/cold",
+      "metric": "documentMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 8876.050361499889,
+        "min": 8799.379256999819,
+        "max": 8952.721465999959,
+        "values": [
+          8799.379256999819,
+          8952.721465999959
+        ]
+      },
+      "candidate": {
+        "median": 8848.85125399998,
+        "min": 8838.381487000035,
+        "max": 8859.321020999923,
+        "values": [
+          8859.321020999923,
+          8838.381487000035
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -59.94176400010474,
+        114.33997899992391
+      ],
+      "pairedPercentReduction": [
+        -0.6812044605580747,
+        1.2771533151584864
+      ],
+      "medianPairedPercentReduction": 0.29797442730020585
+    },
+    {
+      "group": "1x/cold",
+      "metric": "assetEncodedBytes",
+      "pairs": 2,
+      "baseline": {
+        "median": 4165405,
+        "min": 4165405,
+        "max": 4165405,
+        "values": [
+          4165405,
+          4165405
+        ]
+      },
+      "candidate": {
+        "median": 4165351,
+        "min": 4165351,
+        "max": 4165351,
+        "values": [
+          4165351,
+          4165351
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        54,
+        54
+      ],
+      "pairedPercentReduction": [
+        0.0012963925476634326,
+        0.0012963925476634326
+      ],
+      "medianPairedPercentReduction": 0.0012963925476634326
+    },
+    {
+      "group": "1x/cold",
+      "metric": "assetDecodedBytes",
+      "pairs": 2,
+      "baseline": {
+        "median": 14687801,
+        "min": 14687801,
+        "max": 14687801,
+        "values": [
+          14687801,
+          14687801
+        ]
+      },
+      "candidate": {
+        "median": 14687813,
+        "min": 14687813,
+        "max": 14687813,
+        "values": [
+          14687813,
+          14687813
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -12,
+        -12
+      ],
+      "pairedPercentReduction": [
+        -8.170045332177363e-05,
+        -8.170045332177363e-05
+      ],
+      "medianPairedPercentReduction": -8.170045332177363e-05
+    },
+    {
+      "group": "1x/idle",
+      "metric": "elapsedMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 60044.68010250002,
+        "min": 60024.64905899996,
+        "max": 60064.711146000074,
+        "values": [
+          60024.64905899996,
+          60064.711146000074
+        ]
+      },
+      "candidate": {
+        "median": 60042.254962000065,
+        "min": 60032.745046,
+        "max": 60051.76487800013,
+        "values": [
+          60032.745046,
+          60051.76487800013
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -8.095987000036985,
+        12.946267999941483
+      ],
+      "pairedPercentReduction": [
+        -0.013487770652485125,
+        0.021553867075915542
+      ],
+      "medianPairedPercentReduction": 0.004033048211715209
+    },
+    {
+      "group": "1x/idle",
+      "metric": "mainThreadMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 16364.8645,
+        "min": 16062.445,
+        "max": 16667.284,
+        "values": [
+          16062.445,
+          16667.284
+        ]
+      },
+      "candidate": {
+        "median": 16243.810000000001,
+        "min": 15872.795000000002,
+        "max": 16614.825,
+        "values": [
+          15872.795000000002,
+          16614.825
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        189.64999999999782,
+        52.45899999999892
+      ],
+      "pairedPercentReduction": [
+        1.1807044319840336,
+        0.314742341943648
+      ],
+      "medianPairedPercentReduction": 0.7477233869638408
+    },
+    {
+      "group": "1x/idle",
+      "metric": "mainThreadMsPerSecond",
+      "pairs": 2,
+      "baseline": {
+        "median": 272.5431363022642,
+        "min": 267.59748289759693,
+        "max": 277.48878970693147,
+        "values": [
+          267.59748289759693,
+          277.48878970693147
+        ]
+      },
+      "candidate": {
+        "median": 270.53866737358686,
+        "min": 264.4022855832679,
+        "max": 276.67504916390584,
+        "values": [
+          264.4022855832679,
+          276.67504916390584
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        3.19519731432905,
+        0.8137405430256308
+      ],
+      "pairedPercentReduction": [
+        1.1940311544528894,
+        0.2932516819454433
+      ],
+      "medianPairedPercentReduction": 0.7436414181991664
+    },
+    {
+      "group": "1x/idle",
+      "metric": "mainThreadCpuMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 16660.4035,
+        "min": 16360.516,
+        "max": 16960.290999999997,
+        "values": [
+          16360.516,
+          16960.290999999997
+        ]
+      },
+      "candidate": {
+        "median": 16558.6155,
+        "min": 16177.565,
+        "max": 16939.665999999997,
+        "values": [
+          16177.565,
+          16939.665999999997
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        182.9509999999991,
+        20.625
+      ],
+      "pairedPercentReduction": [
+        1.11824712619088,
+        0.12160758326611261
+      ],
+      "medianPairedPercentReduction": 0.6199273547284962
+    },
+    {
+      "group": "1x/idle",
+      "metric": "rendererCpuMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 25475,
+        "min": 24849.999999999996,
+        "max": 26100,
+        "values": [
+          24849.999999999996,
+          26100
+        ]
+      },
+      "candidate": {
+        "median": 24935.000000000004,
+        "min": 24490.000000000004,
+        "max": 25380.000000000004,
+        "values": [
+          24490.000000000004,
+          25380.000000000004
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        359.9999999999927,
+        719.9999999999964
+      ],
+      "pairedPercentReduction": [
+        1.4486921529174759,
+        2.7586206896551584
+      ],
+      "medianPairedPercentReduction": 2.103656421286317
+    },
+    {
+      "group": "1x/idle",
+      "metric": "scriptMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 1822.705,
+        "min": 1816.579,
+        "max": 1828.8310000000001,
+        "values": [
+          1816.579,
+          1828.8310000000001
+        ]
+      },
+      "candidate": {
+        "median": 1796.9415,
+        "min": 1737.8199999999997,
+        "max": 1856.0629999999999,
+        "values": [
+          1737.8199999999997,
+          1856.0629999999999
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        78.75900000000024,
+        -27.231999999999744
+      ],
+      "pairedPercentReduction": [
+        4.335567019105706,
+        -1.489038626313735
+      ],
+      "medianPairedPercentReduction": 1.4232641963959853
+    },
+    {
+      "group": "1x/idle",
+      "metric": "styleMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 2269.663,
+        "min": 2213.282,
+        "max": 2326.044,
+        "values": [
+          2213.282,
+          2326.044
+        ]
+      },
+      "candidate": {
+        "median": 2256.402,
+        "min": 2209.282,
+        "max": 2303.522,
+        "values": [
+          2209.282,
+          2303.522
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        4,
+        22.521999999999935
+      ],
+      "pairedPercentReduction": [
+        0.18072708312813276,
+        0.9682533950346569
+      ],
+      "medianPairedPercentReduction": 0.5744902390813948
+    },
+    {
+      "group": "1x/idle",
+      "metric": "layoutMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 169.10700000000003,
+        "min": 166.32800000000003,
+        "max": 171.886,
+        "values": [
+          166.32800000000003,
+          171.886
+        ]
+      },
+      "candidate": {
+        "median": 159.942,
+        "min": 143.17299999999997,
+        "max": 176.711,
+        "values": [
+          143.17299999999997,
+          176.711
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        23.155000000000058,
+        -4.825000000000017
+      ],
+      "pairedPercentReduction": [
+        13.921288057332532,
+        -2.807093073316045
+      ],
+      "medianPairedPercentReduction": 5.557097492008244
+    },
+    {
+      "group": "1x/idle",
+      "metric": "styleRecalculations",
+      "pairs": 2,
+      "baseline": {
+        "median": 3600.5,
+        "min": 3599,
+        "max": 3602,
+        "values": [
+          3599,
+          3602
+        ]
+      },
+      "candidate": {
+        "median": 3600,
+        "min": 3600,
+        "max": 3600,
+        "values": [
+          3600,
+          3600
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -1,
+        2
+      ],
+      "pairedPercentReduction": [
+        -0.027785495971103084,
+        0.0555247084952804
+      ],
+      "medianPairedPercentReduction": 0.013869606262088658
+    },
+    {
+      "group": "1x/idle",
+      "metric": "layouts",
+      "pairs": 2,
+      "baseline": {
+        "median": 357.5,
+        "min": 357,
+        "max": 358,
+        "values": [
+          358,
+          357
+        ]
+      },
+      "candidate": {
+        "median": 359.5,
+        "min": 359,
+        "max": 360,
+        "values": [
+          359,
+          360
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -1,
+        -3
+      ],
+      "pairedPercentReduction": [
+        -0.27932960893854747,
+        -0.8403361344537815
+      ],
+      "medianPairedPercentReduction": -0.5598328716961645
+    },
+    {
+      "group": "1x/idle",
+      "metric": "frameGapP95Ms",
+      "pairs": 2,
+      "baseline": {
+        "median": 16.70000000001164,
+        "min": 16.70000000001164,
+        "max": 16.70000000001164,
+        "values": [
+          16.70000000001164,
+          16.70000000001164
+        ]
+      },
+      "candidate": {
+        "median": 16.70000000001164,
+        "min": 16.70000000001164,
+        "max": 16.70000000001164,
+        "values": [
+          16.70000000001164,
+          16.70000000001164
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/idle",
+      "metric": "frameGapMaxMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 33.349999999998545,
+        "min": 33.299999999995634,
+        "max": 33.400000000001455,
+        "values": [
+          33.299999999995634,
+          33.400000000001455
+        ]
+      },
+      "candidate": {
+        "median": 33.39999999999782,
+        "min": 33.39999999999418,
+        "max": 33.400000000001455,
+        "values": [
+          33.400000000001455,
+          33.39999999999418
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -0.10000000000582077,
+        7.275957614183426e-12
+      ],
+      "pairedPercentReduction": [
+        -0.30030030031781946,
+        2.1784304234081164e-11
+      ],
+      "medianPairedPercentReduction": -0.15015015014801758
+    },
+    {
+      "group": "1x/idle",
+      "metric": "longTasks",
+      "pairs": 2,
+      "baseline": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "candidate": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        null,
+        null
+      ],
+      "medianPairedPercentReduction": null
+    },
+    {
+      "group": "1x/idle",
+      "metric": "longTaskMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "candidate": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        null,
+        null
+      ],
+      "medianPairedPercentReduction": null
+    },
+    {
+      "group": "1x/idle",
+      "metric": "domNodes",
+      "pairs": 2,
+      "baseline": {
+        "median": 24542,
+        "min": 24542,
+        "max": 24542,
+        "values": [
+          24542,
+          24542
+        ]
+      },
+      "candidate": {
+        "median": 24542,
+        "min": 24542,
+        "max": 24542,
+        "values": [
+          24542,
+          24542
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/idle",
+      "metric": "mountedEditors",
+      "pairs": 2,
+      "baseline": {
+        "median": 6,
+        "min": 6,
+        "max": 6,
+        "values": [
+          6,
+          6
+        ]
+      },
+      "candidate": {
+        "median": 6,
+        "min": 6,
+        "max": 6,
+        "values": [
+          6,
+          6
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/idle",
+      "metric": "runningAnimations",
+      "pairs": 2,
+      "baseline": {
+        "median": 60,
+        "min": 60,
+        "max": 60,
+        "values": [
+          60,
+          60
+        ]
+      },
+      "candidate": {
+        "median": 60,
+        "min": 60,
+        "max": 60,
+        "values": [
+          60,
+          60
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/idle",
+      "metric": "historyRequests",
+      "pairs": 2,
+      "baseline": {
+        "median": 74,
+        "min": 74,
+        "max": 74,
+        "values": [
+          74,
+          74
+        ]
+      },
+      "candidate": {
+        "median": 74.5,
+        "min": 74,
+        "max": 75,
+        "values": [
+          74,
+          75
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        -1
+      ],
+      "pairedPercentReduction": [
+        0,
+        -1.3513513513513513
+      ],
+      "medianPairedPercentReduction": -0.6756756756756757
+    },
+    {
+      "group": "1x/idle",
+      "metric": "historyDecodedBytes",
+      "pairs": 2,
+      "baseline": {
+        "median": 13425419.5,
+        "min": 13335477,
+        "max": 13515362,
+        "values": [
+          13515362,
+          13335477
+        ]
+      },
+      "candidate": {
+        "median": 13427871,
+        "min": 13337757,
+        "max": 13517985,
+        "values": [
+          13337757,
+          13517985
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        177605,
+        -182508
+      ],
+      "pairedPercentReduction": [
+        1.314097247265741,
+        -1.3685899649483855
+      ],
+      "medianPairedPercentReduction": -0.027246358841322205
+    },
+    {
+      "group": "1x/idle",
+      "metric": "websocketDecodedBytes",
+      "pairs": 2,
+      "baseline": {
+        "median": 13464947,
+        "min": 13374842,
+        "max": 13555052,
+        "values": [
+          13555052,
+          13374842
+        ]
+      },
+      "candidate": {
+        "median": 13467825,
+        "min": 13377324,
+        "max": 13558326,
+        "values": [
+          13377324,
+          13558326
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        177728,
+        -183484
+      ],
+      "pairedPercentReduction": [
+        1.3111569029761008,
+        -1.3718591965422844
+      ],
+      "medianPairedPercentReduction": -0.03035114678309181
+    },
+    {
+      "group": "1x/idle",
+      "metric": "resets",
+      "pairs": 2,
+      "baseline": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "candidate": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        null,
+        null
+      ],
+      "medianPairedPercentReduction": null
+    },
+    {
+      "group": "1x/idle",
+      "metric": "changedNotifications",
+      "pairs": 2,
+      "baseline": {
+        "median": 72,
+        "min": 72,
+        "max": 72,
+        "values": [
+          72,
+          72
+        ]
+      },
+      "candidate": {
+        "median": 72,
+        "min": 72,
+        "max": 72,
+        "values": [
+          72,
+          72
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "elapsedMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 60587.16209500015,
+        "min": 60470.20770500018,
+        "max": 60704.11648500012,
+        "values": [
+          60704.11648500012,
+          60470.20770500018
+        ]
+      },
+      "candidate": {
+        "median": 60582.75872000004,
+        "min": 60529.694224999985,
+        "max": 60635.8232150001,
+        "values": [
+          60529.694224999985,
+          60635.8232150001
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        174.4222600001376,
+        -165.61550999991596
+      ],
+      "pairedPercentReduction": [
+        0.2873318484805508,
+        -0.2738795123837841
+      ],
+      "medianPairedPercentReduction": 0.0067261680483833575
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "mainThreadMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 59751.874500000005,
+        "min": 59659.339,
+        "max": 59844.41000000001,
+        "values": [
+          59844.41000000001,
+          59659.339
+        ]
+      },
+      "candidate": {
+        "median": 59667.649000000005,
+        "min": 59522.24800000001,
+        "max": 59813.05,
+        "values": [
+          59522.24800000001,
+          59813.05
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        322.1620000000039,
+        -153.71100000000297
+      ],
+      "pairedPercentReduction": [
+        0.5383326529579018,
+        -0.25764784286329917
+      ],
+      "medianPairedPercentReduction": 0.1403424050473013
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "mainThreadMsPerSecond",
+      "pairs": 2,
+      "baseline": {
+        "median": 986.214182320887,
+        "min": 985.8377564030185,
+        "max": 986.5906082387553,
+        "values": [
+          985.8377564030185,
+          986.5906082387553
+        ]
+      },
+      "candidate": {
+        "median": 984.8935354033991,
+        "min": 983.3561653020232,
+        "max": 986.4309055047751,
+        "values": [
+          983.3561653020232,
+          986.4309055047751
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        2.4815911009952742,
+        0.15970273398022528
+      ],
+      "pairedPercentReduction": [
+        0.2517240879523364,
+        0.016187335724320736
+      ],
+      "medianPairedPercentReduction": 0.13395571183832858
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "mainThreadCpuMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 59682.2235,
+        "min": 59680.703,
+        "max": 59683.744,
+        "values": [
+          59680.703,
+          59683.744
+        ]
+      },
+      "candidate": {
+        "median": 59700.549,
+        "min": 59580.064999999995,
+        "max": 59821.033,
+        "values": [
+          59580.064999999995,
+          59821.033
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        100.63800000000629,
+        -137.2890000000043
+      ],
+      "pairedPercentReduction": [
+        0.16862737022384988,
+        -0.23002745940335834
+      ],
+      "medianPairedPercentReduction": -0.030700044589754227
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "rendererCpuMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 73590,
+        "min": 73539.99999999999,
+        "max": 73640,
+        "values": [
+          73539.99999999999,
+          73640
+        ]
+      },
+      "candidate": {
+        "median": 74000,
+        "min": 73199.99999999999,
+        "max": 74800,
+        "values": [
+          73199.99999999999,
+          74800
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        340,
+        -1160
+      ],
+      "pairedPercentReduction": [
+        0.462333423986946,
+        -1.5752308527973926
+      ],
+      "medianPairedPercentReduction": -0.5564487144052233
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "scriptMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 40340.454,
+        "min": 39955.517,
+        "max": 40725.391,
+        "values": [
+          39955.517,
+          40725.391
+        ]
+      },
+      "candidate": {
+        "median": 39976.0585,
+        "min": 39105.182,
+        "max": 40846.935000000005,
+        "values": [
+          39105.182,
+          40846.935000000005
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        850.3349999999991,
+        -121.54400000000169
+      ],
+      "pairedPercentReduction": [
+        2.128204222710969,
+        -0.29844771778864365
+      ],
+      "medianPairedPercentReduction": 0.9148782524611627
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "styleMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 5242.834000000001,
+        "min": 5198.978,
+        "max": 5286.6900000000005,
+        "values": [
+          5198.978,
+          5286.6900000000005
+        ]
+      },
+      "candidate": {
+        "median": 5370.1965,
+        "min": 5325.77,
+        "max": 5414.623,
+        "values": [
+          5325.77,
+          5414.623
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -126.79200000000037,
+        -127.93299999999908
+      ],
+      "pairedPercentReduction": [
+        -2.4387870077542235,
+        -2.4199073522373937
+      ],
+      "medianPairedPercentReduction": -2.4293471799958084
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "layoutMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 1052.1569999999997,
+        "min": 1035.5409999999997,
+        "max": 1068.773,
+        "values": [
+          1035.5409999999997,
+          1068.773
+        ]
+      },
+      "candidate": {
+        "median": 1091.56,
+        "min": 1059.402,
+        "max": 1123.718,
+        "values": [
+          1059.402,
+          1123.718
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -23.86100000000033,
+        -54.945000000000164
+      ],
+      "pairedPercentReduction": [
+        -2.304206207190284,
+        -5.140941996102088
+      ],
+      "medianPairedPercentReduction": -3.7225741016461855
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "styleRecalculations",
+      "pairs": 2,
+      "baseline": {
+        "median": 2544,
+        "min": 2522,
+        "max": 2566,
+        "values": [
+          2522,
+          2566
+        ]
+      },
+      "candidate": {
+        "median": 2523.5,
+        "min": 2471,
+        "max": 2576,
+        "values": [
+          2576,
+          2471
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -54,
+        95
+      ],
+      "pairedPercentReduction": [
+        -2.141157811260904,
+        3.7022603273577555
+      ],
+      "medianPairedPercentReduction": 0.7805512580484257
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "layouts",
+      "pairs": 2,
+      "baseline": {
+        "median": 2298,
+        "min": 2239,
+        "max": 2357,
+        "values": [
+          2239,
+          2357
+        ]
+      },
+      "candidate": {
+        "median": 2408.5,
+        "min": 2394,
+        "max": 2423,
+        "values": [
+          2394,
+          2423
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -155,
+        -66
+      ],
+      "pairedPercentReduction": [
+        -6.922733363108531,
+        -2.800169707254985
+      ],
+      "medianPairedPercentReduction": -4.861451535181758
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "frameGapP95Ms",
+      "pairs": 2,
+      "baseline": {
+        "median": 108.34999999998399,
+        "min": 100.09999999997672,
+        "max": 116.59999999999127,
+        "values": [
+          100.09999999997672,
+          116.59999999999127
+        ]
+      },
+      "candidate": {
+        "median": 100,
+        "min": 100,
+        "max": 100,
+        "values": [
+          100,
+          100
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0.09999999997671694,
+        16.59999999999127
+      ],
+      "pairedPercentReduction": [
+        0.09990009987686334,
+        14.236706689530456
+      ],
+      "medianPairedPercentReduction": 7.16830339470366
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "frameGapMaxMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 150.0500000000102,
+        "min": 133.40000000000873,
+        "max": 166.70000000001164,
+        "values": [
+          133.40000000000873,
+          166.70000000001164
+        ]
+      },
+      "candidate": {
+        "median": 158.34999999999127,
+        "min": 150.09999999999127,
+        "max": 166.59999999999127,
+        "values": [
+          166.59999999999127,
+          150.09999999999127
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -33.19999999998254,
+        16.600000000020373
+      ],
+      "pairedPercentReduction": [
+        -24.887556221874338,
+        9.958008398331861
+      ],
+      "medianPairedPercentReduction": -7.464773911771238
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "longTasks",
+      "pairs": 2,
+      "baseline": {
+        "median": 3,
+        "min": 1,
+        "max": 5,
+        "values": [
+          5,
+          1
+        ]
+      },
+      "candidate": {
+        "median": 1.5,
+        "min": 1,
+        "max": 2,
+        "values": [
+          1,
+          2
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        4,
+        -1
+      ],
+      "pairedPercentReduction": [
+        80,
+        -100
+      ],
+      "medianPairedPercentReduction": -10
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "longTaskMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 183,
+        "min": 59,
+        "max": 307,
+        "values": [
+          307,
+          59
+        ]
+      },
+      "candidate": {
+        "median": 79,
+        "min": 51,
+        "max": 107,
+        "values": [
+          51,
+          107
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        256,
+        -48
+      ],
+      "pairedPercentReduction": [
+        83.38762214983713,
+        -81.35593220338983
+      ],
+      "medianPairedPercentReduction": 1.0158449732236505
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "domNodes",
+      "pairs": 2,
+      "baseline": {
+        "median": 26378,
+        "min": 26378,
+        "max": 26378,
+        "values": [
+          26378,
+          26378
+        ]
+      },
+      "candidate": {
+        "median": 26378,
+        "min": 26378,
+        "max": 26378,
+        "values": [
+          26378,
+          26378
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "mountedEditors",
+      "pairs": 2,
+      "baseline": {
+        "median": 6,
+        "min": 6,
+        "max": 6,
+        "values": [
+          6,
+          6
+        ]
+      },
+      "candidate": {
+        "median": 6,
+        "min": 6,
+        "max": 6,
+        "values": [
+          6,
+          6
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "runningAnimations",
+      "pairs": 2,
+      "baseline": {
+        "median": 60,
+        "min": 60,
+        "max": 60,
+        "values": [
+          60,
+          60
+        ]
+      },
+      "candidate": {
+        "median": 60,
+        "min": 60,
+        "max": 60,
+        "values": [
+          60,
+          60
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "historyRequests",
+      "pairs": 2,
+      "baseline": {
+        "median": 72,
+        "min": 72,
+        "max": 72,
+        "values": [
+          72,
+          72
+        ]
+      },
+      "candidate": {
+        "median": 72,
+        "min": 72,
+        "max": 72,
+        "values": [
+          72,
+          72
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "historyDecodedBytes",
+      "pairs": 2,
+      "baseline": {
+        "median": 13255683,
+        "min": 13255525,
+        "max": 13255841,
+        "values": [
+          13255841,
+          13255525
+        ]
+      },
+      "candidate": {
+        "median": 13259549.5,
+        "min": 13257763,
+        "max": 13261336,
+        "values": [
+          13257763,
+          13261336
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -1922,
+        -5811
+      ],
+      "pairedPercentReduction": [
+        -0.014499268662018502,
+        -0.04383832401960692
+      ],
+      "medianPairedPercentReduction": -0.029168796340812708
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "websocketDecodedBytes",
+      "pairs": 2,
+      "baseline": {
+        "median": 34949574.5,
+        "min": 33570086,
+        "max": 36329063,
+        "values": [
+          33570086,
+          36329063
+        ]
+      },
+      "candidate": {
+        "median": 36815669.5,
+        "min": 36698876,
+        "max": 36932463,
+        "values": [
+          36698876,
+          36932463
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -3128790,
+        -603400
+      ],
+      "pairedPercentReduction": [
+        -9.320172727588485,
+        -1.6609291574627179
+      ],
+      "medianPairedPercentReduction": -5.490550942525601
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "resets",
+      "pairs": 2,
+      "baseline": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "candidate": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        null,
+        null
+      ],
+      "medianPairedPercentReduction": null
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "changedNotifications",
+      "pairs": 2,
+      "baseline": {
+        "median": 1642,
+        "min": 1568,
+        "max": 1716,
+        "values": [
+          1568,
+          1716
+        ]
+      },
+      "candidate": {
+        "median": 1701,
+        "min": 1623,
+        "max": 1779,
+        "values": [
+          1623,
+          1779
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -55,
+        -63
+      ],
+      "pairedPercentReduction": [
+        -3.50765306122449,
+        -3.6713286713286712
+      ],
+      "medianPairedPercentReduction": -3.5894908662765808
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "elapsedMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 60052.08501199994,
+        "min": 60041.964114999864,
+        "max": 60062.20590900001,
+        "values": [
+          60041.964114999864,
+          60062.20590900001
+        ]
+      },
+      "candidate": {
+        "median": 60036.96474299999,
+        "min": 60032.910278999945,
+        "max": 60041.019207000034,
+        "values": [
+          60032.910278999945,
+          60041.019207000034
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        9.053835999919102,
+        21.18670199997723
+      ],
+      "pairedPercentReduction": [
+        0.015079180258956994,
+        0.03527459852553053
+      ],
+      "medianPairedPercentReduction": 0.025176889392243763
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "mainThreadMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 6347.032999999996,
+        "min": 6271.137999999994,
+        "max": 6422.927999999999,
+        "values": [
+          6271.137999999994,
+          6422.927999999999
+        ]
+      },
+      "candidate": {
+        "median": 6027.007500000003,
+        "min": 5041.274999999999,
+        "max": 7012.740000000008,
+        "values": [
+          7012.740000000008,
+          5041.274999999999
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -741.6020000000144,
+        1381.6530000000002
+      ],
+      "pairedPercentReduction": [
+        -11.82563675045925,
+        21.51126402164247
+      ],
+      "medianPairedPercentReduction": 4.842813635591611
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "mainThreadMsPerSecond",
+      "pairs": 2,
+      "baseline": {
+        "median": 105.6919237362996,
+        "min": 104.44591699213449,
+        "max": 106.9379304804647,
+        "values": [
+          104.44591699213449,
+          106.9379304804647
+        ]
+      },
+      "candidate": {
+        "median": 100.3893871477004,
+        "min": 83.96384782575858,
+        "max": 116.81492646964224,
+        "values": [
+          116.81492646964224,
+          83.96384782575858
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -12.36900947750776,
+        22.974082654706123
+      ],
+      "pairedPercentReduction": [
+        -11.842501682894156,
+        21.48356766535986
+      ],
+      "medianPairedPercentReduction": 4.820532991232852
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "mainThreadCpuMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 6655.227500000003,
+        "min": 6591.575000000006,
+        "max": 6718.879999999998,
+        "values": [
+          6591.575000000006,
+          6718.879999999998
+        ]
+      },
+      "candidate": {
+        "median": 6325.090500000002,
+        "min": 5310.422000000002,
+        "max": 7339.759000000001,
+        "values": [
+          7339.759000000001,
+          5310.422000000002
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -748.1839999999947,
+        1408.457999999996
+      ],
+      "pairedPercentReduction": [
+        -11.350610438324589,
+        20.962690210273088
+      ],
+      "medianPairedPercentReduction": 4.80603988597425
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "rendererCpuMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 11270.000000000004,
+        "min": 11000,
+        "max": 11540.000000000005,
+        "values": [
+          11000,
+          11540.000000000005
+        ]
+      },
+      "candidate": {
+        "median": 11089.999999999996,
+        "min": 9759.99999999999,
+        "max": 12420.000000000002,
+        "values": [
+          12420.000000000002,
+          9759.99999999999
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -1420.0000000000018,
+        1780.0000000000146
+      ],
+      "pairedPercentReduction": [
+        -12.909090909090924,
+        15.424610051993186
+      ],
+      "medianPairedPercentReduction": 1.257759571451131
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "scriptMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 1858.2369999999992,
+        "min": 1851.301999999997,
+        "max": 1865.1720000000012,
+        "values": [
+          1865.1720000000012,
+          1851.301999999997
+        ]
+      },
+      "candidate": {
+        "median": 1769.1025000000025,
+        "min": 1589.9980000000014,
+        "max": 1948.2070000000035,
+        "values": [
+          1948.2070000000035,
+          1589.9980000000014
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -83.03500000000236,
+        261.30399999999554
+      ],
+      "pairedPercentReduction": [
+        -4.451868245931331,
+        14.114606909083227
+      ],
+      "medianPairedPercentReduction": 4.831369331575948
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "styleMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 16.929000000000638,
+        "min": 13.255000000000017,
+        "max": 20.60300000000126,
+        "values": [
+          13.255000000000017,
+          20.60300000000126
+        ]
+      },
+      "candidate": {
+        "median": 16.424499999999398,
+        "min": 12.993999999999062,
+        "max": 19.854999999999734,
+        "values": [
+          12.993999999999062,
+          19.854999999999734
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0.2610000000009549,
+        0.7480000000015252
+      ],
+      "pairedPercentReduction": [
+        1.9690682761294198,
+        3.6305392418651627
+      ],
+      "medianPairedPercentReduction": 2.7998037589972915
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "layoutMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 156.04700000000014,
+        "min": 147.07400000000015,
+        "max": 165.02000000000015,
+        "values": [
+          147.07400000000015,
+          165.02000000000015
+        ]
+      },
+      "candidate": {
+        "median": 150.81549999999987,
+        "min": 111.9539999999999,
+        "max": 189.67699999999988,
+        "values": [
+          189.67699999999988,
+          111.9539999999999
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -42.602999999999724,
+        53.06600000000026
+      ],
+      "pairedPercentReduction": [
+        -28.96705060037782,
+        32.15731426493771
+      ],
+      "medianPairedPercentReduction": 1.5951318322799448
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "styleRecalculations",
+      "pairs": 2,
+      "baseline": {
+        "median": 2.5,
+        "min": 2,
+        "max": 3,
+        "values": [
+          2,
+          3
+        ]
+      },
+      "candidate": {
+        "median": 2.5,
+        "min": 2,
+        "max": 3,
+        "values": [
+          2,
+          3
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "layouts",
+      "pairs": 2,
+      "baseline": {
+        "median": 336,
+        "min": 312,
+        "max": 360,
+        "values": [
+          312,
+          360
+        ]
+      },
+      "candidate": {
+        "median": 359,
+        "min": 358,
+        "max": 360,
+        "values": [
+          358,
+          360
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -46,
+        0
+      ],
+      "pairedPercentReduction": [
+        -14.743589743589743,
+        0
+      ],
+      "medianPairedPercentReduction": -7.371794871794871
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "frameGapP95Ms",
+      "pairs": 2,
+      "baseline": {
+        "median": 16.70000000001164,
+        "min": 16.70000000001164,
+        "max": 16.70000000001164,
+        "values": [
+          16.70000000001164,
+          16.70000000001164
+        ]
+      },
+      "candidate": {
+        "median": 16.75,
+        "min": 16.70000000001164,
+        "max": 16.79999999998836,
+        "values": [
+          16.79999999998836,
+          16.70000000001164
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -0.09999999997671694,
+        0
+      ],
+      "pairedPercentReduction": [
+        -0.5988023950697439,
+        0
+      ],
+      "medianPairedPercentReduction": -0.29940119753487193
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "frameGapMaxMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 50,
+        "min": 50,
+        "max": 50,
+        "values": [
+          50,
+          50
+        ]
+      },
+      "candidate": {
+        "median": 66.65000000000873,
+        "min": 66.60000000000582,
+        "max": 66.70000000001164,
+        "values": [
+          66.60000000000582,
+          66.70000000001164
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -16.60000000000582,
+        -16.70000000001164
+      ],
+      "pairedPercentReduction": [
+        -33.20000000001164,
+        -33.40000000002328
+      ],
+      "medianPairedPercentReduction": -33.30000000001746
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "longTasks",
+      "pairs": 2,
+      "baseline": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "candidate": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        null,
+        null
+      ],
+      "medianPairedPercentReduction": null
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "longTaskMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "candidate": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        null,
+        null
+      ],
+      "medianPairedPercentReduction": null
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "domNodes",
+      "pairs": 2,
+      "baseline": {
+        "median": 26378,
+        "min": 26378,
+        "max": 26378,
+        "values": [
+          26378,
+          26378
+        ]
+      },
+      "candidate": {
+        "median": 26378,
+        "min": 26378,
+        "max": 26378,
+        "values": [
+          26378,
+          26378
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "mountedEditors",
+      "pairs": 2,
+      "baseline": {
+        "median": 6,
+        "min": 6,
+        "max": 6,
+        "values": [
+          6,
+          6
+        ]
+      },
+      "candidate": {
+        "median": 6,
+        "min": 6,
+        "max": 6,
+        "values": [
+          6,
+          6
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "runningAnimations",
+      "pairs": 2,
+      "baseline": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "candidate": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        null,
+        null
+      ],
+      "medianPairedPercentReduction": null
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "historyRequests",
+      "pairs": 2,
+      "baseline": {
+        "median": 72,
+        "min": 72,
+        "max": 72,
+        "values": [
+          72,
+          72
+        ]
+      },
+      "candidate": {
+        "median": 72,
+        "min": 72,
+        "max": 72,
+        "values": [
+          72,
+          72
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "historyDecodedBytes",
+      "pairs": 2,
+      "baseline": {
+        "median": 13528665.5,
+        "min": 13528607,
+        "max": 13528724,
+        "values": [
+          13528607,
+          13528724
+        ]
+      },
+      "candidate": {
+        "median": 13530952,
+        "min": 13530927,
+        "max": 13530977,
+        "values": [
+          13530977,
+          13530927
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -2370,
+        -2203
+      ],
+      "pairedPercentReduction": [
+        -0.017518433346463535,
+        -0.01628387126531667
+      ],
+      "medianPairedPercentReduction": -0.0169011523058901
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "websocketDecodedBytes",
+      "pairs": 2,
+      "baseline": {
+        "median": 13557053,
+        "min": 13556993,
+        "max": 13557113,
+        "values": [
+          13556993,
+          13557113
+        ]
+      },
+      "candidate": {
+        "median": 13559344.5,
+        "min": 13559320,
+        "max": 13559369,
+        "values": [
+          13559369,
+          13559320
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -2376,
+        -2207
+      ],
+      "pairedPercentReduction": [
+        -0.01752601037707993,
+        -0.01627927715878742
+      ],
+      "medianPairedPercentReduction": -0.016902643767933677
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "resets",
+      "pairs": 2,
+      "baseline": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "candidate": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        null,
+        null
+      ],
+      "medianPairedPercentReduction": null
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "changedNotifications",
+      "pairs": 2,
+      "baseline": {
+        "median": 72,
+        "min": 72,
+        "max": 72,
+        "values": [
+          72,
+          72
+        ]
+      },
+      "candidate": {
+        "median": 72,
+        "min": 72,
+        "max": 72,
+        "values": [
+          72,
+          72
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        0
+      ],
+      "pairedPercentReduction": [
+        0,
+        0
+      ],
+      "medianPairedPercentReduction": 0
+    }
+  ],
+  "experiment": {
+    "change": "Compact Markdown reveal wrappers after a 300 ms quiet period. Keep the 140 ms fade and synchronous selection guard.",
+    "productionFiles": [
+      "apps/web/components/shared/chat-markdown-motion.tsx"
+    ],
+    "patch": "rejected-quiet-motion-cleanup.patch",
+    "patchSha256": "fcb98f3c0d06410adc435e92c253d18d0f44f18e150dead1364fb5263d0766d8",
+    "frozenBuild": "quiet-motion-build.json",
+    "frozenRoot": "/tmp/kandev-dense-quiet-motion-5936a872",
+    "scope": "Control is the previously retained 9f2b assets. Candidate assets are 3f02. Both use the same b6a6 backend and lockfile.",
+    "unitFinding": "At 200 ms intervals, twelve appends cause twelve parses plus one final compaction, rather than twelve append parses plus twelve cleanup parses. This targeted count reduction did not produce a repeatable streaming CPU gain in the dense test."
+  },
+  "validation": {
+    "runner": "Passed in 31.8 minutes",
+    "log": "quiet-motion-two-pair-logs/kandev-run.e2e.23R2NWUv.log",
+    "completedSamples": 4,
+    "orderedUpdates": 7200,
+    "unitRed": "/tmp/kandev-quiet-motion-red.log; expected one parse, received two",
+    "unitGreen": "68 relevant checks pass across motion, selection, Markdown, and rendering tests",
+    "typecheck": "passed",
+    "strictLint": "passed",
+    "build": "passed",
+    "desktopBrowser": "Two checks pass in 25.2 s; quiet-motion-desktop-browser-logs/kandev-run.e2e.c7mRIYfV.log",
+    "phoneBrowser": "Two checks pass in 25.3 s; quiet-motion-browser-logs/kandev-run.e2e.s4gHHiEF.log",
+    "resources": "Main 12458 and host 86483 both terminal. No heavy owned verification jobs overlapped timing."
+  },
+  "samples": [
+    {
+      "arm": "baseline",
+      "pair": 0,
+      "scheduledUpdates": 1800,
+      "verificationErrors": [],
+      "initialLoadedHistory": [
+        {
+          "sessionId": "1a6ebbfc-c762-40a7-95db-79a0667e574a",
+          "messages": 100
+        },
+        {
+          "sessionId": "0a63cd1b-e230-4aae-9453-2617f8eb9523",
+          "messages": 100
+        },
+        {
+          "sessionId": "4db018b2-c67a-49d8-a5b3-8f7858029091",
+          "messages": 100
+        },
+        {
+          "sessionId": "3f592735-efb6-401d-aafa-e142048bd05f",
+          "messages": 100
+        },
+        {
+          "sessionId": "03f0f9e8-0648-44bd-b53b-32b509993ae0",
+          "messages": 100
+        },
+        {
+          "sessionId": "cb22937b-d6ba-4047-9fbe-8eb5752823ba",
+          "messages": 100
+        }
+      ],
+      "cold": {
+        "readyMs": 15068.563309999881,
+        "httpFailures": []
+      },
+      "runs": [
+        {
+          "scenario": "idle",
+          "elapsedMs": 60024.64905899996,
+          "metrics": {
+            "Timestamp": 60.00513800000772,
+            "AudioHandlers": 0,
+            "AudioWorkletProcessors": 0,
+            "Documents": -4,
+            "Frames": -1,
+            "JSEventListeners": -2781,
+            "LayoutObjects": -777,
+            "MediaKeySessions": 0,
+            "MediaKeys": 0,
+            "Nodes": -1145,
+            "Resources": -28,
+            "ContextLifecycleStateObservers": -4,
+            "V8PerContextDatas": 0,
+            "WorkerGlobalScopes": 0,
+            "UACSSResources": 0,
+            "RTCPeerConnections": 0,
+            "ResourceFetchers": -4,
+            "AdSubframes": 0,
+            "DetachedScriptStates": -1,
+            "ArrayBufferContents": 0,
+            "LayoutCount": 358,
+            "RecalcStyleCount": 3599,
+            "LayoutDuration": 0.16632800000000003,
+            "RecalcStyleDuration": 2.213282,
+            "DevToolsCommandDuration": 0.0005479999999999929,
+            "ScriptDuration": 1.816579,
+            "V8CompileDuration": 0,
+            "TaskDuration": 16.062445,
+            "TaskOtherDuration": 11.865708,
+            "ThreadTime": 16.360516,
+            "ProcessTime": 24.849999999999998,
+            "JSHeapUsedSize": -37191764,
+            "JSHeapTotalSize": -68395008,
+            "FirstMeaningfulPaint": 354609.237434,
+            "DomContentLoaded": 0,
+            "NavigationStart": 0
+          },
+          "httpFailures": [],
+          "historyRequests": {
+            "sent": 74,
+            "received": 75,
+            "bytes": 13515362
+          },
+          "resets": 0,
+          "selectionBefore": {
+            "rangeCount": 0,
+            "activeElementTag": "BODY",
+            "activeElementEditable": false
+          }
+        },
+        {
+          "scenario": "streaming",
+          "elapsedMs": 60704.11648500012,
+          "metrics": {
+            "Timestamp": 60.69053800002439,
+            "AudioHandlers": 0,
+            "AudioWorkletProcessors": 0,
+            "Documents": 0,
+            "Frames": 0,
+            "JSEventListeners": 2775,
+            "LayoutObjects": 4016,
+            "MediaKeySessions": 0,
+            "MediaKeys": 0,
+            "Nodes": 5816,
+            "Resources": 1,
+            "ContextLifecycleStateObservers": -1,
+            "V8PerContextDatas": 0,
+            "WorkerGlobalScopes": 0,
+            "UACSSResources": 0,
+            "RTCPeerConnections": 0,
+            "ResourceFetchers": 0,
+            "AdSubframes": 0,
+            "DetachedScriptStates": 0,
+            "ArrayBufferContents": 0,
+            "LayoutCount": 2239,
+            "RecalcStyleCount": 2522,
+            "LayoutDuration": 1.0355409999999998,
+            "RecalcStyleDuration": 5.198978,
+            "DevToolsCommandDuration": 0.08758300000000019,
+            "ScriptDuration": 39.955517,
+            "V8CompileDuration": 0,
+            "TaskDuration": 59.84441000000001,
+            "TaskOtherDuration": 13.566790999999998,
+            "ThreadTime": 59.680703,
+            "ProcessTime": 73.53999999999999,
+            "JSHeapUsedSize": 144646548,
+            "JSHeapTotalSize": 441040896,
+            "FirstMeaningfulPaint": 0,
+            "DomContentLoaded": 0,
+            "NavigationStart": 0
+          },
+          "httpFailures": [],
+          "historyRequests": {
+            "sent": 72,
+            "received": 72,
+            "bytes": 13255841
+          },
+          "resets": 0,
+          "selectionBefore": {
+            "rangeCount": 0,
+            "activeElementTag": "BODY",
+            "activeElementEditable": false
+          }
+        },
+        {
+          "scenario": "reduced-motion-idle",
+          "elapsedMs": 60041.964114999864,
+          "metrics": {
+            "Timestamp": 60.02347000001464,
+            "AudioHandlers": 0,
+            "AudioWorkletProcessors": 0,
+            "Documents": 0,
+            "Frames": 0,
+            "JSEventListeners": -4457,
+            "LayoutObjects": -2900,
+            "MediaKeySessions": 0,
+            "MediaKeys": 0,
+            "Nodes": -3236,
+            "Resources": 6,
+            "ContextLifecycleStateObservers": -1,
+            "V8PerContextDatas": 0,
+            "WorkerGlobalScopes": 0,
+            "UACSSResources": 0,
+            "RTCPeerConnections": 0,
+            "ResourceFetchers": 0,
+            "AdSubframes": 0,
+            "DetachedScriptStates": 0,
+            "ArrayBufferContents": 0,
+            "LayoutCount": 312,
+            "RecalcStyleCount": 2,
+            "LayoutDuration": 0.14707400000000015,
+            "RecalcStyleDuration": 0.013255000000000017,
+            "DevToolsCommandDuration": 0.0012719999999999398,
+            "ScriptDuration": 1.8651720000000012,
+            "V8CompileDuration": 0,
+            "TaskDuration": 6.271137999999993,
+            "TaskOtherDuration": 4.244364999999998,
+            "ThreadTime": 6.591575000000006,
+            "ProcessTime": 11,
+            "JSHeapUsedSize": -176704644,
+            "JSHeapTotalSize": -433762304,
+            "FirstMeaningfulPaint": 0,
+            "DomContentLoaded": 0,
+            "NavigationStart": 0
+          },
+          "httpFailures": [],
+          "historyRequests": {
+            "sent": 72,
+            "received": 72,
+            "bytes": 13528607
+          },
+          "resets": 0,
+          "selectionBefore": {
+            "rangeCount": 0,
+            "activeElementTag": "BODY",
+            "activeElementEditable": false
+          }
+        }
+      ]
+    },
+    {
+      "arm": "candidate",
+      "pair": 0,
+      "scheduledUpdates": 1800,
+      "verificationErrors": [],
+      "initialLoadedHistory": [
+        {
+          "sessionId": "1a6ebbfc-c762-40a7-95db-79a0667e574a",
+          "messages": 100
+        },
+        {
+          "sessionId": "0a63cd1b-e230-4aae-9453-2617f8eb9523",
+          "messages": 100
+        },
+        {
+          "sessionId": "4db018b2-c67a-49d8-a5b3-8f7858029091",
+          "messages": 100
+        },
+        {
+          "sessionId": "3f592735-efb6-401d-aafa-e142048bd05f",
+          "messages": 100
+        },
+        {
+          "sessionId": "03f0f9e8-0648-44bd-b53b-32b509993ae0",
+          "messages": 100
+        },
+        {
+          "sessionId": "cb22937b-d6ba-4047-9fbe-8eb5752823ba",
+          "messages": 100
+        }
+      ],
+      "cold": {
+        "readyMs": 15222.073481000029,
+        "httpFailures": []
+      },
+      "runs": [
+        {
+          "scenario": "idle",
+          "elapsedMs": 60032.745046,
+          "metrics": {
+            "Timestamp": 60.01373700000113,
+            "AudioHandlers": 0,
+            "AudioWorkletProcessors": 0,
+            "Documents": -1,
+            "Frames": 0,
+            "JSEventListeners": -2943,
+            "LayoutObjects": -754,
+            "MediaKeySessions": 0,
+            "MediaKeys": 0,
+            "Nodes": -1122,
+            "Resources": -19,
+            "ContextLifecycleStateObservers": -1,
+            "V8PerContextDatas": 0,
+            "WorkerGlobalScopes": 0,
+            "UACSSResources": 0,
+            "RTCPeerConnections": 0,
+            "ResourceFetchers": -1,
+            "AdSubframes": 0,
+            "DetachedScriptStates": 0,
+            "ArrayBufferContents": 0,
+            "LayoutCount": 359,
+            "RecalcStyleCount": 3600,
+            "LayoutDuration": 0.14317299999999997,
+            "RecalcStyleDuration": 2.209282,
+            "DevToolsCommandDuration": 0.0005399999999999849,
+            "ScriptDuration": 1.7378199999999997,
+            "V8CompileDuration": 0,
+            "TaskDuration": 15.872795000000002,
+            "TaskOtherDuration": 11.781979999999999,
+            "ThreadTime": 16.177565,
+            "ProcessTime": 24.490000000000002,
+            "JSHeapUsedSize": -74880388,
+            "JSHeapTotalSize": -70041600,
+            "FirstMeaningfulPaint": 354824.211137,
+            "DomContentLoaded": 0,
+            "NavigationStart": 0
+          },
+          "httpFailures": [],
+          "historyRequests": {
+            "sent": 74,
+            "received": 74,
+            "bytes": 13337757
+          },
+          "resets": 0,
+          "selectionBefore": {
+            "rangeCount": 0,
+            "activeElementTag": "BODY",
+            "activeElementEditable": false
+          }
+        },
+        {
+          "scenario": "streaming",
+          "elapsedMs": 60529.694224999985,
+          "metrics": {
+            "Timestamp": 60.51560899999458,
+            "AudioHandlers": 0,
+            "AudioWorkletProcessors": 0,
+            "Documents": 0,
+            "Frames": 0,
+            "JSEventListeners": 4167,
+            "LayoutObjects": 4212,
+            "MediaKeySessions": 0,
+            "MediaKeys": 0,
+            "Nodes": 6016,
+            "Resources": -4,
+            "ContextLifecycleStateObservers": -1,
+            "V8PerContextDatas": 0,
+            "WorkerGlobalScopes": 0,
+            "UACSSResources": 0,
+            "RTCPeerConnections": 0,
+            "ResourceFetchers": 0,
+            "AdSubframes": 0,
+            "DetachedScriptStates": 0,
+            "ArrayBufferContents": 0,
+            "LayoutCount": 2394,
+            "RecalcStyleCount": 2576,
+            "LayoutDuration": 1.059402,
+            "RecalcStyleDuration": 5.32577,
+            "DevToolsCommandDuration": 0.0784069999999999,
+            "ScriptDuration": 39.105182,
+            "V8CompileDuration": 0,
+            "TaskDuration": 59.522248000000005,
+            "TaskOtherDuration": 13.953486999999999,
+            "ThreadTime": 59.580065,
+            "ProcessTime": 73.19999999999999,
+            "JSHeapUsedSize": 245179888,
+            "JSHeapTotalSize": 429215744,
+            "FirstMeaningfulPaint": 0,
+            "DomContentLoaded": 0,
+            "NavigationStart": 0
+          },
+          "httpFailures": [],
+          "historyRequests": {
+            "sent": 72,
+            "received": 72,
+            "bytes": 13257763
+          },
+          "resets": 0,
+          "selectionBefore": {
+            "rangeCount": 0,
+            "activeElementTag": "BODY",
+            "activeElementEditable": false
+          }
+        },
+        {
+          "scenario": "reduced-motion-idle",
+          "elapsedMs": 60032.910278999945,
+          "metrics": {
+            "Timestamp": 60.01529399998253,
+            "AudioHandlers": 0,
+            "AudioWorkletProcessors": 0,
+            "Documents": 0,
+            "Frames": 0,
+            "JSEventListeners": -6466,
+            "LayoutObjects": -3096,
+            "MediaKeySessions": 0,
+            "MediaKeys": 0,
+            "Nodes": -3436,
+            "Resources": -7,
+            "ContextLifecycleStateObservers": -1,
+            "V8PerContextDatas": 0,
+            "WorkerGlobalScopes": 0,
+            "UACSSResources": 0,
+            "RTCPeerConnections": 0,
+            "ResourceFetchers": 0,
+            "AdSubframes": 0,
+            "DetachedScriptStates": 0,
+            "ArrayBufferContents": 0,
+            "LayoutCount": 358,
+            "RecalcStyleCount": 2,
+            "LayoutDuration": 0.18967699999999987,
+            "RecalcStyleDuration": 0.012993999999999062,
+            "DevToolsCommandDuration": 0.0004729999999999457,
+            "ScriptDuration": 1.9482070000000036,
+            "V8CompileDuration": 0,
+            "TaskDuration": 7.012740000000008,
+            "TaskOtherDuration": 4.861388999999999,
+            "ThreadTime": 7.339759000000001,
+            "ProcessTime": 12.420000000000002,
+            "JSHeapUsedSize": -262077208,
+            "JSHeapTotalSize": -400613376,
+            "FirstMeaningfulPaint": 0,
+            "DomContentLoaded": 0,
+            "NavigationStart": 0
+          },
+          "httpFailures": [],
+          "historyRequests": {
+            "sent": 72,
+            "received": 72,
+            "bytes": 13530977
+          },
+          "resets": 0,
+          "selectionBefore": {
+            "rangeCount": 0,
+            "activeElementTag": "BODY",
+            "activeElementEditable": false
+          }
+        }
+      ]
+    },
+    {
+      "arm": "candidate",
+      "pair": 1,
+      "scheduledUpdates": 1800,
+      "verificationErrors": [],
+      "initialLoadedHistory": [
+        {
+          "sessionId": "1a6ebbfc-c762-40a7-95db-79a0667e574a",
+          "messages": 100
+        },
+        {
+          "sessionId": "0a63cd1b-e230-4aae-9453-2617f8eb9523",
+          "messages": 100
+        },
+        {
+          "sessionId": "4db018b2-c67a-49d8-a5b3-8f7858029091",
+          "messages": 100
+        },
+        {
+          "sessionId": "3f592735-efb6-401d-aafa-e142048bd05f",
+          "messages": 100
+        },
+        {
+          "sessionId": "03f0f9e8-0648-44bd-b53b-32b509993ae0",
+          "messages": 100
+        },
+        {
+          "sessionId": "cb22937b-d6ba-4047-9fbe-8eb5752823ba",
+          "messages": 100
+        }
+      ],
+      "cold": {
+        "readyMs": 14471.638877999969,
+        "httpFailures": []
+      },
+      "runs": [
+        {
+          "scenario": "idle",
+          "elapsedMs": 60051.76487800013,
+          "metrics": {
+            "Timestamp": 60.03251399996225,
+            "AudioHandlers": 0,
+            "AudioWorkletProcessors": 0,
+            "Documents": -5,
+            "Frames": -2,
+            "JSEventListeners": -2893,
+            "LayoutObjects": -783,
+            "MediaKeySessions": 0,
+            "MediaKeys": 0,
+            "Nodes": -1221,
+            "Resources": -25,
+            "ContextLifecycleStateObservers": -5,
+            "V8PerContextDatas": 0,
+            "WorkerGlobalScopes": 0,
+            "UACSSResources": 0,
+            "RTCPeerConnections": 0,
+            "ResourceFetchers": -5,
+            "AdSubframes": 0,
+            "DetachedScriptStates": 0,
+            "ArrayBufferContents": 0,
+            "LayoutCount": 360,
+            "RecalcStyleCount": 3600,
+            "LayoutDuration": 0.176711,
+            "RecalcStyleDuration": 2.303522,
+            "DevToolsCommandDuration": 0.0006249999999999867,
+            "ScriptDuration": 1.8560629999999998,
+            "V8CompileDuration": 0,
+            "TaskDuration": 16.614825,
+            "TaskOtherDuration": 12.277904000000001,
+            "ThreadTime": 16.939666,
+            "ProcessTime": 25.380000000000003,
+            "JSHeapUsedSize": -73014416,
+            "JSHeapTotalSize": -104955904,
+            "FirstMeaningfulPaint": 355039.571799,
+            "DomContentLoaded": 0,
+            "NavigationStart": 0
+          },
+          "httpFailures": [],
+          "historyRequests": {
+            "sent": 75,
+            "received": 75,
+            "bytes": 13517985
+          },
+          "resets": 0,
+          "selectionBefore": {
+            "rangeCount": 0,
+            "activeElementTag": "BODY",
+            "activeElementEditable": false
+          }
+        },
+        {
+          "scenario": "streaming",
+          "elapsedMs": 60635.8232150001,
+          "metrics": {
+            "Timestamp": 60.62186399998609,
+            "AudioHandlers": 0,
+            "AudioWorkletProcessors": 0,
+            "Documents": 0,
+            "Frames": 0,
+            "JSEventListeners": 816,
+            "LayoutObjects": 3771,
+            "MediaKeySessions": 0,
+            "MediaKeys": 0,
+            "Nodes": 5571,
+            "Resources": -5,
+            "ContextLifecycleStateObservers": -1,
+            "V8PerContextDatas": 0,
+            "WorkerGlobalScopes": 0,
+            "UACSSResources": 0,
+            "RTCPeerConnections": 0,
+            "ResourceFetchers": 0,
+            "AdSubframes": 0,
+            "DetachedScriptStates": 0,
+            "ArrayBufferContents": 0,
+            "LayoutCount": 2423,
+            "RecalcStyleCount": 2471,
+            "LayoutDuration": 1.123718,
+            "RecalcStyleDuration": 5.414623,
+            "DevToolsCommandDuration": 0.094333,
+            "ScriptDuration": 40.846935,
+            "V8CompileDuration": 0,
+            "TaskDuration": 59.813050000000004,
+            "TaskOtherDuration": 12.333441,
+            "ThreadTime": 59.821033,
+            "ProcessTime": 74.8,
+            "JSHeapUsedSize": 76896432,
+            "JSHeapTotalSize": 479756288,
+            "FirstMeaningfulPaint": 0,
+            "DomContentLoaded": 0,
+            "NavigationStart": 0
+          },
+          "httpFailures": [],
+          "historyRequests": {
+            "sent": 72,
+            "received": 72,
+            "bytes": 13261336
+          },
+          "resets": 0,
+          "selectionBefore": {
+            "rangeCount": 0,
+            "activeElementTag": "BODY",
+            "activeElementEditable": false
+          }
+        },
+        {
+          "scenario": "reduced-motion-idle",
+          "elapsedMs": 60041.019207000034,
+          "metrics": {
+            "Timestamp": 60.022786000045016,
+            "AudioHandlers": 0,
+            "AudioWorkletProcessors": 0,
+            "Documents": 0,
+            "Frames": 0,
+            "JSEventListeners": -2613,
+            "LayoutObjects": -2655,
+            "MediaKeySessions": 0,
+            "MediaKeys": 0,
+            "Nodes": -2991,
+            "Resources": 8,
+            "ContextLifecycleStateObservers": -1,
+            "V8PerContextDatas": 0,
+            "WorkerGlobalScopes": 0,
+            "UACSSResources": 0,
+            "RTCPeerConnections": 0,
+            "ResourceFetchers": 0,
+            "AdSubframes": 0,
+            "DetachedScriptStates": 0,
+            "ArrayBufferContents": 0,
+            "LayoutCount": 360,
+            "RecalcStyleCount": 3,
+            "LayoutDuration": 0.11195399999999989,
+            "RecalcStyleDuration": 0.019854999999999734,
+            "DevToolsCommandDuration": 0.0005259999999999154,
+            "ScriptDuration": 1.5899980000000014,
+            "V8CompileDuration": 0,
+            "TaskDuration": 5.041274999999999,
+            "TaskOtherDuration": 3.318942,
+            "ThreadTime": 5.310422000000003,
+            "ProcessTime": 9.759999999999991,
+            "JSHeapUsedSize": -90632768,
+            "JSHeapTotalSize": -441978880,
+            "FirstMeaningfulPaint": 0,
+            "DomContentLoaded": 0,
+            "NavigationStart": 0
+          },
+          "httpFailures": [],
+          "historyRequests": {
+            "sent": 72,
+            "received": 72,
+            "bytes": 13530927
+          },
+          "resets": 0,
+          "selectionBefore": {
+            "rangeCount": 0,
+            "activeElementTag": "BODY",
+            "activeElementEditable": false
+          }
+        }
+      ]
+    },
+    {
+      "arm": "baseline",
+      "pair": 1,
+      "scheduledUpdates": 1800,
+      "verificationErrors": [],
+      "initialLoadedHistory": [
+        {
+          "sessionId": "1a6ebbfc-c762-40a7-95db-79a0667e574a",
+          "messages": 100
+        },
+        {
+          "sessionId": "0a63cd1b-e230-4aae-9453-2617f8eb9523",
+          "messages": 100
+        },
+        {
+          "sessionId": "4db018b2-c67a-49d8-a5b3-8f7858029091",
+          "messages": 100
+        },
+        {
+          "sessionId": "3f592735-efb6-401d-aafa-e142048bd05f",
+          "messages": 100
+        },
+        {
+          "sessionId": "03f0f9e8-0648-44bd-b53b-32b509993ae0",
+          "messages": 100
+        },
+        {
+          "sessionId": "cb22937b-d6ba-4047-9fbe-8eb5752823ba",
+          "messages": 100
+        }
+      ],
+      "cold": {
+        "readyMs": 15140.10306000011,
+        "httpFailures": []
+      },
+      "runs": [
+        {
+          "scenario": "idle",
+          "elapsedMs": 60064.711146000074,
+          "metrics": {
+            "Timestamp": 60.04311199998483,
+            "AudioHandlers": 0,
+            "AudioWorkletProcessors": 0,
+            "Documents": -2,
+            "Frames": 0,
+            "JSEventListeners": -3064,
+            "LayoutObjects": -764,
+            "MediaKeySessions": 0,
+            "MediaKeys": 0,
+            "Nodes": -1136,
+            "Resources": -37,
+            "ContextLifecycleStateObservers": -2,
+            "V8PerContextDatas": 0,
+            "WorkerGlobalScopes": 0,
+            "UACSSResources": 0,
+            "RTCPeerConnections": 0,
+            "ResourceFetchers": -2,
+            "AdSubframes": 0,
+            "DetachedScriptStates": -1,
+            "ArrayBufferContents": 0,
+            "LayoutCount": 357,
+            "RecalcStyleCount": 3602,
+            "LayoutDuration": 0.17188599999999998,
+            "RecalcStyleDuration": 2.326044,
+            "DevToolsCommandDuration": 0.000568000000000124,
+            "ScriptDuration": 1.828831,
+            "V8CompileDuration": 0,
+            "TaskDuration": 16.667284,
+            "TaskOtherDuration": 12.339955,
+            "ThreadTime": 16.960290999999998,
+            "ProcessTime": 26.1,
+            "JSHeapUsedSize": -74449640,
+            "JSHeapTotalSize": -94347264,
+            "FirstMeaningfulPaint": 355253.278415,
+            "DomContentLoaded": 0,
+            "NavigationStart": 0
+          },
+          "httpFailures": [],
+          "historyRequests": {
+            "sent": 74,
+            "received": 74,
+            "bytes": 13335477
+          },
+          "resets": 0,
+          "selectionBefore": {
+            "rangeCount": 0,
+            "activeElementTag": "BODY",
+            "activeElementEditable": false
+          }
+        },
+        {
+          "scenario": "streaming",
+          "elapsedMs": 60470.20770500018,
+          "metrics": {
+            "Timestamp": 60.459250000014435,
+            "AudioHandlers": 0,
+            "AudioWorkletProcessors": 0,
+            "Documents": 0,
+            "Frames": 0,
+            "JSEventListeners": 6563,
+            "LayoutObjects": 4416,
+            "MediaKeySessions": 0,
+            "MediaKeys": 0,
+            "Nodes": 6216,
+            "Resources": 14,
+            "ContextLifecycleStateObservers": -1,
+            "V8PerContextDatas": 0,
+            "WorkerGlobalScopes": 0,
+            "UACSSResources": 0,
+            "RTCPeerConnections": 0,
+            "ResourceFetchers": 0,
+            "AdSubframes": 0,
+            "DetachedScriptStates": 0,
+            "ArrayBufferContents": 0,
+            "LayoutCount": 2357,
+            "RecalcStyleCount": 2566,
+            "LayoutDuration": 1.068773,
+            "RecalcStyleDuration": 5.28669,
+            "DevToolsCommandDuration": 0.06576999999999988,
+            "ScriptDuration": 40.725391,
+            "V8CompileDuration": 0,
+            "TaskDuration": 59.659339,
+            "TaskOtherDuration": 12.512715000000002,
+            "ThreadTime": 59.683744,
+            "ProcessTime": 73.64,
+            "JSHeapUsedSize": 361693952,
+            "JSHeapTotalSize": 474537984,
+            "FirstMeaningfulPaint": 0,
+            "DomContentLoaded": 0,
+            "NavigationStart": 0
+          },
+          "httpFailures": [],
+          "historyRequests": {
+            "sent": 72,
+            "received": 72,
+            "bytes": 13255525
+          },
+          "resets": 0,
+          "selectionBefore": {
+            "rangeCount": 0,
+            "activeElementTag": "BODY",
+            "activeElementEditable": false
+          }
+        },
+        {
+          "scenario": "reduced-motion-idle",
+          "elapsedMs": 60062.20590900001,
+          "metrics": {
+            "Timestamp": 60.04475399997318,
+            "AudioHandlers": 0,
+            "AudioWorkletProcessors": 0,
+            "Documents": 0,
+            "Frames": 0,
+            "JSEventListeners": -8401,
+            "LayoutObjects": -3300,
+            "MediaKeySessions": 0,
+            "MediaKeys": 0,
+            "Nodes": -3636,
+            "Resources": -12,
+            "ContextLifecycleStateObservers": -1,
+            "V8PerContextDatas": 0,
+            "WorkerGlobalScopes": 0,
+            "UACSSResources": 0,
+            "RTCPeerConnections": 0,
+            "ResourceFetchers": 0,
+            "AdSubframes": 0,
+            "DetachedScriptStates": 0,
+            "ArrayBufferContents": 0,
+            "LayoutCount": 360,
+            "RecalcStyleCount": 3,
+            "LayoutDuration": 0.16502000000000017,
+            "RecalcStyleDuration": 0.02060300000000126,
+            "DevToolsCommandDuration": 0.0012800000000001699,
+            "ScriptDuration": 1.851301999999997,
+            "V8CompileDuration": 0,
+            "TaskDuration": 6.422927999999999,
+            "TaskOtherDuration": 4.384723000000001,
+            "ThreadTime": 6.718879999999999,
+            "ProcessTime": 11.540000000000006,
+            "JSHeapUsedSize": -380443204,
+            "JSHeapTotalSize": -409436160,
+            "FirstMeaningfulPaint": 0,
+            "DomContentLoaded": 0,
+            "NavigationStart": 0
+          },
+          "httpFailures": [],
+          "historyRequests": {
+            "sent": 72,
+            "received": 72,
+            "bytes": 13528724
+          },
+          "resets": 0,
+          "selectionBefore": {
+            "rangeCount": 0,
+            "activeElementTag": "BODY",
+            "activeElementEditable": false
+          }
+        }
+      ]
+    }
+  ],
+  "hostObservations": {
+    "file": "quiet-motion-two-pair-host-load.jsonl",
+    "samples": 64,
+    "minLoad1m": 1.10498046875,
+    "maxLoad1m": 4.26220703125,
+    "minAvailableMemoryKiB": 19704940,
+    "causalAttribution": false
+  },
+  "limits": [
+    "Two pairs are preliminary, not the six-pair final package comparison.",
+    "Streaming main CPU is nearly saturated in both builds. No overall speed, energy, or M2 Air gain is established.",
+    "One pair has a slightly lower p95 and one a one-frame reduction; maximum streaming gap regresses in one pair and improves in the other.",
+    "Reduced-motion idle CPU is mixed and its maximum frame gap increases from 50 ms to about 66.7 ms in both pairs. Its cause is unconfirmed.",
+    "All initial idle animation counts are 60; reduced-motion counts are 0 in both builds.",
+    "The complete package matrix remains open."
+  ]
+}

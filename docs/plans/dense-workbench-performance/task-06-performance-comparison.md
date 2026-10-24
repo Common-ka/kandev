@@ -569,7 +569,9 @@ and context propagation. Profiles cover the measured windows, with no sampled
 ARIA inspection functions. This separate attribution run is excluded from speed
 summaries. It does not resolve the scripted return-bottom failure.
 
-A stream-quiet cleanup experiment is being measured separately. Its browser
-checks preserve the 140 ms fade, synchronous selection, scrolling, and reduced
-motion. No speed gain is established yet. See
-[the attribution evidence](evidence/current-grid-render-cpu-attribution.json).
+The separate stream-quiet cleanup experiment passes correctness but is rejected
+after two full-reference pairs. All 7,200 ordered updates pass with no HTTP
+failures or verification retries. Streaming CPU is essentially unchanged, with
+mixed frame results. The two source/test changes were removed and retained
+assets remain `9f2b7a96`. See [the attribution evidence](evidence/current-grid-render-cpu-attribution.json)
+and [the rejected experiment](evidence/rejected-stream-quiet-cleanup-1x.json).
