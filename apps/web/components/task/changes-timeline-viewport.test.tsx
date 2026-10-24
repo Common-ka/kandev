@@ -8,6 +8,7 @@ import {
 } from "./changes-timeline-model";
 import type { CommitItem } from "./commit-row";
 import { ChangesTimelineViewport } from "./changes-timeline-viewport";
+import { ChangesPanelVisibilityContext } from "./changes-panel-visibility";
 
 const virtualizerTestHooks = vi.hoisted(() => ({ measure: vi.fn() }));
 
@@ -33,6 +34,7 @@ type DeepGroupedTestRow = { key: string; section: string; repository: string; co
 type FocusFallbackRow = { key: string; section: string; label: string };
 const SCROLL_VIEWPORT_TEST_ID = "scroll-viewport";
 const TIMELINE_ROW_SELECTOR = "[data-changes-timeline-row]";
+const ANCHOR_ROW_TEST_ID = "timeline-row-10";
 
 const resizeObservers: ControlledResizeObserver[] = [];
 const originalFontsProperty = Object.getOwnPropertyDescriptor(document, "fonts");
@@ -76,21 +78,47 @@ class ControlledResizeObserver {
   }
 }
 
-function TestViewport({ rows, estimate = 28 }: { rows: TestRow[]; estimate?: number }) {
+function TestViewport({
+  rows,
+  estimate = 28,
+  visible = true,
+  contextKey,
+  focusRequest,
+  focusable = false,
+}: {
+  rows: TestRow[];
+  estimate?: number;
+  visible?: boolean;
+  contextKey?: string;
+  focusRequest?: { rowKey: string; token: number };
+  focusable?: boolean;
+}) {
   const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null);
   return (
-    <div
-      ref={setScrollElement}
-      data-testid="scroll-viewport"
-      style={{ height: 600, overflow: "auto" }}
-    >
-      <ChangesTimelineViewport
-        rows={rows}
-        scrollElement={scrollElement}
-        estimateSize={() => estimate}
-        renderRow={(row) => <div data-testid={`timeline-row-${row.index}`}>{row.index}</div>}
-      />
-    </div>
+    <ChangesPanelVisibilityContext.Provider value={visible}>
+      <div
+        ref={setScrollElement}
+        data-testid="scroll-viewport"
+        style={{ height: 600, overflow: "auto" }}
+      >
+        <ChangesTimelineViewport
+          rows={rows}
+          scrollElement={scrollElement}
+          estimateSize={() => estimate}
+          contextKey={contextKey}
+          focusRequest={focusRequest}
+          renderRow={(row) =>
+            focusable ? (
+              <button data-changes-row-focus data-testid={`timeline-row-${row.index}`}>
+                {row.index}
+              </button>
+            ) : (
+              <div data-testid={`timeline-row-${row.index}`}>{row.index}</div>
+            )
+          }
+        />
+      </div>
+    </ChangesPanelVisibilityContext.Provider>
   );
 }
 
@@ -331,7 +359,7 @@ it("remeasures rows when width, locale, font, or pointer mode changes and preser
     scrollViewport.scrollTop = 280;
     scrollViewport.dispatchEvent(new Event("scroll"));
   });
-  await waitFor(() => expect(screen.getByTestId("timeline-row-10")).toBeTruthy());
+  await waitFor(() => expect(screen.getByTestId(ANCHOR_ROW_TEST_ID)).toBeTruthy());
   const anchorScrollTop = scrollViewport.scrollTop;
   measure.mockClear();
 
@@ -468,3 +496,137 @@ it.each(["pr", "commits"] as const)(
     expect(view.container.querySelectorAll(TIMELINE_ROW_SELECTOR).length).toBeLessThanOrEqual(120);
   },
 );
+
+const visibilityRows = Array.from({ length: 200 }, (_, index) => ({
+  key: `visibility-row-${index}`,
+  index,
+}));
+
+function initializeVisibilityScroll(offset = 280) {
+  const scroll = screen.getByTestId(SCROLL_VIEWPORT_TEST_ID);
+  Object.defineProperty(scroll, "scrollHeight", { configurable: true, value: 10_000 });
+  Object.defineProperty(scroll, "clientHeight", { configurable: true, value: 600 });
+  act(() => resizeObservers.forEach((observer) => observer.emitTarget(scroll, 800, 600)));
+  act(() => {
+    scroll.scrollTop = offset;
+    scroll.dispatchEvent(new Event("scroll"));
+  });
+  expect(scroll.scrollTop).toBe(offset);
+  return scroll;
+}
+
+it("does not read a hidden timeline's scroll anchor when its rows change", () => {
+  const view = render(<TestViewport rows={visibilityRows} visible={false} />);
+  const scroll = screen.getByTestId(SCROLL_VIEWPORT_TEST_ID);
+  const read = vi.fn(() => 0);
+  Object.defineProperty(scroll, "scrollTop", { configurable: true, get: read, set: vi.fn() });
+
+  view.rerender(<TestViewport rows={[...visibilityRows]} visible={false} />);
+
+  expect(read).not.toHaveBeenCalled();
+});
+
+it("defers hidden presentation invalidation and restores the visible row after an insert", async () => {
+  const fonts = new EventTarget();
+  Object.defineProperty(document, "fonts", { configurable: true, value: fonts });
+  const view = render(<TestViewport rows={visibilityRows} />);
+  const scroll = initializeVisibilityScroll();
+  await waitFor(() => expect(screen.getByTestId(ANCHOR_ROW_TEST_ID)).toBeTruthy());
+  view.rerender(<TestViewport rows={visibilityRows} visible={false} />);
+  // A hidden scroll owner can report zero while its retained row anchor is still meaningful.
+  scroll.scrollTop = 0;
+  const changedRows = [{ key: "inserted-row", index: -1 }, ...visibilityRows];
+  virtualizerTestHooks.measure.mockClear();
+  view.rerender(<TestViewport rows={changedRows} visible={false} />);
+  act(() => fonts.dispatchEvent(new Event("loadingdone")));
+  expect(virtualizerTestHooks.measure).not.toHaveBeenCalled();
+
+  view.rerender(<TestViewport rows={changedRows} />);
+
+  await waitFor(() => expect(scroll.scrollTop).toBe(308));
+  expect(virtualizerTestHooks.measure).toHaveBeenCalled();
+  expect(screen.getByTestId(ANCHOR_ROW_TEST_ID)).toBeTruthy();
+});
+
+it("resets the old context's anchor when a different hidden context becomes visible", async () => {
+  const view = render(<TestViewport rows={visibilityRows} contextKey="context-a" />);
+  const scroll = initializeVisibilityScroll();
+  await waitFor(() => expect(screen.getByTestId(ANCHOR_ROW_TEST_ID)).toBeTruthy());
+  view.rerender(<TestViewport rows={visibilityRows} contextKey="context-a" visible={false} />);
+  const nextRows = visibilityRows.map((row) => ({ ...row, key: `next-${row.key}` }));
+  view.rerender(<TestViewport rows={nextRows} contextKey="context-b" visible={false} />);
+
+  view.rerender(<TestViewport rows={nextRows} contextKey="context-b" />);
+
+  await waitFor(() => expect(scroll.scrollTop).toBe(0));
+  act(() => scroll.dispatchEvent(new Event("scroll")));
+  await waitFor(() => expect(screen.getByTestId("timeline-row-0")).toBeTruthy());
+});
+
+function controlFocusRequestFrames() {
+  const frames = new Map<number, FrameRequestCallback>();
+  let frameId = 0;
+  vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+    frames.set(++frameId, callback);
+    return frameId;
+  });
+  vi.stubGlobal("cancelAnimationFrame", (id: number) => frames.delete(id));
+  const flushFrames = () => {
+    for (let i = 0; i < 5 && frames.size > 0; i++) {
+      const pending = [...frames.values()];
+      frames.clear();
+      act(() => pending.forEach((callback) => callback(performance.now())));
+    }
+  };
+  return { frames, flushFrames };
+}
+
+it("defers a hidden focus request until the retained timeline is visible", () => {
+  const { flushFrames } = controlFocusRequestFrames();
+  const view = render(<TestViewport rows={visibilityRows} focusable visible={false} />);
+  initializeVisibilityScroll(0);
+  const outside = document.createElement("button");
+  document.body.append(outside);
+  try {
+    outside.focus();
+    const request = { rowKey: visibilityRows[5].key, token: 1 };
+    view.rerender(
+      <TestViewport rows={visibilityRows} focusable visible={false} focusRequest={request} />,
+    );
+    flushFrames();
+    expect(document.activeElement).toBe(outside);
+
+    view.rerender(<TestViewport rows={visibilityRows} focusable focusRequest={request} />);
+    flushFrames();
+
+    expect(document.activeElement).toBe(screen.getByTestId("timeline-row-5"));
+  } finally {
+    outside.remove();
+  }
+});
+
+it("resumes a still-current focus request canceled by hiding before its frame", () => {
+  const { frames, flushFrames } = controlFocusRequestFrames();
+  const view = render(<TestViewport rows={visibilityRows} focusable />);
+  initializeVisibilityScroll(0);
+  const outside = document.createElement("button");
+  document.body.append(outside);
+  try {
+    outside.focus();
+    const request = { rowKey: visibilityRows[5].key, token: 1 };
+    view.rerender(<TestViewport rows={visibilityRows} focusable focusRequest={request} />);
+    expect(frames.size).toBeGreaterThan(0);
+    view.rerender(
+      <TestViewport rows={visibilityRows} focusable visible={false} focusRequest={request} />,
+    );
+    flushFrames();
+    expect(document.activeElement).toBe(outside);
+
+    view.rerender(<TestViewport rows={visibilityRows} focusable focusRequest={request} />);
+    flushFrames();
+
+    expect(document.activeElement).toBe(screen.getByTestId("timeline-row-5"));
+  } finally {
+    outside.remove();
+  }
+});

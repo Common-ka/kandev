@@ -3,6 +3,7 @@
 import { defaultRangeExtractor, useVirtualizer, type Range } from "@tanstack/react-virtual";
 import {
   useCallback,
+  useContext,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -12,6 +13,7 @@ import {
   type ReactNode,
 } from "react";
 import { measureFileTreeElement } from "./file-tree-measurement";
+import { ChangesPanelVisibilityContext } from "./changes-panel-visibility";
 import {
   captureChangesTimelineAnchor,
   observeChangesTimelinePresentationChanges,
@@ -23,6 +25,7 @@ import {
 import {
   changesTimelineNextIndex,
   isChangesTimelineTextEntry,
+  shouldRetainChangesTimelineFocus,
   type ChangesTimelineNavigationKey,
 } from "./changes-timeline-interaction";
 import {
@@ -72,6 +75,7 @@ export function ChangesTimelineViewport<Row extends ChangesTimelineRowIdentity>(
   contextKey = "",
   focusRequest,
 }: ChangesTimelineViewportProps<Row>) {
+  const isVisible = useContext(ChangesPanelVisibilityContext);
   const viewportRef = useRef<HTMLDivElement>(null);
   const focusState = useTimelineViewportFocusState<Row>(rows, contextKey, focusRequest);
   const { focusedRowKey } = focusState;
@@ -104,6 +108,7 @@ export function ChangesTimelineViewport<Row extends ChangesTimelineRowIdentity>(
   const visibleItems = virtualizer.getVirtualItems();
   const groupTree = buildVisibleGroupTree(visibleItems, rows, getRowGroups);
   useTimelineViewportLifecycle({
+    isVisible,
     rows,
     scrollElement,
     contextKey,
@@ -199,6 +204,7 @@ function resolveRowGroups<Row extends ChangesTimelineRowIdentity>(
 }
 
 function useTimelineViewportLifecycle<Row extends ChangesTimelineRowIdentity>({
+  isVisible,
   rows,
   scrollElement,
   contextKey,
@@ -209,6 +215,7 @@ function useTimelineViewportLifecycle<Row extends ChangesTimelineRowIdentity>({
   state,
   getRowGroups,
 }: {
+  isVisible: boolean;
   rows: Row[];
   scrollElement: HTMLDivElement | null;
   contextKey: string;
@@ -219,17 +226,19 @@ function useTimelineViewportLifecycle<Row extends ChangesTimelineRowIdentity>({
   state: ViewportFocusState<Row>;
   getRowGroups: (row: Row) => ChangesTimelineGroup[];
 }) {
-  const latestPresentationStateRef = useRef({ rows, scrollElement, virtualizer, state });
-  latestPresentationStateRef.current = { rows, scrollElement, virtualizer, state };
+  const previousVisibleRef = useRef(isVisible);
+  const latestPresentationStateRef = useRef({ rows, scrollElement, virtualizer, state, isVisible });
+  latestPresentationStateRef.current = { rows, scrollElement, virtualizer, state, isVisible };
   const cancelFocusRequestFrames = useCallback(() => {
     state.focusRequestFramesRef.current.forEach((frame) => cancelAnimationFrame(frame));
     state.focusRequestFramesRef.current = [];
   }, [state.focusRequestFramesRef]);
 
   useLayoutEffect(() => {
-    if (!scrollElement) return;
+    if (!scrollElement || !isVisible) return;
     return observeChangesTimelinePresentationChanges(scrollElement, () => {
       const current = latestPresentationStateRef.current;
+      if (!current.isVisible) return;
       const anchor = captureChangesTimelineAnchor(
         current.rows,
         current.virtualizer.getVirtualItems(),
@@ -238,10 +247,20 @@ function useTimelineViewportLifecycle<Row extends ChangesTimelineRowIdentity>({
       refreshChangesTimelineMeasurements(viewportRef.current, current.virtualizer);
       current.state.pendingPresentationAnchorRef.current = anchor;
     });
-  }, [scrollElement, virtualizer]);
+  }, [scrollElement, virtualizer, isVisible]);
 
   useLayoutEffect(() => cancelFocusRequestFrames, [cancelFocusRequestFrames]);
   useLayoutEffect(() => {
+    const wasVisible = previousVisibleRef.current;
+    previousVisibleRef.current = isVisible;
+    if (!isVisible) {
+      state.previousRowsRef.current = rows;
+      if (state.focusRequestFramesRef.current.length > 0) {
+        state.previousFocusRequestRef.current = undefined;
+      }
+      cancelFocusRequestFrames();
+      return;
+    }
     const contextChanged = resetTimelineContext({
       contextKey,
       focusRequest,
@@ -251,6 +270,10 @@ function useTimelineViewportLifecycle<Row extends ChangesTimelineRowIdentity>({
       state,
       cancelFocusRequestFrames,
     });
+    if (!wasVisible) {
+      refreshChangesTimelineMeasurements(viewportRef.current, virtualizer);
+      if (!contextChanged) state.pendingPresentationAnchorRef.current = state.anchorRef.current;
+    }
     if (!contextChanged) {
       restoreTimelineAnchor(rows, indexByKey, virtualizer, state);
       restorePresentationAnchor(rows, indexByKey, virtualizer, state);
@@ -460,7 +483,7 @@ function useTimelineViewportHandlers<Row extends ChangesTimelineRowIdentity>({
   const handleBlurCapture = useCallback(
     (event: FocusEvent<HTMLDivElement>) => {
       const nextTarget = event.relatedTarget;
-      if (shouldRetainTimelineFocus(nextTarget, viewportRef.current)) return;
+      if (shouldRetainChangesTimelineFocus(nextTarget, viewportRef.current)) return;
       state.setFocusedRowKey(null);
     },
     [state, viewportRef],
@@ -484,19 +507,6 @@ function useTimelineViewportHandlers<Row extends ChangesTimelineRowIdentity>({
     [getRowGroups, indexByKey, rows, state, virtualizer],
   );
   return { handleFocusCapture, handleBlurCapture, handleKeyDownCapture };
-}
-
-function shouldRetainTimelineFocus(
-  target: EventTarget | null,
-  viewport: HTMLDivElement | null,
-): boolean {
-  if (!(target instanceof Element)) return false;
-  if (viewport?.contains(target)) return true;
-  return Boolean(
-    target.closest(
-      '[role="menu"], [role="dialog"], [role="listbox"], [data-radix-popper-content-wrapper]',
-    ),
-  );
 }
 
 function isTimelineNavigationEvent(

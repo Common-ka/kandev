@@ -19,3 +19,16 @@ export function isChangesTimelineTextEntry(target: EventTarget | null): boolean 
     ),
   );
 }
+
+export function shouldRetainChangesTimelineFocus(
+  target: EventTarget | null,
+  viewport: HTMLDivElement | null,
+): boolean {
+  if (!(target instanceof Element)) return false;
+  if (viewport?.contains(target)) return true;
+  return Boolean(
+    target.closest(
+      '[role="menu"], [role="dialog"], [role="listbox"], [data-radix-popper-content-wrapper]',
+    ),
+  );
+}

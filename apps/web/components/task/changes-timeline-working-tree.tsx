@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useContext, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { IconChevronDown, IconChevronRight } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import { useMultiSelect } from "@/hooks/use-multi-select";
@@ -9,6 +9,7 @@ import { useDockviewStore } from "@/lib/state/dockview-store";
 import { useAppStore } from "@/components/state-provider";
 import { Button } from "@kandev/ui/button";
 import type { OpenDiffOptions } from "@/lib/state/diff-target-types";
+import { ChangesPanelVisibilityContext } from "./changes-panel-visibility";
 import { FileRow, BulkActionTargetBar } from "./changes-panel-file-row";
 import { FileSectionActions } from "./changes-panel-repo-groups";
 import { TreeDirRow } from "./changes-panel-tree";
@@ -243,12 +244,13 @@ function useWorkingTreeRows(
 }
 
 function useWorkingTreeScrollMargin(props: ChangesWorkingTreeProps) {
+  const isVisible = useContext(ChangesPanelVisibilityContext);
   const [scrollMargin, setScrollMargin] = useState(0);
   const anchorRef = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const anchor = anchorRef.current;
     const scrollElement = props.scrollElement;
-    if (!anchor || !scrollElement) return;
+    if (!anchor || !scrollElement || !isVisible) return;
 
     const updateScrollMargin = () => {
       const top =
@@ -271,7 +273,7 @@ function useWorkingTreeScrollMargin(props: ChangesWorkingTreeProps) {
       observer.disconnect();
       window.removeEventListener("resize", updateScrollMargin);
     };
-  }, [props.scrollElement, props.beforeLayoutKey]);
+  }, [props.scrollElement, props.beforeLayoutKey, isVisible]);
   return { anchorRef, scrollMargin };
 }
 

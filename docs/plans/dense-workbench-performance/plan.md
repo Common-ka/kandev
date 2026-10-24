@@ -190,3 +190,6 @@ not improve, and frame-gap p95 increased 59.93%. All twelve samples passed final
 content checks. The existing six-pair navigation comparison also establishes
 no switching gain. Rendering follow-up, 4x stress, and the remaining scenario
 matrix stay open. See [results.md](results.md) for ranges, errors, and limits.
+
+The [completion audit](completion-audit.md) tracks the remaining scenario,
+artifact, correctness, and delivery proof against the full approved scope.

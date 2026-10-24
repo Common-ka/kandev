@@ -1,0 +1,2017 @@
+{
+  "decision": "retained",
+  "scope": "Defer hidden Dockview Changes presentation measurements and focus work; preserve mounted data and restore the saved row on reveal.",
+  "production": {
+    "candidateAssetsSha256": "131a69e7d91ef0781e6dc3b612aedc69f7f2a3f51cceeca427e053a398a39a12",
+    "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+    "parentDeliveredRevision": "ef17d222ae262549070d7f5473cca2ee4b8d15ac",
+    "productionFiles": [
+      {
+        "path": "apps/web/components/task/changes-panel-visibility.ts",
+        "sha256": "ac7bdc02d48c56ebdbade9d95043077b125c37e205fb31326c3faa3f247ab184"
+      },
+      {
+        "path": "apps/web/components/task/changes-panel.tsx",
+        "sha256": "1fbaab59791059f1688abf694fda7b86f0da7075bc2eb70c824230df01a12ac0"
+      },
+      {
+        "path": "apps/web/components/task/changes-timeline-viewport.tsx",
+        "sha256": "53f02f659073d8da045cedbb72a803f6a6a6c8011a2769eca9166d0073b1c23f"
+      },
+      {
+        "path": "apps/web/components/task/changes-timeline-interaction.ts",
+        "sha256": "e399fb94add4eb75f4556484dc9da90a7a2a16345154bcaa5051a396eda85002"
+      },
+      {
+        "path": "apps/web/components/task/changes-timeline-working-tree.tsx",
+        "sha256": "bd5f047b9253bc6a37b7bf485e25e9b0fdad2d54febfc518cf6ea3051d279067"
+      },
+      {
+        "path": "apps/web/components/task/dockview-panel-content.tsx",
+        "sha256": "7e3baed8bd8a04db1293236ec6ebb1ba47f2708f87f6ca9e0e577a2df2984b5b"
+      }
+    ],
+    "candidatePatchSha256": "252777bac43e1b82900e0d7f26247a53e9f39e717526c4fa3498713ad82784d6",
+    "candidateFiles": [
+      "apps/web/components/task/changes-panel-visibility.ts",
+      "apps/web/components/task/changes-panel.tsx",
+      "apps/web/components/task/changes-timeline-viewport.tsx",
+      "apps/web/components/task/changes-timeline-interaction.ts",
+      "apps/web/components/task/changes-timeline-working-tree.tsx",
+      "apps/web/components/task/dockview-panel-content.tsx",
+      "apps/web/components/task/changes-timeline-viewport.test.tsx",
+      "apps/web/components/task/changes-timeline-working-tree.test.tsx",
+      "apps/web/e2e/tests/layout/changes-panel-hidden-lifecycle.spec.ts"
+    ]
+  },
+  "attribution": {
+    "status": "confirmed_targeted_rendering_gain",
+    "measurementKind": "scroll-read-attribution",
+    "scope": "Existing Dockview Changes presentation effects",
+    "baseline": {
+      "report": "changes-scroll-attribution-1792827705426.json",
+      "assetsSha256": "085df3998be95fbe3df28366479b06bdcec1f2edc18925e8fcfb01164b215041",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "fixture": {
+        "taskCount": 1000,
+        "historyCount": 1000,
+        "switchCount": 40
+      },
+      "counts": [
+        {
+          "phase": "setup",
+          "visibility": "hidden",
+          "caller": "    at cSt (http://localhost:18107/assets/index-Bme56PMG.js:258:186552)",
+          "count": 70
+        },
+        {
+          "phase": "setup",
+          "visibility": "hidden",
+          "caller": "    at a (http://localhost:18107/assets/index-Bme56PMG.js:258:191738)",
+          "count": 5
+        },
+        {
+          "phase": "setup",
+          "visibility": "hidden",
+          "caller": "    at ResizeObserver.a (http://localhost:18107/assets/index-Bme56PMG.js:258:191738)",
+          "count": 5
+        },
+        {
+          "phase": "setup",
+          "visibility": "hidden",
+          "caller": "    at http://localhost:18107/assets/index-Bme56PMG.js:258:184008",
+          "count": 2
+        },
+        {
+          "phase": "task-switches",
+          "visibility": "hidden",
+          "caller": "    at cSt (http://localhost:18107/assets/index-Bme56PMG.js:258:186552)",
+          "count": 640
+        },
+        {
+          "phase": "task-switches",
+          "visibility": "hidden",
+          "caller": "    at a (http://localhost:18107/assets/index-Bme56PMG.js:258:191738)",
+          "count": 40
+        },
+        {
+          "phase": "task-switches",
+          "visibility": "hidden",
+          "caller": "    at ResizeObserver.a (http://localhost:18107/assets/index-Bme56PMG.js:258:191738)",
+          "count": 40
+        },
+        {
+          "phase": "show-changes",
+          "visibility": "visible",
+          "caller": "    at cSt (http://localhost:18107/assets/index-Bme56PMG.js:258:186552)",
+          "count": 4
+        },
+        {
+          "phase": "show-changes",
+          "visibility": "visible",
+          "caller": "    at a (http://localhost:18107/assets/index-Bme56PMG.js:258:191738)",
+          "count": 1
+        },
+        {
+          "phase": "show-changes",
+          "visibility": "visible",
+          "caller": "    at http://localhost:18107/assets/index-Bme56PMG.js:258:184008",
+          "count": 1
+        },
+        {
+          "phase": "show-changes",
+          "visibility": "visible",
+          "caller": "    at ResizeObserver.a (http://localhost:18107/assets/index-Bme56PMG.js:258:191738)",
+          "count": 1
+        }
+      ]
+    },
+    "candidate": {
+      "report": "changes-scroll-attribution-1792829220425.json",
+      "assetsSha256": "131a69e7d91ef0781e6dc3b612aedc69f7f2a3f51cceeca427e053a398a39a12",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "fixture": {
+        "taskCount": 1000,
+        "historyCount": 1000,
+        "switchCount": 40
+      },
+      "counts": [
+        {
+          "phase": "show-changes",
+          "visibility": "visible",
+          "caller": "    at cSt (http://localhost:18107/assets/index-DKKxc9vT.js:258:187124)",
+          "count": 5
+        },
+        {
+          "phase": "show-changes",
+          "visibility": "visible",
+          "caller": "    at o (http://localhost:18107/assets/index-DKKxc9vT.js:258:192170)",
+          "count": 2
+        },
+        {
+          "phase": "show-changes",
+          "visibility": "visible",
+          "caller": "    at http://localhost:18107/assets/index-DKKxc9vT.js:258:184327",
+          "count": 1
+        },
+        {
+          "phase": "show-changes",
+          "visibility": "visible",
+          "caller": "    at ResizeObserver.o (http://localhost:18107/assets/index-DKKxc9vT.js:258:192170)",
+          "count": 1
+        }
+      ]
+    },
+    "diagnosticSourceSha256": "648f7f1c3a00e28c7be5a2af3f37758024fcb91ffd1b2dc16fdb6628433cf5a5",
+    "validationNotes": "hidden-changes-correctness-notes.md",
+    "limits": [
+      "The native getter probe captures stacks and adds overhead. Counts do not establish speed.",
+      "No hidden Changes scrollTop reads were recorded in the candidate setup or task-switch phases. Visible reveal still performs measurements.",
+      "The diagnostic assertion was adjusted to permit zero task-switch reads; instrumentation and fixture are unchanged.",
+      "The Linux host is not an M2 Air."
+    ],
+    "preliminaryTiming": {
+      "measurementKind": "reference-workload",
+      "finalVisibilityProbe": "locator-assertion",
+      "layout": "grid",
+      "extraBusyHeaders": 0,
+      "throttleAfterLoad": false,
+      "machine": {
+        "revision": "c7c639e1cc09d6783121529c0a7e45c516b62d69",
+        "cpu": "11th Gen Intel(R) Core(TM) i7-11700T @ 1.40GHz",
+        "cores": 16,
+        "load": [
+          1.61,
+          1.62,
+          1.49
+        ],
+        "totalMemory": 33303863296,
+        "freeMemory": 22594695168,
+        "platform": "linux 6.18.49"
+      },
+      "builds": {
+        "baseline": {
+          "binary": "/tmp/kandev-dense-owned-motion-5936a872/apps/backend/bin/kandev",
+          "assets": "/tmp/kandev-dense-owned-motion-5936a872/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "085df3998be95fbe3df28366479b06bdcec1f2edc18925e8fcfb01164b215041"
+        },
+        "candidate": {
+          "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+          "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "131a69e7d91ef0781e6dc3b612aedc69f7f2a3f51cceeca427e053a398a39a12"
+        }
+      },
+      "sampleCount": 4,
+      "comparisons": [
+        {
+          "group": "1x/task-switch",
+          "metric": "elapsedMs",
+          "pairs": 2,
+          "baseline": {
+            "median": 39910.639150999996,
+            "min": 38404.364256,
+            "max": 41416.91404599999,
+            "values": [
+              38404.364256,
+              41416.91404599999
+            ]
+          },
+          "candidate": {
+            "median": 39591.9747245,
+            "min": 38751.60960100003,
+            "max": 40432.339847999974,
+            "values": [
+              38751.60960100003,
+              40432.339847999974
+            ]
+          },
+          "pairedAbsoluteReduction": [
+            -347.2453450000321,
+            984.5741980000166
+          ],
+          "pairedPercentReduction": [
+            -0.9041819900606248,
+            2.3772273253060145
+          ],
+          "medianPairedPercentReduction": 0.7365226676226948
+        },
+        {
+          "group": "1x/task-switch",
+          "metric": "mainThreadMs",
+          "pairs": 2,
+          "baseline": {
+            "median": 38007.899000000005,
+            "min": 37577.125,
+            "max": 38438.673,
+            "values": [
+              37577.125,
+              38438.673
+            ]
+          },
+          "candidate": {
+            "median": 37994.929000000004,
+            "min": 37825.312999999995,
+            "max": 38164.545000000006,
+            "values": [
+              37825.312999999995,
+              38164.545000000006
+            ]
+          },
+          "pairedAbsoluteReduction": [
+            -248.18799999999464,
+            274.127999999997
+          ],
+          "pairedPercentReduction": [
+            -0.6604762871028442,
+            0.7131567731279301
+          ],
+          "medianPairedPercentReduction": 0.026340243012542952
+        },
+        {
+          "group": "1x/task-switch",
+          "metric": "mainThreadMsPerSecond",
+          "pairs": 2,
+          "baseline": {
+            "median": 953.2754740518698,
+            "min": 928.091188959849,
+            "max": 978.4597591438906,
+            "values": [
+              978.4597591438906,
+              928.091188959849
+            ]
+          },
+          "candidate": {
+            "median": 960.0039635570511,
+            "min": 943.9113626239431,
+            "max": 976.0965644901589,
+            "values": [
+              976.0965644901589,
+              943.9113626239431
+            ]
+          },
+          "pairedAbsoluteReduction": [
+            2.3631946537316253,
+            -15.820173664094114
+          ],
+          "pairedPercentReduction": [
+            0.24152190538722995,
+            -1.7045925930860792
+          ],
+          "medianPairedPercentReduction": -0.7315353438494246
+        },
+        {
+          "group": "1x/task-switch",
+          "metric": "mainThreadCpuMs",
+          "pairs": 2,
+          "baseline": {
+            "median": 37178.646,
+            "min": 36739.646,
+            "max": 37617.646,
+            "values": [
+              36739.646,
+              37617.646
+            ]
+          },
+          "candidate": {
+            "median": 37166.1975,
+            "min": 36952.30100000001,
+            "max": 37380.094,
+            "values": [
+              36952.30100000001,
+              37380.094
+            ]
+          },
+          "pairedAbsoluteReduction": [
+            -212.6550000000061,
+            237.55200000000332
+          ],
+          "pairedPercentReduction": [
+            -0.5788161377494114,
+            0.6314908700028793
+          ],
+          "medianPairedPercentReduction": 0.02633736612673393
+        },
+        {
+          "group": "1x/task-switch",
+          "metric": "rendererCpuMs",
+          "pairs": 2,
+          "baseline": {
+            "median": 49695,
+            "min": 49349.99999999999,
+            "max": 50040.00000000001,
+            "values": [
+              49349.99999999999,
+              50040.00000000001
+            ]
+          },
+          "candidate": {
+            "median": 49845,
+            "min": 49840,
+            "max": 49849.99999999999,
+            "values": [
+              49849.99999999999,
+              49840
+            ]
+          },
+          "pairedAbsoluteReduction": [
+            -500,
+            200.00000000000728
+          ],
+          "pairedPercentReduction": [
+            -1.0131712259371835,
+            0.3996802557953782
+          ],
+          "medianPairedPercentReduction": -0.3067454850709026
+        },
+        {
+          "group": "1x/task-switch",
+          "metric": "scriptMs",
+          "pairs": 2,
+          "baseline": {
+            "median": 24740.723,
+            "min": 24660.675000000003,
+            "max": 24820.771,
+            "values": [
+              24660.675000000003,
+              24820.771
+            ]
+          },
+          "candidate": {
+            "median": 25012.879,
+            "min": 24995.949,
+            "max": 25029.809,
+            "values": [
+              24995.949,
+              25029.809
+            ]
+          },
+          "pairedAbsoluteReduction": [
+            -335.2739999999976,
+            -209.03800000000047
+          ],
+          "pairedPercentReduction": [
+            -1.3595491607589718,
+            -0.8421897933791036
+          ],
+          "medianPairedPercentReduction": -1.1008694770690377
+        },
+        {
+          "group": "1x/task-switch",
+          "metric": "styleMs",
+          "pairs": 2,
+          "baseline": {
+            "median": 5008.013499999999,
+            "min": 4905.346,
+            "max": 5110.681,
+            "values": [
+              4905.346,
+              5110.681
+            ]
+          },
+          "candidate": {
+            "median": 4625.6955,
+            "min": 4607.244,
+            "max": 4644.147,
+            "values": [
+              4607.244,
+              4644.147
+            ]
+          },
+          "pairedAbsoluteReduction": [
+            298.10199999999986,
+            466.53399999999965
+          ],
+          "pairedPercentReduction": [
+            6.077084062979449,
+            9.12860732258577
+          ],
+          "medianPairedPercentReduction": 7.60284569278261
+        },
+        {
+          "group": "1x/task-switch",
+          "metric": "layoutMs",
+          "pairs": 2,
+          "baseline": {
+            "median": 357.37250000000006,
+            "min": 352.2850000000001,
+            "max": 362.46,
+            "values": [
+              352.2850000000001,
+              362.46
+            ]
+          },
+          "candidate": {
+            "median": 353.85850000000005,
+            "min": 345.57,
+            "max": 362.14700000000005,
+            "values": [
+              345.57,
+              362.14700000000005
+            ]
+          },
+          "pairedAbsoluteReduction": [
+            6.715000000000089,
+            0.31299999999993133
+          ],
+          "pairedPercentReduction": [
+            1.9061271413770349,
+            0.08635435634274992
+          ],
+          "medianPairedPercentReduction": 0.9962407488598924
+        },
+        {
+          "group": "1x/task-switch",
+          "metric": "styleRecalculations",
+          "pairs": 2,
+          "baseline": {
+            "median": 2139,
+            "min": 2063,
+            "max": 2215,
+            "values": [
+              2063,
+              2215
+            ]
+          },
+          "candidate": {
+            "median": 1871,
+            "min": 1826,
+            "max": 1916,
+            "values": [
+              1826,
+              1916
+            ]
+          },
+          "pairedAbsoluteReduction": [
+            237,
+            299
+          ],
+          "pairedPercentReduction": [
+            11.488124091129423,
+            13.498871331828443
+          ],
+          "medianPairedPercentReduction": 12.493497711478934
+        },
+        {
+          "group": "1x/task-switch",
+          "metric": "layouts",
+          "pairs": 2,
+          "baseline": {
+            "median": 1009.5,
+            "min": 1000,
+            "max": 1019,
+            "values": [
+              1000,
+              1019
+            ]
+          },
+          "candidate": {
+            "median": 952.5,
+            "min": 930,
+            "max": 975,
+            "values": [
+              930,
+              975
+            ]
+          },
+          "pairedAbsoluteReduction": [
+            70,
+            44
+          ],
+          "pairedPercentReduction": [
+            7,
+            4.317958783120707
+          ],
+          "medianPairedPercentReduction": 5.6589793915603535
+        },
+        {
+          "group": "1x/task-switch",
+          "metric": "frameGapP95Ms",
+          "pairs": 2,
+          "baseline": {
+            "median": 133.35000000000036,
+            "min": 133.29999999999927,
+            "max": 133.40000000000146,
+            "values": [
+              133.40000000000146,
+              133.29999999999927
+            ]
+          },
+          "candidate": {
+            "median": 125.050000000002,
+            "min": 116.70000000000437,
+            "max": 133.39999999999964,
+            "values": [
+              133.39999999999964,
+              116.70000000000437
+            ]
+          },
+          "pairedAbsoluteReduction": [
+            1.8189894035458565e-12,
+            16.599999999994907
+          ],
+          "pairedPercentReduction": [
+            1.363560272523116e-12,
+            12.453113278315827
+          ],
+          "medianPairedPercentReduction": 6.226556639158596
+        },
+        {
+          "group": "1x/task-switch",
+          "metric": "frameGapMaxMs",
+          "pairs": 2,
+          "baseline": {
+            "median": 316.6500000000001,
+            "min": 300,
+            "max": 333.3000000000002,
+            "values": [
+              333.3000000000002,
+              300
+            ]
+          },
+          "candidate": {
+            "median": 308.35000000000036,
+            "min": 300,
+            "max": 316.7000000000007,
+            "values": [
+              316.7000000000007,
+              300
+            ]
+          },
+          "pairedAbsoluteReduction": [
+            16.599999999999454,
+            0
+          ],
+          "pairedPercentReduction": [
+            4.980498049804814,
+            0
+          ],
+          "medianPairedPercentReduction": 2.490249024902407
+        },
+        {
+          "group": "1x/task-switch",
+          "metric": "longTasks",
+          "pairs": 2,
+          "baseline": {
+            "median": 115.5,
+            "min": 112,
+            "max": 119,
+            "values": [
+              112,
+              119
+            ]
+          },
+          "candidate": {
+            "median": 102.5,
+            "min": 97,
+            "max": 108,
+            "values": [
+              97,
+              108
+            ]
+          },
+          "pairedAbsoluteReduction": [
+            15,
+            11
+          ],
+          "pairedPercentReduction": [
+            13.392857142857142,
+            9.243697478991596
+          ],
+          "medianPairedPercentReduction": 11.318277310924369
+        },
+        {
+          "group": "1x/task-switch",
+          "metric": "longTaskMs",
+          "pairs": 2,
+          "baseline": {
+            "median": 16256.5,
+            "min": 15864,
+            "max": 16649,
+            "values": [
+              15864,
+              16649
+            ]
+          },
+          "candidate": {
+            "median": 15622.5,
+            "min": 15142,
+            "max": 16103,
+            "values": [
+              15142,
+              16103
+            ]
+          },
+          "pairedAbsoluteReduction": [
+            722,
+            546
+          ],
+          "pairedPercentReduction": [
+            4.551185073121533,
+            3.2794762448195085
+          ],
+          "medianPairedPercentReduction": 3.915330658970521
+        },
+        {
+          "group": "1x/task-switch",
+          "metric": "domNodes",
+          "pairs": 2,
+          "baseline": {
+            "median": 6117,
+            "min": 6116,
+            "max": 6118,
+            "values": [
+              6116,
+              6118
+            ]
+          },
+          "candidate": {
+            "median": 6116,
+            "min": 6116,
+            "max": 6116,
+            "values": [
+              6116,
+              6116
+            ]
+          },
+          "pairedAbsoluteReduction": [
+            0,
+            2
+          ],
+          "pairedPercentReduction": [
+            0,
+            0.032690421706440015
+          ],
+          "medianPairedPercentReduction": 0.016345210853220007
+        },
+        {
+          "group": "1x/task-switch",
+          "metric": "mountedEditors",
+          "pairs": 2,
+          "baseline": {
+            "median": 1,
+            "min": 1,
+            "max": 1,
+            "values": [
+              1,
+              1
+            ]
+          },
+          "candidate": {
+            "median": 1,
+            "min": 1,
+            "max": 1,
+            "values": [
+              1,
+              1
+            ]
+          },
+          "pairedAbsoluteReduction": [
+            0,
+            0
+          ],
+          "pairedPercentReduction": [
+            0,
+            0
+          ],
+          "medianPairedPercentReduction": 0
+        },
+        {
+          "group": "1x/task-switch",
+          "metric": "runningAnimations",
+          "pairs": 2,
+          "baseline": {
+            "median": 4,
+            "min": 4,
+            "max": 4,
+            "values": [
+              4,
+              4
+            ]
+          },
+          "candidate": {
+            "median": 3,
+            "min": 2,
+            "max": 4,
+            "values": [
+              4,
+              2
+            ]
+          },
+          "pairedAbsoluteReduction": [
+            0,
+            2
+          ],
+          "pairedPercentReduction": [
+            0,
+            50
+          ],
+          "medianPairedPercentReduction": 25
+        },
+        {
+          "group": "1x/task-switch",
+          "metric": "selectionP50Ms",
+          "pairs": 2,
+          "baseline": {
+            "median": 976.8577942499978,
+            "min": 942.3743374999904,
+            "max": 1011.3412510000053,
+            "values": [
+              942.3743374999904,
+              1011.3412510000053
+            ]
+          },
+          "candidate": {
+            "median": 972.2668827499874,
+            "min": 955.2824739999778,
+            "max": 989.251291499997,
+            "values": [
+              955.2824739999778,
+              989.251291499997
+            ]
+          },
+          "pairedAbsoluteReduction": [
+            -12.90813649998745,
+            22.089959500008263
+          ],
+          "pairedPercentReduction": [
+            -1.3697461811440277,
+            2.1842241160603213
+          ],
+          "medianPairedPercentReduction": 0.4072389674581468
+        },
+        {
+          "group": "1x/task-switch",
+          "metric": "selectionP95Ms",
+          "pairs": 2,
+          "baseline": {
+            "median": 1045.7359750000178,
+            "min": 1013.0688139999984,
+            "max": 1078.4031360000372,
+            "values": [
+              1013.0688139999984,
+              1078.4031360000372
+            ]
+          },
+          "candidate": {
+            "median": 1034.5507360000338,
+            "min": 1009.5489960000268,
+            "max": 1059.5524760000408,
+            "values": [
+              1009.5489960000268,
+              1059.5524760000408
+            ]
+          },
+          "pairedAbsoluteReduction": [
+            3.519817999971565,
+            18.850659999996424
+          ],
+          "pairedPercentReduction": [
+            0.34744115615146853,
+            1.7480160591813945
+          ],
+          "medianPairedPercentReduction": 1.0477286076664316
+        },
+        {
+          "group": "1x/task-switch",
+          "metric": "requests",
+          "pairs": 2,
+          "baseline": {
+            "median": 1443.5,
+            "min": 1443,
+            "max": 1444,
+            "values": [
+              1443,
+              1444
+            ]
+          },
+          "candidate": {
+            "median": 1443.5,
+            "min": 1443,
+            "max": 1444,
+            "values": [
+              1443,
+              1444
+            ]
+          },
+          "pairedAbsoluteReduction": [
+            0,
+            0
+          ],
+          "pairedPercentReduction": [
+            0,
+            0
+          ],
+          "medianPairedPercentReduction": 0
+        }
+      ],
+      "notes": [
+        "Extra busy headers are backend-seeded status rows, not additional live executions. The six canonical stream producers remain unchanged. Busy-header variants must not be pooled with the default workload.",
+        "mainThreadMs and mainThreadMsPerSecond use TaskDuration with timeTicks: elapsed time in main-thread tasks, not thread CPU time. Script, style, and layout durations use the same elapsed-time domain.",
+        "mainThreadCpuMs uses ThreadTime (renderer main-thread CPU). rendererCpuMs uses ProcessTime (renderer-process CPU); it excludes separate browser, GPU, and backend processes.",
+        "Positive reduction means a lower candidate value. Counts such as mounted editors are observations, not optimization scores.",
+        "Final-content probe versions must not be pooled. Locator-assertion retries can collect page-wide ARIA snapshots; boolean polling retains the same visibility gate without those snapshots.",
+        "Streaming duration includes the wait for final visible content. Fixed-deadline traffic is retained in the raw report.",
+        "Frame gaps and driver DOM readiness are not INP. Linux CPU throttling is not an M2 Air simulation.",
+        "History decoded bytes include captured requests and responses. They are not compressed network transfer."
+      ]
+    }
+  },
+  "confirmation": {
+    "measurementKind": "reference-workload",
+    "finalVisibilityProbe": "locator-assertion",
+    "layout": "grid",
+    "extraBusyHeaders": 0,
+    "throttleAfterLoad": false,
+    "machine": {
+      "revision": "c7c639e1cc09d6783121529c0a7e45c516b62d69",
+      "cpu": "11th Gen Intel(R) Core(TM) i7-11700T @ 1.40GHz",
+      "cores": 16,
+      "load": [
+        1.95,
+        1.93,
+        1.76
+      ],
+      "totalMemory": 33303863296,
+      "freeMemory": 22614700032,
+      "platform": "linux 6.18.49"
+    },
+    "builds": {
+      "baseline": {
+        "binary": "/tmp/kandev-dense-owned-motion-5936a872/apps/backend/bin/kandev",
+        "assets": "/tmp/kandev-dense-owned-motion-5936a872/apps/web/dist",
+        "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+        "assetsSha256": "085df3998be95fbe3df28366479b06bdcec1f2edc18925e8fcfb01164b215041"
+      },
+      "candidate": {
+        "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+        "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+        "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+        "assetsSha256": "131a69e7d91ef0781e6dc3b612aedc69f7f2a3f51cceeca427e053a398a39a12"
+      }
+    },
+    "sampleCount": 12,
+    "comparisons": [
+      {
+        "group": "1x/task-switch",
+        "metric": "elapsedMs",
+        "pairs": 6,
+        "baseline": {
+          "median": 43377.34217250004,
+          "min": 38235.674703000026,
+          "max": 48408.37886500009,
+          "values": [
+            38235.674703000026,
+            41386.267054000054,
+            42316.52508300007,
+            44438.159262,
+            44985.069034999935,
+            48408.37886500009
+          ]
+        },
+        "candidate": {
+          "median": 42268.40007600002,
+          "min": 40266.552795000025,
+          "max": 45692.88816900016,
+          "values": [
+            40266.552795000025,
+            40371.95192600007,
+            41894.27850200003,
+            42642.52165000001,
+            44787.25431999995,
+            45692.88816900016
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          -2030.878091999999,
+          1014.3151279999875,
+          422.2465810000431,
+          1795.6376119999913,
+          197.81471499998588,
+          2715.4906959999353
+        ],
+        "pairedPercentReduction": [
+          -5.31147444833935,
+          2.4508495213557855,
+          0.9978290518227672,
+          4.040756057003195,
+          0.43973415900746804,
+          5.609546858763476
+        ],
+        "medianPairedPercentReduction": 1.7243392865892764
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "mainThreadMs",
+        "pairs": 6,
+        "baseline": {
+          "median": 39424.296,
+          "min": 37569.049,
+          "max": 39910.320999999996,
+          "values": [
+            37569.049,
+            38858.917,
+            39310.122,
+            39649.92,
+            39538.469999999994,
+            39910.320999999996
+          ]
+        },
+        "candidate": {
+          "median": 38481.318,
+          "min": 38169.212,
+          "max": 39294.542,
+          "values": [
+            39294.542,
+            38303.89,
+            38169.212,
+            38307.205,
+            38751.575000000004,
+            38655.431
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          -1725.4930000000022,
+          555.0270000000019,
+          1140.9100000000035,
+          1342.7149999999965,
+          786.8949999999895,
+          1254.8899999999994
+        ],
+        "pairedPercentReduction": [
+          -4.592857806967651,
+          1.4283130947782252,
+          2.9023313639169155,
+          3.3864254959404625,
+          1.99020093594919,
+          3.1442743845633303
+        ],
+        "medianPairedPercentReduction": 2.4462661499330527
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "mainThreadMsPerSecond",
+        "pairs": 6,
+        "baseline": {
+          "median": 910.6018874472913,
+          "min": 824.4506826246084,
+          "max": 982.5653474620726,
+          "values": [
+            982.5653474620726,
+            938.9326403683035,
+            928.9543960166086,
+            892.2493788779742,
+            878.9242930634986,
+            824.4506826246084
+          ]
+        },
+        "candidate": {
+          "median": 904.7088031730618,
+          "min": 845.983533740057,
+          "max": 975.8605907997985,
+          "values": [
+            975.8605907997985,
+            948.7747847864595,
+            911.084123293299,
+            898.3334830528248,
+            865.2366747718962,
+            845.983533740057
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          6.7047566622741215,
+          -9.842144418155954,
+          17.870272723309654,
+          -6.084104174850609,
+          13.687618291602348,
+          -21.532851115448693
+        ],
+        "pairedPercentReduction": [
+          0.6823725953283659,
+          -1.0482268903012357,
+          1.923697524866458,
+          -0.6818838229398961,
+          1.5573148221781459,
+          -2.6117815861222473
+        ],
+        "medianPairedPercentReduction": 0.0002443861942348913
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "mainThreadCpuMs",
+        "pairs": 6,
+        "baseline": {
+          "median": 38540.1445,
+          "min": 36708.33899999999,
+          "max": 39043.717000000004,
+          "values": [
+            36708.33899999999,
+            37926.291999999994,
+            38430.229,
+            38752.102999999996,
+            38650.060000000005,
+            39043.717000000004
+          ]
+        },
+        "candidate": {
+          "median": 37632.152,
+          "min": 37314.157,
+          "max": 38351.388,
+          "values": [
+            38351.388,
+            37446.00800000001,
+            37314.157,
+            37483.389,
+            37869.914000000004,
+            37780.915
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          -1643.0490000000063,
+          480.2839999999851,
+          1116.0720000000001,
+          1268.7139999999927,
+          780.1460000000006,
+          1262.8020000000033
+        ],
+        "pairedPercentReduction": [
+          -4.4759557222134365,
+          1.26636160476744,
+          2.904151312759547,
+          3.273922966193584,
+          2.0184858703970976,
+          3.2343283299589616
+        ],
+        "medianPairedPercentReduction": 2.4613185915783222
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "rendererCpuMs",
+        "pairs": 6,
+        "baseline": {
+          "median": 51600,
+          "min": 49370.00000000001,
+          "max": 51870.00000000001,
+          "values": [
+            49370.00000000001,
+            50720,
+            51589.99999999999,
+            51819.99999999999,
+            51610,
+            51870.00000000001
+          ]
+        },
+        "candidate": {
+          "median": 50645,
+          "min": 49990.00000000001,
+          "max": 51210,
+          "values": [
+            51210,
+            50170,
+            49990.00000000001,
+            50410.00000000001,
+            50900,
+            50879.99999999999
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          -1839.9999999999927,
+          550,
+          1599.9999999999854,
+          1409.9999999999854,
+          710,
+          990.0000000000146
+        ],
+        "pairedPercentReduction": [
+          -3.726959692120706,
+          1.084384858044164,
+          3.101376235704566,
+          2.720957159397888,
+          1.3757023832590582,
+          1.90861769809141
+        ],
+        "medianPairedPercentReduction": 1.6421600406752341
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "scriptMs",
+        "pairs": 6,
+        "baseline": {
+          "median": 25452.0035,
+          "min": 24720.653000000002,
+          "max": 25550.907,
+          "values": [
+            24720.653000000002,
+            25261.796000000002,
+            25414.228000000003,
+            25550.907,
+            25510.226000000002,
+            25489.779
+          ]
+        },
+        "candidate": {
+          "median": 25227.752999999997,
+          "min": 24932.678,
+          "max": 26111.911999999997,
+          "values": [
+            26111.911999999997,
+            25218.596999999998,
+            24973.036,
+            24932.678,
+            25431.685999999998,
+            25236.909
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          -1391.2589999999946,
+          43.19900000000416,
+          441.19200000000274,
+          618.2289999999994,
+          78.54000000000451,
+          252.86999999999898
+        ],
+        "pairedPercentReduction": [
+          -5.6279217219706705,
+          0.1710052602752558,
+          1.736003942358598,
+          2.4195970812308127,
+          0.3078765354724984,
+          0.9920446936789801
+        ],
+        "medianPairedPercentReduction": 0.6499606145757393
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "styleMs",
+        "pairs": 6,
+        "baseline": {
+          "median": 5211.425499999999,
+          "min": 4871.673,
+          "max": 5253.375999999999,
+          "values": [
+            4871.673,
+            5141.86,
+            5228.178,
+            5230.124,
+            5194.673,
+            5253.375999999999
+          ]
+        },
+        "candidate": {
+          "median": 4679.9335,
+          "min": 4616.544,
+          "max": 4745.256,
+          "values": [
+            4745.256,
+            4688.499,
+            4698.067999999999,
+            4671.368,
+            4621.311000000001,
+            4616.544
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          126.41699999999946,
+          453.3609999999999,
+          530.1100000000006,
+          558.7559999999994,
+          573.3619999999992,
+          636.8319999999994
+        ],
+        "pairedPercentReduction": [
+          2.5949401776350642,
+          8.817062308191977,
+          10.139478801219097,
+          10.683417831011262,
+          11.037499376765375,
+          12.122338092685531
+        ],
+        "medianPairedPercentReduction": 10.41144831611518
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "layoutMs",
+        "pairs": 6,
+        "baseline": {
+          "median": 365.2405,
+          "min": 349.3259999999999,
+          "max": 374.063,
+          "values": [
+            349.3259999999999,
+            359.29800000000006,
+            372.49499999999995,
+            369.72700000000003,
+            374.063,
+            360.75399999999996
+          ]
+        },
+        "candidate": {
+          "median": 360.906,
+          "min": 355.138,
+          "max": 379.1960000000001,
+          "values": [
+            379.1960000000001,
+            359.81399999999996,
+            362.751,
+            361.708,
+            360.104,
+            355.138
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          -29.870000000000175,
+          -0.5159999999999059,
+          9.743999999999971,
+          8.019000000000005,
+          13.959000000000003,
+          5.6159999999999854
+        ],
+        "pairedPercentReduction": [
+          -8.550752019603516,
+          -0.14361337942318236,
+          2.6158740385776915,
+          2.168897592007077,
+          3.731724335205568,
+          1.5567394956119645
+        ],
+        "medianPairedPercentReduction": 1.8628185438095208
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "styleRecalculations",
+        "pairs": 6,
+        "baseline": {
+          "median": 2248,
+          "min": 2054,
+          "max": 2427,
+          "values": [
+            2054,
+            2205,
+            2215,
+            2281,
+            2289,
+            2427
+          ]
+        },
+        "candidate": {
+          "median": 1963.5,
+          "min": 1828,
+          "max": 2077,
+          "values": [
+            1828,
+            1903,
+            1949,
+            1978,
+            2058,
+            2077
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          226,
+          302,
+          266,
+          303,
+          231,
+          350
+        ],
+        "pairedPercentReduction": [
+          11.002921129503408,
+          13.696145124716553,
+          12.009029345372461,
+          13.28364752301622,
+          10.091743119266056,
+          14.42109600329625
+        ],
+        "medianPairedPercentReduction": 12.646338434194341
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "layouts",
+        "pairs": 6,
+        "baseline": {
+          "median": 1019,
+          "min": 994,
+          "max": 1029,
+          "values": [
+            994,
+            1015,
+            1021,
+            1017,
+            1023,
+            1029
+          ]
+        },
+        "candidate": {
+          "median": 976,
+          "min": 928,
+          "max": 985,
+          "values": [
+            928,
+            962,
+            973,
+            983,
+            979,
+            985
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          66,
+          53,
+          48,
+          34,
+          44,
+          44
+        ],
+        "pairedPercentReduction": [
+          6.639839034205232,
+          5.221674876847291,
+          4.701273261508325,
+          3.343166175024582,
+          4.301075268817204,
+          4.275996112730807
+        ],
+        "medianPairedPercentReduction": 4.501174265162764
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "frameGapP95Ms",
+        "pairs": 6,
+        "baseline": {
+          "median": 125.00000000000182,
+          "min": 116.69999999999891,
+          "max": 133.40000000000146,
+          "values": [
+            133.40000000000146,
+            116.70000000000437,
+            133.29999999999927,
+            116.70000000000437,
+            133.29999999999927,
+            116.69999999999891
+          ]
+        },
+        "candidate": {
+          "median": 124.95000000000255,
+          "min": 116.70000000000073,
+          "max": 149.89999999999964,
+          "values": [
+            149.89999999999964,
+            133.29999999999927,
+            133.20000000000073,
+            116.70000000000437,
+            116.70000000000437,
+            116.70000000000073
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          -16.49999999999818,
+          -16.599999999994907,
+          0.09999999999854481,
+          0,
+          16.599999999994907,
+          -1.8189894035458565e-12
+        ],
+        "pairedPercentReduction": [
+          -12.368815592202399,
+          -14.224507283628352,
+          0.07501875468758092,
+          0,
+          12.453113278315827,
+          -1.5586884349150588e-12
+        ],
+        "medianPairedPercentReduction": -7.793442174575294e-13
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "frameGapMaxMs",
+        "pairs": 6,
+        "baseline": {
+          "median": 333.2999999999993,
+          "min": 316.6999999999998,
+          "max": 333.40000000000146,
+          "values": [
+            316.6999999999998,
+            333.2999999999993,
+            333.40000000000146,
+            333.29999999999563,
+            333.2999999999993,
+            333.2999999999993
+          ]
+        },
+        "candidate": {
+          "median": 325.0000000000009,
+          "min": 300,
+          "max": 366.6999999999971,
+          "values": [
+            366.6999999999971,
+            333.3000000000029,
+            349.90000000000146,
+            316.6999999999989,
+            300,
+            300
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          -49.99999999999727,
+          -3.637978807091713e-12,
+          -16.5,
+          16.599999999996726,
+          33.29999999999927,
+          33.29999999999927
+        ],
+        "pairedPercentReduction": [
+          -15.787811809282381,
+          -1.091502792406757e-12,
+          -4.949010197960386,
+          4.980498049804063,
+          9.990999099909795,
+          9.990999099909795
+        ],
+        "medianPairedPercentReduction": 2.4902490249014857
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "longTasks",
+        "pairs": 6,
+        "baseline": {
+          "median": 121,
+          "min": 115,
+          "max": 123,
+          "values": [
+            115,
+            121,
+            120,
+            122,
+            123,
+            121
+          ]
+        },
+        "candidate": {
+          "median": 112.5,
+          "min": 108,
+          "max": 117,
+          "values": [
+            109,
+            108,
+            111,
+            117,
+            117,
+            114
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          6,
+          13,
+          9,
+          5,
+          6,
+          7
+        ],
+        "pairedPercentReduction": [
+          5.217391304347826,
+          10.743801652892563,
+          7.5,
+          4.098360655737705,
+          4.878048780487805,
+          5.785123966942149
+        ],
+        "medianPairedPercentReduction": 5.501257635644988
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "longTaskMs",
+        "pairs": 6,
+        "baseline": {
+          "median": 17003,
+          "min": 16027,
+          "max": 17253,
+          "values": [
+            16027,
+            16796,
+            17104,
+            17253,
+            17225,
+            16902
+          ]
+        },
+        "candidate": {
+          "median": 16452.5,
+          "min": 16154,
+          "max": 16649,
+          "values": [
+            16468,
+            16154,
+            16437,
+            16625,
+            16649,
+            16363
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          -441,
+          642,
+          667,
+          628,
+          576,
+          539
+        ],
+        "pairedPercentReduction": [
+          -2.7516066637549135,
+          3.822338652060014,
+          3.8996725912067354,
+          3.639946675940416,
+          3.343976777939042,
+          3.188971719323157
+        ],
+        "medianPairedPercentReduction": 3.491961726939729
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "domNodes",
+        "pairs": 6,
+        "baseline": {
+          "median": 6116,
+          "min": 6114,
+          "max": 6118,
+          "values": [
+            6116,
+            6116,
+            6114,
+            6114,
+            6118,
+            6116
+          ]
+        },
+        "candidate": {
+          "median": 6116,
+          "min": 6114,
+          "max": 6118,
+          "values": [
+            6116,
+            6116,
+            6114,
+            6114,
+            6116,
+            6118
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          0,
+          0,
+          0,
+          0,
+          2,
+          -2
+        ],
+        "pairedPercentReduction": [
+          0,
+          0,
+          0,
+          0,
+          0.032690421706440015,
+          -0.032701111837802485
+        ],
+        "medianPairedPercentReduction": 0
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "mountedEditors",
+        "pairs": 6,
+        "baseline": {
+          "median": 1,
+          "min": 1,
+          "max": 1,
+          "values": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "candidate": {
+          "median": 1,
+          "min": 1,
+          "max": 1,
+          "values": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pairedPercentReduction": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "medianPairedPercentReduction": 0
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "runningAnimations",
+        "pairs": 6,
+        "baseline": {
+          "median": 1.5,
+          "min": 1,
+          "max": 4,
+          "values": [
+            4,
+            4,
+            2,
+            1,
+            1,
+            1
+          ]
+        },
+        "candidate": {
+          "median": 1.5,
+          "min": 1,
+          "max": 5,
+          "values": [
+            5,
+            2,
+            2,
+            1,
+            1,
+            1
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          -1,
+          2,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pairedPercentReduction": [
+          -25,
+          50,
+          0,
+          0,
+          0,
+          0
+        ],
+        "medianPairedPercentReduction": 0
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "selectionP50Ms",
+        "pairs": 6,
+        "baseline": {
+          "median": 1054.433280749974,
+          "min": 940.0535929999896,
+          "max": 1183.3050775000593,
+          "values": [
+            940.0535929999896,
+            1020.2831119999755,
+            1027.8957894999767,
+            1080.9707719999715,
+            1103.8178705000319,
+            1183.3050775000593
+          ]
+        },
+        "candidate": {
+          "median": 1033.1524560000398,
+          "min": 985.5905995000212,
+          "max": 1113.137676000013,
+          "values": [
+            985.5905995000212,
+            989.9410744999768,
+            1026.4399625000078,
+            1039.8649495000718,
+            1097.073444000096,
+            1113.137676000013
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          -45.537006500031566,
+          30.342037499998696,
+          1.4558269999688491,
+          41.10582249989966,
+          6.744426499935798,
+          70.16740150004625
+        ],
+        "pairedPercentReduction": [
+          -4.844086213713569,
+          2.9738841252132207,
+          0.14163176995569182,
+          3.802676590769167,
+          0.6110089970622199,
+          5.929781155700546
+        ],
+        "medianPairedPercentReduction": 1.7924465611377203
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "selectionP95Ms",
+        "pairs": 6,
+        "baseline": {
+          "median": 1135.241314999992,
+          "min": 1005.2578499999945,
+          "max": 1254.8383690000046,
+          "values": [
+            1005.2578499999945,
+            1066.3054590000538,
+            1114.9532360000303,
+            1167.0059990000445,
+            1155.5293939999538,
+            1254.8383690000046
+          ]
+        },
+        "candidate": {
+          "median": 1111.339325500012,
+          "min": 1067.915522000054,
+          "max": 1185.8679579999298,
+          "values": [
+            1096.6383449999848,
+            1067.915522000054,
+            1116.4700360000134,
+            1106.2086150000105,
+            1171.951189000043,
+            1185.8679579999298
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          -91.38049499999033,
+          -1.610063000000082,
+          -1.51679999998305,
+          60.79738400003407,
+          -16.421795000089332,
+          68.97041100007482
+        ],
+        "pairedPercentReduction": [
+          -9.090254306394208,
+          -0.15099453786065636,
+          -0.13604158013161807,
+          5.209689072046642,
+          -1.4211490495489714,
+          5.496358152886108
+        ],
+        "medianPairedPercentReduction": -0.14351805899613723
+      },
+      {
+        "group": "1x/task-switch",
+        "metric": "requests",
+        "pairs": 6,
+        "baseline": {
+          "median": 1445,
+          "min": 1439,
+          "max": 1445,
+          "values": [
+            1439,
+            1445,
+            1444,
+            1445,
+            1445,
+            1445
+          ]
+        },
+        "candidate": {
+          "median": 1444,
+          "min": 1440,
+          "max": 1445,
+          "values": [
+            1440,
+            1443,
+            1444,
+            1444,
+            1444,
+            1445
+          ]
+        },
+        "pairedAbsoluteReduction": [
+          -1,
+          2,
+          0,
+          1,
+          1,
+          0
+        ],
+        "pairedPercentReduction": [
+          -0.06949270326615706,
+          0.1384083044982699,
+          0,
+          0.06920415224913495,
+          0.06920415224913495,
+          0
+        ],
+        "medianPairedPercentReduction": 0.03460207612456748
+      }
+    ],
+    "notes": [
+      "Extra busy headers are backend-seeded status rows, not additional live executions. The six canonical stream producers remain unchanged. Busy-header variants must not be pooled with the default workload.",
+      "mainThreadMs and mainThreadMsPerSecond use TaskDuration with timeTicks: elapsed time in main-thread tasks, not thread CPU time. Script, style, and layout durations use the same elapsed-time domain.",
+      "mainThreadCpuMs uses ThreadTime (renderer main-thread CPU). rendererCpuMs uses ProcessTime (renderer-process CPU); it excludes separate browser, GPU, and backend processes.",
+      "Positive reduction means a lower candidate value. Counts such as mounted editors are observations, not optimization scores.",
+      "Final-content probe versions must not be pooled. Locator-assertion retries can collect page-wide ARIA snapshots; boolean polling retains the same visibility gate without those snapshots.",
+      "Streaming duration includes the wait for final visible content. Fixed-deadline traffic is retained in the raw report.",
+      "Frame gaps and driver DOM readiness are not INP. Linux CPU throttling is not an M2 Air simulation.",
+      "History decoded bytes include captured requests and responses. They are not compressed network transfer."
+    ]
+  },
+  "sampleValidation": [
+    {
+      "arm": "baseline",
+      "pair": 0,
+      "timedSwitches": 40,
+      "retention": {
+        "switches": 100,
+        "heapBefore": {
+          "usedSize": 85846060,
+          "totalSize": 97406976,
+          "embedderHeapUsedSize": 16120640,
+          "backingStorageSize": 13551168
+        },
+        "heapAfter": {
+          "usedSize": 89328052,
+          "totalSize": 94785536,
+          "embedderHeapUsedSize": 16690368,
+          "backingStorageSize": 13545685
+        },
+        "ownersBefore": {
+          "editors": 1,
+          "panels": 3
+        },
+        "ownersAfter": {
+          "editors": 1,
+          "panels": 3
+        }
+      }
+    },
+    {
+      "arm": "candidate",
+      "pair": 0,
+      "timedSwitches": 40,
+      "retention": {
+        "switches": 100,
+        "heapBefore": {
+          "usedSize": 86326876,
+          "totalSize": 92688384,
+          "embedderHeapUsedSize": 15861144,
+          "backingStorageSize": 13547602
+        },
+        "heapAfter": {
+          "usedSize": 89330872,
+          "totalSize": 94261248,
+          "embedderHeapUsedSize": 16422376,
+          "backingStorageSize": 13546770
+        },
+        "ownersBefore": {
+          "editors": 1,
+          "panels": 3
+        },
+        "ownersAfter": {
+          "editors": 1,
+          "panels": 3
+        }
+      }
+    },
+    {
+      "arm": "candidate",
+      "pair": 1,
+      "timedSwitches": 40,
+      "retention": null
+    },
+    {
+      "arm": "baseline",
+      "pair": 1,
+      "timedSwitches": 40,
+      "retention": null
+    },
+    {
+      "arm": "baseline",
+      "pair": 2,
+      "timedSwitches": 40,
+      "retention": null
+    },
+    {
+      "arm": "candidate",
+      "pair": 2,
+      "timedSwitches": 40,
+      "retention": null
+    },
+    {
+      "arm": "candidate",
+      "pair": 3,
+      "timedSwitches": 40,
+      "retention": null
+    },
+    {
+      "arm": "baseline",
+      "pair": 3,
+      "timedSwitches": 40,
+      "retention": null
+    },
+    {
+      "arm": "baseline",
+      "pair": 4,
+      "timedSwitches": 40,
+      "retention": null
+    },
+    {
+      "arm": "candidate",
+      "pair": 4,
+      "timedSwitches": 40,
+      "retention": null
+    },
+    {
+      "arm": "candidate",
+      "pair": 5,
+      "timedSwitches": 40,
+      "retention": null
+    },
+    {
+      "arm": "baseline",
+      "pair": 5,
+      "timedSwitches": 40,
+      "retention": null
+    }
+  ],
+  "rawReports": [
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/matched-navigation-1792830434449.json",
+      "sha256": "dd789698bd97f0db1960b6aa29a3270af300f09b105e0ce20d94c4a326b5a6f4"
+    },
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/matched-navigation-1792829729312.json",
+      "sha256": "52f549f84639b5c47e53cfbbafc875501e07591b1a97c8f0f8af6adf60b6d96d"
+    },
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/changes-scroll-attribution-1792827705426.json",
+      "sha256": "19b02506b0b7357483446d6bd750eb078c1bc068c2edccc3efb158a9f3a6c62f"
+    },
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/changes-scroll-attribution-1792829220425.json",
+      "sha256": "5c1c22885caef63f2a124686bb9a6af0fbf41da55faddd28d17f616e050f3e74"
+    }
+  ],
+  "validationNotes": "# Hidden Changes lifecycle candidate\n\nProduction parent: ef17d222ae262549070d7f5473cca2ee4b8d15ac.\nCandidate build: hidden-changes-candidate-build.json.\nNo timing gain is established yet.\n\nThe retained build performed 720 hidden Changes scrollTop reads during 40\nswitches among 1,000 tasks with 1,000 stored messages per selected task.\nSource attribution maps 640 reads to recordTimelineAnchor and 80 to the\nworking-tree scroll-margin layout effect and ResizeObserver.\n\nThe candidate uses existing Dockview panel visibility to defer these presentation\neffects. It preserves mounted data, visible unfocused splits, and the default\nvisible state outside Dockview. Reveal refreshes measurements and restores the\nsaved row. Deferred focus requests resume if still current.\n\nValidation:\n- /tmp/kandev-hidden-changes-red-corrected.log: 3 failed, 12 passed before lifecycle gating.\n- /tmp/kandev-hidden-changes-pending-focus-red.log: 1 failed, 15 passed before focus replay repair.\n- /tmp/kandev-hidden-margin-red.log: 1 failed, 1 passed before scroll-margin gating.\n- /tmp/kandev-hidden-changes-broad-tests.log: 77 passed across 11 files.\n- /tmp/kandev-hidden-changes-typecheck.log: passed.\n- /tmp/kandev-hidden-changes-lint-complete.log: passed.\n- /tmp/kandev-hidden-changes-build.log: passed.\n- hidden-changes-baseline-grouped-browser-logs/kandev-run.e2e.9l9UvFEy.log:\n  baseline row moved 106 px after hidden Git update and resize.\n- hidden-changes-candidate-browser-logs/kandev-run.e2e.Y7zmUl1u.log:\n  same scenario passed; also retains a visible unfocused split without stealing editor focus.\n- hidden-changes-desktop-logs/kandev-run.e2e.Aeh7Q5kg.log: 12 passed.\n- hidden-changes-phone-logs/kandev-run.e2e.RPqBBHLl.log:\n  history passed; deep-tree test failed before actions because its heading remained mounted after scroll.\n- hidden-changes-phone-baseline-logs/kandev-run.e2e.9iOoNWt7.log: baseline deep-tree passed alone.\n- hidden-changes-phone-baseline-grouped-logs/kandev-run.e2e.3KmPXYKM.log: both baseline cases passed together.\n- hidden-changes-phone-candidate-repeat-logs/kandev-run.e2e.NIMKNjBV.log: both unchanged candidate cases passed together.\n  The first phone failure is preserved in hidden-changes-phone-failure; cause is unconfirmed.\n\nEarlier baseline setup failures remain separately preserved. One incorrectly\nrequired scrollTop=400 despite legitimate virtualizer adjustment to 382. The\nother used the default group, where new Git changes intentionally activate\nChanges. The final lifecycle fixture uses the supported group with chat, where\nthat autoactivation is blocked. Neither production policy was changed.\n\n\nThe full candidate attribution passed in 4.6 minutes:\nchanges-scroll-attribution-1792829220425.json. No Changes scrollTop reads were\nrecorded during setup or 40 hidden switches, versus 720 during baseline\nswitches. Visible reveal performed nine reads versus seven. This is work\nattribution, not timing evidence. The temporary diagnostic source is archived\nas changes-scroll-attribution-diagnostic.spec.ts and removed from the test tree.\nIts final assertion permits zero hidden reads; instrumentation did not change.\n\nThe first matched navigation attempt failed before any sample because the new\nfrozen baseline bundle lacked its relative mock-agent executable. Report:\nmatched-navigation-1792829382709.json; artifacts:\nhidden-changes-navigation-startup-failure/. The same mock-agent and agentctl\nhelpers as the candidate were added to the frozen bundle and hash-checked\nagainst the preceding timestamp baseline. Application binary/assets did not\nchange. This setup error establishes no performance result.\n\nThe corrected two-pair run passed in 11.3 minutes:\nmatched-navigation-1792829729312.json;\nhidden-changes-navigation-two-pair-summary.json;\nhidden-changes-navigation-two-pair-retry-logs/kandev-run.e2e.aPyyjvTD.log.\nIt completed 160 timed switches plus 200 retention switches, keeping one editor\nand three panels in both arms. Style time fell 6.08% and 9.13%; long-task count\nfell 13.39% and 9.24%. Main-thread CPU changed by +0.58% and -0.63%; renderer CPU\nchanged by +1.01% and -0.40%. Median readiness was mixed (+1.37%, -2.18%);\np95 improved 0.35% and 1.75%. These are preliminary targeted rendering gains,\nnot evidence of a meaningful overall CPU or navigation-speed gain. The separate six-pair confirmation passed; its complete results are included here.\n",
+  "confirmationLog": ".kandev/diagnostics/dense-workbench-performance/hidden-changes-navigation-six-pair-logs/kandev-run.e2e.0Ty0dX1Q.log",
+  "confirmationDurationMinutes": 19.9,
+  "limits": [
+    "Style time, style-recalculation count, layout count, and long-task count fell in all six pairs. This is the basis for retaining the targeted rendering fix.",
+    "Main-thread and renderer CPU fell in five pairs; the first pair regressed by 4.48% and 3.73%.",
+    "Median paired p95 switch readiness was 0.14% slower, with four slower pairs and two faster pairs. No p95 navigation-speed gain is established.",
+    "Per-arm switch times rose during the series. Alternating order and all raw samples are retained; the cause of the drift is not established.",
+    "Native getter attribution adds overhead and is separate from timing. No hidden reads does not mean no hidden React work.",
+    "One initial phone deep-tree scroll failure is preserved with an unconfirmed cause; unchanged baseline and candidate reruns passed.",
+    "These Linux Chromium measurements do not establish M2 Air speed, battery life, field INP, or a memory leak.",
+    "Final original-baseline grid, columns, Dockview and stress coverage remains open in completion-audit.md."
+  ]
+}

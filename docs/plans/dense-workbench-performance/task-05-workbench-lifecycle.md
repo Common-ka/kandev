@@ -27,6 +27,31 @@ system_design:
 
 # Task 05: Dockview and editor lifecycle
 
+## Hidden Changes lifecycle: retained
+
+The existing panel-visibility signal now defers hidden anchor, scroll-margin,
+presentation-observer, and focus work without suspending data ownership or
+unmounting content. Reveal restores the saved row and current pending focus.
+A visible unfocused split remains eligible. Phone and non-Dockview consumers
+retain their default visible behavior.
+
+The targeted regression fails on the retained control with a 106 px row shift
+and passes on the candidate. Related validation passes 77 unit tests, typecheck,
+strict lint, production build, the new browser case, 12 existing desktop cases,
+and the unchanged two-case phone rerun. The first phone failure is preserved
+with an unconfirmed cause. A separate attribution run reduces hidden scroll
+reads from 720 to zero across 40 switches.
+
+Six alternating pairs confirm lower style time and long-task count in every
+pair, with median paired reductions of 10.41% and 5.50%. CPU improves in five
+pairs but regresses in the first. p95 readiness remains essentially neutral
+(0.14% slower). Retain the targeted rendering and row-retention fix without a
+p95 speed claim. See [results](results.md#hidden-changes-presentation-retained)
+and [complete evidence](evidence/hidden-changes-six-pair-1x.json). The full
+Dockview/switching matrix remains open in the [completion audit](completion-audit.md).
+
+## Earlier experiments
+
 The completed six-pair grid reference confirms a streaming frame-gap regression
 despite reduced history traffic. A bounded CSS containment experiment tested
 the existing fixed-size native transcript wrapper against the frozen retained

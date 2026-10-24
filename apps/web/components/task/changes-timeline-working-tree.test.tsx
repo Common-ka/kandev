@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { TooltipProvider } from "@kandev/ui/tooltip";
 import type { ChangedFile } from "./changes-panel-helpers";
 import { ChangesWorkingTree } from "./changes-timeline-working-tree";
+import { ChangesPanelVisibilityContext } from "./changes-panel-visibility";
 
 vi.mock("@/components/state-provider", () => ({
   useAppStore: (selector: (state: { userSettings: { changesPanelLayout: string } }) => unknown) =>
@@ -70,31 +71,41 @@ const sharedFiles: ChangedFile[] = [
   },
 ];
 
-function WorkingTreeOwner({ contextKey }: { contextKey: string }) {
+function WorkingTreeOwner({
+  contextKey,
+  scrollElement = null,
+  isVisible = true,
+}: {
+  contextKey: string;
+  scrollElement?: HTMLDivElement | null;
+  isVisible?: boolean;
+}) {
   const noop = () => {};
   return (
-    <TooltipProvider>
-      <ChangesWorkingTree
-        hasUnstaged
-        hasStaged={false}
-        unstagedFiles={sharedFiles}
-        stagedFiles={[]}
-        pendingStageFiles={new Set()}
-        onOpenDiff={noop}
-        onEditFile={noop}
-        onStage={noop}
-        onUnstage={noop}
-        onDiscard={noop}
-        onBulkStage={noop}
-        onBulkUnstage={noop}
-        onBulkDiscard={noop}
-        repoDisplayName={(repositoryName) => repositoryName}
-        isLoading={false}
-        scrollElement={null}
-        beforeLayoutKey="stable-layout"
-        contextKey={contextKey}
-      />
-    </TooltipProvider>
+    <ChangesPanelVisibilityContext.Provider value={isVisible}>
+      <TooltipProvider>
+        <ChangesWorkingTree
+          hasUnstaged
+          hasStaged={false}
+          unstagedFiles={sharedFiles}
+          stagedFiles={[]}
+          pendingStageFiles={new Set()}
+          onOpenDiff={noop}
+          onEditFile={noop}
+          onStage={noop}
+          onUnstage={noop}
+          onDiscard={noop}
+          onBulkStage={noop}
+          onBulkUnstage={noop}
+          onBulkDiscard={noop}
+          repoDisplayName={(repositoryName) => repositoryName}
+          isLoading={false}
+          scrollElement={scrollElement}
+          beforeLayoutKey="stable-layout"
+          contextKey={contextKey}
+        />
+      </TooltipProvider>
+    </ChangesPanelVisibilityContext.Provider>
   );
 }
 
@@ -147,5 +158,38 @@ describe("ChangesWorkingTree context ownership", () => {
     fireEvent.click(screen.getByTestId("unstaged-files-section-collapse-toggle"));
     view.rerender(<WorkingTreeOwner contextKey={TASK_A_ENV_B} />);
     expectFreshWorkingTree();
+  });
+});
+
+describe("ChangesWorkingTree visibility", () => {
+  it("measures the scroll margin only while visible and resumes on reveal", () => {
+    const scrollElement = document.createElement("div");
+    const readScroll = vi.spyOn(scrollElement, "scrollTop", "get");
+    const view = render(
+      <WorkingTreeOwner
+        contextKey={TASK_A_ENV_A}
+        scrollElement={scrollElement}
+        isVisible={false}
+      />,
+    );
+    fireEvent(window, new Event("resize"));
+    expect(readScroll).not.toHaveBeenCalled();
+
+    view.rerender(<WorkingTreeOwner contextKey={TASK_A_ENV_A} scrollElement={scrollElement} />);
+    expect(readScroll).toHaveBeenCalled();
+    readScroll.mockClear();
+    view.rerender(
+      <WorkingTreeOwner
+        contextKey={TASK_A_ENV_A}
+        scrollElement={scrollElement}
+        isVisible={false}
+      />,
+    );
+    fireEvent(window, new Event("resize"));
+    expect(readScroll).not.toHaveBeenCalled();
+
+    view.rerender(<WorkingTreeOwner contextKey={TASK_B_ENV_B} scrollElement={scrollElement} />);
+    expect(readScroll).toHaveBeenCalled();
+    readScroll.mockRestore();
   });
 });

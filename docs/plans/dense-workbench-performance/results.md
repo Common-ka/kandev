@@ -5,6 +5,58 @@ and the remaining stress/scenario matrix are in progress. The branch is
 `feature/evaluate-live-thread-bc0`; the frozen baseline is
 `595df36ed5c1cf02fd90cb972b623ad6edc53df8`.
 
+## Hidden Changes presentation: retained
+
+The candidate removes hidden Changes timeline anchor, presentation-observer,
+and scroll-margin measurements using Dockview's existing visibility signal.
+Visible unfocused split panes still update. Data and mounted state stay owned
+by the existing components. Reveal refreshes measurements and restores the
+saved row; still-current deferred focus requests resume. No layout or style
+values change.
+
+A separate native-getter diagnostic records 720 hidden scroll-position reads
+on the retained control and zero on the candidate during 40 switches. Visible
+reveal performs seven and nine reads respectively. This tracing adds overhead
+and establishes work attribution, not speed. The real-browser baseline also
+moves the saved row by 106 px after a hidden Git update and resize; the candidate
+preserves it within 2 px and retains editor focus beside visible Changes.
+
+Six alternating timing pairs passed in 19.9 minutes: 480 measured switches plus
+200 additional retention switches. Each selected task has 1,000 stored messages,
+630 files, and 73 changed files, within a 1,000-task workspace. Style-recalculation
+time falls in all six pairs, by 2.59–12.12% (median paired reduction 10.41%).
+Style-recalculation count falls 12.65%, layout count 4.50%, and long-task count
+5.50% by median paired change, with reductions in every pair.
+
+Main-thread CPU falls 2.46% and renderer CPU 1.64% by median paired change.
+Both improve in five pairs; the first pair instead increases 4.48% and 3.73%.
+Median switch readiness improves 1.79%, but p95 is effectively unchanged:
+0.14% slower by median paired change, with four slower and two faster pairs.
+The first pair's p95 is 9.09% slower. Per-arm switch times rise across the series;
+the cause is unconfirmed. Retain every pair. This is a targeted rendering gain,
+not an established p95 navigation-speed improvement. Both retention arms keep
+one editor and three panels; no leak conclusion follows.
+
+Validation passes 77 unit tests in 11 files, typecheck, strict lint, the production
+build, the new hidden/visible browser case, and 12 existing desktop history and
+focus checks. Both phone checks pass on the unchanged rerun. The initial phone
+deep-tree case fails before file actions because the heading remains mounted
+after scroll; its cause remains unconfirmed and its artifacts are preserved.
+The same cases pass on the retained baseline. No phone test was weakened.
+
+The first paired timing attempt records zero samples because the frozen control
+bundle lacks its relative mock-agent helper. Adding the same hash-checked
+mock-agent and agentctl binaries as the candidate repairs the fixture; application
+binary/assets are unchanged. The corrected preliminary two-pair run also passes
+and remains separate from the six-pair confirmation.
+
+[Complete evidence](evidence/hidden-changes-six-pair-1x.json) includes all paired
+metrics, source hashes, attribution counts, validation, failures, and limits.
+Raw confirmation: `matched-navigation-1792830434449.json`; log:
+`hidden-changes-navigation-six-pair-logs/kandev-run.e2e.0Ty0dX1Q.log`.
+The [completion audit](completion-audit.md) retains the remaining full-package
+scenario and stress obligations. These results are from Linux, not an M2 Air.
+
 ## Owned Threads status visibility: retained
 
 The six-pair repeat passed all 12 samples in 48.0 minutes. Normal-idle

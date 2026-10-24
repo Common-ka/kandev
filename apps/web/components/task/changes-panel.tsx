@@ -11,6 +11,7 @@ import {
 } from "./changes-panel-helpers";
 import { useChangesPanelData, buildChangesPanelBodyProps } from "./changes-panel-data";
 import { ChangesPanelBody } from "./changes-panel-body";
+import { ChangesPanelVisibilityContext } from "./changes-panel-visibility";
 import type {
   CommitDetailTarget,
   CommitFileNavigationRequest,
@@ -26,6 +27,7 @@ import { contributionHistoryExplanationKey } from "@/hooks/domains/session/use-c
 export { filterUnpushedCommits, mergeCommits, separateCommitHistories };
 
 type ChangesPanelProps = {
+  isVisible?: boolean;
   onOpenDiffFile: (path: string, options?: OpenDiffOptions) => void;
   onEditFile: (path: string, repo?: string) => void;
   onOpenCommitDetail?: (
@@ -70,48 +72,50 @@ const ChangesPanel = memo(function ChangesPanel(props: ChangesPanelProps) {
   }, [comparisonRequestToken]);
   if (isArchived) return <ArchivedPanelPlaceholder />;
   return (
-    <PanelRoot className="@container/changes-panel" data-testid="changes-panel">
-      <ChangesPanelHeader
-        refreshStatus={data.refreshStatus}
-        hasPriorData={data.gitStatusPresentation.hasPriorData}
-        failedRepositories={data.gitStatusPresentation.failedRepositories}
-        hasChanges={data.git.hasChanges}
-        hasCommits={data.git.hasCommits}
-        hasPRFiles={data.hasPRFiles}
-        displayBranch={data.git.branch}
-        baseBranchDisplay={data.baseBranchDisplay}
-        baseBranchByRepo={data.baseBranchByRepo}
-        behindCount={data.git.pullBehind}
-        pullDisabled={data.pullDisabled}
-        pullDisabledReason={data.pullDisabledReason}
-        isLoading={data.git.isLoading}
-        loadingOperation={data.git.loadingOperation}
-        onOpenDiffAll={props.onOpenDiffAll}
-        onOpenReview={props.onOpenReview}
-        onRequestWalkthrough={requestWalkthrough}
-        requestWalkthroughDisabled={!data.walkthroughRequestReady}
-        repoNames={data.git.repoNames}
-        perRepoStatus={data.git.perRepoStatus}
-        onRepoPull={data.repoCallbacks.onRepoPull}
-        onRepoRebase={data.repoCallbacks.onRepoRebase}
-        onRepoMerge={data.repoCallbacks.onRepoMerge}
-        onRenameBranch={data.git.renameBranch}
-        repoDisplayName={data.repoDisplayName}
-        taskId={data.activeTaskId}
-        credentialDisplay={data.gitCredentialDisplay}
-        comparisonTargets={data.git.comparisonTargets}
-        relation={data.relation}
-        contributionHistoryTarget={data.contributionHistoryTarget}
-        resolution={data.resolution}
-        resolutionTarget={data.resolutionTarget}
-        remoteContributionUrl={data.selectedPR?.pr_url ?? data.existingPrUrl}
-        remoteContributionNumber={data.selectedPR?.pr_number}
-      />
-      <ChangesPanelBody
-        {...buildChangesPanelBodyProps(data, props)}
-        comparisonRequestToken={comparisonRequestToken}
-      />
-    </PanelRoot>
+    <ChangesPanelVisibilityContext.Provider value={props.isVisible ?? true}>
+      <PanelRoot className="@container/changes-panel" data-testid="changes-panel">
+        <ChangesPanelHeader
+          refreshStatus={data.refreshStatus}
+          hasPriorData={data.gitStatusPresentation.hasPriorData}
+          failedRepositories={data.gitStatusPresentation.failedRepositories}
+          hasChanges={data.git.hasChanges}
+          hasCommits={data.git.hasCommits}
+          hasPRFiles={data.hasPRFiles}
+          displayBranch={data.git.branch}
+          baseBranchDisplay={data.baseBranchDisplay}
+          baseBranchByRepo={data.baseBranchByRepo}
+          behindCount={data.git.pullBehind}
+          pullDisabled={data.pullDisabled}
+          pullDisabledReason={data.pullDisabledReason}
+          isLoading={data.git.isLoading}
+          loadingOperation={data.git.loadingOperation}
+          onOpenDiffAll={props.onOpenDiffAll}
+          onOpenReview={props.onOpenReview}
+          onRequestWalkthrough={requestWalkthrough}
+          requestWalkthroughDisabled={!data.walkthroughRequestReady}
+          repoNames={data.git.repoNames}
+          perRepoStatus={data.git.perRepoStatus}
+          onRepoPull={data.repoCallbacks.onRepoPull}
+          onRepoRebase={data.repoCallbacks.onRepoRebase}
+          onRepoMerge={data.repoCallbacks.onRepoMerge}
+          onRenameBranch={data.git.renameBranch}
+          repoDisplayName={data.repoDisplayName}
+          taskId={data.activeTaskId}
+          credentialDisplay={data.gitCredentialDisplay}
+          comparisonTargets={data.git.comparisonTargets}
+          relation={data.relation}
+          contributionHistoryTarget={data.contributionHistoryTarget}
+          resolution={data.resolution}
+          resolutionTarget={data.resolutionTarget}
+          remoteContributionUrl={data.selectedPR?.pr_url ?? data.existingPrUrl}
+          remoteContributionNumber={data.selectedPR?.pr_number}
+        />
+        <ChangesPanelBody
+          {...buildChangesPanelBodyProps(data, props)}
+          comparisonRequestToken={comparisonRequestToken}
+        />
+      </PanelRoot>
+    </ChangesPanelVisibilityContext.Provider>
   );
 });
 

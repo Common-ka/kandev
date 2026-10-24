@@ -116,7 +116,9 @@ function ChatContent({ panelId, params }: { panelId: string; params: Record<stri
  * after the target becomes reachable again.
  */
 function useResyncGitStatusOnTabActivate(panelId: string, sessionId: string | null) {
-  useSessionGitRefresh(sessionId, usePanelActive(panelId));
+  const isVisible = usePanelActive(panelId);
+  useSessionGitRefresh(sessionId, isVisible);
+  return isVisible;
 }
 
 /** Render the changes/diff viewer for the panel's params (`kind` "all" or
@@ -176,7 +178,7 @@ function ChangesContent({ panelId }: { panelId: string }) {
   // Dynamic title with file count - use environment-stable sessionId so the
   // tab title doesn't re-fetch on same-environment session tab switches.
   const activeSessionId = useEnvironmentSessionId();
-  useResyncGitStatusOnTabActivate(panelId, activeSessionId);
+  const isVisible = useResyncGitStatusOnTabActivate(panelId, activeSessionId);
   const totalCount = useSessionChangesCount(activeSessionId);
 
   useEffect(() => {
@@ -211,6 +213,7 @@ function ChangesContent({ panelId }: { panelId: string }) {
 
   return (
     <ChangesPanel
+      isVisible={isVisible}
       onOpenDiffFile={handleOpenDiffFile}
       onEditFile={handleEditFile}
       onOpenCommitDetail={handleOpenCommitDetail}
