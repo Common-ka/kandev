@@ -7,6 +7,29 @@ plugin Dockview series is also complete; core/plugin regressions still need attr
 `feature/evaluate-live-thread-bc0`; the frozen baseline is
 `595df36ed5c1cf02fd90cb972b623ad6edc53df8`.
 
+## Final scripted grid attempt (incomplete)
+
+The final full-reference attempt stops after 50.8 minutes in the fifth control
+sample. Four pairs pass all 14,400 ordered updates. During the next control
+stream, the fixed return-bottom wheel action fails its unchanged five-second
+check: expected at most 3 px from the bottom, observed 423 px. Its last failure
+checkpoint records a 592 px gap. The final screenshot shows that tile behind
+the live tail. The cause is unconfirmed. No driver tolerance or timeout changes.
+
+All four completed pairs have higher candidate streaming frame-gap p95:
+83.4 to 116.6 ms, 83.4 to 133.3 ms, 116.6 to 150 ms, and 100 to 149.9 ms.
+Completed control samples also contain 104 HTTP 503 responses and eight
+post-window verification retries. Candidate samples have neither and record
+zero resets. Passing content checks do not erase either
+availability failures or the candidate frame regression. Counts exclude failures
+that were not captured in the unfinished streaming window.
+
+The raw report retains its error, and the speed summary correctly rejects it.
+This is not a successful six-pair result. [The evidence](evidence/final-scripted-grid-failed-attempt.json)
+preserves every completed sample and the failed interaction. A separate quiet
+CPU-stack capture will investigate renderer cost without mixing diagnostic and
+speed samples. Final grid timing and the scroll-failure investigation remain open.
+
 ## Native document visibility verification
 
 Real core and full-plugin hide-and-restore checks now pass. The earlier probe

@@ -548,3 +548,14 @@ motion, foreground refresh, and plugin expansion state. Initial timeouts and
 the collapsed-row assertion failure are preserved, without labeling them product
 regressions. See [evidence](evidence/native-document-visibility.json). Paired timing
 configuration is unchanged; the final combined correctness gate remains open.
+
+## Final scripted grid attempt stopped
+
+The full reference run against the final retained candidate stops in control
+pair 4 after 50.8 minutes. The preceding four pairs pass 14,400 ordered updates.
+The control's return-bottom action remains 423 px from the bottom at the
+unchanged five-second assertion. All completed pairs also show worse candidate
+streaming frame-gap p95. The raw report retains the failure and the summary
+rejects it. See [evidence](evidence/final-scripted-grid-failed-attempt.json).
+A separate quiet CPU attribution run is preparing the same dense workload.
+The six-pair final grid gate and the interaction failure remain open.

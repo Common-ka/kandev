@@ -1,0 +1,3068 @@
+{
+  "status": "failed attempt; four completed pairs only; final six-pair comparison remains incomplete",
+  "measurementUse": "Diagnostic observations from completed samples and the failed control. No successful final speed summary or six-pair result.",
+  "rawReport": "matched-dense-1792860881244.json",
+  "rawSha256": "1642be718461a27009e932e9b995061274b719a6e32db70e03a00543346f9486",
+  "log": "final-scripted-grid-spinner-logs/kandev-run.e2e.vnSzk3T6.log",
+  "runnerResult": "failed after 50.8 minutes",
+  "artifacts": "final-scripted-grid-scroll-bottom-failure",
+  "lastCaptureInspected": "test-failed-9.png",
+  "sourceRevision": "080b5aa7d7f63bcd0cc90f244785aabad56405e8",
+  "sourcePatchBytes": 0,
+  "builds": {
+    "baseline": {
+      "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+      "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+      "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+      "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+    },
+    "candidate": {
+      "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+      "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "9f2b7a961b623e0e4074fdfd0e253b10b65ccf979e110223af6b88b9121dbea8"
+    }
+  },
+  "lockfileSha256": "9d5a03a9086f28c93752fce491f896047fbcdbc64abfafe3b3aa53261199c554",
+  "machine": {
+    "revision": "080b5aa7d7f63bcd0cc90f244785aabad56405e8",
+    "cpu": "11th Gen Intel(R) Core(TM) i7-11700T @ 1.40GHz",
+    "cores": 16,
+    "load": [
+      2.56,
+      2.83,
+      3.42
+    ],
+    "totalMemory": 33303863296,
+    "freeMemory": 21509427200,
+    "platform": "linux 6.18.49"
+  },
+  "databaseSha256": "d7f0a097e906bd73f2a27412e04073a2be3135e428781138a726a556be3f04be",
+  "protocol": {
+    "measurementKind": "reference-workload",
+    "finalVisibilityProbe": "boolean-poll",
+    "interactionMode": "scripted-scroll-v1",
+    "layout": "grid",
+    "extraBusyHeaders": 0,
+    "throttleAfterLoad": false,
+    "candidateFirst": false
+  },
+  "fixture": {
+    "workload": {
+      "layout": "grid",
+      "extraBusyHeaders": 0,
+      "tasks": 1000,
+      "columns": 30,
+      "messages": 1000,
+      "durationMs": 60000
+    },
+    "storedMessages": 36000,
+    "visibleChats": 6,
+    "initialLoadedMessagesPerVisibleChat": 100,
+    "historyMode": "newest",
+    "scheduledUpdatesPerCompleteSample": 1800
+  },
+  "completedSamples": [
+    {
+      "arm": "baseline",
+      "pair": 0,
+      "scheduledUpdates": 1800,
+      "verificationErrors": [],
+      "cold": {
+        "documentMs": 17410.525031000143,
+        "readyMs": 24046.831226000097,
+        "visibleTaskIds": [
+          "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+          "ad9c6415-2731-48c6-a082-a67fb008a5fa",
+          "683d828f-bbbf-4f2f-a468-c5ce9a37efc7",
+          "020d8d9b-338b-49d8-982e-fa9ea3ec7f66",
+          "76e5c1fd-2eef-4737-9c5a-fe2641cf23c0",
+          "00452117-3670-4dfd-88fe-916fb8bcfbb0"
+        ],
+        "displayedColumns": 6
+      },
+      "coldAssetEncodedBytes": 18607703,
+      "coldAssetDecodedBytes": 18607703,
+      "initialLoadedHistory": [
+        {
+          "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72",
+          "messages": 100
+        },
+        {
+          "sessionId": "6fc26e4b-a544-4a1e-9455-0326c926f919",
+          "messages": 100
+        },
+        {
+          "sessionId": "73149a1f-be7d-49cc-97ef-ea24b65df032",
+          "messages": 100
+        },
+        {
+          "sessionId": "2778b28b-83c6-4928-b339-4f8c94acbead",
+          "messages": 100
+        },
+        {
+          "sessionId": "dd11bc9c-13ef-4388-8b05-b9264734698b",
+          "messages": 100
+        },
+        {
+          "sessionId": "833fd142-0b8a-4346-8d23-e560dc1cdcdf",
+          "messages": 100
+        }
+      ],
+      "loadedHistory": [
+        {
+          "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72",
+          "messages": 100
+        },
+        {
+          "sessionId": "6fc26e4b-a544-4a1e-9455-0326c926f919",
+          "messages": 100
+        },
+        {
+          "sessionId": "73149a1f-be7d-49cc-97ef-ea24b65df032",
+          "messages": 100
+        },
+        {
+          "sessionId": "2778b28b-83c6-4928-b339-4f8c94acbead",
+          "messages": 100
+        },
+        {
+          "sessionId": "dd11bc9c-13ef-4388-8b05-b9264734698b",
+          "messages": 100
+        },
+        {
+          "sessionId": "833fd142-0b8a-4346-8d23-e560dc1cdcdf",
+          "messages": 100
+        }
+      ],
+      "runs": [
+        {
+          "scenario": "idle",
+          "elapsedMs": 60052.91308600013,
+          "mainTaskElapsedMs": 14599.508,
+          "mainThreadCpuMs": 14907.112000000001,
+          "rendererCpuMs": 22640.0,
+          "scriptElapsedMs": 1743.741,
+          "styleElapsedMs": 1969.58,
+          "layoutElapsedMs": 141.561,
+          "frameGapP95Ms": 16.70000000001164,
+          "frameGapMaxMs": 66.59999999999854,
+          "longTaskMs": [],
+          "domNodes": 24523,
+          "mountedEditors": 6,
+          "animations": {
+            "running": 60,
+            "paused": 60
+          },
+          "historyRequests": 74,
+          "historyDecodedBytes": 13334603,
+          "resets": 0,
+          "httpFailures": [],
+          "interactions": []
+        },
+        {
+          "scenario": "streaming",
+          "elapsedMs": 61321.048681000015,
+          "mainTaskElapsedMs": 58472.632000000005,
+          "mainThreadCpuMs": 60304.429000000004,
+          "rendererCpuMs": 74710.00000000001,
+          "scriptElapsedMs": 26280.944,
+          "styleElapsedMs": 6229.424,
+          "layoutElapsedMs": 1432.299,
+          "frameGapP95Ms": 83.39999999999418,
+          "frameGapMaxMs": 183.3000000000029,
+          "longTaskMs": [
+            53,
+            127,
+            50,
+            50,
+            63,
+            54,
+            50,
+            52,
+            52,
+            58,
+            50,
+            64,
+            50,
+            55,
+            51,
+            50,
+            56,
+            68,
+            52,
+            52,
+            56,
+            51,
+            55,
+            56,
+            50,
+            56,
+            100,
+            50,
+            67,
+            53,
+            59,
+            56,
+            52,
+            59,
+            54,
+            53,
+            50,
+            57,
+            58,
+            55,
+            54,
+            69,
+            51,
+            51,
+            50,
+            55,
+            52,
+            86,
+            54,
+            59,
+            54,
+            51
+          ],
+          "domNodes": 26359,
+          "mountedEditors": 6,
+          "animations": {
+            "running": 61,
+            "paused": 59
+          },
+          "historyRequests": 765,
+          "historyDecodedBytes": 140703234,
+          "resets": 1595,
+          "httpFailures": [
+            {
+              "at": 1792861007577,
+              "path": "/api/v1/jira/config",
+              "status": 503
+            },
+            {
+              "at": 1792861007577,
+              "path": "/api/v1/linear/config",
+              "status": 503
+            },
+            {
+              "at": 1792861007577,
+              "path": "/api/v1/azure-devops/config",
+              "status": 503
+            },
+            {
+              "at": 1792861007606,
+              "path": "/api/v1/sentry/instances",
+              "status": 503
+            },
+            {
+              "at": 1792861008544,
+              "path": "/api/v1/tasks/811356d7-2a02-45b7-ba23-a2d1d5dca1fe/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861008671,
+              "path": "/api/v1/tasks/ad9c6415-2731-48c6-a082-a67fb008a5fa/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861008737,
+              "path": "/api/v1/tasks/683d828f-bbbf-4f2f-a468-c5ce9a37efc7/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861008825,
+              "path": "/api/v1/tasks/020d8d9b-338b-49d8-982e-fa9ea3ec7f66/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861008932,
+              "path": "/api/v1/tasks/76e5c1fd-2eef-4737-9c5a-fe2641cf23c0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861009071,
+              "path": "/api/v1/tasks/00452117-3670-4dfd-88fe-916fb8bcfbb0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861011556,
+              "path": "/api/v1/tasks/811356d7-2a02-45b7-ba23-a2d1d5dca1fe/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861011699,
+              "path": "/api/v1/tasks/ad9c6415-2731-48c6-a082-a67fb008a5fa/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861011817,
+              "path": "/api/v1/tasks/683d828f-bbbf-4f2f-a468-c5ce9a37efc7/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861011943,
+              "path": "/api/v1/tasks/020d8d9b-338b-49d8-982e-fa9ea3ec7f66/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861011968,
+              "path": "/api/v1/tasks/76e5c1fd-2eef-4737-9c5a-fe2641cf23c0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861012158,
+              "path": "/api/v1/tasks/00452117-3670-4dfd-88fe-916fb8bcfbb0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861014549,
+              "path": "/api/v1/tasks/811356d7-2a02-45b7-ba23-a2d1d5dca1fe/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861014691,
+              "path": "/api/v1/tasks/ad9c6415-2731-48c6-a082-a67fb008a5fa/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861014779,
+              "path": "/api/v1/tasks/683d828f-bbbf-4f2f-a468-c5ce9a37efc7/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861014885,
+              "path": "/api/v1/tasks/020d8d9b-338b-49d8-982e-fa9ea3ec7f66/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861014955,
+              "path": "/api/v1/tasks/76e5c1fd-2eef-4737-9c5a-fe2641cf23c0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861015102,
+              "path": "/api/v1/tasks/00452117-3670-4dfd-88fe-916fb8bcfbb0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861017591,
+              "path": "/api/v1/tasks/811356d7-2a02-45b7-ba23-a2d1d5dca1fe/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861017726,
+              "path": "/api/v1/tasks/ad9c6415-2731-48c6-a082-a67fb008a5fa/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861017831,
+              "path": "/api/v1/tasks/683d828f-bbbf-4f2f-a468-c5ce9a37efc7/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861017871,
+              "path": "/api/v1/tasks/020d8d9b-338b-49d8-982e-fa9ea3ec7f66/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861017936,
+              "path": "/api/v1/tasks/76e5c1fd-2eef-4737-9c5a-fe2641cf23c0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861018100,
+              "path": "/api/v1/tasks/00452117-3670-4dfd-88fe-916fb8bcfbb0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861020543,
+              "path": "/api/v1/tasks/811356d7-2a02-45b7-ba23-a2d1d5dca1fe/environment/live",
+              "status": 503
+            }
+          ],
+          "interactions": [
+            {
+              "action": "scroll-up",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 12000,
+              "startedMs": 12000.663509000093,
+              "finishedMs": 14422.80172200012,
+              "before": {
+                "scrollTop": 51520,
+                "scrollHeight": 51956,
+                "clientHeight": 352,
+                "composer": "closed",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 51717,
+                "scrollHeight": 52146,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            },
+            {
+              "action": "return-bottom",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 24000,
+              "startedMs": 23998.954492000164,
+              "finishedMs": 25964.445097000105,
+              "before": {
+                "scrollTop": 51717,
+                "scrollHeight": 53181,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 53271,
+                "scrollHeight": 53435,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            },
+            {
+              "action": "leave-tile",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 36000,
+              "startedMs": 35999.072397000156,
+              "finishedMs": 36987.96243800013,
+              "before": {
+                "scrollTop": 54348,
+                "scrollHeight": 54512,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 54260,
+                "scrollHeight": 54618,
+                "clientHeight": 352,
+                "composer": "closed",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            },
+            {
+              "action": "hover-tile",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 48000,
+              "startedMs": 48000.121878999984,
+              "finishedMs": 49791.36166100018,
+              "before": {
+                "scrollTop": 55428,
+                "scrollHeight": 55780,
+                "clientHeight": 352,
+                "composer": "closed",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 55764,
+                "scrollHeight": 55928,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            }
+          ]
+        },
+        {
+          "scenario": "reduced-motion-idle",
+          "elapsedMs": 60045.2892130001,
+          "mainTaskElapsedMs": 16950.393000000004,
+          "mainThreadCpuMs": 17268.218000000004,
+          "rendererCpuMs": 25450.00000000002,
+          "scriptElapsedMs": 1814.751000000001,
+          "styleElapsedMs": 2253.6590000000006,
+          "layoutElapsedMs": 159.32499999999993,
+          "frameGapP95Ms": 16.70000000001164,
+          "frameGapMaxMs": 66.70000000001164,
+          "longTaskMs": [],
+          "domNodes": 26359,
+          "mountedEditors": 6,
+          "animations": {
+            "running": 60,
+            "paused": 54
+          },
+          "historyRequests": 79,
+          "historyDecodedBytes": 14843090,
+          "resets": 0,
+          "httpFailures": [],
+          "interactions": []
+        }
+      ]
+    },
+    {
+      "arm": "candidate",
+      "pair": 0,
+      "scheduledUpdates": 1800,
+      "verificationErrors": [],
+      "cold": {
+        "documentMs": 8681.885969999945,
+        "readyMs": 14807.590728999814,
+        "visibleTaskIds": [
+          "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+          "ad9c6415-2731-48c6-a082-a67fb008a5fa",
+          "683d828f-bbbf-4f2f-a468-c5ce9a37efc7",
+          "020d8d9b-338b-49d8-982e-fa9ea3ec7f66",
+          "76e5c1fd-2eef-4737-9c5a-fe2641cf23c0",
+          "00452117-3670-4dfd-88fe-916fb8bcfbb0"
+        ],
+        "displayedColumns": 6
+      },
+      "coldAssetEncodedBytes": 4165405,
+      "coldAssetDecodedBytes": 14687801,
+      "initialLoadedHistory": [
+        {
+          "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72",
+          "messages": 100
+        },
+        {
+          "sessionId": "6fc26e4b-a544-4a1e-9455-0326c926f919",
+          "messages": 100
+        },
+        {
+          "sessionId": "73149a1f-be7d-49cc-97ef-ea24b65df032",
+          "messages": 100
+        },
+        {
+          "sessionId": "2778b28b-83c6-4928-b339-4f8c94acbead",
+          "messages": 100
+        },
+        {
+          "sessionId": "dd11bc9c-13ef-4388-8b05-b9264734698b",
+          "messages": 100
+        },
+        {
+          "sessionId": "833fd142-0b8a-4346-8d23-e560dc1cdcdf",
+          "messages": 100
+        }
+      ],
+      "loadedHistory": [
+        {
+          "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72",
+          "messages": 100
+        },
+        {
+          "sessionId": "6fc26e4b-a544-4a1e-9455-0326c926f919",
+          "messages": 100
+        },
+        {
+          "sessionId": "73149a1f-be7d-49cc-97ef-ea24b65df032",
+          "messages": 100
+        },
+        {
+          "sessionId": "2778b28b-83c6-4928-b339-4f8c94acbead",
+          "messages": 100
+        },
+        {
+          "sessionId": "dd11bc9c-13ef-4388-8b05-b9264734698b",
+          "messages": 100
+        },
+        {
+          "sessionId": "833fd142-0b8a-4346-8d23-e560dc1cdcdf",
+          "messages": 100
+        }
+      ],
+      "runs": [
+        {
+          "scenario": "idle",
+          "elapsedMs": 60047.61571000004,
+          "mainTaskElapsedMs": 15883.365999999998,
+          "mainThreadCpuMs": 16201.459999999997,
+          "rendererCpuMs": 24130.000000000004,
+          "scriptElapsedMs": 1729.6500000000003,
+          "styleElapsedMs": 2219.874,
+          "layoutElapsedMs": 166.46599999999998,
+          "frameGapP95Ms": 16.70000000001164,
+          "frameGapMaxMs": 33.400000000001455,
+          "longTaskMs": [],
+          "domNodes": 24542,
+          "mountedEditors": 6,
+          "animations": {
+            "running": 60,
+            "paused": 60
+          },
+          "historyRequests": 74,
+          "historyDecodedBytes": 13337479,
+          "resets": 0,
+          "httpFailures": [],
+          "interactions": []
+        },
+        {
+          "scenario": "streaming",
+          "elapsedMs": 60734.89065299998,
+          "mainTaskElapsedMs": 59738.255999999994,
+          "mainThreadCpuMs": 59638.669,
+          "rendererCpuMs": 73590.0,
+          "scriptElapsedMs": 40171.801,
+          "styleElapsedMs": 5064.2699999999995,
+          "layoutElapsedMs": 987.372,
+          "frameGapP95Ms": 116.60000000000582,
+          "frameGapMaxMs": 150,
+          "longTaskMs": [
+            51
+          ],
+          "domNodes": 26378,
+          "mountedEditors": 6,
+          "animations": {
+            "running": 61,
+            "paused": 59
+          },
+          "historyRequests": 72,
+          "historyDecodedBytes": 13258656,
+          "resets": 0,
+          "httpFailures": [],
+          "interactions": [
+            {
+              "action": "scroll-up",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 12000,
+              "startedMs": 11999.452374999877,
+              "finishedMs": 14885.702783999965,
+              "before": {
+                "scrollTop": 51667,
+                "scrollHeight": 52041,
+                "clientHeight": 352,
+                "composer": "closed",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 51907,
+                "scrollHeight": 52336,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            },
+            {
+              "action": "return-bottom",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 24000,
+              "startedMs": 24000.174937999807,
+              "finishedMs": 26235.762422999833,
+              "before": {
+                "scrollTop": 51907,
+                "scrollHeight": 53308,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 53374,
+                "scrollHeight": 53540,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            },
+            {
+              "action": "leave-tile",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 36000,
+              "startedMs": 36000.377393999835,
+              "finishedMs": 37104.236284999875,
+              "before": {
+                "scrollTop": 54369,
+                "scrollHeight": 54533,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 54324,
+                "scrollHeight": 54702,
+                "clientHeight": 352,
+                "composer": "closed",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            },
+            {
+              "action": "hover-tile",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 48000,
+              "startedMs": 47998.83119099983,
+              "finishedMs": 50047.43686599983,
+              "before": {
+                "scrollTop": 55468,
+                "scrollHeight": 55822,
+                "clientHeight": 352,
+                "composer": "closed",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 55841,
+                "scrollHeight": 56012,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            }
+          ]
+        },
+        {
+          "scenario": "reduced-motion-idle",
+          "elapsedMs": 60045.63486199989,
+          "mainTaskElapsedMs": 6560.071000000008,
+          "mainThreadCpuMs": 6863.283999999993,
+          "rendererCpuMs": 11559.999999999987,
+          "scriptElapsedMs": 1836.162999999999,
+          "styleElapsedMs": 12.880000000000003,
+          "layoutElapsedMs": 140.00999999999996,
+          "frameGapP95Ms": 16.70000000001164,
+          "frameGapMaxMs": 66.79999999998836,
+          "longTaskMs": [],
+          "domNodes": 26378,
+          "mountedEditors": 6,
+          "animations": {},
+          "historyRequests": 72,
+          "historyDecodedBytes": 13530690,
+          "resets": 0,
+          "httpFailures": [],
+          "interactions": []
+        }
+      ]
+    },
+    {
+      "arm": "candidate",
+      "pair": 1,
+      "scheduledUpdates": 1800,
+      "verificationErrors": [],
+      "cold": {
+        "documentMs": 9308.141947000055,
+        "readyMs": 15854.52075399994,
+        "visibleTaskIds": [
+          "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+          "ad9c6415-2731-48c6-a082-a67fb008a5fa",
+          "683d828f-bbbf-4f2f-a468-c5ce9a37efc7",
+          "020d8d9b-338b-49d8-982e-fa9ea3ec7f66",
+          "76e5c1fd-2eef-4737-9c5a-fe2641cf23c0",
+          "00452117-3670-4dfd-88fe-916fb8bcfbb0"
+        ],
+        "displayedColumns": 6
+      },
+      "coldAssetEncodedBytes": 4165405,
+      "coldAssetDecodedBytes": 14687801,
+      "initialLoadedHistory": [
+        {
+          "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72",
+          "messages": 100
+        },
+        {
+          "sessionId": "6fc26e4b-a544-4a1e-9455-0326c926f919",
+          "messages": 100
+        },
+        {
+          "sessionId": "73149a1f-be7d-49cc-97ef-ea24b65df032",
+          "messages": 100
+        },
+        {
+          "sessionId": "2778b28b-83c6-4928-b339-4f8c94acbead",
+          "messages": 100
+        },
+        {
+          "sessionId": "dd11bc9c-13ef-4388-8b05-b9264734698b",
+          "messages": 100
+        },
+        {
+          "sessionId": "833fd142-0b8a-4346-8d23-e560dc1cdcdf",
+          "messages": 100
+        }
+      ],
+      "loadedHistory": [
+        {
+          "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72",
+          "messages": 100
+        },
+        {
+          "sessionId": "6fc26e4b-a544-4a1e-9455-0326c926f919",
+          "messages": 100
+        },
+        {
+          "sessionId": "73149a1f-be7d-49cc-97ef-ea24b65df032",
+          "messages": 100
+        },
+        {
+          "sessionId": "2778b28b-83c6-4928-b339-4f8c94acbead",
+          "messages": 100
+        },
+        {
+          "sessionId": "dd11bc9c-13ef-4388-8b05-b9264734698b",
+          "messages": 100
+        },
+        {
+          "sessionId": "833fd142-0b8a-4346-8d23-e560dc1cdcdf",
+          "messages": 100
+        }
+      ],
+      "runs": [
+        {
+          "scenario": "idle",
+          "elapsedMs": 60053.22857200005,
+          "mainTaskElapsedMs": 15065.248,
+          "mainThreadCpuMs": 15378.125999999998,
+          "rendererCpuMs": 23040.0,
+          "scriptElapsedMs": 1734.7559999999999,
+          "styleElapsedMs": 2080.145,
+          "layoutElapsedMs": 141.64,
+          "frameGapP95Ms": 16.79999999998836,
+          "frameGapMaxMs": 50,
+          "longTaskMs": [],
+          "domNodes": 24542,
+          "mountedEditors": 6,
+          "animations": {
+            "running": 60,
+            "paused": 60
+          },
+          "historyRequests": 74,
+          "historyDecodedBytes": 13337457,
+          "resets": 0,
+          "httpFailures": [],
+          "interactions": []
+        },
+        {
+          "scenario": "streaming",
+          "elapsedMs": 60712.029364000075,
+          "mainTaskElapsedMs": 59865.092,
+          "mainThreadCpuMs": 59807.789,
+          "rendererCpuMs": 73280.0,
+          "scriptElapsedMs": 40033.01,
+          "styleElapsedMs": 5225.584,
+          "layoutElapsedMs": 1000.2220000000002,
+          "frameGapP95Ms": 133.3000000000029,
+          "frameGapMaxMs": 166.70000000001164,
+          "longTaskMs": [
+            86,
+            55,
+            60
+          ],
+          "domNodes": 26378,
+          "mountedEditors": 6,
+          "animations": {
+            "running": 61,
+            "paused": 59
+          },
+          "historyRequests": 72,
+          "historyDecodedBytes": 13256355,
+          "resets": 0,
+          "httpFailures": [],
+          "interactions": [
+            {
+              "action": "scroll-up",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 12000,
+              "startedMs": 11998.60975900013,
+              "finishedMs": 15378.608542000176,
+              "before": {
+                "scrollTop": 51681,
+                "scrollHeight": 52041,
+                "clientHeight": 352,
+                "composer": "closed",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 51983,
+                "scrollHeight": 52400,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            },
+            {
+              "action": "return-bottom",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 24000,
+              "startedMs": 23999.26816000021,
+              "finishedMs": 26600.53418299998,
+              "before": {
+                "scrollTop": 51983,
+                "scrollHeight": 53350,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 53355,
+                "scrollHeight": 53519,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            },
+            {
+              "action": "leave-tile",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 36000,
+              "startedMs": 35999.23557300004,
+              "finishedMs": 36931.4502330001,
+              "before": {
+                "scrollTop": 54390,
+                "scrollHeight": 54554,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 54287,
+                "scrollHeight": 54639,
+                "clientHeight": 352,
+                "composer": "closed",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            },
+            {
+              "action": "hover-tile",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 48000,
+              "startedMs": 47999.84218899999,
+              "finishedMs": 50944.21619600011,
+              "before": {
+                "scrollTop": 55491,
+                "scrollHeight": 55864,
+                "clientHeight": 352,
+                "composer": "closed",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 55963,
+                "scrollHeight": 56139,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            }
+          ]
+        },
+        {
+          "scenario": "reduced-motion-idle",
+          "elapsedMs": 60067.01953499997,
+          "mainTaskElapsedMs": 6185.724999999991,
+          "mainThreadCpuMs": 6503.350999999995,
+          "rendererCpuMs": 10770.000000000011,
+          "scriptElapsedMs": 1690.2359999999987,
+          "styleElapsedMs": 27.2370000000004,
+          "layoutElapsedMs": 117.62099999999998,
+          "frameGapP95Ms": 16.70000000001164,
+          "frameGapMaxMs": 83.29999999998836,
+          "longTaskMs": [],
+          "domNodes": 26378,
+          "mountedEditors": 6,
+          "animations": {},
+          "historyRequests": 73,
+          "historyDecodedBytes": 13718575,
+          "resets": 0,
+          "httpFailures": [],
+          "interactions": []
+        }
+      ]
+    },
+    {
+      "arm": "baseline",
+      "pair": 1,
+      "scheduledUpdates": 1800,
+      "verificationErrors": [],
+      "cold": {
+        "documentMs": 13623.442814999959,
+        "readyMs": 21485.280589999864,
+        "visibleTaskIds": [
+          "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+          "ad9c6415-2731-48c6-a082-a67fb008a5fa",
+          "683d828f-bbbf-4f2f-a468-c5ce9a37efc7",
+          "020d8d9b-338b-49d8-982e-fa9ea3ec7f66",
+          "76e5c1fd-2eef-4737-9c5a-fe2641cf23c0",
+          "00452117-3670-4dfd-88fe-916fb8bcfbb0"
+        ],
+        "displayedColumns": 6
+      },
+      "coldAssetEncodedBytes": 18607703,
+      "coldAssetDecodedBytes": 18607703,
+      "initialLoadedHistory": [
+        {
+          "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72",
+          "messages": 100
+        },
+        {
+          "sessionId": "6fc26e4b-a544-4a1e-9455-0326c926f919",
+          "messages": 100
+        },
+        {
+          "sessionId": "73149a1f-be7d-49cc-97ef-ea24b65df032",
+          "messages": 100
+        },
+        {
+          "sessionId": "2778b28b-83c6-4928-b339-4f8c94acbead",
+          "messages": 100
+        },
+        {
+          "sessionId": "dd11bc9c-13ef-4388-8b05-b9264734698b",
+          "messages": 100
+        },
+        {
+          "sessionId": "833fd142-0b8a-4346-8d23-e560dc1cdcdf",
+          "messages": 100
+        }
+      ],
+      "loadedHistory": [
+        {
+          "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72",
+          "messages": 100
+        },
+        {
+          "sessionId": "6fc26e4b-a544-4a1e-9455-0326c926f919",
+          "messages": 100
+        },
+        {
+          "sessionId": "73149a1f-be7d-49cc-97ef-ea24b65df032",
+          "messages": 100
+        },
+        {
+          "sessionId": "2778b28b-83c6-4928-b339-4f8c94acbead",
+          "messages": 100
+        },
+        {
+          "sessionId": "dd11bc9c-13ef-4388-8b05-b9264734698b",
+          "messages": 100
+        },
+        {
+          "sessionId": "833fd142-0b8a-4346-8d23-e560dc1cdcdf",
+          "messages": 100
+        }
+      ],
+      "runs": [
+        {
+          "scenario": "idle",
+          "elapsedMs": 60073.94707900006,
+          "mainTaskElapsedMs": 15148.398000000001,
+          "mainThreadCpuMs": 15459.916000000001,
+          "rendererCpuMs": 22860.0,
+          "scriptElapsedMs": 1945.9929999999997,
+          "styleElapsedMs": 2017.7969999999998,
+          "layoutElapsedMs": 153.366,
+          "frameGapP95Ms": 16.70000000001164,
+          "frameGapMaxMs": 33.30000000000291,
+          "longTaskMs": [],
+          "domNodes": 24523,
+          "mountedEditors": 6,
+          "animations": {
+            "running": 60,
+            "paused": 60
+          },
+          "historyRequests": 74,
+          "historyDecodedBytes": 13514668,
+          "resets": 0,
+          "httpFailures": [],
+          "interactions": []
+        },
+        {
+          "scenario": "streaming",
+          "elapsedMs": 61388.235437999945,
+          "mainTaskElapsedMs": 58378.163,
+          "mainThreadCpuMs": 60229.74599999999,
+          "rendererCpuMs": 74230.0,
+          "scriptElapsedMs": 26079.773,
+          "styleElapsedMs": 5997.82,
+          "layoutElapsedMs": 1443.632,
+          "frameGapP95Ms": 83.39999999999418,
+          "frameGapMaxMs": 166.6999999999971,
+          "longTaskMs": [
+            51,
+            72,
+            50,
+            55,
+            50,
+            51,
+            60,
+            56,
+            53,
+            51,
+            53,
+            55,
+            52,
+            51,
+            77,
+            57,
+            50,
+            53,
+            52,
+            52,
+            53,
+            56,
+            50,
+            53,
+            52,
+            59,
+            51,
+            53,
+            50,
+            50,
+            51,
+            55,
+            59,
+            55,
+            52,
+            62,
+            56,
+            54,
+            55,
+            126,
+            51,
+            51,
+            53,
+            54,
+            52,
+            52,
+            54,
+            62,
+            56,
+            54,
+            62,
+            70,
+            59,
+            51,
+            52,
+            57,
+            52,
+            54
+          ],
+          "domNodes": 26364,
+          "mountedEditors": 6,
+          "animations": {
+            "running": 52,
+            "paused": 68
+          },
+          "historyRequests": 747,
+          "historyDecodedBytes": 137205727,
+          "resets": 1594,
+          "httpFailures": [
+            {
+              "at": 1792861666833,
+              "path": "/api/v1/tasks/00452117-3670-4dfd-88fe-916fb8bcfbb0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861667629,
+              "path": "/api/v1/jira/config",
+              "status": 503
+            },
+            {
+              "at": 1792861667629,
+              "path": "/api/v1/linear/config",
+              "status": 503
+            },
+            {
+              "at": 1792861667629,
+              "path": "/api/v1/azure-devops/config",
+              "status": 503
+            },
+            {
+              "at": 1792861667686,
+              "path": "/api/v1/sentry/instances",
+              "status": 503
+            },
+            {
+              "at": 1792861668608,
+              "path": "/api/v1/tasks/811356d7-2a02-45b7-ba23-a2d1d5dca1fe/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861668761,
+              "path": "/api/v1/tasks/ad9c6415-2731-48c6-a082-a67fb008a5fa/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861668843,
+              "path": "/api/v1/tasks/683d828f-bbbf-4f2f-a468-c5ce9a37efc7/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861668981,
+              "path": "/api/v1/tasks/020d8d9b-338b-49d8-982e-fa9ea3ec7f66/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861669095,
+              "path": "/api/v1/tasks/76e5c1fd-2eef-4737-9c5a-fe2641cf23c0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861669801,
+              "path": "/api/v1/tasks/00452117-3670-4dfd-88fe-916fb8bcfbb0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861671609,
+              "path": "/api/v1/tasks/811356d7-2a02-45b7-ba23-a2d1d5dca1fe/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861671784,
+              "path": "/api/v1/tasks/ad9c6415-2731-48c6-a082-a67fb008a5fa/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861671863,
+              "path": "/api/v1/tasks/683d828f-bbbf-4f2f-a468-c5ce9a37efc7/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861671941,
+              "path": "/api/v1/tasks/020d8d9b-338b-49d8-982e-fa9ea3ec7f66/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861672110,
+              "path": "/api/v1/tasks/76e5c1fd-2eef-4737-9c5a-fe2641cf23c0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861672888,
+              "path": "/api/v1/tasks/00452117-3670-4dfd-88fe-916fb8bcfbb0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861674633,
+              "path": "/api/v1/tasks/811356d7-2a02-45b7-ba23-a2d1d5dca1fe/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861674760,
+              "path": "/api/v1/tasks/ad9c6415-2731-48c6-a082-a67fb008a5fa/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861674875,
+              "path": "/api/v1/tasks/683d828f-bbbf-4f2f-a468-c5ce9a37efc7/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861674960,
+              "path": "/api/v1/tasks/020d8d9b-338b-49d8-982e-fa9ea3ec7f66/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861675073,
+              "path": "/api/v1/tasks/76e5c1fd-2eef-4737-9c5a-fe2641cf23c0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861675815,
+              "path": "/api/v1/tasks/00452117-3670-4dfd-88fe-916fb8bcfbb0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861677655,
+              "path": "/api/v1/tasks/811356d7-2a02-45b7-ba23-a2d1d5dca1fe/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861677764,
+              "path": "/api/v1/tasks/ad9c6415-2731-48c6-a082-a67fb008a5fa/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861677882,
+              "path": "/api/v1/tasks/683d828f-bbbf-4f2f-a468-c5ce9a37efc7/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861677983,
+              "path": "/api/v1/tasks/020d8d9b-338b-49d8-982e-fa9ea3ec7f66/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861678071,
+              "path": "/api/v1/tasks/76e5c1fd-2eef-4737-9c5a-fe2641cf23c0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861678879,
+              "path": "/api/v1/tasks/00452117-3670-4dfd-88fe-916fb8bcfbb0/environment/live",
+              "status": 503
+            }
+          ],
+          "interactions": [
+            {
+              "action": "scroll-up",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 12000,
+              "startedMs": 11999.881319999928,
+              "finishedMs": 14545.713819999946,
+              "before": {
+                "scrollTop": 51583,
+                "scrollHeight": 51935,
+                "clientHeight": 352,
+                "composer": "closed",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 51822,
+                "scrollHeight": 52188,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            },
+            {
+              "action": "return-bottom",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 24000,
+              "startedMs": 23998.571231000125,
+              "finishedMs": 25880.78602400003,
+              "before": {
+                "scrollTop": 51822,
+                "scrollHeight": 53224,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 53271,
+                "scrollHeight": 53435,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            },
+            {
+              "action": "leave-tile",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 36000,
+              "startedMs": 36000.09244400007,
+              "finishedMs": 37006.73961300007,
+              "before": {
+                "scrollTop": 54348,
+                "scrollHeight": 54512,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 54202,
+                "scrollHeight": 54618,
+                "clientHeight": 352,
+                "composer": "closed",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            },
+            {
+              "action": "hover-tile",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 48000,
+              "startedMs": 47999.749811999965,
+              "finishedMs": 49750.714433999965,
+              "before": {
+                "scrollTop": 55407,
+                "scrollHeight": 55759,
+                "clientHeight": 352,
+                "composer": "closed",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 55512,
+                "scrollHeight": 55928,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            }
+          ]
+        },
+        {
+          "scenario": "reduced-motion-idle",
+          "elapsedMs": 60080.63002000004,
+          "mainTaskElapsedMs": 14337.448999999993,
+          "mainThreadCpuMs": 14618.159000000005,
+          "rendererCpuMs": 22789.999999999993,
+          "scriptElapsedMs": 1829.7919999999976,
+          "styleElapsedMs": 1757.054,
+          "layoutElapsedMs": 132.37900000000025,
+          "frameGapP95Ms": 16.70000000001164,
+          "frameGapMaxMs": 100,
+          "longTaskMs": [],
+          "domNodes": 26364,
+          "mountedEditors": 6,
+          "animations": {
+            "running": 51,
+            "paused": 63
+          },
+          "historyRequests": 77,
+          "historyDecodedBytes": 14467383,
+          "resets": 0,
+          "httpFailures": [],
+          "interactions": []
+        }
+      ]
+    },
+    {
+      "arm": "baseline",
+      "pair": 2,
+      "scheduledUpdates": 1800,
+      "verificationErrors": [],
+      "cold": {
+        "documentMs": 11103.079374999972,
+        "readyMs": 17792.67140000011,
+        "visibleTaskIds": [
+          "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+          "ad9c6415-2731-48c6-a082-a67fb008a5fa",
+          "683d828f-bbbf-4f2f-a468-c5ce9a37efc7",
+          "020d8d9b-338b-49d8-982e-fa9ea3ec7f66",
+          "76e5c1fd-2eef-4737-9c5a-fe2641cf23c0",
+          "00452117-3670-4dfd-88fe-916fb8bcfbb0"
+        ],
+        "displayedColumns": 6
+      },
+      "coldAssetEncodedBytes": 18607703,
+      "coldAssetDecodedBytes": 18607703,
+      "initialLoadedHistory": [
+        {
+          "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72",
+          "messages": 100
+        },
+        {
+          "sessionId": "6fc26e4b-a544-4a1e-9455-0326c926f919",
+          "messages": 100
+        },
+        {
+          "sessionId": "73149a1f-be7d-49cc-97ef-ea24b65df032",
+          "messages": 100
+        },
+        {
+          "sessionId": "2778b28b-83c6-4928-b339-4f8c94acbead",
+          "messages": 100
+        },
+        {
+          "sessionId": "dd11bc9c-13ef-4388-8b05-b9264734698b",
+          "messages": 100
+        },
+        {
+          "sessionId": "833fd142-0b8a-4346-8d23-e560dc1cdcdf",
+          "messages": 100
+        }
+      ],
+      "loadedHistory": [
+        {
+          "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72",
+          "messages": 100
+        },
+        {
+          "sessionId": "6fc26e4b-a544-4a1e-9455-0326c926f919",
+          "messages": 100
+        },
+        {
+          "sessionId": "73149a1f-be7d-49cc-97ef-ea24b65df032",
+          "messages": 100
+        },
+        {
+          "sessionId": "2778b28b-83c6-4928-b339-4f8c94acbead",
+          "messages": 100
+        },
+        {
+          "sessionId": "dd11bc9c-13ef-4388-8b05-b9264734698b",
+          "messages": 100
+        },
+        {
+          "sessionId": "833fd142-0b8a-4346-8d23-e560dc1cdcdf",
+          "messages": 100
+        }
+      ],
+      "runs": [
+        {
+          "scenario": "idle",
+          "elapsedMs": 60130.65944999992,
+          "mainTaskElapsedMs": 15815.845000000001,
+          "mainThreadCpuMs": 16131.355,
+          "rendererCpuMs": 24500.0,
+          "scriptElapsedMs": 2078.7839999999997,
+          "styleElapsedMs": 2092.457,
+          "layoutElapsedMs": 153.692,
+          "frameGapP95Ms": 16.79999999998836,
+          "frameGapMaxMs": 66.59999999999127,
+          "longTaskMs": [],
+          "domNodes": 24523,
+          "mountedEditors": 6,
+          "animations": {
+            "running": 60,
+            "paused": 60
+          },
+          "historyRequests": 74,
+          "historyDecodedBytes": 13514678,
+          "resets": 0,
+          "httpFailures": [],
+          "interactions": []
+        },
+        {
+          "scenario": "streaming",
+          "elapsedMs": 61712.07667200011,
+          "mainTaskElapsedMs": 58836.890999999996,
+          "mainThreadCpuMs": 60495.299000000006,
+          "rendererCpuMs": 75149.99999999999,
+          "scriptElapsedMs": 26569.395999999997,
+          "styleElapsedMs": 5994.87,
+          "layoutElapsedMs": 1458.061,
+          "frameGapP95Ms": 116.69999999998254,
+          "frameGapMaxMs": 216.60000000000582,
+          "longTaskMs": [
+            90,
+            85,
+            95,
+            50,
+            85,
+            92,
+            52,
+            94,
+            93,
+            100,
+            113,
+            76,
+            67,
+            61,
+            72,
+            56,
+            61,
+            56,
+            57,
+            60,
+            75,
+            59,
+            64,
+            73,
+            90,
+            54,
+            60,
+            62,
+            51,
+            71,
+            59,
+            54,
+            54,
+            57,
+            65,
+            65,
+            56,
+            53,
+            53,
+            52,
+            64,
+            51,
+            53,
+            80,
+            54,
+            50,
+            63,
+            76,
+            50,
+            50,
+            54,
+            51,
+            60,
+            51,
+            50,
+            52,
+            51,
+            50,
+            50,
+            50,
+            67,
+            53,
+            50,
+            57,
+            51,
+            50,
+            52,
+            50,
+            51,
+            57,
+            149,
+            61,
+            53,
+            55,
+            50,
+            53,
+            58,
+            63,
+            61,
+            55,
+            61,
+            57,
+            50,
+            54,
+            51,
+            50,
+            54,
+            56,
+            52,
+            80,
+            53,
+            54,
+            51,
+            50,
+            54,
+            55,
+            97,
+            55,
+            53,
+            52,
+            60,
+            50,
+            60,
+            52,
+            58,
+            53,
+            59,
+            52,
+            51,
+            51,
+            50,
+            55,
+            53,
+            61,
+            53,
+            58,
+            54,
+            52,
+            54,
+            50,
+            52,
+            50,
+            61,
+            54,
+            57,
+            60,
+            62,
+            57,
+            62,
+            67,
+            69,
+            174,
+            61,
+            74,
+            59,
+            59,
+            66,
+            62,
+            54,
+            51,
+            64,
+            56,
+            57,
+            52,
+            52,
+            50,
+            63,
+            62,
+            53,
+            55,
+            52,
+            50,
+            56,
+            55,
+            52,
+            54,
+            57,
+            52,
+            53,
+            53,
+            57,
+            54,
+            50,
+            50,
+            53,
+            52,
+            51,
+            76,
+            57,
+            53,
+            78,
+            54,
+            59,
+            64,
+            68,
+            53,
+            51,
+            54,
+            59,
+            54,
+            55,
+            53,
+            66,
+            51,
+            56,
+            51,
+            56,
+            57,
+            50,
+            55,
+            59,
+            53,
+            52,
+            57,
+            51,
+            51,
+            50,
+            109,
+            74,
+            73,
+            69,
+            71,
+            74,
+            83,
+            61,
+            51,
+            55,
+            53,
+            53,
+            53,
+            50,
+            57,
+            58,
+            63,
+            69,
+            55,
+            58,
+            51,
+            51,
+            51,
+            54,
+            52,
+            63,
+            50,
+            51,
+            60,
+            50,
+            57,
+            56,
+            64,
+            53,
+            58,
+            55,
+            52,
+            54,
+            61,
+            52,
+            57,
+            52
+          ],
+          "domNodes": 26359,
+          "mountedEditors": 6,
+          "animations": {
+            "running": 61,
+            "paused": 59
+          },
+          "historyRequests": 613,
+          "historyDecodedBytes": 112761633,
+          "resets": 1537,
+          "httpFailures": [
+            {
+              "at": 1792861879964,
+              "path": "/api/v1/tasks/811356d7-2a02-45b7-ba23-a2d1d5dca1fe/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861880140,
+              "path": "/api/v1/tasks/ad9c6415-2731-48c6-a082-a67fb008a5fa/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861880154,
+              "path": "/api/v1/tasks/683d828f-bbbf-4f2f-a468-c5ce9a37efc7/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861880235,
+              "path": "/api/v1/tasks/020d8d9b-338b-49d8-982e-fa9ea3ec7f66/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861880322,
+              "path": "/api/v1/tasks/76e5c1fd-2eef-4737-9c5a-fe2641cf23c0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861880432,
+              "path": "/api/v1/tasks/00452117-3670-4dfd-88fe-916fb8bcfbb0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861882956,
+              "path": "/api/v1/tasks/811356d7-2a02-45b7-ba23-a2d1d5dca1fe/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861883027,
+              "path": "/api/v1/tasks/ad9c6415-2731-48c6-a082-a67fb008a5fa/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861883147,
+              "path": "/api/v1/tasks/683d828f-bbbf-4f2f-a468-c5ce9a37efc7/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861883233,
+              "path": "/api/v1/tasks/020d8d9b-338b-49d8-982e-fa9ea3ec7f66/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861883329,
+              "path": "/api/v1/tasks/76e5c1fd-2eef-4737-9c5a-fe2641cf23c0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861883469,
+              "path": "/api/v1/tasks/00452117-3670-4dfd-88fe-916fb8bcfbb0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861885950,
+              "path": "/api/v1/tasks/811356d7-2a02-45b7-ba23-a2d1d5dca1fe/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861886110,
+              "path": "/api/v1/tasks/ad9c6415-2731-48c6-a082-a67fb008a5fa/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861886150,
+              "path": "/api/v1/tasks/683d828f-bbbf-4f2f-a468-c5ce9a37efc7/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861886234,
+              "path": "/api/v1/tasks/020d8d9b-338b-49d8-982e-fa9ea3ec7f66/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861886348,
+              "path": "/api/v1/tasks/76e5c1fd-2eef-4737-9c5a-fe2641cf23c0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861886440,
+              "path": "/api/v1/tasks/00452117-3670-4dfd-88fe-916fb8bcfbb0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861887990,
+              "path": "/api/v1/jira/config",
+              "status": 503
+            },
+            {
+              "at": 1792861887990,
+              "path": "/api/v1/linear/config",
+              "status": 503
+            },
+            {
+              "at": 1792861887990,
+              "path": "/api/v1/azure-devops/config",
+              "status": 503
+            },
+            {
+              "at": 1792861888070,
+              "path": "/api/v1/sentry/instances",
+              "status": 503
+            },
+            {
+              "at": 1792861888991,
+              "path": "/api/v1/tasks/811356d7-2a02-45b7-ba23-a2d1d5dca1fe/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861889108,
+              "path": "/api/v1/tasks/ad9c6415-2731-48c6-a082-a67fb008a5fa/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861889210,
+              "path": "/api/v1/tasks/683d828f-bbbf-4f2f-a468-c5ce9a37efc7/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861889236,
+              "path": "/api/v1/tasks/020d8d9b-338b-49d8-982e-fa9ea3ec7f66/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861889333,
+              "path": "/api/v1/tasks/76e5c1fd-2eef-4737-9c5a-fe2641cf23c0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861889487,
+              "path": "/api/v1/tasks/00452117-3670-4dfd-88fe-916fb8bcfbb0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861891971,
+              "path": "/api/v1/tasks/811356d7-2a02-45b7-ba23-a2d1d5dca1fe/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861892082,
+              "path": "/api/v1/tasks/ad9c6415-2731-48c6-a082-a67fb008a5fa/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861892151,
+              "path": "/api/v1/tasks/683d828f-bbbf-4f2f-a468-c5ce9a37efc7/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861892268,
+              "path": "/api/v1/tasks/020d8d9b-338b-49d8-982e-fa9ea3ec7f66/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861892290,
+              "path": "/api/v1/tasks/76e5c1fd-2eef-4737-9c5a-fe2641cf23c0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792861892451,
+              "path": "/api/v1/tasks/00452117-3670-4dfd-88fe-916fb8bcfbb0/environment/live",
+              "status": 503
+            }
+          ],
+          "interactions": [
+            {
+              "action": "scroll-up",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 12000,
+              "startedMs": 11999.238335000118,
+              "finishedMs": 15028.34866899997,
+              "before": {
+                "scrollTop": 51561,
+                "scrollHeight": 51998,
+                "clientHeight": 352,
+                "composer": "closed",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 51843,
+                "scrollHeight": 52252,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            },
+            {
+              "action": "return-bottom",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 24000,
+              "startedMs": 23998.796760000056,
+              "finishedMs": 26074.59404600016,
+              "before": {
+                "scrollTop": 51843,
+                "scrollHeight": 53245,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 53270,
+                "scrollHeight": 53435,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            },
+            {
+              "action": "leave-tile",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 36000,
+              "startedMs": 35999.749072999926,
+              "finishedMs": 37080.0396240002,
+              "before": {
+                "scrollTop": 54285,
+                "scrollHeight": 54512,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 54245,
+                "scrollHeight": 54597,
+                "clientHeight": 352,
+                "composer": "closed",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            },
+            {
+              "action": "hover-tile",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 48000,
+              "startedMs": 48000.10112699983,
+              "finishedMs": 50641.19989099982,
+              "before": {
+                "scrollTop": 55425,
+                "scrollHeight": 55780,
+                "clientHeight": 352,
+                "composer": "closed",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 55826,
+                "scrollHeight": 55991,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            }
+          ]
+        },
+        {
+          "scenario": "reduced-motion-idle",
+          "elapsedMs": 60090.534765999764,
+          "mainTaskElapsedMs": 16107.191999999997,
+          "mainThreadCpuMs": 16400.599,
+          "rendererCpuMs": 24650.000000000007,
+          "scriptElapsedMs": 1971.6599999999999,
+          "styleElapsedMs": 1992.889,
+          "layoutElapsedMs": 143.74300000000017,
+          "frameGapP95Ms": 16.79999999998836,
+          "frameGapMaxMs": 133.39999999999418,
+          "longTaskMs": [],
+          "domNodes": 26359,
+          "mountedEditors": 6,
+          "animations": {
+            "running": 60,
+            "paused": 54
+          },
+          "historyRequests": 77,
+          "historyDecodedBytes": 14467379,
+          "resets": 0,
+          "httpFailures": [],
+          "interactions": []
+        }
+      ]
+    },
+    {
+      "arm": "candidate",
+      "pair": 2,
+      "scheduledUpdates": 1800,
+      "verificationErrors": [],
+      "cold": {
+        "documentMs": 16889.605632000137,
+        "readyMs": 25142.183554999996,
+        "visibleTaskIds": [
+          "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+          "ad9c6415-2731-48c6-a082-a67fb008a5fa",
+          "683d828f-bbbf-4f2f-a468-c5ce9a37efc7",
+          "020d8d9b-338b-49d8-982e-fa9ea3ec7f66",
+          "76e5c1fd-2eef-4737-9c5a-fe2641cf23c0",
+          "00452117-3670-4dfd-88fe-916fb8bcfbb0"
+        ],
+        "displayedColumns": 6
+      },
+      "coldAssetEncodedBytes": 4165405,
+      "coldAssetDecodedBytes": 14687801,
+      "initialLoadedHistory": [
+        {
+          "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72",
+          "messages": 100
+        },
+        {
+          "sessionId": "6fc26e4b-a544-4a1e-9455-0326c926f919",
+          "messages": 100
+        },
+        {
+          "sessionId": "73149a1f-be7d-49cc-97ef-ea24b65df032",
+          "messages": 100
+        },
+        {
+          "sessionId": "2778b28b-83c6-4928-b339-4f8c94acbead",
+          "messages": 100
+        },
+        {
+          "sessionId": "dd11bc9c-13ef-4388-8b05-b9264734698b",
+          "messages": 100
+        },
+        {
+          "sessionId": "833fd142-0b8a-4346-8d23-e560dc1cdcdf",
+          "messages": 100
+        }
+      ],
+      "loadedHistory": [
+        {
+          "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72",
+          "messages": 100
+        },
+        {
+          "sessionId": "6fc26e4b-a544-4a1e-9455-0326c926f919",
+          "messages": 100
+        },
+        {
+          "sessionId": "73149a1f-be7d-49cc-97ef-ea24b65df032",
+          "messages": 100
+        },
+        {
+          "sessionId": "2778b28b-83c6-4928-b339-4f8c94acbead",
+          "messages": 100
+        },
+        {
+          "sessionId": "dd11bc9c-13ef-4388-8b05-b9264734698b",
+          "messages": 100
+        },
+        {
+          "sessionId": "833fd142-0b8a-4346-8d23-e560dc1cdcdf",
+          "messages": 100
+        }
+      ],
+      "runs": [
+        {
+          "scenario": "idle",
+          "elapsedMs": 60107.10219600005,
+          "mainTaskElapsedMs": 14641.711,
+          "mainThreadCpuMs": 14960.583000000002,
+          "rendererCpuMs": 21990.000000000004,
+          "scriptElapsedMs": 1875.1620000000005,
+          "styleElapsedMs": 1957.848,
+          "layoutElapsedMs": 144.09499999999997,
+          "frameGapP95Ms": 16.799999999995634,
+          "frameGapMaxMs": 33.30000000000291,
+          "longTaskMs": [],
+          "domNodes": 24542,
+          "mountedEditors": 6,
+          "animations": {
+            "running": 60,
+            "paused": 60
+          },
+          "historyRequests": 74,
+          "historyDecodedBytes": 13337483,
+          "resets": 0,
+          "httpFailures": [],
+          "interactions": []
+        },
+        {
+          "scenario": "streaming",
+          "elapsedMs": 61896.64035800006,
+          "mainTaskElapsedMs": 60970.837,
+          "mainThreadCpuMs": 60788.062999999995,
+          "rendererCpuMs": 75690.0,
+          "scriptElapsedMs": 42082.619,
+          "styleElapsedMs": 5121.201,
+          "layoutElapsedMs": 1038.8950000000002,
+          "frameGapP95Ms": 150,
+          "frameGapMaxMs": 183.39999999999418,
+          "longTaskMs": [
+            53,
+            52,
+            55,
+            51,
+            59,
+            57,
+            55,
+            65,
+            57,
+            55,
+            51,
+            55,
+            50,
+            58,
+            53,
+            55,
+            51,
+            55,
+            76,
+            57
+          ],
+          "domNodes": 26378,
+          "mountedEditors": 6,
+          "animations": {
+            "running": 61,
+            "paused": 59
+          },
+          "historyRequests": 74,
+          "historyDecodedBytes": 13626842,
+          "resets": 0,
+          "httpFailures": [],
+          "interactions": [
+            {
+              "action": "scroll-up",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 12000,
+              "startedMs": 11999.46011200035,
+              "finishedMs": 21144.920966000296,
+              "before": {
+                "scrollTop": 51688,
+                "scrollHeight": 52041,
+                "clientHeight": 352,
+                "composer": "closed",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 52562,
+                "scrollHeight": 52991,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            },
+            {
+              "action": "return-bottom",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 24000,
+              "startedMs": 23999.58906200016,
+              "finishedMs": 25708.631263000425,
+              "before": {
+                "scrollTop": 52562,
+                "scrollHeight": 53287,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 53271,
+                "scrollHeight": 53435,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            },
+            {
+              "action": "leave-tile",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 36000,
+              "startedMs": 35999.36480500037,
+              "finishedMs": 36842.7364670001,
+              "before": {
+                "scrollTop": 54380,
+                "scrollHeight": 54554,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 54250,
+                "scrollHeight": 54618,
+                "clientHeight": 352,
+                "composer": "closed",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            },
+            {
+              "action": "hover-tile",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 48000,
+              "startedMs": 47999.63787800027,
+              "finishedMs": 53332.550361,
+              "before": {
+                "scrollTop": 55533,
+                "scrollHeight": 55885,
+                "clientHeight": 352,
+                "composer": "closed",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 56185,
+                "scrollHeight": 56371,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            }
+          ]
+        },
+        {
+          "scenario": "reduced-motion-idle",
+          "elapsedMs": 60105.072335999925,
+          "mainTaskElapsedMs": 6064.373000000003,
+          "mainThreadCpuMs": 6351.782999999998,
+          "rendererCpuMs": 11149.99999999999,
+          "scriptElapsedMs": 1703.0189999999975,
+          "styleElapsedMs": 13.809000000000182,
+          "layoutElapsedMs": 110.09700000000011,
+          "frameGapP95Ms": 16.70000000001164,
+          "frameGapMaxMs": 50,
+          "longTaskMs": [],
+          "domNodes": 26378,
+          "mountedEditors": 6,
+          "animations": {},
+          "historyRequests": 72,
+          "historyDecodedBytes": 13530665,
+          "resets": 0,
+          "httpFailures": [],
+          "interactions": []
+        }
+      ]
+    },
+    {
+      "arm": "candidate",
+      "pair": 3,
+      "scheduledUpdates": 1800,
+      "verificationErrors": [],
+      "cold": {
+        "documentMs": 9985.491774000227,
+        "readyMs": 17712.359139000066,
+        "visibleTaskIds": [
+          "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+          "ad9c6415-2731-48c6-a082-a67fb008a5fa",
+          "683d828f-bbbf-4f2f-a468-c5ce9a37efc7",
+          "020d8d9b-338b-49d8-982e-fa9ea3ec7f66",
+          "76e5c1fd-2eef-4737-9c5a-fe2641cf23c0",
+          "00452117-3670-4dfd-88fe-916fb8bcfbb0"
+        ],
+        "displayedColumns": 6
+      },
+      "coldAssetEncodedBytes": 4165405,
+      "coldAssetDecodedBytes": 14687801,
+      "initialLoadedHistory": [
+        {
+          "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72",
+          "messages": 100
+        },
+        {
+          "sessionId": "6fc26e4b-a544-4a1e-9455-0326c926f919",
+          "messages": 100
+        },
+        {
+          "sessionId": "73149a1f-be7d-49cc-97ef-ea24b65df032",
+          "messages": 100
+        },
+        {
+          "sessionId": "2778b28b-83c6-4928-b339-4f8c94acbead",
+          "messages": 100
+        },
+        {
+          "sessionId": "dd11bc9c-13ef-4388-8b05-b9264734698b",
+          "messages": 100
+        },
+        {
+          "sessionId": "833fd142-0b8a-4346-8d23-e560dc1cdcdf",
+          "messages": 100
+        }
+      ],
+      "loadedHistory": [
+        {
+          "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72",
+          "messages": 100
+        },
+        {
+          "sessionId": "6fc26e4b-a544-4a1e-9455-0326c926f919",
+          "messages": 100
+        },
+        {
+          "sessionId": "73149a1f-be7d-49cc-97ef-ea24b65df032",
+          "messages": 100
+        },
+        {
+          "sessionId": "2778b28b-83c6-4928-b339-4f8c94acbead",
+          "messages": 100
+        },
+        {
+          "sessionId": "dd11bc9c-13ef-4388-8b05-b9264734698b",
+          "messages": 100
+        },
+        {
+          "sessionId": "833fd142-0b8a-4346-8d23-e560dc1cdcdf",
+          "messages": 100
+        }
+      ],
+      "runs": [
+        {
+          "scenario": "idle",
+          "elapsedMs": 60136.36402600026,
+          "mainTaskElapsedMs": 14360.993999999999,
+          "mainThreadCpuMs": 14678.404,
+          "rendererCpuMs": 21960.0,
+          "scriptElapsedMs": 1823.6749999999997,
+          "styleElapsedMs": 1893.5230000000001,
+          "layoutElapsedMs": 142.14,
+          "frameGapP95Ms": 16.79999999998836,
+          "frameGapMaxMs": 50,
+          "longTaskMs": [],
+          "domNodes": 24542,
+          "mountedEditors": 6,
+          "animations": {
+            "running": 60,
+            "paused": 60
+          },
+          "historyRequests": 74,
+          "historyDecodedBytes": 13337490,
+          "resets": 0,
+          "httpFailures": [],
+          "interactions": []
+        },
+        {
+          "scenario": "streaming",
+          "elapsedMs": 62007.80760399997,
+          "mainTaskElapsedMs": 60861.994000000006,
+          "mainThreadCpuMs": 60700.227999999996,
+          "rendererCpuMs": 75130.0,
+          "scriptElapsedMs": 41016.43,
+          "styleElapsedMs": 5102.346,
+          "layoutElapsedMs": 1030.345,
+          "frameGapP95Ms": 149.89999999999418,
+          "frameGapMaxMs": 183.3000000000029,
+          "longTaskMs": [
+            50,
+            76,
+            64,
+            68,
+            58,
+            60,
+            67,
+            51
+          ],
+          "domNodes": 26378,
+          "mountedEditors": 6,
+          "animations": {
+            "running": 61,
+            "paused": 59
+          },
+          "historyRequests": 75,
+          "historyDecodedBytes": 13625254,
+          "resets": 0,
+          "httpFailures": [],
+          "interactions": [
+            {
+              "action": "scroll-up",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 12000,
+              "startedMs": 11999.763989000116,
+              "finishedMs": 15665.367908000015,
+              "before": {
+                "scrollTop": 51727,
+                "scrollHeight": 52083,
+                "clientHeight": 352,
+                "composer": "closed",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 52007,
+                "scrollHeight": 52379,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            },
+            {
+              "action": "return-bottom",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 24000,
+              "startedMs": 23999.890664000064,
+              "finishedMs": 25560.77063400019,
+              "before": {
+                "scrollTop": 52007,
+                "scrollHeight": 53245,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 53270,
+                "scrollHeight": 53435,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            },
+            {
+              "action": "leave-tile",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 36000,
+              "startedMs": 35999.0286989999,
+              "finishedMs": 37002.46573000029,
+              "before": {
+                "scrollTop": 54390,
+                "scrollHeight": 54554,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 54286,
+                "scrollHeight": 54660,
+                "clientHeight": 352,
+                "composer": "closed",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            },
+            {
+              "action": "hover-tile",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 48000,
+              "startedMs": 47999.79648400005,
+              "finishedMs": 51645.66992100002,
+              "before": {
+                "scrollTop": 55532,
+                "scrollHeight": 55906,
+                "clientHeight": 352,
+                "composer": "closed",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 56102,
+                "scrollHeight": 56266,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            }
+          ]
+        },
+        {
+          "scenario": "reduced-motion-idle",
+          "elapsedMs": 60091.926977999974,
+          "mainTaskElapsedMs": 5860.503999999992,
+          "mainThreadCpuMs": 6142.673999999999,
+          "rendererCpuMs": 10500.0,
+          "scriptElapsedMs": 1666.2140000000036,
+          "styleElapsedMs": 20.680000000000476,
+          "layoutElapsedMs": 103.60100000000006,
+          "frameGapP95Ms": 16.70000000001164,
+          "frameGapMaxMs": 66.69999999998254,
+          "longTaskMs": [],
+          "domNodes": 26378,
+          "mountedEditors": 6,
+          "animations": {},
+          "historyRequests": 72,
+          "historyDecodedBytes": 13530683,
+          "resets": 0,
+          "httpFailures": [],
+          "interactions": []
+        }
+      ]
+    },
+    {
+      "arm": "baseline",
+      "pair": 3,
+      "scheduledUpdates": 1800,
+      "verificationErrors": [
+        {
+          "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72",
+          "at": 1792862603945,
+          "message": "Error: API GET /api/v1/task-sessions/7b1d3ede-1b2a-42ea-980f-c7907995ac72/messages?limit=100&sort=asc failed (503): {\"action\":\"Check the database connection and the persistence diagnostics, then retry.\",\"code\":\"persistence_unavailable\",\"error\":\"required persistence is unavailable\",\"store_ids\":[\"workflow\",\"analytics\",\"agent-settings\",\"user\",\"notification\",\"editor\",\"prompts\",\"utility\",\"office\",\"terminal\",\"quick-terminal\",\"runtime-flags\",\"auth\",\"secrets\",\"system-settings\",\"auth-hostnames\",\"organizations\",\"organization-units\",\"message-queue\",\"task-share\",\"telemetry-contract\",\"delivery\",\"storage\",\"plugin-instances\",\"plugin-marketplace\",\"plugin-settings\",\"plugin-state\",\"plugin-instance-state\",\"plugin-user-state\",\"canvas\",\"github\",\"gitlab\",\"jira\",\"linear\",\"sentry\",\"azure-devops\",\"workflow-sync\",\"office-config-sync\",\"automation\",\"coordinator\"]}"
+        },
+        {
+          "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72",
+          "at": 1792862604947,
+          "message": "Error: API GET /api/v1/task-sessions/7b1d3ede-1b2a-42ea-980f-c7907995ac72/messages?limit=100&sort=asc failed (503): {\"action\":\"Check the database connection and the persistence diagnostics, then retry.\",\"code\":\"persistence_unavailable\",\"error\":\"required persistence is unavailable\",\"store_ids\":[\"workflow\",\"analytics\",\"agent-settings\",\"user\",\"notification\",\"editor\",\"prompts\",\"utility\",\"office\",\"terminal\",\"quick-terminal\",\"runtime-flags\",\"auth\",\"secrets\",\"system-settings\",\"auth-hostnames\",\"organizations\",\"organization-units\",\"message-queue\",\"task-share\",\"telemetry-contract\",\"delivery\",\"storage\",\"plugin-instances\",\"plugin-marketplace\",\"plugin-settings\",\"plugin-state\",\"plugin-instance-state\",\"plugin-user-state\",\"canvas\",\"github\",\"gitlab\",\"jira\",\"linear\",\"sentry\",\"azure-devops\",\"workflow-sync\",\"office-config-sync\",\"automation\",\"coordinator\"]}"
+        },
+        {
+          "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72",
+          "at": 1792862605949,
+          "message": "Error: API GET /api/v1/task-sessions/7b1d3ede-1b2a-42ea-980f-c7907995ac72/messages?limit=100&sort=asc failed (503): {\"action\":\"Check the database connection and the persistence diagnostics, then retry.\",\"code\":\"persistence_unavailable\",\"error\":\"required persistence is unavailable\",\"store_ids\":[\"workflow\",\"analytics\",\"agent-settings\",\"user\",\"notification\",\"editor\",\"prompts\",\"utility\",\"office\",\"terminal\",\"quick-terminal\",\"runtime-flags\",\"auth\",\"secrets\",\"system-settings\",\"auth-hostnames\",\"organizations\",\"organization-units\",\"message-queue\",\"task-share\",\"telemetry-contract\",\"delivery\",\"storage\",\"plugin-instances\",\"plugin-marketplace\",\"plugin-settings\",\"plugin-state\",\"plugin-instance-state\",\"plugin-user-state\",\"canvas\",\"github\",\"gitlab\",\"jira\",\"linear\",\"sentry\",\"azure-devops\",\"workflow-sync\",\"office-config-sync\",\"automation\",\"coordinator\"]}"
+        },
+        {
+          "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72",
+          "at": 1792862606950,
+          "message": "Error: API GET /api/v1/task-sessions/7b1d3ede-1b2a-42ea-980f-c7907995ac72/messages?limit=100&sort=asc failed (503): {\"action\":\"Check the database connection and the persistence diagnostics, then retry.\",\"code\":\"persistence_unavailable\",\"error\":\"required persistence is unavailable\",\"store_ids\":[\"workflow\",\"analytics\",\"agent-settings\",\"user\",\"notification\",\"editor\",\"prompts\",\"utility\",\"office\",\"terminal\",\"quick-terminal\",\"runtime-flags\",\"auth\",\"secrets\",\"system-settings\",\"auth-hostnames\",\"organizations\",\"organization-units\",\"message-queue\",\"task-share\",\"telemetry-contract\",\"delivery\",\"storage\",\"plugin-instances\",\"plugin-marketplace\",\"plugin-settings\",\"plugin-state\",\"plugin-instance-state\",\"plugin-user-state\",\"canvas\",\"github\",\"gitlab\",\"jira\",\"linear\",\"sentry\",\"azure-devops\",\"workflow-sync\",\"office-config-sync\",\"automation\",\"coordinator\"]}"
+        },
+        {
+          "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72",
+          "at": 1792862607953,
+          "message": "Error: API GET /api/v1/task-sessions/7b1d3ede-1b2a-42ea-980f-c7907995ac72/messages?limit=100&sort=asc failed (503): {\"action\":\"Check the database connection and the persistence diagnostics, then retry.\",\"code\":\"persistence_unavailable\",\"error\":\"required persistence is unavailable\",\"store_ids\":[\"workflow\",\"analytics\",\"agent-settings\",\"user\",\"notification\",\"editor\",\"prompts\",\"utility\",\"office\",\"terminal\",\"quick-terminal\",\"runtime-flags\",\"auth\",\"secrets\",\"system-settings\",\"auth-hostnames\",\"organizations\",\"organization-units\",\"message-queue\",\"task-share\",\"telemetry-contract\",\"delivery\",\"storage\",\"plugin-instances\",\"plugin-marketplace\",\"plugin-settings\",\"plugin-state\",\"plugin-instance-state\",\"plugin-user-state\",\"canvas\",\"github\",\"gitlab\",\"jira\",\"linear\",\"sentry\",\"azure-devops\",\"workflow-sync\",\"office-config-sync\",\"automation\",\"coordinator\"]}"
+        },
+        {
+          "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72",
+          "at": 1792862608955,
+          "message": "Error: API GET /api/v1/task-sessions/7b1d3ede-1b2a-42ea-980f-c7907995ac72/messages?limit=100&sort=asc failed (503): {\"action\":\"Check the database connection and the persistence diagnostics, then retry.\",\"code\":\"persistence_unavailable\",\"error\":\"required persistence is unavailable\",\"store_ids\":[\"workflow\",\"analytics\",\"agent-settings\",\"user\",\"notification\",\"editor\",\"prompts\",\"utility\",\"office\",\"terminal\",\"quick-terminal\",\"runtime-flags\",\"auth\",\"secrets\",\"system-settings\",\"auth-hostnames\",\"organizations\",\"organization-units\",\"message-queue\",\"task-share\",\"telemetry-contract\",\"delivery\",\"storage\",\"plugin-instances\",\"plugin-marketplace\",\"plugin-settings\",\"plugin-state\",\"plugin-instance-state\",\"plugin-user-state\",\"canvas\",\"github\",\"gitlab\",\"jira\",\"linear\",\"sentry\",\"azure-devops\",\"workflow-sync\",\"office-config-sync\",\"automation\",\"coordinator\"]}"
+        },
+        {
+          "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72",
+          "at": 1792862609958,
+          "message": "Error: API GET /api/v1/task-sessions/7b1d3ede-1b2a-42ea-980f-c7907995ac72/messages?limit=100&sort=asc failed (503): {\"action\":\"Check the database connection and the persistence diagnostics, then retry.\",\"code\":\"persistence_unavailable\",\"error\":\"required persistence is unavailable\",\"store_ids\":[\"workflow\",\"analytics\",\"agent-settings\",\"user\",\"notification\",\"editor\",\"prompts\",\"utility\",\"office\",\"terminal\",\"quick-terminal\",\"runtime-flags\",\"auth\",\"secrets\",\"system-settings\",\"auth-hostnames\",\"organizations\",\"organization-units\",\"message-queue\",\"task-share\",\"telemetry-contract\",\"delivery\",\"storage\",\"plugin-instances\",\"plugin-marketplace\",\"plugin-settings\",\"plugin-state\",\"plugin-instance-state\",\"plugin-user-state\",\"canvas\",\"github\",\"gitlab\",\"jira\",\"linear\",\"sentry\",\"azure-devops\",\"workflow-sync\",\"office-config-sync\",\"automation\",\"coordinator\"]}"
+        },
+        {
+          "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72",
+          "at": 1792862610960,
+          "message": "Error: API GET /api/v1/task-sessions/7b1d3ede-1b2a-42ea-980f-c7907995ac72/messages?limit=100&sort=asc failed (503): {\"action\":\"Check the database connection and the persistence diagnostics, then retry.\",\"code\":\"persistence_unavailable\",\"error\":\"required persistence is unavailable\",\"store_ids\":[\"workflow\",\"analytics\",\"agent-settings\",\"user\",\"notification\",\"editor\",\"prompts\",\"utility\",\"office\",\"terminal\",\"quick-terminal\",\"runtime-flags\",\"auth\",\"secrets\",\"system-settings\",\"auth-hostnames\",\"organizations\",\"organization-units\",\"message-queue\",\"task-share\",\"telemetry-contract\",\"delivery\",\"storage\",\"plugin-instances\",\"plugin-marketplace\",\"plugin-settings\",\"plugin-state\",\"plugin-instance-state\",\"plugin-user-state\",\"canvas\",\"github\",\"gitlab\",\"jira\",\"linear\",\"sentry\",\"azure-devops\",\"workflow-sync\",\"office-config-sync\",\"automation\",\"coordinator\"]}"
+        }
+      ],
+      "cold": {
+        "documentMs": 13348.666491999757,
+        "readyMs": 20610.577581999823,
+        "visibleTaskIds": [
+          "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+          "ad9c6415-2731-48c6-a082-a67fb008a5fa",
+          "683d828f-bbbf-4f2f-a468-c5ce9a37efc7",
+          "020d8d9b-338b-49d8-982e-fa9ea3ec7f66",
+          "76e5c1fd-2eef-4737-9c5a-fe2641cf23c0",
+          "00452117-3670-4dfd-88fe-916fb8bcfbb0"
+        ],
+        "displayedColumns": 6
+      },
+      "coldAssetEncodedBytes": 18607703,
+      "coldAssetDecodedBytes": 18607703,
+      "initialLoadedHistory": [
+        {
+          "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72",
+          "messages": 100
+        },
+        {
+          "sessionId": "6fc26e4b-a544-4a1e-9455-0326c926f919",
+          "messages": 100
+        },
+        {
+          "sessionId": "73149a1f-be7d-49cc-97ef-ea24b65df032",
+          "messages": 100
+        },
+        {
+          "sessionId": "2778b28b-83c6-4928-b339-4f8c94acbead",
+          "messages": 100
+        },
+        {
+          "sessionId": "dd11bc9c-13ef-4388-8b05-b9264734698b",
+          "messages": 100
+        },
+        {
+          "sessionId": "833fd142-0b8a-4346-8d23-e560dc1cdcdf",
+          "messages": 100
+        }
+      ],
+      "loadedHistory": [
+        {
+          "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72",
+          "messages": 100
+        },
+        {
+          "sessionId": "6fc26e4b-a544-4a1e-9455-0326c926f919",
+          "messages": 100
+        },
+        {
+          "sessionId": "73149a1f-be7d-49cc-97ef-ea24b65df032",
+          "messages": 100
+        },
+        {
+          "sessionId": "2778b28b-83c6-4928-b339-4f8c94acbead",
+          "messages": 100
+        },
+        {
+          "sessionId": "dd11bc9c-13ef-4388-8b05-b9264734698b",
+          "messages": 100
+        },
+        {
+          "sessionId": "833fd142-0b8a-4346-8d23-e560dc1cdcdf",
+          "messages": 100
+        }
+      ],
+      "runs": [
+        {
+          "scenario": "idle",
+          "elapsedMs": 60108.117806999944,
+          "mainTaskElapsedMs": 14294.278000000002,
+          "mainThreadCpuMs": 14577.719999999998,
+          "rendererCpuMs": 21590.0,
+          "scriptElapsedMs": 1785.252,
+          "styleElapsedMs": 1900.0330000000001,
+          "layoutElapsedMs": 143.459,
+          "frameGapP95Ms": 16.70000000001164,
+          "frameGapMaxMs": 33.30000000000291,
+          "longTaskMs": [],
+          "domNodes": 24523,
+          "mountedEditors": 6,
+          "animations": {
+            "running": 60,
+            "paused": 60
+          },
+          "historyRequests": 74,
+          "historyDecodedBytes": 13334627,
+          "resets": 0,
+          "httpFailures": [],
+          "interactions": []
+        },
+        {
+          "scenario": "streaming",
+          "elapsedMs": 61405.46219099965,
+          "mainTaskElapsedMs": 58515.80699999999,
+          "mainThreadCpuMs": 60159.201,
+          "rendererCpuMs": 73949.99999999999,
+          "scriptElapsedMs": 26275.243,
+          "styleElapsedMs": 6143.815,
+          "layoutElapsedMs": 1465.493,
+          "frameGapP95Ms": 100,
+          "frameGapMaxMs": 150.09999999999127,
+          "longTaskMs": [
+            58,
+            54,
+            58,
+            65,
+            66,
+            60,
+            58,
+            61,
+            51,
+            78,
+            63,
+            70,
+            60,
+            58,
+            63,
+            61,
+            50,
+            60,
+            57,
+            60,
+            60,
+            53,
+            62,
+            54,
+            51,
+            55,
+            57,
+            50,
+            55,
+            51,
+            50,
+            51,
+            54,
+            59,
+            50,
+            50,
+            55,
+            55,
+            66,
+            59,
+            51,
+            52,
+            50,
+            55,
+            53,
+            54,
+            53,
+            53,
+            57,
+            50,
+            50,
+            57,
+            65,
+            55,
+            60,
+            53,
+            53,
+            53,
+            50,
+            55,
+            50,
+            84,
+            63,
+            51,
+            50,
+            50,
+            52,
+            51,
+            53,
+            58,
+            61,
+            51,
+            52,
+            50,
+            50,
+            51,
+            51,
+            59,
+            66,
+            58,
+            57,
+            51,
+            52,
+            55,
+            60,
+            56,
+            54,
+            50,
+            50,
+            50,
+            118,
+            56,
+            52
+          ],
+          "domNodes": 26364,
+          "mountedEditors": 6,
+          "animations": {
+            "running": 52,
+            "paused": 68
+          },
+          "historyRequests": 705,
+          "historyDecodedBytes": 129735758,
+          "resets": 1631,
+          "httpFailures": [
+            {
+              "at": 1792862598578,
+              "path": "/api/v1/tasks/811356d7-2a02-45b7-ba23-a2d1d5dca1fe/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792862598656,
+              "path": "/api/v1/tasks/ad9c6415-2731-48c6-a082-a67fb008a5fa/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792862598766,
+              "path": "/api/v1/tasks/683d828f-bbbf-4f2f-a468-c5ce9a37efc7/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792862598853,
+              "path": "/api/v1/tasks/020d8d9b-338b-49d8-982e-fa9ea3ec7f66/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792862598930,
+              "path": "/api/v1/tasks/76e5c1fd-2eef-4737-9c5a-fe2641cf23c0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792862599072,
+              "path": "/api/v1/tasks/00452117-3670-4dfd-88fe-916fb8bcfbb0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792862601593,
+              "path": "/api/v1/tasks/811356d7-2a02-45b7-ba23-a2d1d5dca1fe/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792862601698,
+              "path": "/api/v1/tasks/ad9c6415-2731-48c6-a082-a67fb008a5fa/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792862601767,
+              "path": "/api/v1/tasks/683d828f-bbbf-4f2f-a468-c5ce9a37efc7/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792862601850,
+              "path": "/api/v1/tasks/020d8d9b-338b-49d8-982e-fa9ea3ec7f66/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792862601901,
+              "path": "/api/v1/tasks/76e5c1fd-2eef-4737-9c5a-fe2641cf23c0/environment/live",
+              "status": 503
+            },
+            {
+              "at": 1792862602092,
+              "path": "/api/v1/tasks/00452117-3670-4dfd-88fe-916fb8bcfbb0/environment/live",
+              "status": 503
+            }
+          ],
+          "interactions": [
+            {
+              "action": "scroll-up",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 12000,
+              "startedMs": 11998.899721999653,
+              "finishedMs": 14932.87177799968,
+              "before": {
+                "scrollTop": 51604,
+                "scrollHeight": 51956,
+                "clientHeight": 352,
+                "composer": "closed",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 51864,
+                "scrollHeight": 52252,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            },
+            {
+              "action": "return-bottom",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 24000,
+              "startedMs": 23999.83042499982,
+              "finishedMs": 26454.69040099997,
+              "before": {
+                "scrollTop": 51864,
+                "scrollHeight": 53181,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 53292,
+                "scrollHeight": 53456,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            },
+            {
+              "action": "leave-tile",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 36000,
+              "startedMs": 35999.018604999874,
+              "finishedMs": 36922.16649599979,
+              "before": {
+                "scrollTop": 54327,
+                "scrollHeight": 54491,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 54202,
+                "scrollHeight": 54618,
+                "clientHeight": 352,
+                "composer": "closed",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            },
+            {
+              "action": "hover-tile",
+              "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+              "scheduledMs": 48000,
+              "startedMs": 48000.30215499969,
+              "finishedMs": 50268.02035299968,
+              "before": {
+                "scrollTop": 55385,
+                "scrollHeight": 55737,
+                "clientHeight": 352,
+                "composer": "closed",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              },
+              "after": {
+                "scrollTop": 55512,
+                "scrollHeight": 56012,
+                "clientHeight": 164,
+                "composer": "open",
+                "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+              }
+            }
+          ]
+        },
+        {
+          "scenario": "reduced-motion-idle",
+          "elapsedMs": 60151.28700600006,
+          "mainTaskElapsedMs": 13579.513999999988,
+          "mainThreadCpuMs": 13872.060000000005,
+          "rendererCpuMs": 22049.999999999996,
+          "scriptElapsedMs": 1810.3789999999976,
+          "styleElapsedMs": 1612.457000000001,
+          "layoutElapsedMs": 128.27499999999992,
+          "frameGapP95Ms": 16.79999999998836,
+          "frameGapMaxMs": 83.40000000002328,
+          "longTaskMs": [],
+          "domNodes": 26364,
+          "mountedEditors": 6,
+          "animations": {
+            "running": 51,
+            "paused": 63
+          },
+          "historyRequests": 73,
+          "historyDecodedBytes": 13715790,
+          "resets": 0,
+          "httpFailures": [],
+          "interactions": []
+        }
+      ]
+    }
+  ],
+  "completedPairsDiagnosticObservations": [
+    {
+      "pair": 0,
+      "controlFrameGapP95Ms": 83.39999999999418,
+      "candidateFrameGapP95Ms": 116.60000000000582,
+      "candidateP95Higher": true
+    },
+    {
+      "pair": 1,
+      "controlFrameGapP95Ms": 83.39999999999418,
+      "candidateFrameGapP95Ms": 133.3000000000029,
+      "candidateP95Higher": true
+    },
+    {
+      "pair": 2,
+      "controlFrameGapP95Ms": 116.69999999998254,
+      "candidateFrameGapP95Ms": 150,
+      "candidateP95Higher": true
+    },
+    {
+      "pair": 3,
+      "controlFrameGapP95Ms": 100,
+      "candidateFrameGapP95Ms": 149.89999999999418,
+      "candidateP95Higher": true
+    }
+  ],
+  "orderedUpdatesInCompleteSamples": 14400,
+  "failedSample": {
+    "arm": "baseline",
+    "pair": 4,
+    "completedWindows": [
+      "idle"
+    ],
+    "interactionFailure": {
+      "action": "return-bottom",
+      "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+      "scheduledMs": 24000,
+      "startedMs": 23998.99731899984,
+      "observations": [
+        {
+          "action": "scroll-up",
+          "taskId": "811356d7-2a02-45b7-ba23-a2d1d5dca1fe",
+          "scheduledMs": 12000,
+          "startedMs": 11998.676438999828,
+          "finishedMs": 14703.722622999921,
+          "before": {
+            "scrollTop": 51603,
+            "scrollHeight": 51977,
+            "clientHeight": 352,
+            "composer": "closed",
+            "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+          },
+          "after": {
+            "scrollTop": 51822,
+            "scrollHeight": 52252,
+            "clientHeight": 164,
+            "composer": "open",
+            "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+          }
+        }
+      ],
+      "state": {
+        "scrollTop": 53186,
+        "scrollHeight": 53942,
+        "clientHeight": 164,
+        "composer": "open",
+        "sessionId": "7b1d3ede-1b2a-42ea-980f-c7907995ac72"
+      },
+      "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: <= \u001b[32m3\u001b[39m\nReceived:    \u001b[31m423\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate"
+    },
+    "originalError": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: <= \u001b[32m3\u001b[39m\nReceived:    \u001b[31m423\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate",
+    "lastCheckpointBottomDistancePx": 592,
+    "scope": "The fixed sixty-second dwell continued after the action failure. No completed streaming timing sample or final ordered-content success is recorded for this attempt."
+  },
+  "summaryGuard": {
+    "result": "rejected report because it contains an error",
+    "log": "/tmp/kandev-final-scripted-grid-summary-rejection.log",
+    "reportErrorRemoved": false,
+    "partialSummaryCreated": false
+  },
+  "observations": {
+    "streamingP95WorseInEveryCompletedPair": true,
+    "controlHttpFailureStatusesInCompletedSamples": {
+      "503": 104
+    },
+    "candidateHttpFailuresInCompletedSamples": 0,
+    "candidateResetsInCompletedSamples": 0,
+    "controlPostWindowVerificationRetries": 8,
+    "candidatePostWindowVerificationRetries": 0,
+    "candidateActionSequencesPassed": 4,
+    "controlActionSequencesPassed": 4,
+    "failureCause": "Unconfirmed. The control remained behind the live tail after the return-bottom wheel action. No tolerance or timeout change was made."
+  },
+  "hostObservations": {
+    "path": "final-scripted-grid-spinner-host-load.jsonl",
+    "records": 105,
+    "loadAverage1MinRange": [
+      1.66650390625,
+      9.54736328125
+    ],
+    "minimumAvailableMemoryKiB": 16203560,
+    "causalAttribution": false
+  },
+  "nextAction": "Separate quiet full-reference CPU attribution on both retained builds. Preserve this scroll failure independently and investigate the repeated renderer frame-gap regression.",
+  "limits": [
+    "The requested six-pair grid result is not achieved. Do not present four pairs as six or discard the failed control.",
+    "Completed-window HTTP counts exclude uncaptured failures during the failed streaming window and setup.",
+    "CPU attribution uses a different interaction mode and cannot be pooled with these speed samples.",
+    "Linux Chromium frame gaps are not M2 Air, battery, or field INP measurements."
+  ]
+}

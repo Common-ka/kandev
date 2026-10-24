@@ -51,6 +51,12 @@ that mode ([evidence](evidence/plugin-spinner-motion-six-pair-1x.json)). Normal
 CPU and frame regressions remain explicit. Full reference grid, columns, and
 stress remain separate work.
 
+The final scripted grid attempt is incomplete: four pairs pass before the fifth
+control fails its return-bottom interaction. Candidate streaming frame-gap p95
+is higher in every completed pair. The failed report remains intact and is
+excluded from final speed summaries. See [evidence](evidence/final-scripted-grid-failed-attempt.json).
+Separate renderer attribution and the final grid gate remain open.
+
 ## Outcome and checkpoint
 
 Reduce unnecessary work in Threads, Dockview, and task switching, then measure
