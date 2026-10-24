@@ -2,10 +2,53 @@
 
 Status: final six-pair comparisons for compatible tasks, incompatible layouts,
 same-environment session tabs, and Dockview core are complete at 1x. Final grid,
-columns, plugin Dockview, visibility, stress, and dense owner retention remain open.
-Late Dockview core regressions still need attribution. The branch is
+columns, visibility, stress, and dense owner retention remain open. The full
+plugin Dockview series is also complete; core/plugin regressions still need attribution. The branch is
 `feature/evaluate-live-thread-bc0`; the frozen baseline is
 `595df36ed5c1cf02fd90cb972b623ad6edc53df8`.
+
+## Final Dockview plugin comparison (1x)
+
+Six alternating pairs compare the original baseline with production
+`f5c8fb8f6ab`, using the same complete E2E plugin archive. All 12 samples pass
+in about one hour. The workspace contains 1,000 tasks and 36,900 stored messages;
+nine API panels, six visible panes, and four document editors remain present.
+All 21,600 scheduled updates pass ordered durable verification. Every retained
+hidden chat catches up to 300 ticks and preserves its draft.
+
+Core streaming history requests fall 95.58% and decoded history bytes fall
+95.57% by median paired change, with improvements in every pair. Full-history
+resets fall to zero. Plugin conversation HTTP requests during streaming fall
+from 364–596 per baseline sample to zero in every candidate sample. Initial
+plugin loading and scheduled core backfill remain separate from these counts.
+
+Streaming renderer CPU falls 12.62% and main-thread CPU falls 8.29% by median
+paired change. Each improves in five pairs and regresses in one. Main-thread
+task time falls 5.94%, below the 20% target. Frame-gap p95 improves in five pairs
+and is effectively equal in one, with a 49.70% median paired reduction. Maximum
+frame gap still regresses in one pair, from 116.7 to 150 ms.
+
+Idle results are mixed. Normal-idle main-thread CPU falls 4.16% by median paired
+change, but rises 21.21% and 27.22% in two pairs. Reduced-motion idle main-thread
+CPU falls 12.35%, with two roughly 7% regressions. Its maximum frame gaps worsen
+in five pairs, despite mostly neutral or better p95 values. Four animations
+remain running in every candidate reduced-motion sample; the core-only build
+had zero. Their source and CPU contribution still need attribution. The full
+plugin adds a hidden review pane as well as its visible conversation pane.
+
+The baseline records 260 HTTP 409 conversation consistency conflicts and 797
+HTTP 503 availability failures. Its final content checks pass after seven
+post-window verification retries in two samples. The candidate records no HTTP
+errors or verification retries. Backend logs show baseline persistence
+`table_probe` deadlines. All affected samples remain included. A passing content
+check does not erase these availability failures, and 409 conflicts are counted
+separately from 503 failures.
+
+[Complete evidence](evidence/final-dockview-plugin-six-pair-1x.json) preserves
+all pairs, HTTP failures, retries, plugin request counts, build identities,
+and host observations. Shared-host load rose as high as 14.89; this does not
+establish the cause of any regression. No cold-entry, M2 Air, INP, battery, or
+leak claim follows. The core and full-plugin results remain separate.
 
 ## Final Dockview core comparison (1x)
 

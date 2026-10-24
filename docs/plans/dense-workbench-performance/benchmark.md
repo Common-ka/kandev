@@ -38,7 +38,7 @@ before each run. Do not copy a SQLite file while its server is running.
 | Sessions | Three per eligible task; one selected per column |
 | History | 1,000 messages per selected session, 100 per sibling; deterministic mixture of text, code blocks, tool groups, and turn metadata |
 | Content size | Approximately 1 KiB text per message; identical fixture bytes in both arms |
-| File state | 630 files in 21 folders and 72 changed files for each of two switching tasks, reusing navigation-profile helpers |
+| File state | 630 tracked fixture files in 21 folders; 72 modified tracked files plus one task marker (73 initial changes) per selected environment, reusing navigation-profile helpers |
 | Streams | Six selected sessions, five updates per second each; 60 seconds = 1,800 scheduled updates; update existing agent messages and complete turns at fixed sequence positions |
 | Grid | 1470 by 956 CSS pixels, scale 2; record and hold six visible tiles with the same layout configuration |
 | List | 30 columns, same viewport; scroll a fixed sequence through first/middle/last columns |

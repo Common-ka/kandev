@@ -36,6 +36,17 @@ See the [compatible-task](evidence/final-task-switch-six-pair-1x.json),
 [layout-restoration](evidence/final-incompatible-layout-six-pair-1x.json), and
 [session-tab](evidence/final-session-tabs-six-pair-1x.json) evidence.
 
+Production `f5c8fb8f6ab` also passes six full Dockview core pairs at 1x.
+Streaming history reads fall about 96.2% in all pairs; renderer CPU falls
+11.4% by median paired change with one regression. Reduced-motion idle main CPU
+falls 81.0% in every pair. Late frame/CPU regressions remain open, and the 20%
+streaming task-time target is unmet. See [core evidence](evidence/final-dockview-core-six-pair-1x.json).
+The scripted Threads grid/column harness and unchanged quiet caller pass both
+builds. The full-plugin six-pair series also passes, with lower streaming reads
+and CPU but mixed idle results and four remaining reduced-motion animations
+([evidence](evidence/final-dockview-plugin-six-pair-1x.json)). Full reference grid,
+columns, and stress remain separate work.
+
 ## Outcome and checkpoint
 
 Reduce unnecessary work in Threads, Dockview, and task switching, then measure
