@@ -1,0 +1,581 @@
+{
+  "status": "rejected",
+  "rawReport": "matched-dense-1792813854154.json",
+  "rawSha256": "ce55bc89d066dce54298d21977eabb5e9cd66e1fbefa4324fc21aa4300847577",
+  "sourceRevision": "a96447a80319bac39ea09921a8ac7e9193d54899",
+  "builds": {
+    "baseline": {
+      "binary": "/tmp/kandev-dense-timestamp-5936a872/apps/backend/bin/kandev",
+      "assets": "/tmp/kandev-dense-timestamp-5936a872/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "8379f62eb1bf4935c6b18d4616f732191cdefc17159c02367a54c05701f7a160"
+    },
+    "candidate": {
+      "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+      "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "feef25d2714c31317b51b41c6d1f0070b9d8cc79ee45e881d0089cde37c0bbc8"
+    }
+  },
+  "fixture": {
+    "layout": "grid",
+    "tasks": 1000,
+    "columns": 6,
+    "messages": 120,
+    "durationMs": 60000
+  },
+  "finalVisibilityProbe": "boolean-poll",
+  "comparisons": [
+    {
+      "group": "1x/cold",
+      "metric": "readyMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 28097.194239999983,
+        "min": 25825.127276999992,
+        "max": 30369.261202999973,
+        "values": [
+          25825.127276999992,
+          30369.261202999973
+        ]
+      },
+      "candidate": {
+        "median": 16469.276685999997,
+        "min": 15942.389935999992,
+        "max": 16996.163436000003,
+        "values": [
+          16996.163436000003,
+          15942.389935999992
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        8828.96384099999,
+        14426.87126699998
+      ],
+      "pairedPercentReduction": [
+        34.18749401039009,
+        47.50484765027754
+      ],
+      "medianPairedPercentReduction": 40.84617083033382
+    },
+    {
+      "group": "1x/idle",
+      "metric": "elapsedMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 60053.866515,
+        "min": 60036.192867000005,
+        "max": 60071.540163,
+        "values": [
+          60036.192867000005,
+          60071.540163
+        ]
+      },
+      "candidate": {
+        "median": 60039.86481849998,
+        "min": 60039.84612699994,
+        "max": 60039.883510000014,
+        "values": [
+          60039.883510000014,
+          60039.84612699994
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -3.690643000009004,
+        31.694036000058986
+      ],
+      "pairedPercentReduction": [
+        -0.00614736348819619,
+        0.052760485105025436
+      ],
+      "medianPairedPercentReduction": 0.023306560808414624
+    },
+    {
+      "group": "1x/idle",
+      "metric": "mainThreadCpuMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 17432.893,
+        "min": 16014.649,
+        "max": 18851.137,
+        "values": [
+          16014.649,
+          18851.137
+        ]
+      },
+      "candidate": {
+        "median": 16186.323999999999,
+        "min": 16041.886999999999,
+        "max": 16330.760999999999,
+        "values": [
+          16041.886999999999,
+          16330.760999999999
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -27.237999999999374,
+        2520.376
+      ],
+      "pairedPercentReduction": [
+        -0.17008177950075193,
+        13.3698885112341
+      ],
+      "medianPairedPercentReduction": 6.599903365866674
+    },
+    {
+      "group": "1x/idle",
+      "metric": "rendererCpuMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 25645,
+        "min": 24350,
+        "max": 26940,
+        "values": [
+          24350,
+          26940
+        ]
+      },
+      "candidate": {
+        "median": 24305,
+        "min": 23759.999999999996,
+        "max": 24850,
+        "values": [
+          24850,
+          23759.999999999996
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -500,
+        3180.0000000000036
+      ],
+      "pairedPercentReduction": [
+        -2.0533880903490758,
+        11.804008908685981
+      ],
+      "medianPairedPercentReduction": 4.875310409168453
+    },
+    {
+      "group": "1x/idle",
+      "metric": "frameGapP95Ms",
+      "pairs": 2,
+      "baseline": {
+        "median": 16.799999999995634,
+        "min": 16.799999999995634,
+        "max": 16.799999999995634,
+        "values": [
+          16.799999999995634,
+          16.799999999995634
+        ]
+      },
+      "candidate": {
+        "median": 16.799999999993815,
+        "min": 16.79999999998836,
+        "max": 16.799999999999272,
+        "values": [
+          16.79999999998836,
+          16.799999999999272
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        7.275957614183426e-12,
+        -3.637978807091713e-12
+      ],
+      "pairedPercentReduction": [
+        4.3309271513007835e-11,
+        -2.1654635756503917e-11
+      ],
+      "medianPairedPercentReduction": 1.0827317878251959e-11
+    },
+    {
+      "group": "1x/idle",
+      "metric": "longTaskMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 110,
+        "min": 85,
+        "max": 135,
+        "values": [
+          85,
+          135
+        ]
+      },
+      "candidate": {
+        "median": 43.5,
+        "min": 0,
+        "max": 87,
+        "values": [
+          0,
+          87
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        85,
+        48
+      ],
+      "pairedPercentReduction": [
+        100,
+        35.55555555555556
+      ],
+      "medianPairedPercentReduction": 67.77777777777777
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "elapsedMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 65083.59775249999,
+        "min": 64339.53589299999,
+        "max": 65827.65961199999,
+        "values": [
+          64339.53589299999,
+          65827.65961199999
+        ]
+      },
+      "candidate": {
+        "median": 63286.25100500006,
+        "min": 61928.62612800003,
+        "max": 64643.87588200008,
+        "values": [
+          61928.62612800003,
+          64643.87588200008
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        2410.9097649999603,
+        1183.7837299999082
+      ],
+      "pairedPercentReduction": [
+        3.747166857108558,
+        1.7983074849954281
+      ],
+      "medianPairedPercentReduction": 2.7727371710519932
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "mainThreadCpuMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 62891.9265,
+        "min": 62789.34000000001,
+        "max": 62994.513,
+        "values": [
+          62994.513,
+          62789.34000000001
+        ]
+      },
+      "candidate": {
+        "median": 61278.531500000005,
+        "min": 59728.032,
+        "max": 62829.03100000001,
+        "values": [
+          59728.032,
+          62829.03100000001
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        3266.4809999999998,
+        -39.690999999998894
+      ],
+      "pairedPercentReduction": [
+        5.185342094794827,
+        -0.06321295939724624
+      ],
+      "medianPairedPercentReduction": 2.5610645676987907
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "rendererCpuMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 80120,
+        "min": 79840,
+        "max": 80399.99999999999,
+        "values": [
+          79840,
+          80399.99999999999
+        ]
+      },
+      "candidate": {
+        "median": 76610,
+        "min": 75440,
+        "max": 77780,
+        "values": [
+          75440,
+          77780
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        4400,
+        2619.9999999999854
+      ],
+      "pairedPercentReduction": [
+        5.511022044088176,
+        3.258706467661674
+      ],
+      "medianPairedPercentReduction": 4.384864255874925
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "frameGapP95Ms",
+      "pairs": 2,
+      "baseline": {
+        "median": 158.40000000000873,
+        "min": 150.10000000000582,
+        "max": 166.70000000001164,
+        "values": [
+          150.10000000000582,
+          166.70000000001164
+        ]
+      },
+      "candidate": {
+        "median": 150.10000000000582,
+        "min": 150.10000000000582,
+        "max": 150.10000000000582,
+        "values": [
+          150.10000000000582,
+          150.10000000000582
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        16.60000000000582
+      ],
+      "pairedPercentReduction": [
+        0,
+        9.958008398323132
+      ],
+      "medianPairedPercentReduction": 4.979004199161566
+    },
+    {
+      "group": "1x/streaming",
+      "metric": "longTaskMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 3866,
+        "min": 624,
+        "max": 7108,
+        "values": [
+          624,
+          7108
+        ]
+      },
+      "candidate": {
+        "median": 4930.5,
+        "min": 4052,
+        "max": 5809,
+        "values": [
+          4052,
+          5809
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -3428,
+        1299
+      ],
+      "pairedPercentReduction": [
+        -549.3589743589744,
+        18.275182892515474
+      ],
+      "medianPairedPercentReduction": -265.54189573322947
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "elapsedMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 60053.30170099996,
+        "min": 60050.765468999976,
+        "max": 60055.837932999944,
+        "values": [
+          60050.765468999976,
+          60055.837932999944
+        ]
+      },
+      "candidate": {
+        "median": 60052.586090000026,
+        "min": 60032.85413000005,
+        "max": 60072.31805,
+        "values": [
+          60032.85413000005,
+          60072.31805
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        17.911338999925647,
+        -16.480117000057362
+      ],
+      "pairedPercentReduction": [
+        0.02982699530978006,
+        -0.02744132388668536
+      ],
+      "medianPairedPercentReduction": 0.0011928357115473503
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "mainThreadCpuMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 6653.942000000008,
+        "min": 6461.357000000006,
+        "max": 6846.527000000009,
+        "values": [
+          6461.357000000006,
+          6846.527000000009
+        ]
+      },
+      "candidate": {
+        "median": 7106.279,
+        "min": 6642.6230000000005,
+        "max": 7569.935000000001,
+        "values": [
+          6642.6230000000005,
+          7569.935000000001
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -181.26599999999416,
+        -723.4079999999922
+      ],
+      "pairedPercentReduction": [
+        -2.8053859274451787,
+        -10.566057798355155
+      ],
+      "medianPairedPercentReduction": -6.6857218629001665
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "rendererCpuMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 10619.999999999996,
+        "min": 10279.999999999987,
+        "max": 10960.000000000007,
+        "values": [
+          10960.000000000007,
+          10279.999999999987
+        ]
+      },
+      "candidate": {
+        "median": 11559.999999999996,
+        "min": 10929.999999999993,
+        "max": 12189.999999999998,
+        "values": [
+          10929.999999999993,
+          12189.999999999998
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        30.000000000014552,
+        -1910.000000000011
+      ],
+      "pairedPercentReduction": [
+        0.2737226277373589,
+        -18.57976653696511
+      ],
+      "medianPairedPercentReduction": -9.153021954613875
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "frameGapP95Ms",
+      "pairs": 2,
+      "baseline": {
+        "median": 16.75,
+        "min": 16.70000000001164,
+        "max": 16.79999999998836,
+        "values": [
+          16.70000000001164,
+          16.79999999998836
+        ]
+      },
+      "candidate": {
+        "median": 16.79999999998836,
+        "min": 16.79999999998836,
+        "max": 16.79999999998836,
+        "values": [
+          16.79999999998836,
+          16.79999999998836
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        -0.09999999997671694,
+        0
+      ],
+      "pairedPercentReduction": [
+        -0.5988023950697439,
+        0
+      ],
+      "medianPairedPercentReduction": -0.29940119753487193
+    },
+    {
+      "group": "1x/reduced-motion-idle",
+      "metric": "longTaskMs",
+      "pairs": 2,
+      "baseline": {
+        "median": 79.5,
+        "min": 0,
+        "max": 159,
+        "values": [
+          0,
+          159
+        ]
+      },
+      "candidate": {
+        "median": 69,
+        "min": 0,
+        "max": 138,
+        "values": [
+          0,
+          138
+        ]
+      },
+      "pairedAbsoluteReduction": [
+        0,
+        21
+      ],
+      "pairedPercentReduction": [
+        null,
+        13.20754716981132
+      ],
+      "medianPairedPercentReduction": 13.20754716981132
+    }
+  ],
+  "validation": [
+    {
+      "sample": "baseline-1x-0",
+      "scheduledUpdates": 1800,
+      "verificationErrors": []
+    },
+    {
+      "sample": "candidate-1x-0",
+      "scheduledUpdates": 1800,
+      "verificationErrors": []
+    },
+    {
+      "sample": "candidate-1x-1",
+      "scheduledUpdates": 1800,
+      "verificationErrors": []
+    },
+    {
+      "sample": "baseline-1x-1",
+      "scheduledUpdates": 1800,
+      "verificationErrors": []
+    }
+  ],
+  "httpErrors": 0,
+  "log": "local-compaction-two-pair-retry-logs/kandev-run.e2e.ehFMDNGD.log",
+  "hostLoad": "local-compaction-two-pair-retry-host-load.jsonl",
+  "priorFailure": {
+    "report": "matched-dense-1792813050902.json",
+    "sha256": "51cfc7e7ac2cfef8e2506bbb2d332087531a1f075369cc315996b8c3f314b9e6",
+    "error": "Error: page.goto: net::ERR_EMPTY_RESPONSE at http://localhost:18107/threads?workspace=fda6793a-679f-49de-886a-3267ca38a115\nCall log:\n\u001b[2m  - navigating to \"http://localhost:18107/threads?workspace=fda6793a-679f-49de-886a-3267ca38a115\", waiting until \"load\"\u001b[22m\n",
+    "completedSamples": 2,
+    "failedSample": "candidate-1x-1",
+    "stage": "cold document navigation before application assets loaded",
+    "cause": "Not established. Preserved process log has no panic or fatal record. Per-home log was removed by fixture cleanup.",
+    "hostLoad": "Recorded 1-minute load reached 18.93 on a 16-logical-CPU host. This does not prove the cause.",
+    "next": "Retry unchanged workload, builds, source, and deadlines. Keep this failure and its completed pair; do not treat it as a complete two-pair comparison."
+  },
+  "conclusion": "Removing the second Markdown parse did not establish a consistent main-thread streaming CPU gain. Renderer streaming CPU fell in both pairs, but reduced-motion idle main-thread CPU rose in both. Remove the candidate rather than claim an overall gain. Host load is recorded; these two pairs do not establish statistical significance or MacBook performance.",
+  "patch": "rejected-local-motion-compaction.patch",
+  "candidateAssets": "/tmp/kandev-dense-rejected-local-compaction-5936a872-dist"
+}

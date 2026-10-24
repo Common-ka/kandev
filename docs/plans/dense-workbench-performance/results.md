@@ -5,6 +5,40 @@ and the remaining stress/scenario matrix are in progress. The branch is
 `feature/evaluate-live-thread-bc0`; the frozen baseline is
 `595df36ed5c1cf02fd90cb972b623ad6edc53df8`.
 
+## Local text-motion cleanup: rejected
+
+The reveal-compaction regression confirmed that cleanup reparses unchanged
+Markdown. A candidate moved compaction into each motion span while preserving
+synchronous selection checks, the 140 ms fade, DOM cleanup, and animation-handle
+release. The parse-count regression failed first, then passed. All 129 related
+unit tests passed, plus a repeated-reveal check, strict scoped lint, typecheck,
+production build, two desktop checks, and two phone checks.
+
+Two alternating pairs passed in 17.3 minutes with the corrected visibility
+probe: 1,000 tasks, six visible chats, 120 primary messages plus two 100-message
+sibling histories per task. All four samples verified 1,800 ordered updates;
+there were no HTTP or verification errors. Streaming main-thread CPU changed
+by -5.19% and +0.06%, so its direction was mixed. Renderer CPU fell 5.51% and
+3.26%. Frame-gap p95 was unchanged in one pair and improved 9.96% in the other.
+Reduced-motion idle main-thread CPU rose 2.81% and 10.57%; renderer CPU was
+mixed. Long-task totals were mixed and include a candidate regression.
+
+These results do not establish an overall gain. The candidate and its specific
+test edits are removed. Production assets are restored to the timestamp build.
+The patch and built candidate remain available for inspection. Do not repeat
+this experiment without new evidence that addresses the measured tradeoffs.
+
+The first attempt stopped after one complete pair when the next candidate
+navigation returned `net::ERR_EMPTY_RESPONSE`, before application assets loaded.
+The cause is not established. The preserved process log has no panic or fatal
+record, and host load reached 18.93 on 16 logical CPUs. The unchanged retry
+passed; workloads and time limits were not changed. Keep the failed report
+`matched-dense-1792813050902.json` and its completed samples as separate evidence.
+
+[Paired evidence](evidence/rejected-local-motion-compaction-1x.json) records all
+metrics and identities. Retry report: `matched-dense-1792813854154.json`; log:
+`local-compaction-two-pair-retry-logs/kandev-run.e2e.ehFMDNGD.log`.
+
 ## Final-visibility probe overhead
 
 A current-build CPU attribution run passed both 1,800-update checks in 6.7

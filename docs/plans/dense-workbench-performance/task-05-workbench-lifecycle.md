@@ -67,6 +67,18 @@ Evidence under the diagnostic directory: `matched-dense-1792793604258.json`,
 `containment-benchmark-logs/kandev-run.e2e.qMzO7hcR.log`. The ordered-update
 assertion remains as benchmark validation; no containment production code remains.
 
+## Local reveal compaction experiment (rejected)
+
+A second Markdown parse at reveal cleanup was reproduced with the real parser.
+Moving cleanup to local spans passed 129 related unit tests, repeated-reveal
+coverage, strict lint, typecheck, production build, and desktop/phone motion
+checks. Two corrected-probe dense pairs then showed mixed main-thread streaming
+CPU, lower renderer streaming CPU, and higher reduced-motion idle main-thread
+CPU in both pairs. The candidate is removed. See the
+[paired evidence](evidence/rejected-local-motion-compaction-1x.json) and
+[results](results.md#local-text-motion-cleanup-rejected), including the first
+attempt's startup failure. No production gain is claimed.
+
 ## Session-fair publication experiment (rejected)
 
 The candidate-first 4x stress run reproduced a display backlog without HTTP
