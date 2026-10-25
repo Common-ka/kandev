@@ -1,0 +1,146 @@
+{
+  "status": "Targeted correctness passed; full dense comparison remains open",
+  "build": {
+    "root": "/tmp/kandev-dense-wheel-follow-5936a872",
+    "parentDeliveredRevision": "82320fd31bb96abb69beb73b7555092a00d1f5ff",
+    "parentProductionRevision": "7808415cf2e373f85486101c271dc63a121fe1f1",
+    "sourcePatchSha256": "a3579fefa3da56710aad6b87781fba77fed2f6b607ca026d8cd3761cc8857998",
+    "productionFiles": [
+      {
+        "path": "apps/web/components/task/chat/message-list-native-scroll.ts",
+        "sha256": "16899fa4014403694d7b79ba7549a140bfd66644525d118fbdcac2572e227cc5"
+      }
+    ],
+    "testFiles": [
+      {
+        "path": "apps/web/components/task/chat/message-list-native.test.tsx",
+        "sha256": "3de985a398efccc6a356c6030251724ca76c687e79d36ff6f109dbeb6e66bd42"
+      }
+    ],
+    "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+    "assetsSha256": "820fcd57e5ecaf8d39c610f13cfbfabf4cd8dea4e64e555a57522fd3823c9a5d",
+    "agentctlSha256": "6e768aef1a1692630fe109c25e23ac31ab461b691800c2059e6dfdd5cf0b4d0a",
+    "mockAgentSha256": "c69f05ee9f5622cc5bce83405c2e9240b537f3e79a21da65765d9867592288c1",
+    "lockSha256": "9d5a03a9086f28c93752fce491f896047fbcdbc64abfafe3b3aa53261199c554"
+  },
+  "problem": "Streamed height can grow between a downward pixel wheel that reaches the observed bottom and the resulting native scroll event. The old owner then remains in reading mode above the new bottom.",
+  "change": "Capture the bottom reachable by a positive pixel wheel. Consume this target only on the resulting scroll within the existing 250 ms input window and existing 3 px boundary. Use the existing follow owner and motion gates. Clear on competing gestures, explicit reading, scope changes, or hidden/disabled state.",
+  "unchanged": [
+    "Original scripted wheel inputs and five-second assertions",
+    "Motion engine and timing",
+    "Layout and visual styling"
+  ],
+  "limits": [
+    "Short rehearsals do not establish CPU, latency, or MacBook Air M2 gains.",
+    "The baseline failure is retained. The failed grid run cannot produce a valid paired performance summary.",
+    "Full reference six-pair, stress, all-history, and retention coverage remains open."
+  ],
+  "unitChecks": 228,
+  "unitFiles": 6,
+  "browserChecks": 50,
+  "logs": [
+    {
+      "path": "/tmp/kandev-native-wheel-growth-red-5936a872.log",
+      "sha256": "64c040617996bc8d3a5e6e5bb95355ced35aa31cb3ca9e1a42f29fd83ed4297a"
+    },
+    {
+      "path": "/tmp/kandev-native-wheel-growth-units-5936a872.log",
+      "sha256": "efa49be8f0820e7ae93bb48e97705c8ddfe98acec7cd786f990715d0da29918d"
+    },
+    {
+      "path": "/tmp/kandev-wheel-and-attempt-lint-5936a872.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/kandev-native-wheel-growth-typecheck-5936a872.log",
+      "sha256": "25b997cf509ff107705ca0f297f89870026f9492a496ad815829a11c442e2473"
+    },
+    {
+      "path": "/tmp/kandev-native-wheel-growth-build-5936a872.log",
+      "sha256": "3515ed09f231b7210456efa152d2c499b622bd9b5940d6ccddcb135065874ee5"
+    }
+  ],
+  "rehearsals": [
+    {
+      "report": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792876832618.json",
+        "sha256": "10368729f2ec1b89690ca73e18369ba66547520dd43f332552a4ea86ea335e5c"
+      },
+      "note": "Original scripted grid: baseline fails at 21 px; candidate completes all four original actions and returns to 0 px.",
+      "attempts": [
+        {
+          "arm": "baseline",
+          "pair": 0,
+          "cpuRate": 1,
+          "sample": "baseline-1x-0",
+          "status": "failed",
+          "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: <= \u001b[32m3\u001b[39m\nReceived:    \u001b[31m21\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate"
+        },
+        {
+          "arm": "candidate",
+          "pair": 0,
+          "cpuRate": 1,
+          "sample": "candidate-1x-0",
+          "status": "passed"
+        }
+      ],
+      "comparisonPlan": {
+        "pairs": 1,
+        "rates": [
+          1
+        ],
+        "candidateFirst": false
+      },
+      "error": "AggregateError: 1 dense samples failed: baseline-1x-0",
+      "completeSamples": 1
+    },
+    {
+      "report": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792877248006.json",
+        "sha256": "2b900ae263d29a0e41868e143fc4521b4990f65001d51ef616ca31447b7c96d2"
+      },
+      "note": "Eight-column original scripted rehearsal: both arms pass; 60 ordered updates and offscreen traversal verified.",
+      "attempts": [
+        {
+          "arm": "baseline",
+          "pair": 0,
+          "cpuRate": 1,
+          "sample": "baseline-1x-0",
+          "status": "passed"
+        },
+        {
+          "arm": "candidate",
+          "pair": 0,
+          "cpuRate": 1,
+          "sample": "candidate-1x-0",
+          "status": "passed"
+        }
+      ],
+      "comparisonPlan": {
+        "pairs": 1,
+        "rates": [
+          1
+        ],
+        "candidateFirst": false
+      },
+      "error": null,
+      "completeSamples": 2
+    }
+  ],
+  "desktop": {
+    "checksPassed": 33,
+    "log": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/wheel-growth-combined-desktop-logs/kandev-run.e2e.RIX75nkU.log",
+      "sha256": "7f849cd33f0a0b4e8b704b66753550623b21c0ea26aa286405d33d9721ca1dd6"
+    },
+    "artifacts": ".kandev/diagnostics/dense-workbench-performance/wheel-growth-combined-desktop-artifacts"
+  },
+  "phone": {
+    "checksPassed": 17,
+    "log": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/wheel-growth-combined-phone-logs/kandev-run.e2e.ZSKy7Wuf.log",
+      "sha256": "859639507fa3afba37a364c429dbeb0226e374faf930f10c43520561e0e61bdf"
+    },
+    "artifacts": ".kandev/diagnostics/dense-workbench-performance/wheel-growth-combined-phone-artifacts"
+  }
+}

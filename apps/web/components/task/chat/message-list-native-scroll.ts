@@ -644,6 +644,7 @@ function useFollowIntent({
   isAnimating,
   userReading,
   isNearBottomRef,
+  wheelBottomRef,
   cancelMotion,
 }: {
   scrollRef: React.RefObject<HTMLDivElement | null>;
@@ -651,6 +652,7 @@ function useFollowIntent({
   isAnimating: () => boolean;
   userReading: React.RefObject<boolean>;
   isNearBottomRef: React.RefObject<boolean>;
+  wheelBottomRef: React.RefObject<number | null>;
   cancelMotion: () => void;
 }) {
   const resyncIsNearBottom = useCallback(() => {
@@ -661,9 +663,10 @@ function useFollowIntent({
     if (isNearBottomRef.current) userReading.current = false;
   }, [scrollRef, isAnimating, userReading]);
   const markNotNearBottom = useCallback(() => {
+    wheelBottomRef.current = null;
     cancelMotion();
     isNearBottomRef.current = false;
-  }, [cancelMotion]);
+  }, [cancelMotion, wheelBottomRef]);
   return { resyncIsNearBottom, markNotNearBottom };
 }
 
@@ -699,6 +702,7 @@ export function useAutoScroll(params: AutoScrollParams) {
   } = params;
   const storeApi = useAppStoreApi();
   const isNearBottomRef = useRef(true);
+  const wheelBottomRef = useRef<number | null>(null);
   const prevIsWorkingRef = useRef(isWorking);
   const isVisibleRef = useRef(isVisible);
   const enabledRef = useRef(enabled);
@@ -738,6 +742,7 @@ export function useAutoScroll(params: AutoScrollParams) {
     isAnimating,
     userReading,
     isNearBottomRef,
+    wheelBottomRef,
     cancelMotion,
   });
 
@@ -748,6 +753,8 @@ export function useAutoScroll(params: AutoScrollParams) {
     sessionId,
     storeApi,
     resyncIsNearBottom,
+    followBottom,
+    wheelBottomRef,
     enabled,
     isWorking,
     isVisible,
@@ -791,6 +798,8 @@ function usePersistedTranscriptScroll({
   sessionId,
   storeApi,
   resyncIsNearBottom,
+  followBottom,
+  wheelBottomRef,
   enabled,
   isWorking,
   isVisible,
@@ -802,6 +811,8 @@ function usePersistedTranscriptScroll({
   sessionId: string | null;
   storeApi: ReturnType<typeof useAppStoreApi>;
   resyncIsNearBottom: () => void;
+  followBottom: () => void;
+  wheelBottomRef: React.RefObject<number | null>;
   enabled: boolean;
   isWorking: boolean;
   isVisible: boolean;
@@ -835,11 +846,26 @@ function usePersistedTranscriptScroll({
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const markUserScrollIntent = () => {
+    wheelBottomRef.current = null;
+    const markUserScrollIntent = (event?: Event) => {
       userScrollIntentUntilRef.current = Date.now() + USER_SCROLL_INTENT_WINDOW_MS;
+      wheelBottomRef.current = null;
+      if (
+        enabled &&
+        isVisibleRef.current &&
+        latestSessionIdRef.current === sessionId &&
+        event instanceof WheelEvent &&
+        !event.ctrlKey &&
+        event.deltaMode === 0 &&
+        event.deltaY > 0
+      ) {
+        const bottom = el.scrollHeight - el.clientHeight;
+        if (event.deltaY >= bottom - el.scrollTop) wheelBottomRef.current = bottom;
+      }
     };
     const clearUserScrollIntent = () => {
       userScrollIntentUntilRef.current = 0;
+      wheelBottomRef.current = null;
     };
     const markScrollKeyIntent = (event: KeyboardEvent) => {
       if (SCROLL_KEYS.has(event.key)) markUserScrollIntent();
@@ -867,12 +893,19 @@ function usePersistedTranscriptScroll({
      * coalesced persistence of the scroll position. */
     const onScroll = () => {
       if (!isVisibleRef.current || latestSessionIdRef.current !== sessionId) return;
-      resyncIsNearBottom();
+      const hasUserScrollIntent = userScrollIntentUntilRef.current >= Date.now();
+      const wheelBottom = wheelBottomRef.current;
+      // Resume only a recent wheel that reached its observed edge.
+      if (hasUserScrollIntent && wheelBottom !== null && wheelBottom - el.scrollTop < 3) {
+        wheelBottomRef.current = null;
+        followBottom();
+      } else {
+        resyncIsNearBottom();
+      }
       // A layout change can clamp a disabled transcript's scrollTop and emit a
       // native scroll event. Only adopt an offset when a recent user gesture
       // explains the movement; otherwise the layout effect must restore the
       // frozen offset on the next render.
-      const hasUserScrollIntent = userScrollIntentUntilRef.current >= Date.now();
       if (!enabled && hasUserScrollIntent) {
         frozenScrollTopRef.current = { sessionId, scrollTop: el.scrollTop };
       }
@@ -893,6 +926,7 @@ function usePersistedTranscriptScroll({
     el.addEventListener("scrollend", clearUserScrollIntent);
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => {
+      wheelBottomRef.current = null;
       el.removeEventListener("wheel", markUserScrollIntent);
       el.removeEventListener("touchstart", markUserScrollIntent);
       el.removeEventListener("touchmove", markUserScrollIntent);
@@ -915,6 +949,9 @@ function usePersistedTranscriptScroll({
     sessionId,
     storeApi,
     resyncIsNearBottom,
+    followBottom,
+    wheelBottomRef,
+    isVisible,
     enabled,
     rememberSessionScrollTop,
     frozenScrollTopRef,

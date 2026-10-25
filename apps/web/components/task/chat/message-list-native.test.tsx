@@ -2355,6 +2355,156 @@ describe("useScrollToDividerOrBottom — anchored-bar offset", () => {
     expect(metrics.scrollTop).toBe(570);
   });
 
+  it("resumes following at the measured bottom when content grows before the wheel scroll settles", () => {
+    const metrics = { scrollHeight: 1000, scrollTop: 600, clientHeight: 400 };
+    render(<AutoScrollHarness isWorking={false} hasUnreadDivider={false} metrics={metrics} />);
+    const element = screen.getByTestId(AUTO_SCROLL_CONTAINER_TEST_ID);
+    act(() => {
+      element.dispatchEvent(new WheelEvent("wheel", { deltaY: -120 }));
+      metrics.scrollTop = 480;
+      element.dispatchEvent(new Event("scroll"));
+      element.dispatchEvent(new WheelEvent("wheel", { deltaY: 1_000_000 }));
+      metrics.scrollHeight = 1021;
+      metrics.scrollTop = 600;
+      element.dispatchEvent(new Event("scroll"));
+    });
+    expect(metrics.scrollTop).toBe(2_147_483_647);
+  });
+
+  it("keeps a partial downward wheel in history when later geometry reaches the old edge", () => {
+    const metrics = { scrollHeight: 1000, scrollTop: 600, clientHeight: 400 };
+    render(<AutoScrollHarness isWorking={false} hasUnreadDivider={false} metrics={metrics} />);
+    const element = screen.getByTestId(AUTO_SCROLL_CONTAINER_TEST_ID);
+    act(() => {
+      element.dispatchEvent(new WheelEvent("wheel", { deltaY: -120 }));
+      metrics.scrollTop = 480;
+      element.dispatchEvent(new Event("scroll"));
+      element.dispatchEvent(new WheelEvent("wheel", { deltaY: 50 }));
+      metrics.scrollTop = 530;
+      element.dispatchEvent(new Event("scroll"));
+      metrics.scrollHeight = 1021;
+      metrics.scrollTop = 600;
+      element.dispatchEvent(new Event("scroll"));
+    });
+    expect(metrics.scrollTop).toBe(600);
+  });
+
+  it("keeps smooth follow timing after a wheel reaches the edge before appended content", () => {
+    let time = 0;
+    let serial = 0;
+    const frames = new Map<number, FrameRequestCallback>();
+    vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+      frames.set(++serial, callback);
+      return serial;
+    });
+    vi.stubGlobal("cancelAnimationFrame", (id: number) => frames.delete(id));
+    const metrics = { scrollHeight: 1000, scrollTop: 600, clientHeight: 400 };
+    const view = render(
+      <AutoScrollHarness
+        isWorking={false}
+        hasUnreadDivider={false}
+        metrics={metrics}
+        motionEnabled
+      />,
+    );
+    try {
+      const element = screen.getByTestId(AUTO_SCROLL_CONTAINER_TEST_ID);
+      act(() => {
+        element.dispatchEvent(new WheelEvent("wheel", { deltaY: -120 }));
+        metrics.scrollTop = 480;
+        element.dispatchEvent(new Event("scroll"));
+        element.dispatchEvent(new WheelEvent("wheel", { deltaY: 1_000_000 }));
+        metrics.scrollHeight = 1021;
+        metrics.scrollTop = 600;
+        element.dispatchEvent(new Event("scroll"));
+      });
+      expect(metrics.scrollTop).toBe(600);
+      for (let frame = 0; frame < 14; frame++)
+        act(() => {
+          time += 16;
+          const callbacks = [...frames.values()];
+          frames.clear();
+          callbacks.forEach((callback) => callback(time));
+        });
+      expect(Math.abs(metrics.scrollTop - 621)).toBeLessThanOrEqual(1);
+    } finally {
+      view.unmount();
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("keeps a reversed wheel intent in history when an older downward scroll arrives", () => {
+    const metrics = { scrollHeight: 1000, scrollTop: 480, clientHeight: 400 };
+    render(<AutoScrollHarness isWorking={false} hasUnreadDivider={false} metrics={metrics} />);
+    const element = screen.getByTestId(AUTO_SCROLL_CONTAINER_TEST_ID);
+    act(() => {
+      element.dispatchEvent(new WheelEvent("wheel", { deltaY: 1_000_000 }));
+      element.dispatchEvent(new WheelEvent("wheel", { deltaY: -30 }));
+      metrics.scrollHeight = 1021;
+      metrics.scrollTop = 600;
+      element.dispatchEvent(new Event("scroll"));
+    });
+    expect(metrics.scrollTop).toBe(600);
+  });
+
+  it("does not follow an expired wheel intent after unrelated geometry changes", () => {
+    const now = vi.spyOn(Date, "now").mockReturnValue(1000);
+    try {
+      const metrics = { scrollHeight: 1000, scrollTop: 480, clientHeight: 400 };
+      render(<AutoScrollHarness isWorking={false} hasUnreadDivider={false} metrics={metrics} />);
+      const element = screen.getByTestId(AUTO_SCROLL_CONTAINER_TEST_ID);
+      act(() => {
+        element.dispatchEvent(new WheelEvent("wheel", { deltaY: 1_000_000 }));
+        element.dispatchEvent(new WheelEvent("wheel", { deltaY: -1 }));
+        element.dispatchEvent(new WheelEvent("wheel", { deltaY: 1_000_000 }));
+        now.mockReturnValue(1251);
+        metrics.scrollHeight = 1021;
+        metrics.scrollTop = 600;
+        element.dispatchEvent(new Event("scroll"));
+      });
+      expect(metrics.scrollTop).toBe(600);
+    } finally {
+      now.mockRestore();
+    }
+  });
+
+  it("keeps an explicit reader position after a pending downward wheel", () => {
+    const metrics = { scrollHeight: 1000, scrollTop: 480, clientHeight: 400 };
+    const markRef: { current?: () => void } = {};
+    render(
+      <AutoScrollHarness
+        isWorking={false}
+        hasUnreadDivider={false}
+        metrics={metrics}
+        markRef={markRef}
+      />,
+    );
+    const element = screen.getByTestId(AUTO_SCROLL_CONTAINER_TEST_ID);
+    act(() => {
+      element.dispatchEvent(new WheelEvent("wheel", { deltaY: 1_000_000 }));
+      markRef.current?.();
+      metrics.scrollHeight = 1021;
+      metrics.scrollTop = 600;
+      element.dispatchEvent(new Event("scroll"));
+    });
+    expect(metrics.scrollTop).toBe(600);
+  });
+
+  it("does not read transcript bounds for an inactive downward wheel", () => {
+    render(<AutoScrollHarness isWorking={false} hasUnreadDivider={false} isVisible={false} />);
+    const element = screen.getByTestId(AUTO_SCROLL_CONTAINER_TEST_ID);
+    let reads = 0;
+    Object.defineProperty(element, "scrollHeight", {
+      configurable: true,
+      get: () => {
+        reads++;
+        return 1000;
+      },
+    });
+    act(() => element.dispatchEvent(new WheelEvent("wheel", { deltaY: 1_000_000 })));
+    expect(reads).toBe(0);
+  });
+
   // @covers AC-UI-TRANSCRIPT-AUTO-SCROLL-001.20
   it("does not force a reader to bottom when work starts", () => {
     const metrics = { scrollHeight: 1000, scrollTop: 600, clientHeight: 400 };

@@ -820,3 +820,19 @@ wire scopes are not private frontend reference counts. Speed summaries reject
 this instrumentation mode. See [the evidence](evidence/dockview-api-release.json).
 
 Full-reference and stress comparisons remain open in the completion audit.
+
+
+### Native wheel follow after streamed growth
+
+A downward wheel can reach the bottom observed at input, then arrive above a
+new bottom after streamed content grows. The existing scroll owner now records
+that reachable edge during its existing input window and resumes following when
+the native scroll reaches it. Partial, reversed, expired, hidden, disabled, and
+explicit reader positions remain covered. Motion and visual styling are unchanged.
+
+The new build passes 228 related unit checks and all 50 targeted browser checks
+(33 desktop and 17 phone). The original scripted one-column candidate returns
+to zero pixels from the bottom; its frozen baseline fails at 21 pixels. The
+eight-column rehearsal passes both arms. These short checks establish correctness,
+not a speed gain. Full dense comparisons remain open. See
+[the build and check evidence](evidence/native-wheel-bottom-follow.json).
