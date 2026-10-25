@@ -3300,6 +3300,7 @@ export class ApiClient {
     opts?: {
       repos?: Array<{ owner: string; name: string }>;
       prompt?: string;
+      executor_profile_id?: string;
       review_scope?: string;
       poll_interval_seconds?: number;
       cleanup_policy?: "auto" | "always" | "never";
@@ -3310,6 +3311,7 @@ export class ApiClient {
       workflow_id: workflowId,
       workflow_step_id: workflowStepId,
       agent_profile_id: agentProfileId,
+      executor_profile_id: opts?.executor_profile_id,
       repos: opts?.repos ?? [],
       prompt: opts?.prompt ?? "",
       review_scope: opts?.review_scope ?? "user_and_teams",

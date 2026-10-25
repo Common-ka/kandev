@@ -601,3 +601,53 @@ catalog validation (404 decisions and 1738 specifications), and specification
 lint passed. The secondary reviewer found no remaining actionable issue in
 the corrected fixtures. The PR remains open and ready for review; merge
 readiness requires new terminal CI.
+
+
+### Discord integration and current CI cleanup
+
+The current base adds automatic Discord release announcements. Preserve both
+public release-guide sections and gate automatic delivery and its recovery
+notice on public SDK verification and `stable-complete`, matching the accepted
+Stable completion boundary. Extend both workflow contract suites; reconcile the
+Discord requirement/design and release instructions. Contract tests reproduced
+the missing SDK gate before the workflow correction.
+
+Current CI run `40234952605` failed the mobile rename ownership, active-task
+Go-cache cleanup, and PR-watcher plan-mode cases. Inspect first-attempt artifacts,
+reproduce their failed scope with retries disabled, and preserve behavioral
+assertions. Run affected workflow contracts, documentation validation, focused
+browser regressions, normal hooks, and new CI after delivery. Keep the separately
+requested root `NOTIFICATION_GUIDE.md` uncommitted.
+
+
+The PR-watcher fixture reused one checkout for three different PR branches.
+A new environment-path assertion failed with one path instead of three.
+Selecting worktree execution exposed another deterministic fixture failure:
+PR head refs were absent from the offline origin. The test now owns a disposable
+repository and publishes both branch and `refs/pull/N/head` refs before starting
+the watch. All original layout assertions remain, alongside workspace isolation.
+Owned watch/tasks/workflow/repository and changed preferences are cleaned up;
+independent cleanup failures are aggregated with the original test error.
+
+The unchanged Go-cache case passed three focused runs; a temporary 1.2-second
+opening-animation probe also passed and was removed. The unchanged rename case
+passed three runs. Their CI first attempts have no retained traces, and neither
+local result establishes the original failure cause. No speculative timeout,
+click retry, or product change was made for those cases. Fresh CI must cover them.
+
+The Discord gate regression failed before the correction. After correction,
+68 release contract tests, 4 Discord workflow tests, 16 delivery tests,
+8 content tests, 4 contributor workflow tests, and 10 SDK CI contract tests pass.
+Harness validation passed (19 tests and 204 files); specification validation
+passed (36 validator tests, 404 decisions, 1740 specifications). Changed-file
+ESLint, Prettier, and the E2E sleep ratchet pass. Local actionlint 1.7.12 rejects
+only inherited `concurrency.queue` keys; it cannot validate that newer grammar.
+The workflow contract tests retain and verify the upstream queue contract.
+
+
+Final cleanup-aware validation passed twice with retries disabled. Each run
+created and exercised all three watch-owned PR tasks, verified three distinct
+workspace paths, and completed owned cleanup. The secondary reviewer found no
+remaining actionable issue in the fixture or release integration. Documentation
+validators and the guide checksum pass. Commit/push through normal hooks and
+require current-head CI; the root notification guide remains uncommitted.

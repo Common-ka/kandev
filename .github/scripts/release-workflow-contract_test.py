@@ -1726,7 +1726,7 @@ class PluginSDKReleaseTests(unittest.TestCase):
             self.assertNotIn("NODE_AUTH_TOKEN", block)
             self.assertNotIn("NPM_TOKEN", block)
     def test_sdk_failure_blocks_completion_and_notices_but_not_sibling_channels(self):
-        for name in ("stable-complete", "notify-contributors"):
+        for name in ("stable-complete", "notify-contributors", "announce-discord", "discord-recovery-notice"):
             self.assertIn("needs.publish-plugin-sdk.result == 'success'", job_block(name))
         for name in ("publish-npm", "update-homebrew-tap", "update-scoop-bucket"):
             self.assertNotIn("publish-plugin-sdk", job_block(name))

@@ -249,3 +249,25 @@ The workflow-change dialog failure remains unexplained: only the successful
 retry has a trace, and three unchanged local runs passed. No speculative fix
 was applied. See the [plan's validation record](plan.md#final-browser-fixture-corrections)
 for delivery checks and remaining CI requirements.
+
+
+## Current-main integration and CI fixture isolation
+
+The current base introduces Discord release announcements. Both automatic
+delivery and the recovery notice now require public SDK verification and Stable
+completion; workflow tests reproduced the missing integration gate before the
+correction. The public release guide preserves both publication and announcement
+instructions, and the owning Discord requirement/design agree with the gate.
+
+The PR-watcher layout fixture shared one checkout across three PR branches.
+A real environment-path regression failed before isolation. Worktree execution
+then proved that its PR refs were missing from the offline origin. The corrected
+fixture uses an owned repository with published branch/provider refs and verifies
+three distinct workspaces while retaining all layout checks. Cleanup attempts
+all independent phases and preserves the original test error.
+
+The Go-cache and rename CI failures did not reproduce in three unchanged local
+runs each. A slower Go-cache opening animation also passed. The retained traces
+belong to successful retries, so they cannot establish the failed attempts'
+causes. Their assertions remain unchanged and require fresh CI. See the
+[plan's cleanup record](plan.md#discord-integration-and-current-ci-cleanup).

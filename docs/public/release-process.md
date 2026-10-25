@@ -41,7 +41,7 @@ The workflow has four mutually exclusive operating modes:
 2. Confirm required checks are green on `main` and no release or release PR is active.
 3. Confirm merged PR titles/commits use the conventional categories consumed by `cliff.toml`. The workflow generates `CHANGELOG.md` and release notes.
 4. Verify platform-sensitive launcher, agentctl, container, and desktop changes on affected targets.
-5. Check GitHub/GHCR access, npm trusted publishing, `RELEASE_PR_BYPASS_TOKEN`, signing keys, and configured desktop signing or notarization secrets.
+5. Check GitHub/GHCR access, npm trusted publishing, `RELEASE_PR_BYPASS_TOKEN`, signing keys, the Discord webhook secret, and configured desktop signing or notarization secrets.
 6. Update public docs for behavior that is about to ship.
 
 ## Configure the release PR bypass
@@ -236,6 +236,29 @@ operation for this mutable tag. A dist-tag permission failure remains a failed
 release even if the immutable upload succeeded. Never delete/reuse an npm
 version or SDK tag to repair conflicting bytes. Publish a new SDK version after
 reviewing the conflict.
+
+## Announce a release on Discord
+
+Normal Stable releases automatically post one compact announcement after GitHub Release, npm, Homebrew, Scoop, and public plugin SDK verification succeed and `stable-complete` passes. The message shows whole-release category counts, up to three Features and three Fixes with contributor credits, and the exact GitHub release link. Other populated categories retain their counts. It sends no attachment or full changelog series.
+
+Store the general-channel webhook URL as `DISCORD_GENERAL_WEBHOOK_URL` in **Settings > Environments > release > Environment secrets**. The existing environment must permit `main`. To enter the URL through an interactive prompt:
+
+```bash
+gh secret set DISCORD_GENERAL_WEBHOOK_URL --env release --repo kdlbs/kandev
+```
+
+A missing secret fails the announcement job with a configuration error. A Discord failure does not undo package publication. Nightlies, dry runs, desktop validation, failed publication, and cancellation before delivery send no announcement. Reruns and backfills skip automatic delivery and report that manual recovery is required.
+
+To preview or recover an announcement:
+
+1. Open **Actions > Announce Discord release > Run workflow** and select `main`.
+2. Enter the exact published Stable tag, such as `v1.2.3`.
+3. Use the default `preview` mode to inspect the job summary and preview artifact. Preview needs no webhook secret.
+4. For delivery, first verify all publication channels and inspect the Discord channel for an existing announcement. Use `update` with its message ID if it exists. Otherwise use `create` and select the acknowledgement checkbox.
+
+Successful delivery records the message ID and Discord link in the job summary and a receipt artifact retained for 30 days. Update requires a message from the configured webhook with the same release tag and GitHub link. It stops if the message is missing or does not match.
+
+A timeout or lost response can leave a message in Discord even when the job fails. The helper retries explicit rate limits within a bounded budget, but does not automatically resend uncertain requests. Inspect the channel before recovery; repeating `create` can produce a duplicate. Cancellation during delivery also requires inspection.
 
 ## Notify release contributors
 
