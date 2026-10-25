@@ -62,6 +62,9 @@ packaged or released.
   substitutions. The minimum shall identify a complete Stable version, without
   prerelease or build suffixes. Registry SDKs installed in npm workspaces shall
   be supported when their resolved location matches the workspace lock evidence.
+  A checkout-directory symlink shall not invalidate registry dependency evidence.
+  Lockfile parsing shall use a finite limit sized for workspace dependencies,
+  separate from the smaller limit for SDK metadata.
   When both SDKs are used, the minimum shall meet both baselines.
 - **AC-PLUGINS-SDK-DISTRIBUTION-002.3:** Every SDK release shall declare its
   compatibility change. Before `1.0.0`, a breaking SDK change shall increase

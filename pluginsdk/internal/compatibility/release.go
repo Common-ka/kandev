@@ -20,25 +20,30 @@ type Record struct {
 	ChangeKind    string `json:"change_kind"`
 }
 
-func readBounded(path string) ([]byte, error) {
+const (
+	metadataLimit = 1 << 20
+	lockfileLimit = 32 << 20
+)
+
+func readBounded(path string, limit int64) ([]byte, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer func() { _ = file.Close() }()
-	data, err := io.ReadAll(io.LimitReader(file, 1<<20+1))
+	data, err := io.ReadAll(io.LimitReader(file, limit+1))
 	if err != nil {
 		return nil, err
 	}
-	if len(data) > 1<<20 {
-		return nil, fmt.Errorf("metadata exceeds 1 MiB: %s", path)
+	if int64(len(data)) > limit {
+		return nil, fmt.Errorf("file exceeds %d MiB: %s", limit>>20, path)
 	}
 	return data, nil
 }
 
 func ReadRecord(path string, version string) (Record, error) {
 	var record Record
-	data, err := readBounded(path)
+	data, err := readBounded(path, metadataLimit)
 	if err != nil {
 		return record, fmt.Errorf("read SDK release record: %w", err)
 	}

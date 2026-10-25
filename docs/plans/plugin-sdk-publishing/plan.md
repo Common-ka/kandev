@@ -527,3 +527,24 @@ frontend, and plugin fixtures from the merged tree. Changed-file ESLint,
 Prettier, sleep-ratchet, catalog validation (404 decisions, 1738 specifications),
 and full specification lint passed. Fresh CI remains required on the merge
 commit, which replaces the previous head's evidence for readiness.
+
+
+### Workspace file and path review corrections
+
+Automated review of the ready-for-review merge found two author checker defects:
+whole-workspace locks inherited the 1 MiB metadata limit, and checkout-directory
+symlinks were mistaken for local SDK substitutions. New npm and pnpm regressions
+failed on both cases before correction. Lockfiles now have a separate 32 MiB
+limit; manifests and SDK records retain the 1 MiB limit. Path verification
+resolves the owning project and lock root before comparing installed locations,
+while preserving exact lock-entry binding and SDK substitution rejection.
+
+Validation passed: `cd pluginsdk && go test -race ./... -count=1 && go vet ./...`
+and `node --test scripts/pluginsdk/npm-workspace.test.mjs` with the pinned
+Node/npm tools. Regressions cover both package managers, oversized locks,
+metadata limits, relative and absolute paths through checkout aliases, and
+linked SDK rejection. The real npm workspace integration retains its shadow,
+explicit-path bypass, lock-version, and lock-root negative cases. Public author
+guidance and the canonical requirement/design describe the corrected boundaries.
+SDK lint passed with zero issues. Documentation catalog and specification
+validation passed. Fresh CI and review disposition are required after delivery.

@@ -54,8 +54,8 @@ type packageManifest struct {
 	OptionalDependencies map[string]string `json:"optionalDependencies"`
 }
 
-func readJSON(path string, target any) error {
-	data, err := readBounded(path)
+func readJSON(path string, target any, limit int64) error {
+	data, err := readBounded(path, limit)
 	if err != nil {
 		return err
 	}
@@ -91,13 +91,13 @@ func ResolveFrontend(directory, packagePath string) (Record, error) {
 		return Record{}, err
 	}
 	var installed, consumer packageManifest
-	if err = readJSON(filepath.Join(packagePath, "package.json"), &installed); err != nil {
+	if err = readJSON(filepath.Join(packagePath, "package.json"), &installed, metadataLimit); err != nil {
 		return Record{}, fmt.Errorf("installed frontend SDK: %w", err)
 	}
 	if installed.Name != PackageName {
 		return Record{}, fmt.Errorf("installed package is not %s", PackageName)
 	}
-	if err = readJSON(filepath.Join(directory, "package.json"), &consumer); err != nil {
+	if err = readJSON(filepath.Join(directory, "package.json"), &consumer, metadataLimit); err != nil {
 		return Record{}, err
 	}
 	spec, err := consumer.sdkSpecifier()
@@ -172,8 +172,18 @@ func verifyInstalledPath(path, root, version, kind string) error {
 	if err != nil {
 		return err
 	}
-	if actual == filepath.Clean(path) {
+	// Resolve checkout aliases without accepting links within the installed package tree.
+	project, err := filepath.EvalSymlinks(filepath.Dir(filepath.Dir(filepath.Dir(path))))
+	if err != nil {
+		return err
+	}
+	expected := filepath.Join(project, "node_modules", "@kandev", "plugin-sdk")
+	if actual == expected {
 		return nil
+	}
+	root, err = filepath.EvalSymlinks(root)
+	if err != nil {
+		return err
 	}
 	store := filepath.Join(root, "node_modules", ".pnpm", "@kandev+plugin-sdk@"+version, "node_modules", "@kandev", "plugin-sdk")
 	if kind == "pnpm" && actual == store {

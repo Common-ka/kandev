@@ -42,7 +42,7 @@ func checkPNPMLock(root, directory, spec, version string) error {
 		} `yaml:"packages"`
 		Snapshots map[string]any `yaml:"snapshots"`
 	}
-	data, err := readBounded(filepath.Join(root, "pnpm-lock.yaml"))
+	data, err := readBounded(filepath.Join(root, "pnpm-lock.yaml"), lockfileLimit)
 	if err != nil {
 		return err
 	}

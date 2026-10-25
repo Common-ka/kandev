@@ -224,3 +224,13 @@ covering desktop and tablet callers of the strengthened helper. The final
 focused browser total is ten passes. Changed-file ESLint, Prettier, the E2E
 sleep ratchet, catalog validation (404 decisions and 1734 specifications), and
 specification lint passed. Fresh CI on the delivered commit remains required.
+
+
+## Workspace file and path review corrections
+
+Review of the ready-for-review merge found false failures for lockfiles above
+1 MiB and checkout-directory symlinks. Both npm and pnpm regressions failed
+before the fix. Separate lockfile limits and canonical checkout-root comparisons
+now preserve published dependency checks. SDK race tests, vet, and the real npm
+workspace integration passed. See the [plan's correction record](plan.md#workspace-file-and-path-review-corrections)
+for boundary coverage and the pending delivery checks.

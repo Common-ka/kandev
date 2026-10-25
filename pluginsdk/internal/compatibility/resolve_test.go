@@ -80,7 +80,8 @@ func TestInstalledNPMLockEvidence(t *testing.T) {
 		})
 	}
 }
-func TestPNPMManagedStoreIsNotALocalSubstitution(t *testing.T) {
+func pnpmFrontendFixture(t *testing.T) (string, string) {
+	t.Helper()
 	root, pkg := frontendFixture(t)
 	require.NoError(t, os.Remove(filepath.Join(root, "package-lock.json")))
 	store := filepath.Join(root, "node_modules", ".pnpm", "@kandev+plugin-sdk@0.1.0", "node_modules", "@kandev", "plugin-sdk")
@@ -102,6 +103,11 @@ snapshots:
   '@kandev/plugin-sdk@0.1.0': {}
 `
 	require.NoError(t, os.WriteFile(filepath.Join(root, "pnpm-lock.yaml"), []byte(lock), 0600))
+	return root, pkg
+}
+
+func TestPNPMManagedStoreIsNotALocalSubstitution(t *testing.T) {
+	root, pkg := pnpmFrontendFixture(t)
 	got, err := ResolveFrontend(root, pkg)
 	require.NoError(t, err)
 	require.Equal(t, releasedRecord(), got)

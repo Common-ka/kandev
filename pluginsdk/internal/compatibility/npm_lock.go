@@ -58,7 +58,7 @@ func checkNPMLock(root, directory, packagePath, spec, version string) error {
 		Version  int                         `json:"lockfileVersion"`
 		Packages map[string]npmLockedPackage `json:"packages"`
 	}
-	if err := readJSON(filepath.Join(root, "package-lock.json"), &lock); err != nil {
+	if err := readJSON(filepath.Join(root, "package-lock.json"), &lock, lockfileLimit); err != nil {
 		return fmt.Errorf("npm lock: %w", err)
 	}
 	if lock.Version != 2 && lock.Version != 3 {

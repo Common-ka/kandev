@@ -29,7 +29,7 @@ func CheckProject(options Options) ([]Record, error) {
 	if !filepath.IsAbs(manifest) {
 		manifest = filepath.Join(options.Directory, manifest)
 	}
-	data, err := readBounded(manifest)
+	data, err := readBounded(manifest, metadataLimit)
 	if err != nil {
 		return nil, err
 	}

@@ -136,3 +136,13 @@ workspace installations. Both were reproduced before fixing. Stable-minimum
 tests and the real npm workspace/CLI regression now pass, including shadow,
 symlink, version, and lock-root rejection cases. The strict lock policy remains
 required. SDK race tests and vet passed after the fixes.
+
+
+## Workspace file and path review corrections
+
+Review of the ready-for-review merge found false failures for lockfiles above
+1 MiB and checkout-directory symlinks. Both npm and pnpm regressions failed
+before the fix. Separate lockfile limits and canonical checkout-root comparisons
+now preserve published dependency checks. SDK race tests, vet, and the real npm
+workspace integration passed. See the [plan's correction record](plan.md#workspace-file-and-path-review-corrections)
+for boundary coverage and the pending delivery checks.

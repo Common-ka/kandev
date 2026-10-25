@@ -206,7 +206,13 @@ SDK pseudo-versions, Go replacements, and frontend packages resolved through
 local workspace/file dependencies. Inspect npm `package-lock.json` or pnpm
 `pnpm-lock.yaml` to establish registry resolution. Normal pnpm symlinks into
 its managed dependency store are valid; a symlink alone is not evidence of a
-local SDK substitution. Missing or unsupported lock evidence fails with a
+local SDK substitution. Resolve checkout-directory aliases before comparing
+installed package and pnpm store paths. Keep the selected package's lexical
+lock entry binding and reject links that substitute the installed SDK tree.
+Allow lockfiles up to 32 MiB because they describe the entire workspace;
+retain the 1 MiB limit for package manifests, plugin manifests, and SDK records.
+Larger files fail with a diagnostic that names the limit and path.
+Missing or unsupported lock evidence fails with a
 specific diagnostic. Require a complete Stable host minimum without prerelease
 or build suffixes, matching the runtime's Stable minimum policy. An optional
 lowercase `v` prefix remains accepted. Require the minimum to be at least the
