@@ -87,6 +87,10 @@ func ResolveFrontend(directory, packagePath string) (Record, error) {
 	if err != nil {
 		return Record{}, err
 	}
+	directory, err = filepath.EvalSymlinks(directory)
+	if err != nil {
+		return Record{}, err
+	}
 	lockRoot, kind, err := findLock(directory)
 	if err != nil {
 		return Record{}, err
@@ -129,6 +133,10 @@ func ResolveFrontend(directory, packagePath string) (Record, error) {
 func installedFrontend(directory, root, kind, requested string) (string, error) {
 	if !filepath.IsAbs(requested) {
 		requested = filepath.Join(directory, requested)
+	}
+	requested, err := canonicalInstalledPath(requested)
+	if err != nil {
+		return "", err
 	}
 	local := filepath.Join(directory, "node_modules", "@kandev", "plugin-sdk")
 	for current := directory; ; current = filepath.Dir(current) {
@@ -177,12 +185,10 @@ func verifyInstalledPath(path, root, version, kind string) error {
 	if err != nil {
 		return err
 	}
-	// Resolve checkout aliases without accepting links within the installed package tree.
-	project, err := filepath.EvalSymlinks(filepath.Dir(filepath.Dir(filepath.Dir(path))))
+	expected, err := canonicalInstalledPath(path)
 	if err != nil {
 		return err
 	}
-	expected := filepath.Join(project, "node_modules", "@kandev", "plugin-sdk")
 	if actual == expected {
 		return nil
 	}
@@ -195,4 +201,17 @@ func verifyInstalledPath(path, root, version, kind string) error {
 		return nil
 	}
 	return fmt.Errorf("frontend SDK is a local substitution outside the installed package or pnpm store")
+}
+
+// Resolve checkout aliases without accepting links within the installed package tree.
+func canonicalInstalledPath(path string) (string, error) {
+	project := filepath.Dir(filepath.Dir(filepath.Dir(path)))
+	if filepath.Clean(path) != filepath.Join(project, "node_modules", "@kandev", "plugin-sdk") {
+		return "", fmt.Errorf("frontend SDK path must identify node_modules/@kandev/plugin-sdk")
+	}
+	project, err := filepath.EvalSymlinks(project)
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(project, "node_modules", "@kandev", "plugin-sdk"), nil
 }

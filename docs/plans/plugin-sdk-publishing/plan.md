@@ -560,3 +560,12 @@ this changes no resolution policy. SDK race tests, vet, and full SDK lint
 passed with CI's `GOFLAGS=-trimpath`. The documentation preview's remote
 demo download failed with a closed TLS socket and recovered on its failed-job
 rerun. Fresh CI remains required for the lint correction.
+
+
+The secondary review also reproduced aliases directly to workspace members
+missing ancestor lockfiles. New npm/pnpm member-alias regressions failed before
+the fix. Directory canonicalization now precedes lock discovery; requested-path
+comparison and installed-tree verification share canonical project paths without
+resolving away SDK substitutions. SDK race tests, vet, full lint with CI flags,
+and the real npm workspace CLI integration pass. The integration also exercises
+relative and absolute package arguments from an aliased member checkout.

@@ -79,3 +79,44 @@ func TestFrontendCheckoutSymlink(t *testing.T) {
 		})
 	}
 }
+
+// @covers AC-PLUGINS-SDK-DISTRIBUTION-002.2
+func TestFrontendWorkspaceMemberSymlink(t *testing.T) {
+	for _, manager := range []string{"npm", "pnpm"} {
+		t.Run(manager, func(t *testing.T) {
+			root, pkg := frontendFixture(t)
+			if manager == "pnpm" {
+				root, pkg = pnpmFrontendFixture(t)
+			}
+			member := filepath.Join(root, "packages", "plugin")
+			require.NoError(t, os.MkdirAll(member, 0755))
+			require.NoError(t, os.Rename(filepath.Join(root, "package.json"), filepath.Join(member, "package.json")))
+			writeJSON(t, filepath.Join(root, "package.json"), map[string]any{"private": true, "workspaces": []string{"packages/*"}})
+			if manager == "npm" {
+				path := filepath.Join(root, "package-lock.json")
+				data, err := os.ReadFile(path)
+				require.NoError(t, err)
+				// The consumer declaration belongs to the member; the installed SDK remains hoisted.
+				require.NoError(t, os.WriteFile(path, []byte(strings.Replace(string(data), `"":`, `"packages/plugin":`, 1)), 0600))
+			} else {
+				path := filepath.Join(root, "pnpm-lock.yaml")
+				data, err := os.ReadFile(path)
+				require.NoError(t, err)
+				require.NoError(t, os.WriteFile(path, []byte(strings.Replace(string(data), "  .:", "  packages/plugin:", 1)), 0600))
+				memberPackage := filepath.Join(member, "node_modules", "@kandev", "plugin-sdk")
+				require.NoError(t, os.MkdirAll(filepath.Dir(memberPackage), 0755))
+				require.NoError(t, os.Rename(pkg, memberPackage))
+			}
+			relative := filepath.Join("node_modules", "@kandev", "plugin-sdk")
+			_, err := ResolveFrontend(member, relative)
+			require.NoError(t, err)
+			alias := filepath.Join(t.TempDir(), "member")
+			require.NoError(t, os.Symlink(member, alias))
+			for _, requested := range []string{relative, filepath.Join(alias, relative)} {
+				record, err := ResolveFrontend(alias, requested)
+				require.NoError(t, err)
+				require.Equal(t, releasedRecord(), record)
+			}
+		})
+	}
+}

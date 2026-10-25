@@ -83,6 +83,20 @@ test("checker follows an npm workspace's installed resolution and binds its exac
     (await check("../../node_modules/@kandev/plugin-sdk")).stdout,
     /compatible/,
   );
+  const alias = join(root, "plugin-link");
+  await symlink(cwd, alias, "dir");
+  for (const path of [
+    "node_modules/@kandev/plugin-sdk",
+    join(alias, "node_modules/@kandev/plugin-sdk"),
+    join(workspace, "node_modules/@kandev/plugin-sdk"),
+  ]) {
+    const result = await run(
+      binary,
+      ["--frontend-only", "--frontend-sdk", path],
+      { cwd: alias, env: { ...env, PWD: alias } },
+    );
+    assert.match(result.stdout, /compatible/);
+  }
   assert.equal(await readFile(lockPath, "utf8"), before);
 
   const installed = join(workspace, "node_modules/@kandev/plugin-sdk");

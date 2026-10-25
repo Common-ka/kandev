@@ -206,8 +206,9 @@ SDK pseudo-versions, Go replacements, and frontend packages resolved through
 local workspace/file dependencies. Inspect npm `package-lock.json` or pnpm
 `pnpm-lock.yaml` to establish registry resolution. Normal pnpm symlinks into
 its managed dependency store are valid; a symlink alone is not evidence of a
-local SDK substitution. Resolve checkout-directory aliases before comparing
-installed package and pnpm store paths. Keep the selected package's lexical
+local SDK substitution. Resolve the consumer directory before ancestor lockfile
+discovery, including aliases directly to workspace members. Resolve checkout
+aliases before comparing requested, installed package, and pnpm store paths. Keep the selected package's lexical
 lock entry binding and reject links that substitute the installed SDK tree.
 Allow lockfiles up to 32 MiB because they describe the entire workspace;
 retain the 1 MiB limit for package manifests, plugin manifests, and SDK records.

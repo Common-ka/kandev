@@ -146,3 +146,9 @@ before the fix. Separate lockfile limits and canonical checkout-root comparisons
 now preserve published dependency checks. SDK race tests, vet, and the real npm
 workspace integration passed. See the [plan's correction record](plan.md#workspace-file-and-path-review-corrections)
 for boundary coverage and the pending delivery checks.
+
+
+The final alias regression also covers workspace members whose lockfile lives
+in a real parent directory. The checker resolves the consumer directory before
+lock discovery. npm/pnpm regressions and real npm CLI checks through the member
+alias pass; local SDK substitutions and shadow-path bypasses remain rejected.

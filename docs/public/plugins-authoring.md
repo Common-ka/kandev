@@ -87,7 +87,8 @@ Run frontend checks from that package's project root; use `--manifest` to select
 a manifest elsewhere. For npm workspaces, the same `--frontend-sdk` argument
 finds a hoisted SDK up to the nearest lockfile root and checks its exact lock
 entry. A closer installed package takes precedence. Checkout-directory symlinks
-and normal pnpm store links are supported. Lockfiles can be up to 32 MiB;
+and normal pnpm store links are supported, including aliases directly to workspace
+members. Lockfiles can be up to 32 MiB;
 package manifests, plugin manifests, and SDK release records can be up to 1 MiB.
 The checker rejects SDK replacements, links to substituted SDK packages, local
 lockfile resolutions, missing metadata, insufficient host minima, and unsupported
