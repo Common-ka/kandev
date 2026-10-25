@@ -548,3 +548,8 @@ explicit-path bypass, lock-version, and lock-root negative cases. Public author
 guidance and the canonical requirement/design describe the corrected boundaries.
 SDK lint passed with zero issues. Documentation catalog and specification
 validation passed. Fresh CI and review disposition are required after delivery.
+
+The base advanced once more to `f33e6ef287d53c93b19f95c7054feb7080ec77b0`
+(question-image preview cleanup). It merged without conflicts. The two affected
+frontend unit files passed all 21 tests in the merged tree. SDK race tests,
+vet, and the real npm workspace integration also passed after integration.
