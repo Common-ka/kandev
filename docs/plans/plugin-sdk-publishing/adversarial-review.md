@@ -234,3 +234,18 @@ before the fix. Separate lockfile limits and canonical checkout-root comparisons
 now preserve published dependency checks. SDK race tests, vet, and the real npm
 workspace integration passed. See the [plan's correction record](plan.md#workspace-file-and-path-review-corrections)
 for boundary coverage and the pending delivery checks.
+
+
+## Final browser fixture corrections
+
+CI run `40232279840` exposed a floating-point geometry assertion and a Stats
+fixture that recovered before the intended manual action. The corrections are
+test-only. A controlled foreground refresh proves the Stats competing-read
+boundary, but does not identify the exact refresh trigger in the original CI
+failure. Secondary review caught a remaining interval before click dispatch;
+a second red/green probe verified the actual-click latch.
+
+The workflow-change dialog failure remains unexplained: only the successful
+retry has a trace, and three unchanged local runs passed. No speculative fix
+was applied. See the [plan's validation record](plan.md#final-browser-fixture-corrections)
+for delivery checks and remaining CI requirements.

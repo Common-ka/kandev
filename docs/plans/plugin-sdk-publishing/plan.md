@@ -569,3 +569,35 @@ comparison and installed-tree verification share canonical project paths without
 resolving away SDK substitutions. SDK race tests, vet, full lint with CI flags,
 and the real npm workspace CLI integration pass. The integration also exercises
 relative and absolute package arguments from an aliased member checkout.
+
+
+### Final browser fixture corrections
+
+CI run `40232279840` passed backend and SDK checks but failed three browser
+cases that passed only on retry. Mobile runtime controls reported a rendered
+height of `43.999969482421875` for a 44 px control. The test now checks the
+44 px CSS constraint and rounds rendered geometry, matching the existing
+same-file convention. Three corrected runs passed with retries disabled.
+
+The Stats recovery fixture allowed success after its first failed read. A
+controlled foreground refresh reproduced disappearance of its error state
+before manual recovery. A second probe showed that enabling success immediately
+before a Playwright action still allowed a refresh before click dispatch.
+The desktop and mobile fixtures now keep the outage active until the actual
+Retry click. A one-shot capturing listener marks that event, and the route
+reads the document-owned marker. The same controlled probe passed. Production
+retry behavior and all original UI assertions remain unchanged.
+
+The workflow-change dialog timeout remains unproven. Its failed attempt has no
+retained trace; the retry trace cannot establish the failed attempt's cause.
+Three unchanged local runs passed with retries disabled and traces enabled.
+No timeout, click retry, or production change is justified by this evidence.
+Fresh CI must validate this unchanged case along with the corrected fixtures.
+
+Final validation passed with retries disabled: three mobile Stats cases,
+three desktop Stats cases, three mobile runtime cases, and three unchanged
+workflow-dialog cases. Changed-file ESLint, Prettier, the E2E sleep ratchet,
+catalog validation (404 decisions and 1738 specifications), and specification
+lint passed. The secondary reviewer found no remaining actionable issue in
+the corrected fixtures. The PR remains open and ready for review; merge
+readiness requires new terminal CI.

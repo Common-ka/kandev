@@ -5,15 +5,17 @@ test("mobile Stats exposes a touch-sized retry and recovers a failed section", a
   testPage,
   seedData,
 }) => {
-  let dailyRequests = 0;
+  // Keep the outage active across automatic and foreground reads until manual recovery.
   await testPage.route("**/api/v1/**", async (route) => {
     const url = new URL(route.request().url());
     if (url.pathname !== `/api/v1/workspaces/${seedData.workspaceId}/stats/daily-activity`) {
       await route.continue();
       return;
     }
-    dailyRequests += 1;
-    if (dailyRequests === 1) {
+    const dailyAvailable = await testPage.evaluate(
+      () => document.documentElement.dataset.e2eStatsRetry === "requested",
+    );
+    if (!dailyAvailable) {
       await route.fulfill({
         status: 503,
         headers: { "Retry-After": "5" },
@@ -46,6 +48,15 @@ test("mobile Stats exposes a touch-sized retry and recovers a failed section", a
     new RegExp(`^/api/v1/workspaces/${seedData.workspaceId}/stats/daily-activity$`),
     { predicate: (response) => response.ok() },
   );
+  await retry.evaluate((button) => {
+    button.addEventListener(
+      "click",
+      () => {
+        document.documentElement.dataset.e2eStatsRetry = "requested";
+      },
+      { capture: true, once: true },
+    );
+  });
   await retry.tap();
   await recoveredDailyRead;
   await expect(status).toHaveCount(0);
