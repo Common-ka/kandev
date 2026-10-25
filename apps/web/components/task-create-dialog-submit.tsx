@@ -356,6 +356,7 @@ export function useTaskSubmitHandlers({
   initialWorkspaceLayout,
   blockedBy,
   mcpServerIds = [],
+  builtinMCPPreferences,
   saveTaskMCPSelections,
   mcpServerIdsDirty,
   editDependencies,
@@ -792,6 +793,7 @@ export function useTaskSubmitHandlers({
           initialWorkspaceLayout,
           blockedBy,
           mcpServerIds,
+          builtinMCPPreferences,
         });
         submittedPayload = payload;
         return payload;
@@ -860,6 +862,7 @@ export function useTaskSubmitHandlers({
       router,
       getRepositoriesPayload,
       createTaskWithFreshBranchRetry,
+      builtinMCPPreferences,
       isSessionMode,
       isEditMode,
       workflowAgentOverrides,
@@ -1104,6 +1107,7 @@ export function useTaskSubmitHandlers({
           initialWorkspaceLayout,
           blockedBy,
           mcpServerIds,
+          builtinMCPPreferences,
         });
         submittedPayload = p;
         return p;
@@ -1143,6 +1147,7 @@ export function useTaskSubmitHandlers({
     getRepositoriesPayload,
     ensureFreshBranchConsent,
     createTaskWithFreshBranchRetry,
+    builtinMCPPreferences,
     refreshStaleBranchPolicies,
     autoFocusNewTasks,
     onSuccess,

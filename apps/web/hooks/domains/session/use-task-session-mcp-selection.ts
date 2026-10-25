@@ -110,6 +110,8 @@ export function useTaskSessionMCPSelection(context: SessionMCPContext) {
   if (!available) return null;
   return {
     contextKey,
+    taskId: context.taskId,
+    sessionId: context.sessionId,
     workspaceId: ownerWorkspace,
     definitions: definitions.definitions,
     definitionsLoading: definitions.loading || editor.loading,

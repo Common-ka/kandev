@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@kandev/ui/button";
 import { controlSizingClassName } from "@kandev/ui/control-sizing";
@@ -26,6 +26,10 @@ import type {
 } from "@/lib/types/http-mcp";
 import { MCPDefinitionForm } from "./mcp-definition-form";
 import { MCPMarketplace } from "./mcp-marketplace";
+import { BuiltinPackageList } from "@/components/mcp/builtin-package-detail";
+import { BuiltinWorkspaceDetail } from "./builtin-workspace-detail";
+import { useBuiltinMCPPolicy } from "@/hooks/domains/workspace/use-builtin-mcp-policy";
+import type { BuiltinMCPPackage } from "@/lib/types/builtin-mcp";
 
 type MCPSettingsProps = { workspaceId: string };
 
@@ -309,16 +313,15 @@ function DeleteMCPServerDialog({
   );
 }
 
-export function MCPSettings({ workspaceId }: MCPSettingsProps) {
+function useMCPActions(
+  data: ReturnType<typeof useMCPWorkspaceSettings>,
+  setEditor: (value: MCPServerDefinition | null | undefined) => void,
+  deleteTarget: MCPServerDefinition | null,
+  setDeleteTarget: (value: MCPServerDefinition | null) => void,
+  setDeleting: (value: boolean) => void,
+) {
   const { t } = useTranslation();
-  const { isMobile } = useResponsiveBreakpoint();
   const { toast } = useToast();
-  const data = useMCPWorkspaceSettings(workspaceId);
-  const [view, setView] = useState<"configured" | "marketplace">("configured");
-  const [editor, setEditor] = useState<MCPServerDefinition | null | undefined>(undefined);
-  const [deleteTarget, setDeleteTarget] = useState<MCPServerDefinition | null>(null);
-  const [deleting, setDeleting] = useState(false);
-
   const saveDefinition = async (payload: MCPDefinitionInput, server?: MCPServerDefinition) => {
     if (server) await data.update(server.id, { ...payload, expected_revision: server.revision });
     else await data.create(payload);
@@ -351,6 +354,40 @@ export function MCPSettings({ workspaceId }: MCPSettingsProps) {
     }
   };
 
+  return { saveDefinition, toggleServer, deleteServer };
+}
+
+export function MCPSettings({ workspaceId }: MCPSettingsProps) {
+  const { t } = useTranslation();
+  const { isMobile } = useResponsiveBreakpoint();
+  const { toast } = useToast();
+  const data = useMCPWorkspaceSettings(workspaceId);
+  const builtin = useBuiltinMCPPolicy(workspaceId);
+  const [builtinId, setBuiltinId] = useState<BuiltinMCPPackage | null>(null);
+  const returnFocus = useRef<BuiltinMCPPackage | null>(null);
+  if (builtinId) returnFocus.current = builtinId;
+  const [view, setView] = useState<"configured" | "marketplace">("configured");
+  const [editor, setEditor] = useState<MCPServerDefinition | null | undefined>(undefined);
+  const [deleteTarget, setDeleteTarget] = useState<MCPServerDefinition | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const { saveDefinition, toggleServer, deleteServer } = useMCPActions(
+    data,
+    setEditor,
+    deleteTarget,
+    setDeleteTarget,
+    setDeleting,
+  );
+
+  const builtinDetail = builtin.view?.catalog.find((item) => item.id === builtinId);
+  if (builtinDetail)
+    return (
+      <BuiltinWorkspaceDetail
+        editor={builtin}
+        item={builtinDetail}
+        onBack={() => setBuiltinId(null)}
+      />
+    );
   if (editor !== undefined)
     return (
       <MCPDefinitionForm
@@ -378,6 +415,13 @@ export function MCPSettings({ workspaceId }: MCPSettingsProps) {
         }
       />
       <MCPViewTabs view={view} onChange={setView} />
+      {view === "configured" && (
+        <BuiltinPackageList
+          returnFocus={returnFocus.current}
+          editor={builtin}
+          onSelect={setBuiltinId}
+        />
+      )}
       {Boolean(data.error) && (
         <p
           className="rounded-md border border-destructive/40 p-3 text-sm text-destructive"
