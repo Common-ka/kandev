@@ -502,3 +502,28 @@ covering desktop and tablet callers of the strengthened helper. The final
 focused browser total is ten passes. Changed-file ESLint, Prettier, the E2E
 sleep ratchet, catalog validation (404 decisions and 1734 specifications), and
 specification lint passed. Fresh CI on the delivered commit remains required.
+
+### Ready-for-review merge update
+
+The user requested ready-for-review status and conflict resolution after
+`main` advanced to `62af870aea3556e34ae3878041d2b99bf1c522bc`.
+The MCP helper keeps the base branch's named route and targeted cleanup while
+retaining this PR's response-provenance header and readiness wait. The
+multi-file chat test adopts the base branch's isolated repository, which starts
+on `main` and publishes its fixture commit before task creation. This preserves
+the original branch/remote visibility correction without shared seed mutations.
+The mobile deep-tree setup fix is identical on both branches.
+
+Run the affected desktop/tablet chat and MCP tests, mobile MCP report cases,
+changed-file lint/format, and documentation validators. Commit through normal
+hooks, push to the same PR, and require new CI before reporting merge readiness.
+The PR is ready for review, not merged. SDK publication, external template
+migration, and author notices remain separate release work.
+
+Merged-result validation passed: three desktop/tablet tests (MCP state reports
+and multi-file chat links) and three mobile MCP report tests (320, 393, and
+767 pixels), all with retries disabled. The managed runner rebuilt backend,
+frontend, and plugin fixtures from the merged tree. Changed-file ESLint,
+Prettier, sleep-ratchet, catalog validation (404 decisions, 1738 specifications),
+and full specification lint passed. Fresh CI remains required on the merge
+commit, which replaces the previous head's evidence for readiness.

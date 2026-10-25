@@ -1,5 +1,5 @@
 import { expectMCPConnectionGeometry } from "./mcp-connection-geometry";
-import { expect, type Locator, type Page } from "@playwright/test";
+import { expect, type Locator, type Page, type Route } from "@playwright/test";
 import type { ApiClient } from "./api-client";
 import type { SeedData } from "../fixtures/test-base";
 import { SessionPage } from "../pages/session-page";
@@ -211,7 +211,7 @@ async function checkSavedReports(
   // Controlled application reports cover states this mock cannot naturally emit.
   let reportState: MCPSessionApplyState = "pending_idle";
   const url = `**/api/v1/task-sessions/${sessionId}/mcp-selections*`;
-  await page.route(url, async (route) => {
+  const handler = async (route: Route) => {
     if (route.request().method() !== "GET") return route.continue();
     const apply_state = reportState;
     const response = await route.fetch();
@@ -226,7 +226,8 @@ async function checkSavedReports(
       json: body,
       headers: { ...response.headers(), "x-kandev-e2e-report": apply_state },
     });
-  });
+  };
+  await page.route(url, handler);
   try {
     for (const apply_state of ["pending_idle", "deferred_restart", "failed", "applied"] as const) {
       reportState = apply_state;
@@ -296,6 +297,6 @@ async function checkSavedReports(
       if (!mobile) await expect(trigger).toBeFocused();
     }
   } finally {
-    await page.unrouteAll({ behavior: "wait" });
+    await page.unroute(url, handler);
   }
 }
