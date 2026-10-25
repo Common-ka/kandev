@@ -183,3 +183,44 @@ The static-check job now has a finite 30-minute total budget to include cold
 builds, SDK consumers, the existing 15-minute lint allowance, and post-job cache
 cleanup. Individual validation commands and their assertions are unchanged.
 Fresh CI on the delivered correction remains required.
+
+## Browser synchronization follow-up
+
+At `45998286df8e87e181db1e80859410455180ff15`, backend CI completed with the
+new total budget. Frontend and container checks passed. E2E run `40198286326`
+failed three browser cases that passed only on retry. Review threads remained
+clear. Investigation identified these test boundaries:
+
+- The deep-tree mobile test set `scrollTop` once and assumed its section heading
+  left the virtualized range. The same assertion failed on the third unchanged
+  local run. Its fixture now continues the deliberate bottom scroll across
+  rendered frames until that precondition holds. The heading assertion, default
+  timeout, and subsequent containment, action, and diff checks remain.
+- Quick Chat's reset test interacted before the opening turn completed. CI
+  missed the reset dialog; a preserved local failure opened the dialog, then
+  lost it before Back. The secondary reviewer confirmed a busy-state transition
+  about 130 ms after opening: the composer changed from direct to queued input,
+  and the toolbar removed its reset control. The test now awaits the existing
+  settled-baseline helper. That helper excludes synthetic `lifecycle_only`
+  completions so startup readiness cannot stand in for a completed opening turn.
+- The desktop workflow test used a page-wide proceed-button locator, which
+  matched two retained panels in CI. Both planned and actual button queries now
+  use the existing `SessionPage.activeChat()` scope. The model-preview and
+  workflow-route assertions remain. An unchanged local run reached its third
+  iteration before SIGTERM; that run is incomplete, not a passing full replay.
+
+These changes affect test setup, readiness, and locator scope only. Production
+UI, runtime behavior, and plugin compatibility contracts are unchanged. Targeted
+validation and fresh CI remain required before closing this review cleanup.
+
+The existing session-helper unit case now includes a completed lifecycle-only
+startup record before an unfinished conversational turn. It failed with the
+old predicate because readiness returned at the startup record. All four helper
+tests pass with the corrected predicate. Three deep-tree runs, three Quick Chat
+reset runs, and two desktop workflow runs passed with retries disabled.
+
+The two existing Quick Chat activity tests also passed with retries disabled,
+covering desktop and tablet callers of the strengthened helper. The final
+focused browser total is ten passes. Changed-file ESLint, Prettier, the E2E
+sleep ratchet, catalog validation (404 decisions and 1734 specifications), and
+specification lint passed. Fresh CI on the delivered commit remains required.

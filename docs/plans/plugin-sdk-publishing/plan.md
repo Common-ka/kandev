@@ -474,3 +474,31 @@ tests), `python3 .github/scripts/backend-tests-workflow-contract_test.py`
 and `actionlint -shellcheck= .github/workflows/backend-tests.yml`. Catalog and
 specification checks also passed. The secondary reviewer found no blocking
 issue. The correction adds no test bypass and changes no test assertion.
+
+### Browser synchronization follow-up
+
+The static-check budget correction passed backend CI. Three retry-pass browser
+cases kept E2E CI failed: mobile deep-tree scroll setup, Quick Chat reset
+confirmation, and desktop workflow button selection. The adversarial review
+record contains the exact distinction between CI and local failure evidence.
+
+PR cleanup work order: establish the virtualized scroll precondition with the
+existing bounded scrolling convention; await a real completed opening turn
+before Quick Chat reset interactions; scope workflow buttons to the active chat
+through `SessionPage`. Preserve all behavioral assertions and default locator
+budgets. Run repeated mobile regressions, the desktop workflow scenario, existing
+Quick Chat activity tests using the strengthened helper, and changed-file lint,
+format, sleep-ratchet, and documentation checks. Deliver one reviewed correction
+through normal hooks and require fresh CI. No production UI change is planned.
+
+The existing session-helper unit case now includes a completed lifecycle-only
+startup record before an unfinished conversational turn. It failed with the
+old predicate because readiness returned at the startup record. All four helper
+tests pass with the corrected predicate. Three deep-tree runs, three Quick Chat
+reset runs, and two desktop workflow runs passed with retries disabled.
+
+The two existing Quick Chat activity tests also passed with retries disabled,
+covering desktop and tablet callers of the strengthened helper. The final
+focused browser total is ten passes. Changed-file ESLint, Prettier, the E2E
+sleep ratchet, catalog validation (404 decisions and 1734 specifications), and
+specification lint passed. Fresh CI on the delivered commit remains required.

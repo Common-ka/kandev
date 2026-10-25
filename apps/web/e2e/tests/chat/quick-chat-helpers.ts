@@ -47,7 +47,7 @@ export async function waitForSessionSettledBaseline(
         return (
           !!session &&
           SETTLED_SESSION_STATES.has(session.state) &&
-          turns.some((turn) => !!turn.completed_at)
+          turns.some((turn) => turn.metadata?.lifecycle_only !== true && !!turn.completed_at)
         );
       },
       {
