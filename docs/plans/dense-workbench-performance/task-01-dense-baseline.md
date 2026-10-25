@@ -21,6 +21,18 @@ system_design:
 
 # Task 01: Dense fixture and baseline
 
+## Full-reference grid checkpoint
+
+The corrected file fixture runs all 12 planned grid attempts with clean harness
+source `0c65b5b5b8a` and frozen `820f...` application assets. Five samples pass and
+seven fail; only one pair completes both arms. File witnesses pass where reached.
+The five complete samples verify 9,000 ordered updates. Readiness and native
+input failures remain open, and the summary rejects this failed series. See
+[the complete failure evidence](evidence/reference-files-grid-failed.json).
+The unchanged-input diagnostic update passes its Node/browser regressions and
+all three callers within their stated scope; the initial combined navigation
+setup failure remains retained ([evidence](evidence/failure-diagnostics.json)).
+
 ## Dense Dockview fixture validation
 
 The fixture now prepares real siblings in one environment and gives both visible

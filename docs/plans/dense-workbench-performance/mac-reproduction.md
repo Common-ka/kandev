@@ -119,6 +119,12 @@ candidate commit. Compare medians of paired changes as well as individual
 pairs. Retain neutral and regressing results. Fewer requests alone do not prove
 faster interaction. CPU attribution profiles are separate from speed samples.
 
+Each attempt also retains `INPUT.json.SAMPLE.backend.log`, with its digest in
+the checkpoint. Failed Threads samples include cold-start or interaction images
+when capture succeeds. The raw checkpoint retains capture errors, browser state,
+and input-step timings. Keep these files beside the raw report. See
+[the failure-evidence protocol](benchmark.md#failure-evidence).
+
 Run document hide/restore as a separate correctness pass:
 
 ```bash

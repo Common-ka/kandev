@@ -1,0 +1,346 @@
+{
+  "status": "Diagnostic collection verified; full-load input failures remain unresolved",
+  "scope": "Only E2E helpers, test regressions, and three comparison callers change. Frozen application assets, production logic, workload, native input actions, and deadlines remain unchanged.",
+  "parentRevision": "0c65b5b5b8aa793ed9c7d8cda836c698a67c3178",
+  "productionRevision": "7a9840211131f7471657105c0b75d08c4953bf65",
+  "productionPathsChanged": [],
+  "sourceFiles": [
+    {
+      "path": "apps/web/e2e/helpers/dense-cold-diagnostics.ts",
+      "sha256": "ef8a15c025d7a223c7d7f6294a29a70f3e77106a74aec6d1f0858ff4d0c30c2d"
+    },
+    {
+      "path": "apps/web/e2e/helpers/dense-cold-load.ts",
+      "sha256": "a4860c2109b6c6aaa9c6c27d4abf9fee45384f89f3098a7014f0d146c697795d"
+    },
+    {
+      "path": "apps/web/e2e/helpers/dense-comparison-sample.ts",
+      "sha256": "cd770b0d40ff988d718a8556616a6de09d02a489b687a39fe0b3ad682ace2043"
+    },
+    {
+      "path": "apps/web/e2e/helpers/dense-evidence.ts",
+      "sha256": "562ab14b6ff068bcd2ccbeac39417ba415ab814a739ac6d29d8022d7ef191567"
+    },
+    {
+      "path": "apps/web/e2e/helpers/dense-interactions.ts",
+      "sha256": "cef907a213b16e33f30493bf139158f13687e97ff23dace4e85eb813edf47e33"
+    },
+    {
+      "path": "apps/web/e2e/scripts/dense-cold-diagnostics.test.mjs",
+      "sha256": "d8405f6b86256c2e7a0e600f1c2a1b4c81208722b9d9a51f31854a21a67d00d3"
+    },
+    {
+      "path": "apps/web/e2e/scripts/dense-evidence.test.mjs",
+      "sha256": "c24456acb5ef89e22bd7b7d631cf24f965a31898811e3c243b9a32d7e940720a"
+    },
+    {
+      "path": "apps/web/e2e/tests/performance/dense-cold-diagnostics.spec.ts",
+      "sha256": "62f346079c0fb039b97d7e235e617e5620250702664ff68fa657692531342433"
+    },
+    {
+      "path": "apps/web/e2e/tests/performance/dense-dockview-comparison.spec.ts",
+      "sha256": "ab1ccd6d420a6abf8fa643a5fa2d32210ab32e090264249fd688d20c33b4a6f0"
+    },
+    {
+      "path": "apps/web/e2e/tests/performance/dense-interaction-diagnostics.spec.ts",
+      "sha256": "f94965799151a8e483248f275ef9f83f0996e1a4a3c1bb02482c00c9362f127b"
+    },
+    {
+      "path": "apps/web/e2e/tests/performance/dense-navigation-comparison.spec.ts",
+      "sha256": "5653f51e4a502b7ed7e357adc4005095b052b6abbe3e3cc9528ffa1d6af65f46"
+    },
+    {
+      "path": "apps/web/e2e/tests/performance/dense-workbench-comparison.spec.ts",
+      "sha256": "a321a78a5aacc845028cd1b4428ed76fd8b7cd780e1c1a07833e41dd216e819f"
+    }
+  ],
+  "sourcePatch": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/failure-diagnostics-source.patch",
+    "sha256": "eb82de9f43860c9cc81704dd00595b242f2c65d0112a126b2f1c40cbd3872552"
+  },
+  "red": {
+    "node": {
+      "path": "/tmp/kandev-dense-evidence-red-5936a872.log",
+      "sha256": "81de8512a1140a9623cdbc769239e03e4eaa07439fe6fe25fdbe4bd81bbe419d"
+    },
+    "nodeExpectedFailures": 4,
+    "coldBrowser": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/cold-failure-diagnostics-red-logs/kandev-run.e2e.DfMiXJvJ.log",
+      "sha256": "2c7a82e7548a9ccc62fe290aea5e59d8892e92eba2eec616a841a60389640051"
+    },
+    "coldExpectedFailures": 2,
+    "interactionBrowser": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/interaction-diagnostics-red-logs/kandev-run.e2e.UpNEsP4g.log",
+      "sha256": "686505d5afaab080deec3fbbaca3e614919e0338bb033d8c424fa6238a137c01"
+    },
+    "interactionExpectedFailures": 2,
+    "artifacts": [
+      ".kandev/diagnostics/dense-workbench-performance/cold-failure-diagnostics-red-artifacts",
+      ".kandev/diagnostics/dense-workbench-performance/interaction-diagnostics-red-artifacts"
+    ]
+  },
+  "green": {
+    "nodeChecks": 57,
+    "nodeLog": {
+      "path": "/tmp/kandev-dense-diagnostics-node-green-5936a872.log",
+      "sha256": "7e474c6be60c742008a33a3cafc1bc2657ba16e5e45723cc09cd21e1146bc330"
+    },
+    "browserChecks": 4,
+    "browserLog": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/failure-diagnostics-green-logs/kandev-run.e2e.1vp6FrSO.log",
+      "sha256": "a30ff3604eeb8987fe97d9cfbd8d66f7abe190382870849367ff00861586e878"
+    },
+    "browserArtifacts": ".kandev/diagnostics/dense-workbench-performance/failure-diagnostics-green-artifacts",
+    "lint": {
+      "path": "/tmp/kandev-dense-diagnostics-final-lint-5936a872.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "format": {
+      "path": "/tmp/kandev-dense-diagnostics-format-5936a872.log",
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    },
+    "compatibilityFinding": "The initial expanded Node run found two compatibility failures. The VM fixture now supplies browser location/performance globals, and the original diagnostic error field is preserved. Final 57 checks pass."
+  },
+  "faultCaller": {
+    "report": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792935907664.json",
+      "sha256": "2d2ad2cc316ba13d5daa02960f51f54eccae0017317f648adc5c3da69e9d9ebb"
+    },
+    "runnerExitCode": 1,
+    "expected": "Two no-script fault controls fail original board readiness; both healthy candidate attempts pass. All four attempts execute and final failure remains. Real frozen baseline was not changed.",
+    "log": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/failure-diagnostics-fault-caller-logs/kandev-run.e2e.X723nB4m.log",
+      "sha256": "695a6b8810a1474e73bd9001fa5e4fb2b2cff197a69800d8f482ec3e68c4e392"
+    },
+    "artifacts": ".kandev/diagnostics/dense-workbench-performance/failure-diagnostics-fault-caller-artifacts",
+    "attempts": [
+      {
+        "sample": "baseline-1x-0",
+        "status": "failed",
+        "backendLog": {
+          "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-dense-1792935907664.json.baseline-1x-0.backend.log",
+          "sha256": "75f382ea98da9bc86404ee069008d7fe50052ba1f48486c0124be9cb076daca7",
+          "capturedAt": 1792935922993
+        },
+        "coldImage": {
+          "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-dense-1792935907664.json.baseline-1x-0.cold.png",
+          "sha256": "8f189104cccd9a2ef9c93753a314471a6e7cf1872a16d656e64deae7bbffb885",
+          "capturedAt": 1792935921275
+        }
+      },
+      {
+        "sample": "candidate-1x-0",
+        "status": "passed",
+        "backendLog": {
+          "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-dense-1792935907664.json.candidate-1x-0.backend.log",
+          "sha256": "c3486f360a309c1641eb1c59d3f7d2e852d93a886aa076fc6ccdfa0b0f6b2dd5",
+          "capturedAt": 1792935934409
+        }
+      },
+      {
+        "sample": "candidate-1x-1",
+        "status": "passed",
+        "backendLog": {
+          "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-dense-1792935907664.json.candidate-1x-1.backend.log",
+          "sha256": "e1a39805c620f7d52eefb3a10dab9965724da16609ff5dacda0ae15fd41c38cb",
+          "capturedAt": 1792935946975
+        }
+      },
+      {
+        "sample": "baseline-1x-1",
+        "status": "failed",
+        "backendLog": {
+          "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-dense-1792935907664.json.baseline-1x-1.backend.log",
+          "sha256": "7688905f8d1ac2d12880fd6c6f5fb082136446a94eab5dced9079270cea932ec",
+          "capturedAt": 1792935959292
+        },
+        "coldImage": {
+          "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-dense-1792935907664.json.baseline-1x-1.cold.png",
+          "sha256": "8f189104cccd9a2ef9c93753a314471a6e7cf1872a16d656e64deae7bbffb885",
+          "capturedAt": 1792935957512
+        }
+      }
+    ],
+    "summaryRejection": {
+      "path": "/tmp/kandev-dense-diagnostics-fault-summary-rejection-5936a872.log",
+      "sha256": "2a2f03b64b52a6d06a190e87636ce2486f99d4882c435b0a9ef00ae3894a9aac"
+    }
+  },
+  "healthyCallers": {
+    "threads": {
+      "report": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792936336548.json",
+        "sha256": "9ab2b6377cf29313d1a7626c66f6f5d3905417d39696b2c6694db8115467c78e"
+      },
+      "summary": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/failure-diagnostics-healthy-threads-summary.json",
+        "sha256": "668047eb33159bc928abf1cc0c669618ad3b624b2afda6d2e95b7ce0cd3f1998"
+      },
+      "measurementKind": "harness-rehearsal",
+      "builds": {
+        "baseline": {
+          "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+          "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+          "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+          "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+        },
+        "candidate": {
+          "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+          "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "820fcd57e5ecaf8d39c610f13cfbfabf4cd8dea4e64e555a57522fd3823c9a5d"
+        }
+      },
+      "attempts": [
+        {
+          "sample": "baseline-1x-0",
+          "status": "passed",
+          "backendLog": {
+            "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-dense-1792936336548.json.baseline-1x-0.backend.log",
+            "sha256": "588dc83e0d0bce9018e9d82bf367f717f44d0bd5b88064fef74f39269ec7a5ff",
+            "capturedAt": 1792936387151
+          }
+        },
+        {
+          "sample": "candidate-1x-0",
+          "status": "passed",
+          "backendLog": {
+            "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-dense-1792936336548.json.candidate-1x-0.backend.log",
+            "sha256": "b716c0dc2f7e646b76f9ca7593bb5457268987f9f9c39a8aea0715936bc6e282",
+            "capturedAt": 1792936433648
+          }
+        }
+      ],
+      "verifiedOrderedUpdates": 60,
+      "limit": "Short caller correctness validation, not reference performance evidence."
+    },
+    "dockview": {
+      "report": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/matched-dockview-1792936034206.json",
+        "sha256": "e7b096109d449fc8949df68465dfe9f94fba561378d0c137795c6e5e48a6a430"
+      },
+      "summary": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/failure-diagnostics-healthy-dockview-summary.json",
+        "sha256": "78fb611e3ca875787d8aecafe8788f7a9f4ba8e15464ffa84555f6bae953fd87"
+      },
+      "measurementKind": "harness-rehearsal",
+      "builds": {
+        "baseline": {
+          "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+          "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+          "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+          "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+        },
+        "candidate": {
+          "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+          "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "820fcd57e5ecaf8d39c610f13cfbfabf4cd8dea4e64e555a57522fd3823c9a5d"
+        }
+      },
+      "attempts": [
+        {
+          "sample": "baseline-1x-0",
+          "status": "passed",
+          "backendLog": {
+            "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-dockview-1792936034206.json.baseline-1x-0.backend.log",
+            "sha256": "8451b031e449946fae71d8c3068fc98645e6526f7bdc8763d788ebd865774064",
+            "capturedAt": 1792936071193
+          }
+        },
+        {
+          "sample": "candidate-1x-0",
+          "status": "passed",
+          "backendLog": {
+            "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-dockview-1792936034206.json.candidate-1x-0.backend.log",
+            "sha256": "0e88da26e789734e6fdc2f24e1b732f42c820e020adbc3d86f58d530b2d7a10d",
+            "capturedAt": 1792936109472
+          }
+        }
+      ],
+      "verifiedOrderedUpdates": 60,
+      "limit": "Short caller correctness validation, not reference performance evidence."
+    },
+    "navigation": {
+      "report": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/matched-navigation-1792936687420.json",
+        "sha256": "5ad76ffe0d18e08399accf28f37d3c67f0fe35e07dbd32d9b588156b877e6ec2"
+      },
+      "summary": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/failure-diagnostics-healthy-navigation-summary.json",
+        "sha256": "bbc453a9b34256c7f757c39afcc61ba3932a68e679f558621fe71cd3cdb9e070"
+      },
+      "measurementKind": "harness-rehearsal",
+      "builds": {
+        "baseline": {
+          "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+          "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+          "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+          "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+        },
+        "candidate": {
+          "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+          "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "820fcd57e5ecaf8d39c610f13cfbfabf4cd8dea4e64e555a57522fd3823c9a5d"
+        }
+      },
+      "attempts": [
+        {
+          "sample": "baseline-1x-0",
+          "status": "passed",
+          "backendLog": {
+            "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-navigation-1792936687420.json.baseline-1x-0.backend.log",
+            "sha256": "e411ef0e0ad5997317b07798bea69f557bc46c78377147794a0a51e3110bc7dd",
+            "capturedAt": 1792936738928
+          }
+        },
+        {
+          "sample": "candidate-1x-0",
+          "status": "passed",
+          "backendLog": {
+            "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-navigation-1792936687420.json.candidate-1x-0.backend.log",
+            "sha256": "38e83a45b392155d727bf1f5888a99cc5db19658a83373b79d06e42681793f5e",
+            "capturedAt": 1792936767292
+          }
+        }
+      ],
+      "verifiedOrderedUpdates": 0,
+      "limit": "Short caller correctness validation, not reference performance evidence."
+    }
+  },
+  "combinedCallerRun": {
+    "exitCode": 1,
+    "passed": 2,
+    "failed": 1,
+    "log": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/failure-diagnostics-healthy-callers-logs/kandev-run.e2e.OZRoNESa.log",
+      "sha256": "dd88177da1bc5842d8ae1e24a8b60174d5c49e4cff8e1c7ddf5d1b7ce2ea81fb"
+    },
+    "artifacts": ".kandev/diagnostics/dense-workbench-performance/failure-diagnostics-combined-callers-artifacts",
+    "failure": "Navigation setup fails at 000-Navigation-B.txt visibility before any comparison report or attempt starts. Dockview and Threads pass.",
+    "requestedNavigationPrimaryMessages": 1000,
+    "limit": "Not an attributed production or diagnostic regression."
+  },
+  "isolatedNavigationRun": {
+    "exitCode": 0,
+    "passed": 1,
+    "log": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/failure-diagnostics-isolated-navigation-logs/kandev-run.e2e.5wZZPK4U.log",
+      "sha256": "77cb586a1dd6b3555d25f475244be0f6bb27526b38b7132338c004bc92e15de1"
+    },
+    "artifacts": ".kandev/diagnostics/dense-workbench-performance/failure-diagnostics-isolated-navigation-artifacts",
+    "requestedTasks": 10,
+    "requestedPrimaryMessages": 10,
+    "measuredSwitchesEach": 2,
+    "limit": "Both isolation and history count differ from the combined setup failure. This validates the log callback, not the earlier failure cause."
+  },
+  "semantics": [
+    "Save outcome before copying its backend log. Copy before next restart, refuse overwrite, retain exact bytes and digest. Evidence persistence failure stops the matrix.",
+    "Cold driver/browser/request timestamps are separate Unix milliseconds. Navigation timing uses document-relative milliseconds. Failure snapshots occur later than failed polls.",
+    "Native input timings wrap existing steps. No successful-path geometry reads, wheel/hover calls, deltas, timing bounds, or action order are added or changed.",
+    "Failure image capture has a two-second bound and preserves the original UI error when capture fails.",
+    "Legacy action finishedMs stays before final geometry read; read-after step may therefore finish later.",
+    "These are correctness and observability checks. No CPU gain, resolved-sluggishness, M2 Air, field INP, battery, or leak claim."
+  ]
+}

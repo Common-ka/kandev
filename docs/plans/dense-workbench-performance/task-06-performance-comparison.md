@@ -30,6 +30,19 @@ system_design:
 
 # Task 06: Matched comparison and regression evidence
 
+## Full-reference grid checkpoint
+
+The corrected full-reference run finishes all 12 planned attempts: five pass
+and seven fail. Only pair zero completes both arms. Its five complete samples
+verify 9,000 ordered updates. The current native-wheel fix remains insufficient
+under full load. The report, original failures, and host data remain intact;
+summary validation rejects the series. The final matrix and regression
+attribution remain open. See
+[the complete failure evidence](evidence/reference-files-grid-failed.json).
+The unchanged-input diagnostic update passes its Node/browser regressions and
+all three callers within their stated scope; the initial combined navigation
+setup failure remains retained ([evidence](evidence/failure-diagnostics.json)).
+
 ## Dense Dockview fixture validation
 
 The fixture now prepares real siblings in one environment and gives both visible

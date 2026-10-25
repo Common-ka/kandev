@@ -311,6 +311,31 @@ candidate samples complete; the final run still fails. This is a harness fault,
 not a result for the original baseline. See
 [validation evidence](evidence/dense-attempt-continuation.json).
 
+### Failure evidence
+
+Each attempt saves its outcome before it copies the current backend log to a
+sample-specific path. The report records the log's SHA-256 digest and capture
+time. This is a snapshot before the next backend restart, not a complete log of
+later shutdown activity. Copy or persistence failure stops the runner. Existing
+evidence is never overwritten by a later attempt.
+
+Cold failures retain document status, navigation timing, browser errors, failed
+request paths, document readiness, board geometry, and store exposure. The
+inspection records driver request time, browser observation time, and driver
+receipt time separately, in Unix milliseconds. Navigation durations use
+milliseconds since the document's time origin. A delayed snapshot does not show
+the state at the instant of the failed readiness check.
+
+Native interaction records include Node-clock start/end times for each existing
+step and values from existing geometry reads. No extra geometry reads run on
+successful paths. The action's legacy `finishedMs` remains before its final
+geometry read; that read's step can therefore finish later. Failures retain the
+original error, completed actions, failing step, later transcript state, and an
+optional image. Image capture has a two-second bound and cannot replace the
+original failure. Images and extra browser-state inspection run only on failed
+samples. Hover/wheel calls, deltas, action order, schedules, and timeouts stay
+unchanged.
+
 ## Acceptance and honest conclusions
 
 Hard gates: correct final content; unchanged default layout and status; no

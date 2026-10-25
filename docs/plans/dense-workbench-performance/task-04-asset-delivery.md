@@ -87,6 +87,13 @@ Wrong variant headers can break caches or execute compressed bytes as JavaScript
 
 ## Results
 
+The final `820f...` asset tree passes a fresh complete byte audit. All 552 gzip
+siblings decode exactly and regenerate byte-for-byte with Node 24 level 9.
+Every eligible JS/CSS file also satisfies the smaller-only sidecar policy.
+The audited identity bytes total 62,083,082; gzip bytes total 15,811,880. These
+whole-artifact totals are separate from actual page transfer and CPU. See
+[the final artifact evidence](evidence/final-assets-byte-audit.json).
+
 2026-10-23: The Vite build now writes deterministic gzip siblings for JS/CSS
 files of at least 1 KiB when compression reduces their size. The native asset
 handler negotiates gzip/identity, preserves the original MIME type, merges

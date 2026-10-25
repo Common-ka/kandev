@@ -1,0 +1,221 @@
+{
+  "status": "All 12 attempts executed; failed series rejected by summary",
+  "sourceRevision": "0c65b5b5b8aa793ed9c7d8cda836c698a67c3178",
+  "sourcePatchBytes": 0,
+  "productionRevision": "7a9840211131f7471657105c0b75d08c4953bf65",
+  "raw": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792931792752.json",
+    "sha256": "77bfd2cdd46077df4407581dd3221c62d205d6d77ae03677ab9ac75745e7c388"
+  },
+  "log": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/final-reference-files-grid-1x-logs/kandev-run.e2e.R7cLZUyi.log",
+    "sha256": "01e2a4c6e62134d1342c8fda4f7915c44324638edb19e5c8b6b8ef59570ab61f"
+  },
+  "artifacts": ".kandev/diagnostics/dense-workbench-performance/final-reference-files-grid-1x-artifacts",
+  "hostLoad": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/final-reference-files-grid-1x-host-load.jsonl",
+    "sha256": "649fe3cbfffe8d14ddece4a9ac3c6b7fd845c6ccc94dd719d91b392e00e8872f"
+  },
+  "runnerExitCode": 1,
+  "samplerExitCode": 0,
+  "summaryRejection": {
+    "path": "/tmp/kandev-full-reference-grid-summary-rejection-5936a872.log",
+    "sha256": "9bdb61caae24e60131b32c9b29dfa14b769041ebcd23e00fb68deceb103317aa"
+  },
+  "machine": {
+    "revision": "0c65b5b5b8aa793ed9c7d8cda836c698a67c3178",
+    "cpu": "11th Gen Intel(R) Core(TM) i7-11700T @ 1.40GHz",
+    "cores": 16,
+    "load": [3.83, 3.15, 3.18],
+    "totalMemory": 33303871488,
+    "freeMemory": 26671542272,
+    "platform": "linux 6.18.49"
+  },
+  "builds": {
+    "baseline": {
+      "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+      "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+      "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+      "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+    },
+    "candidate": {
+      "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+      "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "820fcd57e5ecaf8d39c610f13cfbfabf4cd8dea4e64e555a57522fd3823c9a5d"
+    }
+  },
+  "fixtureProtocol": "threads-files-v1",
+  "workload": {
+    "layout": "grid",
+    "extraBusyHeaders": 0,
+    "tasks": 1000,
+    "columns": 30,
+    "messages": 1000,
+    "durationMs": 60000
+  },
+  "fixtureTaskCount": 1000,
+  "storedMessages": 36000,
+  "fileState": {
+    "environments": 6,
+    "profileFilesEach": 630,
+    "changesEach": 73,
+    "allPreSampleWitnessesMatch": true,
+    "allCompletePostSampleWitnessesMatch": true
+  },
+  "attempts": [
+    {
+      "sample": "baseline-1x-0",
+      "status": "passed"
+    },
+    {
+      "sample": "candidate-1x-0",
+      "status": "passed"
+    },
+    {
+      "sample": "candidate-1x-1",
+      "status": "failed"
+    },
+    {
+      "sample": "baseline-1x-1",
+      "status": "failed"
+    },
+    {
+      "sample": "baseline-1x-2",
+      "status": "failed"
+    },
+    {
+      "sample": "candidate-1x-2",
+      "status": "passed"
+    },
+    {
+      "sample": "candidate-1x-3",
+      "status": "failed"
+    },
+    {
+      "sample": "baseline-1x-3",
+      "status": "passed"
+    },
+    {
+      "sample": "baseline-1x-4",
+      "status": "passed"
+    },
+    {
+      "sample": "candidate-1x-4",
+      "status": "failed"
+    },
+    {
+      "sample": "candidate-1x-5",
+      "status": "failed"
+    },
+    {
+      "sample": "baseline-1x-5",
+      "status": "failed"
+    }
+  ],
+  "completePairs": [0],
+  "completedSamples": 5,
+  "verifiedOrderedUpdates": 9000,
+  "failures": [
+    {
+      "sample": "candidate-1x-1",
+      "kind": "cold",
+      "action": null,
+      "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('threads-board')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('threads-board')\n",
+      "scheduledMs": null,
+      "startedMs": null,
+      "laterState": null
+    },
+    {
+      "sample": "baseline-1x-1",
+      "kind": "interaction",
+      "action": "scroll-up",
+      "error": "Error: expect(received).toBeLessThan(expected)\n\nExpected: < 52108\nReceived:   52139\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate",
+      "scheduledMs": 12000,
+      "startedMs": 12000.264636000153,
+      "laterState": {
+        "scrollTop": 52139,
+        "scrollHeight": 53012,
+        "clientHeight": 164,
+        "composer": "open",
+        "sessionId": "9ecc4d44-3416-4d7c-88fa-ba85155186a4"
+      }
+    },
+    {
+      "sample": "baseline-1x-2",
+      "kind": "cold",
+      "action": null,
+      "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('threads-board')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('threads-board')\n",
+      "scheduledMs": null,
+      "startedMs": null,
+      "laterState": null
+    },
+    {
+      "sample": "candidate-1x-3",
+      "kind": "interaction",
+      "action": "scroll-up",
+      "error": "Error: Timeout 5000ms exceeded while waiting on the predicate",
+      "scheduledMs": 12000,
+      "startedMs": 11999.192875999957,
+      "laterState": {
+        "scrollTop": 52583,
+        "scrollHeight": 54618,
+        "clientHeight": 164,
+        "composer": "open",
+        "sessionId": "9ecc4d44-3416-4d7c-88fa-ba85155186a4"
+      }
+    },
+    {
+      "sample": "candidate-1x-4",
+      "kind": "interaction",
+      "action": "return-bottom",
+      "error": "Error: expect(received).toBeLessThanOrEqual(expected)\n\nExpected: <= 3\nReceived:    21\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate",
+      "scheduledMs": 24000,
+      "startedMs": 30427.363862000406,
+      "laterState": {
+        "scrollTop": 54602,
+        "scrollHeight": 54766,
+        "clientHeight": 164,
+        "composer": "open",
+        "sessionId": "9ecc4d44-3416-4d7c-88fa-ba85155186a4"
+      }
+    },
+    {
+      "sample": "candidate-1x-5",
+      "kind": "interaction",
+      "action": "return-bottom",
+      "error": "Error: expect(received).toBeLessThanOrEqual(expected)\n\nExpected: <= 3\nReceived:    464\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate",
+      "scheduledMs": 24000,
+      "startedMs": 30373.33111600019,
+      "laterState": {
+        "scrollTop": 54095,
+        "scrollHeight": 54935,
+        "clientHeight": 164,
+        "composer": "open",
+        "sessionId": "9ecc4d44-3416-4d7c-88fa-ba85155186a4"
+      }
+    },
+    {
+      "sample": "baseline-1x-5",
+      "kind": "interaction",
+      "action": "leave-tile",
+      "error": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: \"closed\"\nReceived: \"open\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate",
+      "scheduledMs": 36000,
+      "startedMs": 35999.341827000026,
+      "laterState": {
+        "scrollTop": 54897,
+        "scrollHeight": 55061,
+        "clientHeight": 164,
+        "composer": "open",
+        "sessionId": "9ecc4d44-3416-4d7c-88fa-ba85155186a4"
+      }
+    }
+  ],
+  "limits": [
+    "No successful six-pair speed summary or resolved-sluggishness claim. The current native-wheel repair remains insufficient at full load.",
+    "Only complete samples contribute to the verified ordered-update count. Partial streams are not added.",
+    "Failure snapshots occur after failed predicate samples. They are not simultaneous observations; a later zero-pixel snapshot does not invalidate a failed 21-pixel predicate sample.",
+    "Old cold diagnostics lack document/error/image evidence and step timing. Cause remains unconfirmed. Preserve all timeouts, wheel inputs, and failure results.",
+    "No direct M2 Air, field INP, battery, or memory-leak claim from this Linux run."
+  ]
+}

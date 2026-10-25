@@ -89,6 +89,13 @@ A suppressed reset can conceal lost data. Preserve coverage validation, bounded 
 
 ## Results
 
+A fresh focused race run passes the four PostgreSQL receipt leaves for new
+turns, existing turns, rollback, and thinking. The same command also passes its
+SQLite cases. It uses a new private cluster and a unique schema per test; no
+PostgreSQL leaf is skipped. This provides direct parity evidence separate from
+the earlier aggregate's skipped PostgreSQL cases. The owned server stops
+cleanly. See [the fresh leaf-level evidence](evidence/final-receipt-postgres-leaves.json).
+
 2026-10-23: The JSON event transport loses nested mutation receipts in
 `conversationReceiptFromData`: the recursive map branch expects another
 envelope instead of decoding the receipt map. A writer-shaped event serialized

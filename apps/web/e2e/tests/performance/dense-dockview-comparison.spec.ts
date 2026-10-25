@@ -1,3 +1,4 @@
+import { copyDenseBackendLog } from "../../helpers/dense-evidence";
 import { DENSE_VISIBILITY_PROBE } from "../../helpers/dense-visible";
 import {
   DENSE_ATTEMPT_PROTOCOL,
@@ -180,6 +181,12 @@ test("compares frozen builds on identical dense Dockview snapshots", async ({
       },
       (outcome) => {
         recordDenseAttempt(report, outcome);
+        save();
+        const backendLog = copyDenseBackendLog(
+          path.join(backend.tmpDir, "backend-process.log"),
+          `${output}.${outcome.sample}.backend.log`,
+        );
+        report.checkpoints[outcome.sample] = { ...report.checkpoints[outcome.sample], backendLog };
         save();
       },
     );

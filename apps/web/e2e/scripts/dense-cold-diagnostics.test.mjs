@@ -21,7 +21,13 @@ test("captures unloaded and failed conversations without copying message bodies"
     };
     const page = {
       evaluate: (fn, args) =>
-        vm.runInNewContext(`(${fn.toString()})(args)`, { window, document: window.document, args }),
+        vm.runInNewContext(`(${fn.toString()})(args)`, {
+          window,
+          document: window.document,
+          location: window.location,
+          performance: window.performance,
+          args,
+        }),
     };
     const result = await inspectDenseColdFailure(page, [
       { taskId: "one", sessionId: "s1" },

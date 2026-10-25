@@ -9,7 +9,27 @@ The branch is `feature/evaluate-live-thread-bc0`; the frozen baseline is
 
 ## Threads reference file-state correction
 
-The latest grid attempt completes one pair and 3,600 ordered updates before a
+The corrected full-reference grid run executes all 12 attempts. Five pass and
+seven fail; only pair zero completes both arms. Its five complete samples verify
+9,000 ordered updates. Both builds have native input failures, and each has a
+cold board-readiness failure. Candidate return-bottom failures remain at 21 px
+and 464 px in the failed predicate samples. Later diagnostic snapshots have
+different positions and must not be treated as simultaneous observations.
+The current wheel fix is insufficient at full load. The summary rejects this
+failed series; no final six-pair speed claim follows. See
+[the complete failure evidence](evidence/reference-files-grid-failed.json).
+
+The diagnostic update retains a separate backend log per attempt, cold browser
+state and errors, failure images, and input-step timings. Its 57 Node checks,
+four browser regressions, fault continuation check, and healthy callers pass.
+The first combined navigation check fails before comparison while preparing
+task B's file marker; that failure remains retained. The documented isolated
+small navigation caller passes. Its isolation and history count differ, so the
+rerun does not establish the earlier setup failure's cause. These checks validate
+evidence collection, with no application change or performance claim. See
+[the diagnostic evidence](evidence/failure-diagnostics.json).
+
+The prior grid attempt completes one pair and 3,600 ordered updates before a
 read-only audit confirms that each prepared repository has only its default
 tracked file. The run is deliberately interrupted to repair that missing
 reference dimension. All data and pending attempts remain retained, and the

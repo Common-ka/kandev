@@ -1,0 +1,31 @@
+{
+  "status": "All final compressed asset siblings decode and regenerate exactly",
+  "checkedAt": "2026-10-25T12:31:53.044Z",
+  "sourceRevision": "0c65b5b5b8aa793ed9c7d8cda836c698a67c3178",
+  "productionRevision": "7a9840211131f7471657105c0b75d08c4953bf65",
+  "assetsSha256": "820fcd57e5ecaf8d39c610f13cfbfabf4cd8dea4e64e555a57522fd3823c9a5d",
+  "scope": "Artifact check during fixture seeding, before measured windows. Whole-tree bytes are not page-transfer or CPU gains.",
+  "nodeVersion": "v24.19.0",
+  "sidecars": 552,
+  "identityBytes": 62083082,
+  "gzipBytes": 15811880,
+  "fullAudit": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/final820f-compression-byte-audit.json",
+    "sha256": "2b1c94294e877a41475ae22298a73e914fb946b495f2adc0ae045dc4c20fdf05"
+  },
+  "verification": "Every gzip sibling decodes exactly, regenerates byte-for-byte with Node 24 level 9, and obeys the smaller-only policy for the full eligible JS/CSS tree.",
+  "limit": "Whole-artifact byte counts do not establish actual page-transfer savings, renderer CPU improvement, or hardware benefit.",
+  "retainedHandlerTests": {
+    "sourceScope": "Handler and precompression sources unchanged since 4fbc42edcfadd93cff35181067e98b0765f728cc. Final artifact audit is separate.",
+    "log": {
+      "path": "/tmp/kandev-dense-assets-handler.log",
+      "sha256": "63750b8f0b981d4f4ff19e41057c9bae4093624ffd97c132a03d7b5c54084a49"
+    },
+    "cases": [
+      "TestAssetCompressionNegotiation",
+      "TestCompressedAssetHTTPBehavior",
+      "TestEmbeddedCompressedAsset"
+    ],
+    "limit": "Retained embedded-tree handler proof is source-scoped; the fresh final820f audit verifies all actual final sidecar bytes."
+  }
+}

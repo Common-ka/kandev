@@ -28,13 +28,29 @@ legacy_specs: []
 
 ## Latest measured checkpoint
 
+The corrected full-reference grid run finishes all 12 planned attempts: five
+pass and seven fail. Only pair zero completes both arms. The five complete
+samples verify 9,000 ordered updates, but the failed series cannot support a
+six-pair speed summary. Cold readiness, scroll-up, return-bottom, and composer
+closure failures remain on the original inputs and deadlines. The current wheel
+repair is insufficient at full load. See
+[the complete failure evidence](evidence/reference-files-grid-failed.json).
+
+The test harness now retains backend logs per attempt, cold-start state and
+errors, failure images, and timings for each existing native input step. The
+57 Node checks, four browser regressions, controlled fault caller, and healthy
+Threads, full-plugin Dockview, and isolated navigation callers pass within
+their scope. The first combined navigation setup failure remains retained.
+The application, input sequence, and deadlines stay unchanged. See
+[the diagnostic evidence](evidence/failure-diagnostics.json).
+
 Production `7a984021113` adds the native wheel follow repair and passes 228
 related unit checks plus 33 desktop and 17 phone browser checks. The original
 scripted candidate rehearsal returns to the bottom after streamed height growth;
 its frozen baseline fails at 21 pixels. See
 [the repair evidence](evidence/native-wheel-bottom-follow.json).
 
-The next six-pair grid attempt stopped after one complete pair because a
+The prior six-pair grid attempt stopped after one complete pair because a
 read-only audit found only the default file in its six prepared repositories.
 Its data and pending attempts remain preserved, and the summary rejects the
 incomplete plan ([gap evidence](evidence/threads-reference-file-gap.json)).

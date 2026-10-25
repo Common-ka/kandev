@@ -1,0 +1,72 @@
+{
+  "startedAt": "2026-10-25T13:54:39.751505+00:00",
+  "root": "/tmp/kandev-final-receipt-pg-5936a872-rmaxbtwj",
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "-p",
+    "1",
+    "-json",
+    "-count=1",
+    "-timeout=5m",
+    "./internal/task/repository/sqlite",
+    "-run",
+    "^TestCanonicalConversationReceipt"
+  ],
+  "sourceRevision": "0c65b5b5b8aa793ed9c7d8cda836c698a67c3178",
+  "isolation": "New owned cluster; Unix socket inside a private temporary directory; TCP disabled; each test owns a unique schema.",
+  "exitCode": 0,
+  "postgresOutcomes": [
+    {
+      "Test": "TestCanonicalConversationReceipt/postgres/new-turn",
+      "Action": "pass",
+      "Elapsed": 0.55
+    },
+    {
+      "Test": "TestCanonicalConversationReceipt/postgres/existing-turn",
+      "Action": "pass",
+      "Elapsed": 0.55
+    },
+    {
+      "Test": "TestCanonicalConversationReceipt/postgres",
+      "Action": "pass",
+      "Elapsed": 1.1
+    },
+    {
+      "Test": "TestCanonicalConversationReceiptRollback/postgres",
+      "Action": "pass",
+      "Elapsed": 0.73
+    },
+    {
+      "Test": "TestCanonicalConversationReceiptThinking/postgres",
+      "Action": "pass",
+      "Elapsed": 0.77
+    }
+  ],
+  "requiredLeavesPassed": true,
+  "anyPostgresLeafSkippedOrFailed": false,
+  "log": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/final-canonical-receipt-postgres.jsonl",
+    "sha256": "36384349020aa628c2d00eeffa47e65c4b1813684d4004938aa71a10a021fb3f"
+  },
+  "stopExitCode": 0,
+  "finishedAt": "2026-10-25T13:56:51.494019+00:00",
+  "sourcePathsUnchangedSince": {
+    "revision": "7196cdf7d952426865108f5686ae87101293a33b",
+    "paths": [
+      "apps/backend/internal/task/repository/sqlite",
+      "apps/backend/internal/agent/runtime/lifecycle",
+      "apps/backend/internal/orchestrator",
+      "apps/backend/internal/gateway/websocket"
+    ],
+    "diffPaths": []
+  },
+  "retainedMetadata": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/final-canonical-receipt-postgres.json",
+    "sha256": "63c5865bddb07126a6a441c4c3b679be2081d63084a6a940d9a87e30ffb66713"
+  },
+  "packageElapsedSeconds": 23.013,
+  "scope": "Focused receipt parity race check. This is not a new full-repository audit or a performance benchmark.",
+  "historicalLimit": "The earlier aggregate contains skipped PostgreSQL leaves. Its passing parents did not prove parity; those skips remain retained. This fresh run supplies direct leaf-level evidence."
+}

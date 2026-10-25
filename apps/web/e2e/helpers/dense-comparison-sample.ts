@@ -85,6 +85,7 @@ export async function runDenseSample(options: {
   cpuRate: number;
   profilePath?: string;
   checkpoint?: (evidence: Record<string, unknown>) => void;
+  failureArtifactPrefix?: string;
 }) {
   const { browser, backend, api, seed, threads, sample, cpuRate } = options;
   const stream = await prepareDenseStream(api, seed, backend, threads, sample);
@@ -117,6 +118,7 @@ export async function runDenseSample(options: {
       warmup: stream.warmup,
       traffic,
       checkpoint: options.checkpoint,
+      failureArtifactPrefix: options.failureArtifactPrefix,
     });
     options.checkpoint?.({ cold });
     const historyMode = process.env.KANDEV_DENSE_HISTORY === "all" ? "all" : "newest-window";
@@ -174,6 +176,7 @@ export async function runDenseSample(options: {
         started: before.started,
         taskId: cold.visibleTaskIds[0],
         checkpoint: options.checkpoint,
+        failureArtifactPrefix: options.failureArtifactPrefix,
       });
       const deadline = {
         elapsedMs: performance.now() - before.started,
@@ -281,6 +284,7 @@ async function observeDenseWindow(options: {
   started: number;
   taskId: string;
   checkpoint?: (evidence: Record<string, unknown>) => void;
+  failureArtifactPrefix?: string;
 }) {
   const durationMs = DENSE_WORKLOAD.durationMs;
   const results = await Promise.allSettled([

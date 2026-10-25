@@ -1,3 +1,4 @@
+import { copyDenseBackendLog } from "../../helpers/dense-evidence";
 import { DENSE_THREADS_FILE_PROTOCOL } from "../../scripts/dense-file-summary.mjs";
 import { DENSE_INTERACTION_MODE } from "../../helpers/dense-interactions";
 import {
@@ -154,6 +155,7 @@ test("compares frozen builds on identical dense conversation snapshots", async (
           allThreads: fixture.threads,
           sample,
           cpuRate,
+          failureArtifactPrefix: `${output}.${sample}`,
           profilePath:
             process.env.KANDEV_DENSE_PROFILE === "1" ? `${output}.${sample}.cpuprofile` : undefined,
           checkpoint: (evidence) => {
@@ -166,6 +168,12 @@ test("compares frozen builds on identical dense conversation snapshots", async (
       },
       (outcome) => {
         recordDenseAttempt(report, outcome);
+        save();
+        const backendLog = copyDenseBackendLog(
+          path.join(backend.tmpDir, "backend-process.log"),
+          `${output}.${outcome.sample}.backend.log`,
+        );
+        report.checkpoints[outcome.sample] = { ...report.checkpoints[outcome.sample], backendLog };
         save();
       },
     );
