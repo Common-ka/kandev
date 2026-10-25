@@ -97,6 +97,13 @@ counts. Do not sum nested trace event durations as independent CPU cost.
 Use separate attribution runs for CPU profiles, React mounts, and stack capture;
 do not include profiler startup or its overhead in timed results.
 
+Temporary request-cause diagnostics use `measurementKind: "read-attribution"`.
+The speed summary rejects these reports. Match each actual HTTP request or
+WebSocket read to its tagged allocation by transport and request ID. Keep
+allocations without a physical request outside read counts. Keep missing and
+unclassified causes explicit; do not infer a cause from timing. Observation
+builds do not establish latency, CPU, or memory savings.
+
 Set the CDP performance time domain explicitly to `timeTicks`. `TaskDuration`,
 `ScriptDuration`, `RecalcStyleDuration`, and `LayoutDuration` then measure elapsed
 time, not CPU time. Report `TaskDuration` as main-thread task time. Report

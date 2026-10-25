@@ -684,3 +684,15 @@ and full-plugin Dockview callers pass
 Production assets, original wheel actions, history density, update schedule,
 and correctness bounds remain unchanged. These checks verify the harness. The
 full final reference, stress, all-history, and ownership matrix remains open.
+
+## Corrected reference columns remain incomplete
+
+All twelve attempts execute on the final `820fcd57` assets with the corrected
+reference file state. Ten pass, verifying 18,000 ordered updates; the final
+control fails native return-bottom and the final candidate fails column
+traversal after its three windows. Five complete pairs do not pass summary
+validation. The two failures and the earlier premeasurement gate timeout are
+retained separately. Runtime identities still match their frozen manifests.
+See [column evidence](evidence/reference-files-columns-failed.json) and
+[gate evidence](evidence/columns-start-gate-timeout.json). Attribution, the full
+remaining matrix, and completion gates stay open.

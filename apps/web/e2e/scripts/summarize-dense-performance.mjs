@@ -298,7 +298,9 @@ function measurementNotes(report) {
 
 export function summarizeReport(report) {
   if (
-    ["cpu-attribution", "animation-attribution", "owner-retention"].includes(report.measurementKind)
+    ["cpu-attribution", "animation-attribution", "read-attribution", "owner-retention"].includes(
+      report.measurementKind,
+    )
   )
     throw new Error("Diagnostic attribution runs are excluded from timing comparisons");
   if (report.error) throw new Error(`input report contains an error: ${report.error}`);

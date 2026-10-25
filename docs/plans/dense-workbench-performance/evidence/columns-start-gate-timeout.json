@@ -1,0 +1,62 @@
+{
+  "status": "failed before measurement",
+  "measurementKind": "orchestration-failure",
+  "sourceRevision": "1cd11a93b92e3e78555e51d18646a734f38f4548",
+  "layout": "columns",
+  "comparisonPlan": {
+    "pairs": 6,
+    "rates": [1],
+    "candidateFirst": false
+  },
+  "fixtureProtocol": "threads-files-v1",
+  "workload": {
+    "layout": "columns",
+    "extraBusyHeaders": 0,
+    "tasks": 1000,
+    "columns": 30,
+    "messages": 1000,
+    "durationMs": 60000
+  },
+  "actualTaskCount": 1000,
+  "rawReport": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792938884992.json",
+  "rawReportSha256": "0e04eeaab6b343a63355f8adce28616aa770a79cd3e2f088ca6ca39a0961e17e",
+  "attemptStatuses": {
+    "pending": 12,
+    "passed": 0,
+    "failed": 0
+  },
+  "completeSamples": 0,
+  "runner": {
+    "handle": 87538,
+    "exitCode": 1,
+    "log": ".kandev/diagnostics/dense-workbench-performance/final-reference-files-columns-1x-logs/kandev-run.e2e.ccmRINMO.log",
+    "logSha256": "6dfd23643934f98f8ba7a7e71a797e43271f1a808097d945051dc7b1c2e929b2",
+    "lastLogWriteUtc": "2026-10-25T15:34:49.695091+00:00"
+  },
+  "sampler": {
+    "handle": 82307,
+    "exitCode": 0,
+    "note": "Sampler data is not a measured comparison."
+  },
+  "failure": {
+    "gate": "KANDEV_DENSE_READY_FILE",
+    "predicate": "ready file exists",
+    "timeoutMs": 3600000,
+    "cause": "Agent orchestration did not release the start gate within its existing one-hour bound. The fixture was ready, but no timed attempt started.",
+    "assetOrSourceChange": false
+  },
+  "summary": {
+    "exitCode": 1,
+    "rejectionLog": "/tmp/kandev-columns-gate-timeout-summary-rejection-5936a872.log",
+    "rejectionLogSha256": "647624c5903ef6b747aa6f9de67776698ad9cb74b63502b9541bb86c1c3b12a5",
+    "accepted": false,
+    "note": "All 12 pending attempts remain in the unmodified raw report. The validator rejects that report even without a top-level error."
+  },
+  "artifacts": ".kandev/diagnostics/dense-workbench-performance/final-reference-files-columns-ready-timeout-artifacts",
+  "limits": [
+    "No cold, idle, streaming, frame, CPU or gain result exists for this attempt.",
+    "The complete standalone backend log was removed by fixture teardown. Its retained warning tail is in the runner log.",
+    "The retry uses a fresh equivalent fixture and no ready gate. It has a separate report and must not be pooled with this attempt."
+  ],
+  "followUp": "Final reference columns and the complete remaining matrix remain open until their own terminal evidence is recorded."
+}

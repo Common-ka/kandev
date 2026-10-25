@@ -49,6 +49,13 @@ test("rejects animation attribution runs as timing comparisons", () => {
   );
 });
 
+test("rejects explicit read-cause diagnostics as timing comparisons", () => {
+  assert.throws(
+    () => summarizeReport({ measurementKind: "read-attribution", samples: [] }),
+    /attribution/,
+  );
+});
+
 test("matches pair identity before computing changes and retains regressions", () => {
   const rows = [
     { arm: "candidate", pair: 1, cpuRate: 1, value: 240 },

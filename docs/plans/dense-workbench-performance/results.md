@@ -83,6 +83,24 @@ See [complete diagnostic evidence](evidence/scroll-follow-attribution.json).
 A separate interaction version can test the existing explicit follow control;
 the original wheel failures remain unresolved and are not pooled with that series.
 
+## Corrected reference columns: five pairs, failed series
+
+The final `820fcd57` build and original frozen baseline execute all twelve
+planned attempts with 1,000 tasks, 30 eligible columns, 36,000 stored messages,
+and the corrected 630-file/73-change producer environments. Ten samples pass,
+with 18,000 ordered updates verified in complete samples. The final pair fails
+on both versions: the control misses the native return-bottom bound at 274
+pixels; the candidate finishes its three windows but cannot show the first
+producer's chat during column traversal. Its exact failed visit is not recorded.
+
+All native inputs and deadlines remain unchanged. The runner and sampler are
+terminal. All twelve backend logs have matching hashes; the control screenshot
+is inspected. Five passing pairs do not establish the required complete series,
+and summary validation rejects the report. No column gain or resolved-sluggishness
+claim follows. See [the failure evidence](evidence/reference-files-columns-failed.json).
+The earlier start-gate timeout has no measured samples and stays separate
+([evidence](evidence/columns-start-gate-timeout.json)).
+
 ## Final scripted columns attempt (incomplete)
 
 The full reference columns run stops after 21.7 minutes in its first control

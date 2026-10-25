@@ -1,0 +1,398 @@
+{
+  "status": "failed; no valid six-pair speed summary",
+  "sourceRevision": "1cd11a93b92e3e78555e51d18646a734f38f4548",
+  "sourcePatchBytes": 0,
+  "productionRevision": "7a9840211131f7471657105c0b75d08c4953bf65",
+  "raw": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792955749781.json",
+    "sha256": "6930a87552a7665ca35d187c9acb73216ae1f0340dc95fd9983c140b59958839"
+  },
+  "log": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/final-reference-files-columns-1x-retry-logs/kandev-run.e2e.sHyHX4jx.log",
+    "sha256": "a85fa8f9056246560d7a034d35ae78663c4096b639186962fd2cffb56df33b8e"
+  },
+  "artifacts": ".kandev/diagnostics/dense-workbench-performance/final-reference-files-columns-1x-retry-artifacts",
+  "hostLoad": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/final-reference-files-columns-1x-retry-host-load.jsonl",
+    "sha256": "f43e357c0c33e13e827d0270474bc7916b8b2bbaecea3c52a29ad7dbd73ab5d8",
+    "samples": 149
+  },
+  "runnerExitCode": 1,
+  "samplerExitCode": 0,
+  "summaryRejection": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/final-reference-files-columns-1x-summary-rejection.log",
+    "sha256": "647624c5903ef6b747aa6f9de67776698ad9cb74b63502b9541bb86c1c3b12a5",
+    "exitCode": 1
+  },
+  "machine": {
+    "revision": "1cd11a93b92e3e78555e51d18646a734f38f4548",
+    "cpu": "11th Gen Intel(R) Core(TM) i7-11700T @ 1.40GHz",
+    "cores": 16,
+    "load": [7.05, 8.09, 6.31],
+    "totalMemory": 33303871488,
+    "freeMemory": 25450545152,
+    "platform": "linux 6.18.49"
+  },
+  "builds": {
+    "baseline": {
+      "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+      "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+      "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+      "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+    },
+    "candidate": {
+      "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+      "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "820fcd57e5ecaf8d39c610f13cfbfabf4cd8dea4e64e555a57522fd3823c9a5d"
+    }
+  },
+  "fixtureProtocol": "threads-files-v1",
+  "workload": {
+    "layout": "columns",
+    "extraBusyHeaders": 0,
+    "tasks": 1000,
+    "columns": 30,
+    "messages": 1000,
+    "durationMs": 60000
+  },
+  "fixtureTaskCount": 1000,
+  "storedMessages": 36000,
+  "fileState": [
+    {
+      "taskId": "4896137a-0ef7-44a7-9562-6cfbca34a637",
+      "sessionId": "26e4055b-86e9-4d7a-82fe-0d64d70729e5",
+      "environmentId": "7bc9c50e-ba33-4b77-b614-57ef3595eebe",
+      "repoPath": "/tmp/kandev-e2e-0-kNX6kf/.kandev/tasks/dense-task-0000_3odhhsn9/E2E-Repo",
+      "profileFiles": 630,
+      "changedFiles": 73,
+      "stateSha256": "5ff4d53abea3ae02ad8612583653c713de322b2722e9383e0e4796703a7e5bd6"
+    },
+    {
+      "taskId": "2faa8392-30a4-4554-ae98-73b166e3c307",
+      "sessionId": "e3542294-bf23-4b3b-be5f-dc8f13d98061",
+      "environmentId": "9bb21152-00e8-4dda-b8f9-e56b27027f69",
+      "repoPath": "/tmp/kandev-e2e-0-kNX6kf/.kandev/tasks/dense-task-0001_psosqwph/E2E-Repo",
+      "profileFiles": 630,
+      "changedFiles": 73,
+      "stateSha256": "b65a1f677b5651b41a136719f9ed760849a25d129fa808e91a25564ea54af9ff"
+    },
+    {
+      "taskId": "c6fe359d-5ef4-44ee-8c47-7ce8729c445f",
+      "sessionId": "e7632e76-e780-43ae-836a-f9026ac1ea90",
+      "environmentId": "88365449-ee7b-479f-bccb-b2f3066ab9ec",
+      "repoPath": "/tmp/kandev-e2e-0-kNX6kf/.kandev/tasks/dense-task-0002_25s086a3/E2E-Repo",
+      "profileFiles": 630,
+      "changedFiles": 73,
+      "stateSha256": "b920ca84e5b816a4852a8738a14c5eb6c98d5a01b252ab295d5a21580875cd78"
+    },
+    {
+      "taskId": "59424603-b2f3-4c5e-807f-4fee83f1b830",
+      "sessionId": "35131db7-1ffb-4e16-88e8-72e75e36c52a",
+      "environmentId": "125d8bae-fc99-4d51-a023-0f23bdd5ea2c",
+      "repoPath": "/tmp/kandev-e2e-0-kNX6kf/.kandev/tasks/dense-task-0003_e0rpd5cn/E2E-Repo",
+      "profileFiles": 630,
+      "changedFiles": 73,
+      "stateSha256": "18f5b44265f9d8d906ad4f8f2013e83dba16592cb67828f9f57c8c63c637e2f1"
+    },
+    {
+      "taskId": "85cc033b-ff7d-4793-bdaf-c531223627d5",
+      "sessionId": "95ef4f6b-52f7-4303-84f8-f80926392934",
+      "environmentId": "8f007289-dd59-49d9-8f6d-371634516da1",
+      "repoPath": "/tmp/kandev-e2e-0-kNX6kf/.kandev/tasks/dense-task-0004_6g82rgm5/E2E-Repo",
+      "profileFiles": 630,
+      "changedFiles": 73,
+      "stateSha256": "2e9471d8c3c10ad771d81c540ca918c2ae0a383f789d7d50a45af7b1993d9091"
+    },
+    {
+      "taskId": "29345007-d70d-4c6f-9c7a-01a4dccb2117",
+      "sessionId": "40acf956-863b-42e3-aa55-f39f149ef1c9",
+      "environmentId": "1187de85-53a6-4ef2-b8c3-fac813ff7872",
+      "repoPath": "/tmp/kandev-e2e-0-kNX6kf/.kandev/tasks/dense-task-0005_v2kp66ok/E2E-Repo",
+      "profileFiles": 630,
+      "changedFiles": 73,
+      "stateSha256": "7a94157b68f3000169c1b21d5dc05341979a38f5a026036e38200ea6daa53585"
+    }
+  ],
+  "attempts": {
+    "passed": 10,
+    "failed": 2,
+    "pending": 0
+  },
+  "completePairs": 5,
+  "completedSamples": 10,
+  "verifiedOrderedUpdates": 18000,
+  "perAttemptBackendLogs": [
+    {
+      "sample": "baseline-1x-0",
+      "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-dense-1792955749781.json.baseline-1x-0.backend.log",
+      "sha256": "cef5c843e17842fe0e5793f731c8e5c2d1bad723c133962266008ea3ce67e7ff",
+      "capturedAt": 1792955996116
+    },
+    {
+      "sample": "candidate-1x-0",
+      "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-dense-1792955749781.json.candidate-1x-0.backend.log",
+      "sha256": "3392c61442b7410b0fefe203837b16d981feafa80ec1177e18b05f09e38f4d29",
+      "capturedAt": 1792956260395
+    },
+    {
+      "sample": "candidate-1x-1",
+      "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-dense-1792955749781.json.candidate-1x-1.backend.log",
+      "sha256": "0a1a89cf5312e07263fa45771bd42a87466ac9e21973ac772b1d9c8570bb3fe7",
+      "capturedAt": 1792956498200
+    },
+    {
+      "sample": "baseline-1x-1",
+      "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-dense-1792955749781.json.baseline-1x-1.backend.log",
+      "sha256": "1d82f489d18aca186735d1aeca5ac0c8558328b28a6ef1f973c6c856aa80b9b8",
+      "capturedAt": 1792956748620
+    },
+    {
+      "sample": "baseline-1x-2",
+      "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-dense-1792955749781.json.baseline-1x-2.backend.log",
+      "sha256": "c9624ba86ff968c3485ae20d85b6769d9d27e86d799c5cad25374916d5824a95",
+      "capturedAt": 1792957002853
+    },
+    {
+      "sample": "candidate-1x-2",
+      "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-dense-1792955749781.json.candidate-1x-2.backend.log",
+      "sha256": "0608460d260d997e9f21f74fcbafde47fa79c6d83290e6075f14b6a5e3024a7e",
+      "capturedAt": 1792957281130
+    },
+    {
+      "sample": "candidate-1x-3",
+      "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-dense-1792955749781.json.candidate-1x-3.backend.log",
+      "sha256": "317023f3a0a00f196725b319978c77b4bb9711123e3dbddbba77aada075d7c35",
+      "capturedAt": 1792957548306
+    },
+    {
+      "sample": "baseline-1x-3",
+      "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-dense-1792955749781.json.baseline-1x-3.backend.log",
+      "sha256": "a3a5973b25ebf2c9d82c4ffcfaf52e513634dd2fa306832b7819e084f701e703",
+      "capturedAt": 1792957815658
+    },
+    {
+      "sample": "baseline-1x-4",
+      "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-dense-1792955749781.json.baseline-1x-4.backend.log",
+      "sha256": "5230ce7ceb65d337a41fdbd48e4bbaca6d4b2207dd68d0e7d7f4252073f6a4de",
+      "capturedAt": 1792958067955
+    },
+    {
+      "sample": "candidate-1x-4",
+      "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-dense-1792955749781.json.candidate-1x-4.backend.log",
+      "sha256": "62e7cd764c22be8d8f6c15d62e4f3f9d14c8837becda1c981ce849820f5a2caf",
+      "capturedAt": 1792958313833
+    },
+    {
+      "sample": "candidate-1x-5",
+      "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-dense-1792955749781.json.candidate-1x-5.backend.log",
+      "sha256": "eae4e32c6e05604fc7a2c8faee80c13f4dbcbe5d0af4a9c5f9d324d6cefc3d99",
+      "capturedAt": 1792958559037
+    },
+    {
+      "sample": "baseline-1x-5",
+      "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-dense-1792955749781.json.baseline-1x-5.backend.log",
+      "sha256": "3d4a0cabbee27683f081db2df21f95aa757ee93d9b9011c5bc488c9d960f03ab",
+      "capturedAt": 1792958733244
+    }
+  ],
+  "failures": [
+    {
+      "sample": "candidate-1x-5",
+      "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveAttribute\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('thread-column-4896137a-0ef7-44a7-9562-6cfbca34a637').getByTestId('session-chat')\nExpected: \u001b[32m\"26e4055b-86e9-4d7a-82fe-0d64d70729e5\"\u001b[39m\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toHaveAttribute\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('thread-column-4896137a-0ef7-44a7-9562-6cfbca34a637').getByTestId('session-chat')\u001b[22m\n",
+      "completedWindows": ["idle", "streaming", "reduced-motion-idle"],
+      "verificationErrors": [],
+      "backendLog": {
+        "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-dense-1792955749781.json.candidate-1x-5.backend.log",
+        "sha256": "eae4e32c6e05604fc7a2c8faee80c13f4dbcbe5d0af4a9c5f9d324d6cefc3d99",
+        "capturedAt": 1792958559037
+      }
+    },
+    {
+      "sample": "baseline-1x-5",
+      "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: <= \u001b[32m3\u001b[39m\nReceived:    \u001b[31m274\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate",
+      "completedWindows": ["idle"],
+      "verificationErrors": null,
+      "backendLog": {
+        "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-dense-1792955749781.json.baseline-1x-5.backend.log",
+        "sha256": "3d4a0cabbee27683f081db2df21f95aa757ee93d9b9011c5bc488c9d960f03ab",
+        "capturedAt": 1792958733244
+      },
+      "interactionFailure": {
+        "action": "return-bottom",
+        "taskId": "4896137a-0ef7-44a7-9562-6cfbca34a637",
+        "scheduledMs": 24000,
+        "startedMs": 23999.479402000085,
+        "observations": [
+          {
+            "action": "scroll-up",
+            "taskId": "4896137a-0ef7-44a7-9562-6cfbca34a637",
+            "scheduledMs": 12000,
+            "startedMs": 11999.249541999772,
+            "finishedMs": 12681.454386000056,
+            "before": {
+              "observedAt": 1792958682818,
+              "scrollTop": 51110,
+              "scrollHeight": 51914,
+              "clientHeight": 804,
+              "composer": "closed",
+              "sessionId": "26e4055b-86e9-4d7a-82fe-0d64d70729e5"
+            },
+            "after": {
+              "observedAt": 1792958683529,
+              "scrollTop": 51138,
+              "scrollHeight": 51914,
+              "clientHeight": 616,
+              "composer": "open",
+              "sessionId": "26e4055b-86e9-4d7a-82fe-0d64d70729e5"
+            },
+            "steps": [
+              {
+                "name": "read-before",
+                "startedMs": 11999.42034099996,
+                "value": {
+                  "observedAt": 1792958682818,
+                  "scrollTop": 51110,
+                  "scrollHeight": 51914,
+                  "clientHeight": 804,
+                  "composer": "closed",
+                  "sessionId": "26e4055b-86e9-4d7a-82fe-0d64d70729e5"
+                },
+                "finishedMs": 12018.187473000027
+              },
+              {
+                "name": "hover-before-disclosure",
+                "startedMs": 12018.199045999907,
+                "finishedMs": 12098.803164000157
+              },
+              {
+                "name": "wait-composer-open",
+                "startedMs": 12098.806462999899,
+                "finishedMs": 12493.80078600021
+              },
+              {
+                "name": "hover-after-disclosure",
+                "startedMs": 12493.803222999908,
+                "finishedMs": 12567.60488800006
+              },
+              {
+                "name": "read-scroll-position",
+                "startedMs": 12567.608024999965,
+                "value": {
+                  "observedAt": 1792958683379,
+                  "scrollTop": 51298,
+                  "scrollHeight": 51914,
+                  "clientHeight": 616,
+                  "composer": "open",
+                  "sessionId": "26e4055b-86e9-4d7a-82fe-0d64d70729e5"
+                },
+                "finishedMs": 12580.068225000054
+              },
+              {
+                "name": "wheel-up",
+                "startedMs": 12580.06991800014,
+                "finishedMs": 12616.291435999796
+              },
+              {
+                "name": "wait-scroll-up",
+                "startedMs": 12616.295710999984,
+                "finishedMs": 12681.43572699977
+              },
+              {
+                "name": "read-after",
+                "startedMs": 12681.45563099999,
+                "value": {
+                  "observedAt": 1792958683529,
+                  "scrollTop": 51138,
+                  "scrollHeight": 51914,
+                  "clientHeight": 616,
+                  "composer": "open",
+                  "sessionId": "26e4055b-86e9-4d7a-82fe-0d64d70729e5"
+                },
+                "finishedMs": 12728.636547000147
+              }
+            ]
+          }
+        ],
+        "steps": [
+          {
+            "name": "read-before",
+            "startedMs": 23999.499104999937,
+            "value": {
+              "observedAt": 1792958695226,
+              "scrollTop": 51138,
+              "scrollHeight": 53245,
+              "clientHeight": 616,
+              "composer": "open",
+              "sessionId": "26e4055b-86e9-4d7a-82fe-0d64d70729e5"
+            },
+            "finishedMs": 24427.418389
+          },
+          {
+            "name": "hover-before-disclosure",
+            "startedMs": 24427.431284000166,
+            "finishedMs": 25147.570135999937
+          },
+          {
+            "name": "wait-composer-open",
+            "startedMs": 25147.57426699996,
+            "finishedMs": 25251.254155000206
+          },
+          {
+            "name": "hover-after-disclosure",
+            "startedMs": 25251.26855099993,
+            "finishedMs": 25986.32407000009
+          },
+          {
+            "name": "wheel-bottom",
+            "startedMs": 25986.329983999953,
+            "finishedMs": 26090.85054200003
+          },
+          {
+            "name": "wait-bottom",
+            "startedMs": 26090.858196000103,
+            "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: <= \u001b[32m3\u001b[39m\nReceived:    \u001b[31m274\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate",
+            "finishedMs": 31094.604044999927
+          }
+        ],
+        "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: <= \u001b[32m3\u001b[39m\nReceived:    \u001b[31m274\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate",
+        "state": {
+          "observedAt": 1792958702586,
+          "scrollTop": 52819,
+          "scrollHeight": 53984,
+          "clientHeight": 616,
+          "composer": "open",
+          "sessionId": "26e4055b-86e9-4d7a-82fe-0d64d70729e5"
+        },
+        "image": {
+          "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/matched-dense-1792955749781.json.baseline-1x-5.interaction.png",
+          "sha256": "324e16d29dd3ea846e8babd86255a6019c7ca185c4c6448fe7036a0517e607dd",
+          "capturedAt": 1792958703881
+        },
+        "capturedAt": 1792958703881
+      }
+    }
+  ],
+  "firstProducer": {
+    "taskId": "4896137a-0ef7-44a7-9562-6cfbca34a637",
+    "sessionId": "26e4055b-86e9-4d7a-82fe-0d64d70729e5"
+  },
+  "limits": [
+    "No passing six-pair gain summary or resolved-sluggishness claim. All 12 planned attempts executed.",
+    "Only complete samples contribute to 18,000 verified ordered updates; partial sample data remains in checkpoints.",
+    "Candidate final-pair failure occurs after all three windows and stored-update verification, during first/middle/last/first traversal. The first producer chat was absent for the 5-second attribute check. The exact visit and activation cause are not recorded. No candidate failure screenshot exists for this post-window check.",
+    "Baseline final-pair failure is the unchanged return-bottom bound: 274 pixels at a predicate sample. Its later snapshot shows 549 pixels; the observations occur at different times. Node step timings and the bounded screenshot are retained.",
+    "Reference files are checked before each sample and after complete samples; do not claim an after-check for either failed sample.",
+    "No explanation is established for the late failure pattern, and no metric is pooled with the start-gate timeout or older fixtures.",
+    "Linux Chromium does not establish M2 Air latency, field INP, battery savings or a memory leak."
+  ],
+  "runtimeAfter": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/final820f-columns-post-runtime.json",
+    "sha256": "4ac73294d22c20aa099090b1546099bc1ff6fdf7c2f52a29aada2a3d9314aa61"
+  },
+  "cleanup": {
+    "fixtureRootRemoved": true,
+    "matchingOwnedProcesses": 0,
+    "record": ".kandev/diagnostics/dense-workbench-performance/final-reference-files-columns-1x-terminal-record.json"
+  }
+}
