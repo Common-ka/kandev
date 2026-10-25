@@ -2,9 +2,10 @@
 
 ## Status and reproducibility
 
-This protocol is being executed. The six-pair unthrottled grid and navigation
-series are complete. Results, exclusions, and remaining scenarios are recorded
-in [results.md](results.md). The 4x stress series remains pending.
+This protocol is being executed. Recorded series retain their exact candidate
+builds. Current verification and remaining scenarios are listed in the
+[completion audit](completion-audit.md); results and exclusions remain in
+[results.md](results.md). The final 4x stress series remains pending.
 Owner: [work order 01](task-01-dense-baseline.md) builds the harness and captures
 the baseline; [work order 06](task-06-performance-comparison.md) runs the final
 comparison. Do not use the changing live deployment as the control.
@@ -286,6 +287,29 @@ report each run's p50/p95 and their paired differences, not only a pooled p95.
 Use `(baseline - candidate) / baseline * 100` for lower-is-better metrics;
 report absolute differences when baseline is zero. Retain raw JSON and a
 machine-readable comparison, then show a Kandev Table with units.
+
+## Sample failures and continued attempts
+
+New reports use `attemptProtocol: continue-and-fail-v1`. Their `comparisonPlan`
+records pair count, CPU rates, and order. The initial `attempts` array contains
+every planned sample with pending status. Each completed sample becomes passed
+or failed before the next independent snapshot starts.
+
+A failed sample sets the report error immediately. The runner continues the
+remaining planned samples and fails at the end if any sample failed. A failure
+to save evidence stops the runner immediately. Existing sample cleanup, fresh
+database copies, workload, input actions, and correctness deadlines remain in
+force. Do not interpret an error field as process completion while later
+attempts are pending; inspect the actual guarded runner handle.
+
+The summary accepts a new-format report only when every planned attempt passed
+in the declared order and every sample identity matches. Failed or unfinished
+attempts remain invalid even if the top-level error field is missing. Legacy
+reports keep their original validation. A controlled missing-assets rehearsal
+verifies that two failed control samples retain their errors while both
+candidate samples complete; the final run still fails. This is a harness fault,
+not a result for the original baseline. See
+[validation evidence](evidence/dense-attempt-continuation.json).
 
 ## Acceptance and honest conclusions
 

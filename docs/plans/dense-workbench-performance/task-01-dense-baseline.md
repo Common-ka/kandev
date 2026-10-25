@@ -161,3 +161,13 @@ visible when another tab is selected or the window is minimized. The bounded
 hidden wait times out and no visibility event fires. This is a local environment
 limitation, not a passing hide/restore test. Synthetic visibility tests remain
 separate. See [the harness evidence](evidence/scripted-threads-harness.json).
+
+## Complete attempt recording
+
+The shared comparison runner now saves every planned sample and continues after
+an isolated sample failure. Failed outcomes remain recorded immediately and the
+final test remains failed. Failed evidence writes abort. The summary validates
+the full plan independently of the top-level error. Meaningful RED/GREEN checks,
+47 Node tests, strict lint, controlled failure behavior, and the three caller
+rehearsals are preserved in [evidence](evidence/dense-attempt-continuation.json).
+No input, timeout, workload, or speed claim changes.

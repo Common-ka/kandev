@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { validateDenseAttempts } from "./dense-attempt-summary.mjs";
 import { interactionPrefix } from "./dense-interaction-summary.mjs";
 import { pathToFileURL } from "node:url";
 import { dockviewMetadata, dockviewRecords } from "./dense-dockview-summary.mjs";
@@ -300,6 +301,7 @@ export function summarizeReport(report) {
   )
     throw new Error("Diagnostic attribution runs are excluded from timing comparisons");
   if (report.error) throw new Error(`input report contains an error: ${report.error}`);
+  validateDenseAttempts(report);
   const records = [];
   for (const sample of report.samples) {
     checkVisibilityProbe(report, sample);
@@ -341,6 +343,9 @@ export function summarizeReport(report) {
       comparisons.push({ group, metric, ...summarizePairs(rows, (row) => row.values[metric]) });
   return {
     measurementKind: report.measurementKind,
+    ...(report.attemptProtocol
+      ? { attemptProtocol: report.attemptProtocol, comparisonPlan: report.comparisonPlan }
+      : {}),
     ...measurementMetadata(report),
     machine: report.machine,
     builds: report.builds,

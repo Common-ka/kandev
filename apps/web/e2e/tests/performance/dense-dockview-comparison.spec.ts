@@ -1,4 +1,10 @@
 import { DENSE_VISIBILITY_PROBE } from "../../helpers/dense-visible";
+import {
+  DENSE_ATTEMPT_PROTOCOL,
+  createDenseAttempts,
+  recordDenseAttempt,
+  runDenseAttempts,
+} from "../../helpers/dense-attempts";
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
@@ -52,6 +58,12 @@ test("compares frozen builds on identical dense Dockview snapshots", async ({
   test.setTimeout(14_400_000);
   const baselineRoot = process.env.KANDEV_DENSE_BASELINE_ROOT;
   if (!baselineRoot) throw new Error("KANDEV_DENSE_BASELINE_ROOT must name the frozen checkout");
+  const comparisonPlan = {
+    pairs: Number(process.env.KANDEV_DENSE_PAIRS ?? 6),
+    rates: (process.env.KANDEV_DENSE_CPU_RATES ?? "1,4").split(",").map(Number),
+    candidateFirst: process.env.KANDEV_DENSE_CANDIDATE_FIRST === "1",
+  };
+  const attempts = createDenseAttempts(comparisonPlan);
   const candidateRoot = path.resolve(process.cwd(), "../..");
   const arms = {
     baseline: {
@@ -105,6 +117,9 @@ test("compares frozen builds on identical dense Dockview snapshots", async ({
     sourceFiles,
     lockfileSha256,
     measurementKind,
+    attemptProtocol: DENSE_ATTEMPT_PROTOCOL,
+    comparisonPlan,
+    attempts,
     finalVisibilityProbe: DENSE_VISIBILITY_PROBE,
     workbenchSurface: "dockview",
     plugin: process.env.KANDEV_DENSE_DOCKVIEW_PLUGIN === "1" ? denseDockviewPluginIdentity() : null,
@@ -129,49 +144,45 @@ test("compares frozen builds on identical dense Dockview snapshots", async ({
         message: "await completion of owned build and verification jobs before timing",
       })
       .toBe(true);
-  const pairs = Number(process.env.KANDEV_DENSE_PAIRS ?? 6);
-  const rates = (process.env.KANDEV_DENSE_CPU_RATES ?? "1,4").split(",").map(Number);
   try {
-    for (const cpuRate of rates)
-      for (let pair = 0; pair < pairs; pair++) {
-        const baselineFirst = (pair % 2 === 0) !== report.candidateFirst;
-        const order = baselineFirst
-          ? (["baseline", "candidate"] as const)
-          : (["candidate", "baseline"] as const);
-        for (const arm of order) {
-          const sample = `${arm}-${cpuRate}x-${pair}`;
-          const database = path.join(backend.tmpDir, `${sample}.db`);
-          fs.copyFileSync(snapshot, database);
-          expect(sha256File(database)).toBe(report.databaseSha256);
-          await backend.restart(
-            {
-              KANDEV_DATABASE_PATH: database,
-              KANDEV_HOME_DIR: path.join(backend.tmpDir, `${sample}-home`),
-              KANDEV_WEB_DIST_DIR: arms[arm].assets,
-              KANDEV_LOG_LEVEL: "warn",
-            },
-            arms[arm].binary,
-          );
-          const result = await runDenseDockviewSample({
-            browser,
-            backend,
-            api,
-            seed,
-            fixture,
-            sample,
-            cpuRate,
-            profilePrefix:
-              process.env.KANDEV_DENSE_DOCKVIEW_PROFILE === "1" ? `${output}.${sample}` : undefined,
-            checkpoint: (evidence) => {
-              report.checkpoints[sample] = { ...report.checkpoints[sample], ...evidence };
-              save();
-            },
-          });
-          verifyDockviewProfile(output, sample, measurementKind, result);
-          report.samples.push({ arm, pair, ...result });
-          save();
-        }
-      }
+    await runDenseAttempts(
+      report.attempts,
+      async ({ arm, pair, cpuRate, sample }) => {
+        const database = path.join(backend.tmpDir, `${sample}.db`);
+        fs.copyFileSync(snapshot, database);
+        expect(sha256File(database)).toBe(report.databaseSha256);
+        await backend.restart(
+          {
+            KANDEV_DATABASE_PATH: database,
+            KANDEV_HOME_DIR: path.join(backend.tmpDir, `${sample}-home`),
+            KANDEV_WEB_DIST_DIR: arms[arm].assets,
+            KANDEV_LOG_LEVEL: "warn",
+          },
+          arms[arm].binary,
+        );
+        const result = await runDenseDockviewSample({
+          browser,
+          backend,
+          api,
+          seed,
+          fixture,
+          sample,
+          cpuRate,
+          profilePrefix:
+            process.env.KANDEV_DENSE_DOCKVIEW_PROFILE === "1" ? `${output}.${sample}` : undefined,
+          checkpoint: (evidence) => {
+            report.checkpoints[sample] = { ...report.checkpoints[sample], ...evidence };
+            save();
+          },
+        });
+        verifyDockviewProfile(output, sample, measurementKind, result);
+        return { arm, pair, ...result };
+      },
+      (outcome) => {
+        recordDenseAttempt(report, outcome);
+        save();
+      },
+    );
   } catch (error) {
     report.error = String(error);
     save();

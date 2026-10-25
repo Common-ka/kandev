@@ -1,4 +1,10 @@
 import fs from "node:fs";
+import {
+  DENSE_ATTEMPT_PROTOCOL,
+  createDenseAttempts,
+  recordDenseAttempt,
+  runDenseAttempts,
+} from "../../helpers/dense-attempts";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { test, expect } from "../../fixtures/test-base";
@@ -57,6 +63,12 @@ test("compares dense task switches and retained Dockview owners", async ({
   const ownerRetention = readOwnerRetention();
   const baseline = process.env.KANDEV_DENSE_BASELINE_ROOT;
   if (!baseline) throw new Error("KANDEV_DENSE_BASELINE_ROOT must name the frozen checkout");
+  const comparisonPlan = {
+    pairs: Number(process.env.KANDEV_DENSE_PAIRS ?? 6),
+    rates: (process.env.KANDEV_DENSE_CPU_RATES ?? "1,4").split(",").map(Number),
+    candidateFirst: false,
+  };
+  const attempts = createDenseAttempts(comparisonPlan);
   const candidate = path.resolve(process.cwd(), "../..");
   const builds = Object.fromEntries(
     Object.entries({ baseline, candidate }).map(([arm, root]) => {
@@ -88,6 +100,9 @@ test("compares dense task switches and retained Dockview owners", async ({
   const profileWindow = profileTimedSwitches ? "timed-switches" : "post-timing-selection";
   const report = {
     measurementKind: navigationMeasurementKind(profileTimedSwitches),
+    attemptProtocol: DENSE_ATTEMPT_PROTOCOL,
+    comparisonPlan,
+    attempts,
     navigationScenario,
     navigationReadiness,
     profileWindow: ownerRetention ? "none" : profileWindow,
@@ -109,56 +124,50 @@ test("compares dense task switches and retained Dockview owners", async ({
   const save = () => fs.writeFileSync(output, JSON.stringify(report, null, 2));
   save();
   try {
-    const pairs = Number(process.env.KANDEV_DENSE_PAIRS ?? 6);
-    const rates = (process.env.KANDEV_DENSE_CPU_RATES ?? "1,4").split(",").map(Number);
-    for (const cpuRate of rates)
-      for (let pair = 0; pair < pairs; pair++) {
-        const order = pair % 2 === 0 ? ["baseline", "candidate"] : ["candidate", "baseline"];
-        for (const arm of order) {
-          const sample = `${arm}-${cpuRate}x-${pair}`;
-          const database = path.join(backend.tmpDir, `${sample}.db`);
-          fs.copyFileSync(snapshot, database);
-          expect(sha256File(database)).toBe(report.databaseSha256);
-          await backend.restart(
-            {
-              KANDEV_DATABASE_PATH: database,
-              KANDEV_HOME_DIR: path.join(backend.tmpDir, `${sample}-home`),
-              KANDEV_WEB_DIST_DIR: builds[arm].assets,
-              KANDEV_LOG_LEVEL: "warn",
-            },
-            builds[arm].binary,
-          );
-          const result = await runDenseNavigationSample({
-            browser,
-            backend,
-            api,
-            seed,
-            items,
-            storageState,
-            sessionStorageState,
-            cpuRate,
-            pair,
-            sample,
-            profileTimedSwitches,
-            ownerRetention,
-            ownerApiReleaseRequired: arm === "candidate",
-            ownerCheckpoint: createOwnerCheckpoint(
-              ownerRetention,
-              report.checkpoints,
-              sample,
-              save,
-            ),
-            navigationReadiness,
-            navigationScenario,
-            profileFile: path.join(
-              directory,
-              `${path.basename(output, ".json")}-${sample}.cpuprofile`,
-            ),
-          });
-          report.samples.push({ arm, pair, ...result });
-          save();
-        }
-      }
+    await runDenseAttempts(
+      report.attempts,
+      async ({ arm, pair, cpuRate, sample }) => {
+        const database = path.join(backend.tmpDir, `${sample}.db`);
+        fs.copyFileSync(snapshot, database);
+        expect(sha256File(database)).toBe(report.databaseSha256);
+        await backend.restart(
+          {
+            KANDEV_DATABASE_PATH: database,
+            KANDEV_HOME_DIR: path.join(backend.tmpDir, `${sample}-home`),
+            KANDEV_WEB_DIST_DIR: builds[arm].assets,
+            KANDEV_LOG_LEVEL: "warn",
+          },
+          builds[arm].binary,
+        );
+        const result = await runDenseNavigationSample({
+          browser,
+          backend,
+          api,
+          seed,
+          items,
+          storageState,
+          sessionStorageState,
+          cpuRate,
+          pair,
+          sample,
+          profileTimedSwitches,
+          ownerRetention,
+          ownerApiReleaseRequired: arm === "candidate",
+          ownerCheckpoint: createOwnerCheckpoint(ownerRetention, report.checkpoints, sample, save),
+          navigationReadiness,
+          navigationScenario,
+          profileFile: path.join(
+            directory,
+            `${path.basename(output, ".json")}-${sample}.cpuprofile`,
+          ),
+        });
+        return { arm, pair, ...result };
+      },
+      (outcome) => {
+        recordDenseAttempt(report, outcome);
+        save();
+      },
+    );
   } catch (error) {
     report.error = String(error);
     save();

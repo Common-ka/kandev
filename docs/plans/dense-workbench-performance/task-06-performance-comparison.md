@@ -622,3 +622,14 @@ runs after its stream finishes, which limits live-follow evidence. Source, all
 events, late actions, and the limits are retained in
 [the evidence](evidence/scroll-follow-attribution.json). No speed claim follows.
 A separately versioned explicit-follow script remains to be validated.
+
+## All planned attempts remain observable
+
+The first failure no longer prevents the other version or later pairs from
+running. The shared runner saves every outcome, preserves the first error while
+later samples run, and fails the final test after any sample failure. Evidence
+write failures abort immediately. The summary independently rejects unfinished
+or failed attempt plans. All original wheel actions and thresholds remain.
+[Evidence](evidence/dense-attempt-continuation.json) includes controlled faults,
+three healthy callers, 47 Node checks, and strict lint. The scripted candidate
+21px failure remains preserved and has separate repair evidence.

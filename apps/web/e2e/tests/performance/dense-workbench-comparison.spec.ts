@@ -1,4 +1,10 @@
 import { DENSE_INTERACTION_MODE } from "../../helpers/dense-interactions";
+import {
+  DENSE_ATTEMPT_PROTOCOL,
+  createDenseAttempts,
+  recordDenseAttempt,
+  runDenseAttempts,
+} from "../../helpers/dense-attempts";
 import { seedDenseBusyHeaders } from "../../helpers/dense-busy-headers";
 import { DENSE_VISIBILITY_PROBE } from "../../helpers/dense-visible";
 import fs from "node:fs";
@@ -36,6 +42,12 @@ test("compares frozen builds on identical dense conversation snapshots", async (
   test.setTimeout(14_400_000);
   const baselineRoot = process.env.KANDEV_DENSE_BASELINE_ROOT;
   if (!baselineRoot) throw new Error("KANDEV_DENSE_BASELINE_ROOT must name the frozen checkout");
+  const comparisonPlan = {
+    pairs: Number(process.env.KANDEV_DENSE_PAIRS ?? 6),
+    rates: (process.env.KANDEV_DENSE_CPU_RATES ?? "1,4").split(",").map(Number),
+    candidateFirst: process.env.KANDEV_DENSE_CANDIDATE_FIRST === "1",
+  };
+  const attempts = createDenseAttempts(comparisonPlan);
   const candidateRoot = path.resolve(process.cwd(), "../..");
   const arms = {
     baseline: {
@@ -91,6 +103,9 @@ test("compares frozen builds on identical dense conversation snapshots", async (
     sourceFiles,
     lockfileSha256,
     measurementKind,
+    attemptProtocol: DENSE_ATTEMPT_PROTOCOL,
+    comparisonPlan,
+    attempts,
     finalVisibilityProbe: DENSE_VISIBILITY_PROBE,
     layout: DENSE_WORKLOAD.layout,
     interactionMode: DENSE_INTERACTION_MODE,
@@ -116,54 +131,48 @@ test("compares frozen builds on identical dense conversation snapshots", async (
         message: "await completion of owned build and verification jobs before timing",
       })
       .toBe(true);
-  const pairs = Number(process.env.KANDEV_DENSE_PAIRS ?? 6);
-  const rates = (process.env.KANDEV_DENSE_CPU_RATES ?? "1,4").split(",").map(Number);
   try {
-    for (const cpuRate of rates)
-      for (let pair = 0; pair < pairs; pair++) {
-        const baselineFirst = (pair % 2 === 0) !== report.candidateFirst;
-        const order = baselineFirst
-          ? (["baseline", "candidate"] as const)
-          : (["candidate", "baseline"] as const);
-        for (const arm of order) {
-          const sample = `${arm}-${cpuRate}x-${pair}`;
-          const database = path.join(backend.tmpDir, `${sample}.db`);
-          fs.copyFileSync(snapshot, database);
-          expect(sha256File(database)).toBe(report.databaseSha256);
-          await backend.restart(
-            {
-              KANDEV_DATABASE_PATH: database,
-              KANDEV_HOME_DIR: path.join(backend.tmpDir, `${sample}-home`),
-              KANDEV_WEB_DIST_DIR: arms[arm].assets,
-              KANDEV_LOG_LEVEL: "warn",
-            },
-            arms[arm].binary,
-          );
-          const busyHeaders = fixture.threads.slice(6, 6 + DENSE_WORKLOAD.extraBusyHeaders);
-          expect(busyHeaders).toHaveLength(DENSE_WORKLOAD.extraBusyHeaders);
-          await seedDenseBusyHeaders(api, busyHeaders);
-          const result = await runDenseSample({
-            browser,
-            backend,
-            api,
-            seed,
-            threads: fixture.threads.slice(0, 6),
-            allThreads: fixture.threads,
-            sample,
-            cpuRate,
-            profilePath:
-              process.env.KANDEV_DENSE_PROFILE === "1"
-                ? `${output}.${sample}.cpuprofile`
-                : undefined,
-            checkpoint: (evidence) => {
-              report.checkpoints[sample] = { ...report.checkpoints[sample], ...evidence };
-              save();
-            },
-          });
-          report.samples.push({ arm, pair, ...result });
-          save();
-        }
-      }
+    await runDenseAttempts(
+      report.attempts,
+      async ({ arm, pair, cpuRate, sample }) => {
+        const database = path.join(backend.tmpDir, `${sample}.db`);
+        fs.copyFileSync(snapshot, database);
+        expect(sha256File(database)).toBe(report.databaseSha256);
+        await backend.restart(
+          {
+            KANDEV_DATABASE_PATH: database,
+            KANDEV_HOME_DIR: path.join(backend.tmpDir, `${sample}-home`),
+            KANDEV_WEB_DIST_DIR: arms[arm].assets,
+            KANDEV_LOG_LEVEL: "warn",
+          },
+          arms[arm].binary,
+        );
+        const busyHeaders = fixture.threads.slice(6, 6 + DENSE_WORKLOAD.extraBusyHeaders);
+        expect(busyHeaders).toHaveLength(DENSE_WORKLOAD.extraBusyHeaders);
+        await seedDenseBusyHeaders(api, busyHeaders);
+        const result = await runDenseSample({
+          browser,
+          backend,
+          api,
+          seed,
+          threads: fixture.threads.slice(0, 6),
+          allThreads: fixture.threads,
+          sample,
+          cpuRate,
+          profilePath:
+            process.env.KANDEV_DENSE_PROFILE === "1" ? `${output}.${sample}.cpuprofile` : undefined,
+          checkpoint: (evidence) => {
+            report.checkpoints[sample] = { ...report.checkpoints[sample], ...evidence };
+            save();
+          },
+        });
+        return { arm, pair, ...result };
+      },
+      (outcome) => {
+        recordDenseAttempt(report, outcome);
+        save();
+      },
+    );
   } catch (error) {
     report.error = String(error);
     save();

@@ -1,0 +1,463 @@
+{
+  "status": "validated benchmark attempt continuation; production wheel fix is a separate change",
+  "scope": "One shared runner for Threads, Dockview and navigation. It retains the original workload, input sequence and per-sample gates. Reports record the complete planned attempts before timing. A failed sample is saved before the next independent restored snapshot runs. Any failed sample still fails the final runner. Evidence-write failure aborts immediately.",
+  "protocol": "continue-and-fail-v1",
+  "parentRevision": "82320fd31bb96abb69beb73b7555092a00d1f5ff",
+  "harnessFilesAtFinalUnitVerification": [
+    {
+      "path": "apps/web/e2e/helpers/dense-attempts.ts",
+      "sha256": "b2d0353847f55877a5882b430f4af88b3330aa89c25a400c993dbf52783b3177"
+    },
+    {
+      "path": "apps/web/e2e/scripts/dense-attempts.test.mjs",
+      "sha256": "a30127ed5863c003a71d65474371e73cc16d91ea846b8f6a27fe5cb70afcac0d"
+    },
+    {
+      "path": "apps/web/e2e/scripts/dense-attempt-summary.mjs",
+      "sha256": "1c73f3250b84f44788ac272797d128a30ba701b1adc8fbb943153e136528c990"
+    },
+    {
+      "path": "apps/web/e2e/scripts/summarize-dense-performance.mjs",
+      "sha256": "008d2cf2267be4559e84bb094d7b7848238c34ccc8c0ad4ab9f396c6c29ac889"
+    },
+    {
+      "path": "apps/web/e2e/tests/performance/dense-workbench-comparison.spec.ts",
+      "sha256": "e1cf74db8efb05ab6d6d027d1af1d8c21c149d585fe8692fdb14d24e27489ca5"
+    },
+    {
+      "path": "apps/web/e2e/tests/performance/dense-dockview-comparison.spec.ts",
+      "sha256": "88123873cf24d89a8e70328eef62c9aa32316b2b4c97ba1cdeb350494a3b12c3"
+    },
+    {
+      "path": "apps/web/e2e/tests/performance/dense-navigation-comparison.spec.ts",
+      "sha256": "eda6b033891a46db504176ff7a2a9eb8223a36bdd8db1fc9d12852f555764f44"
+    }
+  ],
+  "originalScriptedInputHelper": {
+    "path": "apps/web/e2e/helpers/dense-interactions.ts",
+    "sha256": "288dad26357758aad525169ee210be41ce1c91f6cd21a252911f21618a261318",
+    "byteIdenticalToParentRevision": true
+  },
+  "tdd": {
+    "firstRed": {
+      "log": "/tmp/kandev-dense-attempts-red-5936a872.log",
+      "result": "7 passed, 3 failed. The direct extraction of the old stop-on-first-error loop aborts at the first failure; summary accepts failed or incomplete attempt metadata."
+    },
+    "planIntegrityRed": {
+      "log": "/tmp/kandev-dense-attempt-plan-red-5936a872.log",
+      "result": "9 passed, 1 failed before missing-protocol and order checks."
+    },
+    "summaryIdentityRed": {
+      "log": "/tmp/kandev-dense-attempt-summary-identity-red-5936a872.log",
+      "result": "9 passed, 1 failed before summary retained the declared comparison plan."
+    },
+    "green": {
+      "log": "/tmp/kandev-dense-attempts-summary-suite-5936a872.log",
+      "result": "47 Node checks passed, including all existing summary variants and ten new runner/metadata cases."
+    },
+    "lint": {
+      "log": "/tmp/kandev-wheel-and-attempt-lint-5936a872.log",
+      "result": "Strict lint passes for all changed source and tests."
+    }
+  },
+  "controlledFault": {
+    "faultBuild": {
+      "purpose": "Deliberate caller regression. The copied baseline binary is valid but its disposable asset tree has no app entry script. This is not the performance baseline.",
+      "root": "/tmp/kandev-dense-attempt-fault-5936a872",
+      "frozenBaselineUnchanged": "/tmp/kandev-dense-baseline-595df36",
+      "copiedExecutables": [
+        {
+          "name": "kandev",
+          "sha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de"
+        },
+        {
+          "name": "agentctl",
+          "sha256": "4d08c6e2412f437a735dd6f5edf35a5fa78c70aa25c14824545d98d4e1da7bcc"
+        },
+        {
+          "name": "mock-agent",
+          "sha256": "c9621492024a9c3881fd8fbf63242b9f3e5e7fe12ba484097c172d091edd1a4f"
+        }
+      ],
+      "lockfileSha256": "9d5a03a9086f28c93752fce491f896047fbcdbc64abfafe3b3aa53261199c554",
+      "indexSha256": "f0612fd741c9786f70afc2b66c58c8453b93f176fb1c2c96cb1b30623960cdb4",
+      "expected": "Two deliberately failed control cold loads; both candidate samples still execute and pass; final runner result remains failed; summary rejects."
+    },
+    "verification": {
+      "status": "controlled fault behavior verified; E2E runner correctly failed",
+      "runnerExitCode": 1,
+      "durationSeconds": 54.2,
+      "rawReport": "matched-dense-1792874835235.json",
+      "rawSha256": "fa0dbbd9fe9f7d8c273b59a731fafe656f318b69b33cbbadedca24bbbff84608",
+      "log": ".kandev/diagnostics/dense-workbench-performance/attempt-continuation-fault-logs/kandev-run.e2e.D0MrcxiE.log",
+      "logSha256": "1180582809e557ff8bdf301a47c25983d545406a460d9b94026a24db49057822",
+      "attempts": [
+        {
+          "arm": "baseline",
+          "pair": 0,
+          "cpuRate": 1,
+          "sample": "baseline-1x-0",
+          "status": "failed",
+          "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('threads-board')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('threads-board')\u001b[22m\n"
+        },
+        {
+          "arm": "candidate",
+          "pair": 0,
+          "cpuRate": 1,
+          "sample": "candidate-1x-0",
+          "status": "passed"
+        },
+        {
+          "arm": "candidate",
+          "pair": 1,
+          "cpuRate": 1,
+          "sample": "candidate-1x-1",
+          "status": "passed"
+        },
+        {
+          "arm": "baseline",
+          "pair": 1,
+          "cpuRate": 1,
+          "sample": "baseline-1x-1",
+          "status": "failed",
+          "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('threads-board')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('threads-board')\u001b[22m\n"
+        }
+      ],
+      "successfulSamples": [
+        {
+          "sample": "candidate-1x-0",
+          "scheduledUpdates": 5,
+          "verificationErrors": []
+        },
+        {
+          "sample": "candidate-1x-1",
+          "scheduledUpdates": 5,
+          "verificationErrors": []
+        }
+      ],
+      "faultBuild": "attempt-fault-build.json",
+      "baselineMeaning": "Copied original binary with deliberately missing application assets. Not a performance result for the original baseline.",
+      "artifacts": ".kandev/diagnostics/dense-workbench-performance/attempt-continuation-fault-artifacts"
+    },
+    "report": {
+      "rawReport": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792874835235.json",
+        "sha256": "fa0dbbd9fe9f7d8c273b59a731fafe656f318b69b33cbbadedca24bbbff84608"
+      },
+      "sourceRevision": "82320fd31bb96abb69beb73b7555092a00d1f5ff",
+      "sourcePatchSha256": "7ae0c3c20df01c5900180b2e846fd3641180240795f858c692961d2e10e9d26a",
+      "measurementKind": "harness-rehearsal",
+      "builds": {
+        "baseline": {
+          "binary": "/tmp/kandev-dense-attempt-fault-5936a872/apps/backend/bin/kandev",
+          "assets": "/tmp/kandev-dense-attempt-fault-5936a872/apps/web/dist",
+          "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+          "assetsSha256": "60ef32cc92d4d19c027d8bd822e1f01f91b4b56c7196cc72390c587e85c49833"
+        },
+        "candidate": {
+          "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+          "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "9f2b7a961b623e0e4074fdfd0e253b10b65ccf979e110223af6b88b9121dbea8"
+        }
+      },
+      "attemptProtocol": "continue-and-fail-v1",
+      "comparisonPlan": {
+        "pairs": 2,
+        "rates": [
+          1
+        ],
+        "candidateFirst": false
+      },
+      "attempts": [
+        {
+          "arm": "baseline",
+          "pair": 0,
+          "cpuRate": 1,
+          "sample": "baseline-1x-0",
+          "status": "failed",
+          "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('threads-board')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('threads-board')\u001b[22m\n"
+        },
+        {
+          "arm": "candidate",
+          "pair": 0,
+          "cpuRate": 1,
+          "sample": "candidate-1x-0",
+          "status": "passed"
+        },
+        {
+          "arm": "candidate",
+          "pair": 1,
+          "cpuRate": 1,
+          "sample": "candidate-1x-1",
+          "status": "passed"
+        },
+        {
+          "arm": "baseline",
+          "pair": 1,
+          "cpuRate": 1,
+          "sample": "baseline-1x-1",
+          "status": "failed",
+          "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('threads-board')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('threads-board')\u001b[22m\n"
+        }
+      ],
+      "error": "AggregateError: 2 dense samples failed: baseline-1x-0, baseline-1x-1",
+      "samples": [
+        {
+          "sample": "candidate-1x-0",
+          "arm": "candidate",
+          "pair": 0,
+          "cpuRate": 1,
+          "scheduledUpdates": 5,
+          "verificationErrors": []
+        },
+        {
+          "sample": "candidate-1x-1",
+          "arm": "candidate",
+          "pair": 1,
+          "cpuRate": 1,
+          "scheduledUpdates": 5,
+          "verificationErrors": []
+        }
+      ]
+    },
+    "summaryGuard": {
+      "exitCode": 1,
+      "log": "/tmp/kandev-dense-attempt-fault-summary-rejection-5936a872.log",
+      "summaryCreated": false
+    },
+    "limit": "The deliberately missing app entry is a harness fault. It is not a performance or availability result for the real frozen baseline."
+  },
+  "healthyCallers": {
+    "quiet-grid": {
+      "rawReport": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792875267045.json",
+        "sha256": "d827b6351a3cc0503d691ffec94b06c65f72b83dfef822dbe906f2f0fc4dfb8d"
+      },
+      "sourceRevision": "82320fd31bb96abb69beb73b7555092a00d1f5ff",
+      "sourcePatchSha256": "7ae0c3c20df01c5900180b2e846fd3641180240795f858c692961d2e10e9d26a",
+      "measurementKind": "harness-rehearsal",
+      "builds": {
+        "baseline": {
+          "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+          "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+          "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+          "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+        },
+        "candidate": {
+          "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+          "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "9f2b7a961b623e0e4074fdfd0e253b10b65ccf979e110223af6b88b9121dbea8"
+        }
+      },
+      "attemptProtocol": "continue-and-fail-v1",
+      "comparisonPlan": {
+        "pairs": 1,
+        "rates": [
+          1
+        ],
+        "candidateFirst": false
+      },
+      "attempts": [
+        {
+          "arm": "baseline",
+          "pair": 0,
+          "cpuRate": 1,
+          "sample": "baseline-1x-0",
+          "status": "passed"
+        },
+        {
+          "arm": "candidate",
+          "pair": 0,
+          "cpuRate": 1,
+          "sample": "candidate-1x-0",
+          "status": "passed"
+        }
+      ],
+      "error": null,
+      "samples": [
+        {
+          "sample": "baseline-1x-0",
+          "arm": "baseline",
+          "pair": 0,
+          "cpuRate": 1,
+          "scheduledUpdates": 5,
+          "verificationErrors": []
+        },
+        {
+          "sample": "candidate-1x-0",
+          "arm": "candidate",
+          "pair": 0,
+          "cpuRate": 1,
+          "scheduledUpdates": 5,
+          "verificationErrors": []
+        }
+      ]
+    },
+    "dockview-core": {
+      "rawReport": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/matched-dockview-1792875911970.json",
+        "sha256": "f45e99ffdf38d94613cd85589c9ec593105ad7731220d393ca49dcf563ad90a1"
+      },
+      "sourceRevision": "82320fd31bb96abb69beb73b7555092a00d1f5ff",
+      "sourcePatchSha256": "3d4d716a89d47f8089e6f11f5d6d666a87c175e2f19e0ff2a0ae151d17a23c74",
+      "measurementKind": "harness-rehearsal",
+      "builds": {
+        "baseline": {
+          "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+          "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+          "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+          "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+        },
+        "candidate": {
+          "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+          "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "9f2b7a961b623e0e4074fdfd0e253b10b65ccf979e110223af6b88b9121dbea8"
+        }
+      },
+      "attemptProtocol": "continue-and-fail-v1",
+      "comparisonPlan": {
+        "pairs": 1,
+        "rates": [
+          1
+        ],
+        "candidateFirst": false
+      },
+      "attempts": [
+        {
+          "arm": "baseline",
+          "pair": 0,
+          "cpuRate": 1,
+          "sample": "baseline-1x-0",
+          "status": "passed"
+        },
+        {
+          "arm": "candidate",
+          "pair": 0,
+          "cpuRate": 1,
+          "sample": "candidate-1x-0",
+          "status": "passed"
+        }
+      ],
+      "error": null,
+      "samples": [
+        {
+          "sample": "baseline-1x-0",
+          "arm": "baseline",
+          "pair": 0,
+          "cpuRate": 1,
+          "scheduledUpdates": 30,
+          "verificationErrors": []
+        },
+        {
+          "sample": "candidate-1x-0",
+          "arm": "candidate",
+          "pair": 0,
+          "cpuRate": 1,
+          "scheduledUpdates": 30,
+          "verificationErrors": []
+        }
+      ]
+    },
+    "navigation": {
+      "rawReport": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/matched-navigation-1792877006249.json",
+        "sha256": "5f8289310ce224412d808ce5a62efa4cc48a96b9cb3e4872ac493f7fefa9e61f"
+      },
+      "sourceRevision": "82320fd31bb96abb69beb73b7555092a00d1f5ff",
+      "sourcePatchSha256": "cdf204b1b73a68018d18007a12a8029c7ec0a28e8ee5143e161acb8a1f1c9ea7",
+      "measurementKind": "harness-rehearsal",
+      "builds": {
+        "baseline": {
+          "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+          "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+          "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+          "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+        },
+        "candidate": {
+          "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+          "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "820fcd57e5ecaf8d39c610f13cfbfabf4cd8dea4e64e555a57522fd3823c9a5d"
+        }
+      },
+      "attemptProtocol": "continue-and-fail-v1",
+      "comparisonPlan": {
+        "pairs": 1,
+        "rates": [
+          1
+        ],
+        "candidateFirst": false
+      },
+      "attempts": [
+        {
+          "arm": "baseline",
+          "pair": 0,
+          "cpuRate": 1,
+          "sample": "baseline-1x-0",
+          "status": "passed"
+        },
+        {
+          "arm": "candidate",
+          "pair": 0,
+          "cpuRate": 1,
+          "sample": "candidate-1x-0",
+          "status": "passed"
+        }
+      ],
+      "error": null,
+      "samples": [
+        {
+          "sample": "baseline-1x-0",
+          "arm": "baseline",
+          "pair": 0,
+          "cpuRate": 1,
+          "measuredSelections": 2,
+          "navigationReadiness": "pointerdown-raf-v1"
+        },
+        {
+          "sample": "candidate-1x-0",
+          "arm": "candidate",
+          "pair": 0,
+          "cpuRate": 1,
+          "measuredSelections": 2,
+          "navigationReadiness": "pointerdown-raf-v1"
+        }
+      ]
+    }
+  },
+  "successfulSummaryValidation": {
+    "reports": [
+      "attempt-continuation-quiet-grid-summary.json",
+      "attempt-continuation-dockview-core-summary.json",
+      "attempt-continuation-navigation-summary.json"
+    ],
+    "allSamples": 2,
+    "completeAttemptMetadata": "passed"
+  },
+  "otherObservedFailures": [
+    {
+      "rawReport": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792874976751.json",
+        "sha256": "5ed4575c7fc304c203b923f187144d687286d97fc2e1d14f5cb44789562aae7f"
+      },
+      "result": "Original scripted grid rehearsal: baseline passed; retained9f candidate stopped21px from the bottom. All attempts and original error are preserved. A separate unit and browser repair follow in the native-wheel evidence."
+    }
+  ],
+  "invariants": [
+    "The original native wheel, hover and composer sequence is unchanged.",
+    "The fixed five-second, three-pixel return-bottom assertion and all content deadlines remain unchanged.",
+    "Each sample still restores the same database snapshot into a distinct path/home and restarts its recorded binary and assets.",
+    "Reports remain failed after any failed sample; later successful samples do not clear the recorded error.",
+    "Summary validation rejects failed, pending, missing, reordered, duplicate or mismatched planned samples even if the top-level error is missing.",
+    "Legacy reports without the new metadata retain their existing validation.",
+    "Actual process completion remains authoritative: a report can contain an error while later planned samples are still running."
+  ],
+  "limits": [
+    "All caller runs in this evidence are short harness rehearsals. No speed or M2 gain is claimed.",
+    "Quiet grid/core use retained9f assets; navigation uses the separately identified820f wheel-follow candidate. These builds are not pooled.",
+    "The new runner does not establish that any failed product scenario has been repaired."
+  ]
+}
