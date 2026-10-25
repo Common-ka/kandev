@@ -1,0 +1,397 @@
+{
+  "status": "failed; all12 planned attempts executed; no valid six-pair speed summary",
+  "sourceRevision": "30e72e160e5ac8566d8d2b595e462330ca88f0e8",
+  "productionRevision": "30e72e160e5ac8566d8d2b595e462330ca88f0e8",
+  "sourcePatchBytes": 0,
+  "untrackedSourceFiles": 0,
+  "harness": {
+    "manifest": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/final39be-harness-manifest.json",
+      "sha256": "67ca2aa2d1a06759054ca21945148f6cc489c9fcff41686441db0b90e9231353"
+    },
+    "sha256": "e3a1a3c04337b1e1272d4ffa79facf766b04cbbeca90f548de7d630b7793ab62",
+    "fileCount": 1942
+  },
+  "raw": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792969449458.json",
+    "sha256": "05676fe267882c8816292bf1a728fa89d8f3bf6aa4e54bab87dcaadf9992b864"
+  },
+  "runner": {
+    "handle": 39600,
+    "exitCode": 1,
+    "terminal": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/final39be-grid-1x-tool-terminal.json",
+      "sha256": "61b94710f532fa3da20a0c287e379b319f986c84eab1951028cb16622e3f3071"
+    },
+    "log": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/final39be-grid-1x-logs/kandev-run.e2e.417lqVca.log",
+      "sha256": "cb79eb18a7ff4110207364422f43c5be7e2f49fa297676149b3402a005e15239"
+    }
+  },
+  "sampler": {
+    "handle": 78288,
+    "exitCode": 0,
+    "hostLoad": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/final39be-grid-1x-host-load.jsonl",
+      "sha256": "7219c78bf2cbcd7e232f1ab9dbd5b455c688a0a9afdd27874f6afe6e7b87055d"
+    },
+    "samples": 132
+  },
+  "summaryRejection": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/final39be-grid-1x-summary-rejection.log",
+    "sha256": "de8ef4c511b626e2ed1c665a23bc1c2bf5c5411ab64c3c0f15b6880bb4b841d8",
+    "exitCode": 1,
+    "summaryFileCreated": false
+  },
+  "machine": {
+    "revision": "30e72e160e5ac8566d8d2b595e462330ca88f0e8",
+    "cpu": "11th Gen Intel(R) Core(TM) i7-11700T @ 1.40GHz",
+    "cores": 16,
+    "load": [
+      1.83,
+      2.82,
+      4.27
+    ],
+    "totalMemory": 33303871488,
+    "freeMemory": 25729540096,
+    "platform": "linux 6.18.49"
+  },
+  "builds": {
+    "baseline": {
+      "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+      "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+      "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+      "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+    },
+    "candidate": {
+      "binary": "/tmp/kandev-perf-delivery-5936a872/apps/backend/bin/kandev",
+      "assets": "/tmp/kandev-perf-delivery-5936a872/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "39be7b61627a3539d8305b522079e0da671a9cb3d643286194cbfe164ea12261"
+    }
+  },
+  "fixtureProtocol": "threads-files-v1",
+  "workload": {
+    "layout": "grid",
+    "extraBusyHeaders": 0,
+    "tasks": 1000,
+    "columns": 30,
+    "messages": 1000,
+    "durationMs": 60000
+  },
+  "fixtureTaskCount": 1000,
+  "storedMessages": 36000,
+  "databaseSha256": "b69bc0595e6716c75a0781c0d2bae6416ae7ca462dff3a52ab2bdbe610d4c7a0",
+  "fileState": [
+    {
+      "taskId": "cb8885ae-4cd4-4987-b24a-e3ca72d939d9",
+      "sessionId": "5fb40e44-2abb-418a-b7e5-67184eb9b277",
+      "environmentId": "ba3daed4-cf3b-45e7-9f0a-1d3b4a2688b1",
+      "repoPath": "/tmp/kandev-e2e-0-RGIPcv/.kandev/tasks/dense-task-0000_6lm8tr4e/E2E-Repo",
+      "profileFiles": 630,
+      "changedFiles": 73,
+      "stateSha256": "5ff4d53abea3ae02ad8612583653c713de322b2722e9383e0e4796703a7e5bd6"
+    },
+    {
+      "taskId": "314f4d2a-6271-4ccb-8d91-8460e0781f08",
+      "sessionId": "0373678b-4f7e-4801-b2f0-f3d7204b93b3",
+      "environmentId": "cc58b2d9-0c23-41d1-8ad7-75254aea102a",
+      "repoPath": "/tmp/kandev-e2e-0-RGIPcv/.kandev/tasks/dense-task-0001_hosz4yce/E2E-Repo",
+      "profileFiles": 630,
+      "changedFiles": 73,
+      "stateSha256": "b65a1f677b5651b41a136719f9ed760849a25d129fa808e91a25564ea54af9ff"
+    },
+    {
+      "taskId": "fa7455a2-09cc-4c62-bea3-0acef9a113b1",
+      "sessionId": "453824b3-ed29-484d-8226-36811358b59a",
+      "environmentId": "18889525-34ca-4e3d-b775-fc62b57d56df",
+      "repoPath": "/tmp/kandev-e2e-0-RGIPcv/.kandev/tasks/dense-task-0002_im9dwk4a/E2E-Repo",
+      "profileFiles": 630,
+      "changedFiles": 73,
+      "stateSha256": "b920ca84e5b816a4852a8738a14c5eb6c98d5a01b252ab295d5a21580875cd78"
+    },
+    {
+      "taskId": "1b65d146-d886-4746-8ead-d593d21886af",
+      "sessionId": "ab368818-2542-411b-ba9f-548a0954085d",
+      "environmentId": "e05a316c-df98-4fad-804f-0b3b20513a0a",
+      "repoPath": "/tmp/kandev-e2e-0-RGIPcv/.kandev/tasks/dense-task-0003_scgqgo8j/E2E-Repo",
+      "profileFiles": 630,
+      "changedFiles": 73,
+      "stateSha256": "18f5b44265f9d8d906ad4f8f2013e83dba16592cb67828f9f57c8c63c637e2f1"
+    },
+    {
+      "taskId": "793fda61-e5cf-43a4-ad45-d718e8a8a133",
+      "sessionId": "8074eb8f-3d6c-4d79-997c-1e2339d588f6",
+      "environmentId": "5ce1099e-c8fc-4211-a058-6cefcd81c4b6",
+      "repoPath": "/tmp/kandev-e2e-0-RGIPcv/.kandev/tasks/dense-task-0004_76yyg5mr/E2E-Repo",
+      "profileFiles": 630,
+      "changedFiles": 73,
+      "stateSha256": "2e9471d8c3c10ad771d81c540ca918c2ae0a383f789d7d50a45af7b1993d9091"
+    },
+    {
+      "taskId": "ef93994a-40b2-4255-a3df-be35edefa613",
+      "sessionId": "71d86883-b705-4b57-bc20-82ae5d05bcdb",
+      "environmentId": "aeb01520-9930-4a49-9e5a-1e76e2650f7b",
+      "repoPath": "/tmp/kandev-e2e-0-RGIPcv/.kandev/tasks/dense-task-0005_7n6nj70x/E2E-Repo",
+      "profileFiles": 630,
+      "changedFiles": 73,
+      "stateSha256": "7a94157b68f3000169c1b21d5dc05341979a38f5a026036e38200ea6daa53585"
+    }
+  ],
+  "attempts": [
+    {
+      "arm": "baseline",
+      "pair": 0,
+      "cpuRate": 1,
+      "sample": "baseline-1x-0",
+      "status": "passed"
+    },
+    {
+      "arm": "candidate",
+      "pair": 0,
+      "cpuRate": 1,
+      "sample": "candidate-1x-0",
+      "status": "passed"
+    },
+    {
+      "arm": "candidate",
+      "pair": 1,
+      "cpuRate": 1,
+      "sample": "candidate-1x-1",
+      "status": "passed"
+    },
+    {
+      "arm": "baseline",
+      "pair": 1,
+      "cpuRate": 1,
+      "sample": "baseline-1x-1",
+      "status": "passed"
+    },
+    {
+      "arm": "baseline",
+      "pair": 2,
+      "cpuRate": 1,
+      "sample": "baseline-1x-2",
+      "status": "passed"
+    },
+    {
+      "arm": "candidate",
+      "pair": 2,
+      "cpuRate": 1,
+      "sample": "candidate-1x-2",
+      "status": "failed",
+      "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m52067\u001b[39m\nReceived:   \u001b[31m52488\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate"
+    },
+    {
+      "arm": "candidate",
+      "pair": 3,
+      "cpuRate": 1,
+      "sample": "candidate-1x-3",
+      "status": "passed"
+    },
+    {
+      "arm": "baseline",
+      "pair": 3,
+      "cpuRate": 1,
+      "sample": "baseline-1x-3",
+      "status": "passed"
+    },
+    {
+      "arm": "baseline",
+      "pair": 4,
+      "cpuRate": 1,
+      "sample": "baseline-1x-4",
+      "status": "passed"
+    },
+    {
+      "arm": "candidate",
+      "pair": 4,
+      "cpuRate": 1,
+      "sample": "candidate-1x-4",
+      "status": "passed"
+    },
+    {
+      "arm": "candidate",
+      "pair": 5,
+      "cpuRate": 1,
+      "sample": "candidate-1x-5",
+      "status": "passed"
+    },
+    {
+      "arm": "baseline",
+      "pair": 5,
+      "cpuRate": 1,
+      "sample": "baseline-1x-5",
+      "status": "passed"
+    }
+  ],
+  "completePairs": 5,
+  "completedSamples": 11,
+  "verifiedOrderedUpdates": 19800,
+  "failure": {
+    "sample": "candidate-1x-2",
+    "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m52067\u001b[39m\nReceived:   \u001b[31m52488\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate",
+    "completedWindows": [
+      "idle"
+    ],
+    "interaction": {
+      "action": "scroll-up",
+      "taskId": "cb8885ae-4cd4-4987-b24a-e3ca72d939d9",
+      "scheduledMs": 12000,
+      "startedMs": 11999.30159300007,
+      "observations": [],
+      "steps": [
+        {
+          "name": "read-before",
+          "startedMs": 11999.428847000003,
+          "value": {
+            "observedAt": 1792970632040,
+            "scrollTop": 51665,
+            "scrollHeight": 52019,
+            "clientHeight": 352,
+            "composer": "closed",
+            "sessionId": "5fb40e44-2abb-418a-b7e5-67184eb9b277"
+          },
+          "finishedMs": 12327.18774199998
+        },
+        {
+          "name": "hover-before-disclosure",
+          "startedMs": 12327.199091000017,
+          "finishedMs": 12868.946202999912
+        },
+        {
+          "name": "wait-composer-open",
+          "startedMs": 12868.948886000086,
+          "finishedMs": 13158.283257000148
+        },
+        {
+          "name": "hover-after-disclosure",
+          "startedMs": 13158.285397000145,
+          "finishedMs": 13894.234502000269
+        },
+        {
+          "name": "read-scroll-position",
+          "startedMs": 13894.238162000198,
+          "value": {
+            "observedAt": 1792970634061,
+            "scrollTop": 52067,
+            "scrollHeight": 52252,
+            "clientHeight": 164,
+            "composer": "open",
+            "sessionId": "5fb40e44-2abb-418a-b7e5-67184eb9b277"
+          },
+          "finishedMs": 14348.782978999894
+        },
+        {
+          "name": "wheel-up",
+          "startedMs": 14348.784696000163,
+          "finishedMs": 14529.01099199988
+        },
+        {
+          "name": "wait-scroll-up",
+          "startedMs": 14529.015405999962,
+          "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m52067\u001b[39m\nReceived:   \u001b[31m52488\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate",
+          "finishedMs": 19529.711335000116
+        }
+      ],
+      "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m52067\u001b[39m\nReceived:   \u001b[31m52488\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate",
+      "state": {
+        "observedAt": 1792970639933,
+        "scrollTop": 52699,
+        "scrollHeight": 52864,
+        "clientHeight": 164,
+        "composer": "open",
+        "sessionId": "5fb40e44-2abb-418a-b7e5-67184eb9b277"
+      },
+      "image": {
+        "path": "/tmp/kandev-perf-delivery-5936a872/.kandev/diagnostics/dense-workbench-performance/matched-dense-1792969449458.json.candidate-1x-2.interaction.png",
+        "sha256": "0e64d47049188808359b1c58f7a8723deccfd3a3f1d8dfda716e9ae2fcfca08c",
+        "capturedAt": 1792970640573
+      },
+      "capturedAt": 1792970640573
+    }
+  },
+  "perAttemptBackendLogs": [
+    {
+      "sample": "baseline-1x-0",
+      "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792969449458.json.baseline-1x-0.backend.log",
+      "sha256": "8e571889b9e782c412485cf3ccbaea7dba1e62c1332732f8f71cc982e6df2c01"
+    },
+    {
+      "sample": "candidate-1x-0",
+      "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792969449458.json.candidate-1x-0.backend.log",
+      "sha256": "54942ab11b59dd8992f481014adb18267fc57e8ab88976e26175d74174979b1f"
+    },
+    {
+      "sample": "candidate-1x-1",
+      "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792969449458.json.candidate-1x-1.backend.log",
+      "sha256": "807c57ae60377e68dadca594848391ef89fda4a7496689f28087021466a41715"
+    },
+    {
+      "sample": "baseline-1x-1",
+      "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792969449458.json.baseline-1x-1.backend.log",
+      "sha256": "7e6ca4569513a72bb6e67c98def486efd637127c1441e4eaf6907cfdcf928f15"
+    },
+    {
+      "sample": "baseline-1x-2",
+      "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792969449458.json.baseline-1x-2.backend.log",
+      "sha256": "ec8a0b8db4b1e35bebd4066b11a49918e4a4c4d80cc69a37e16027b742200070"
+    },
+    {
+      "sample": "candidate-1x-2",
+      "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792969449458.json.candidate-1x-2.backend.log",
+      "sha256": "36928e0519e3fb96f4eb315f5786479399546b1dbac05037c7b6714778793db8"
+    },
+    {
+      "sample": "candidate-1x-3",
+      "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792969449458.json.candidate-1x-3.backend.log",
+      "sha256": "088513eb4fcca74a6a517b7a43f6356cd644a4bc73bda3280b31ff1dcdc3372b"
+    },
+    {
+      "sample": "baseline-1x-3",
+      "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792969449458.json.baseline-1x-3.backend.log",
+      "sha256": "83887161a10670296da3762a2bcabe70becf45d388dffa65a2c6def5f52c88e5"
+    },
+    {
+      "sample": "baseline-1x-4",
+      "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792969449458.json.baseline-1x-4.backend.log",
+      "sha256": "cdf372e3016d1011296b1003b708f459febcfcec910ca7df783950a3e29eddb3"
+    },
+    {
+      "sample": "candidate-1x-4",
+      "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792969449458.json.candidate-1x-4.backend.log",
+      "sha256": "99ff9a3e6b148755cfa75252c274d32ab6fa516c095fe45297e09291bd62048e"
+    },
+    {
+      "sample": "candidate-1x-5",
+      "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792969449458.json.candidate-1x-5.backend.log",
+      "sha256": "6a4bc55305bea07da1ef2bfcae4d469232ebb04689388345a652807e161fd97f"
+    },
+    {
+      "sample": "baseline-1x-5",
+      "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792969449458.json.baseline-1x-5.backend.log",
+      "sha256": "fb47ce6865a3529b9d8f531b4434fabcefd9c3b300a51ca8cc55fe80788cdc43"
+    }
+  ],
+  "runtimeAfter": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/final39be-grid-1x-post-runtime.json",
+    "sha256": "5e4c5713697e15f01a0cd946e9c9e5a7dc4e46393f2395520622cf09d2709b55"
+  },
+  "cleanup": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/final39be-grid-1x-cleanup-and-logs.json",
+    "sha256": "9a50233b72bbdd08374bcac86aa23e358adb77070632bb2776a95499fffa23cd"
+  },
+  "artifacts": ".kandev/diagnostics/dense-workbench-performance/final39be-grid-1x-artifacts",
+  "copyManifest": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/final39be-grid-1x-copy-manifest.json",
+    "sha256": "3e389d659320258c315b3be21b45b3448949b306162a7e016a9503865729fab1"
+  },
+  "limits": [
+    "The original passes all six attempts. Candidate39be passes five and fails one unchanged native scroll-up bound. No speed reduction is calculated from the five complete pairs.",
+    "The failure follows completed hover, composer-open and second-hover steps. The position predicate expects less than52067pixels and receives52488pixels. Its later snapshot is52699pixels at a different time.",
+    "The trace does not record the actual trusted wheel event target, its propagation path, or the first native scroll response. These remain the next attribution work; no production cause or fix is inferred.",
+    "Only the11 fully verified samples contribute to19800 ordered updates. Partial data remains in checkpoints. Before-sample file checks exist for all12; after-sample checks exist only for completed samples.",
+    "Both frozen runtime/helper/asset/lock identities remain exact. The temporary root is removed and no owned process remains after excluding the audit shell itself.",
+    "This is Linux Chromium evidence. It does not establish MacBook Air M2 latency, field INP, battery or memory-leak gains."
+  ]
+}

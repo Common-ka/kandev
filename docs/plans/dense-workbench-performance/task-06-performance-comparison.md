@@ -774,3 +774,27 @@ correctness results, not a speed or memory-saving estimate. Existing `820f`
 measurements keep their old build scope. The new final performance matrix and
 remaining Threads attribution stay open. See
 [the repair evidence](evidence/editor-user-subscription-ownership.json).
+
+## New production Grid reference
+
+The uninstrumented `39be7b61` build completes all 12 planned Grid attempts
+against the original `312770e3` control. The workload stays at 1,000 tasks,
+30 columns, 36,000 stored messages, six canonical streams and 60-second
+windows. All six original attempts pass. Five candidate attempts pass;
+`candidate-1x-2` fails the unchanged native scroll-up check during streaming.
+The 11 complete samples verify 19,800 ordered updates.
+
+Both hover steps and the composer reveal finish before the failed wheel
+action. The five-second predicate expects a position below 52,067 pixels
+and receives 52,488 pixels. A later snapshot is separate evidence. The trace
+does not capture the actual wheel target or first native scroll response,
+so the production cause remains unknown. Capture those events in a separate
+diagnostic before changing scroll behavior. Do not change the original
+inputs or deadlines.
+
+The failed report is correctly rejected by the summary guard. No speed
+comparison is published from its five complete pairs. All raw attempts,
+12 backend logs and the failure screenshot are retained; runtime and helper
+identities remain exact, and the temporary instance stops cleanly. The other
+19 new-build matrix cases remain pending. Earlier `820f` failures retain
+their original scope. See [the Grid evidence](evidence/reference39be-grid-failed.json).
