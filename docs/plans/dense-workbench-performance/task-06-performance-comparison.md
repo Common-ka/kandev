@@ -724,3 +724,25 @@ writing fails. See [the failure-evidence checks](evidence/column-traversal-diagn
 These synthetic faults do not attribute the earlier dense activation failure.
 Production assets are unchanged; full-density attribution, the remaining
 matrix and the completion gates stay open.
+
+## Full-density Dockview read causes
+
+A separate diagnostic pair passes on the frozen private observer builds. The
+fixture has 1,000 tasks, 36,900 stored messages, 630 profile files and 73 changes.
+Both arms verify all 1,800 ordered updates and hidden-tab catch-up. Every
+physical history read has an explicit cause and no collector error.
+
+During streaming, the original version issues 617 core gap-recovery reads,
+295 plugin message-rebind reads and 295 plugin turn-rebind reads. The candidate
+issues zero reads for those three causes. Scheduled backfill remains: 16
+streaming reads on the control and 24 on the candidate. That count difference
+is not attributed. The control also has 74 recovered HTTP 409 responses;
+the candidate has zero. All requests, failures and phases remain recorded.
+
+This trace explains repeated read paths. It does not measure a speed gain.
+The speed-summary guard rejects it despite both successful attempts. Frozen
+app sources, runtime/helper hashes, exact raw reports and backend logs are
+verified, and the disposable instance stops cleanly. See
+[the cause evidence](evidence/full-density-dockview-read-causes.json).
+The final uninstrumented timing matrix, Threads attribution and private
+100-switch ownership proof remain open.

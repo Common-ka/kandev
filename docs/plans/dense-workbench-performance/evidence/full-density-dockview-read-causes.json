@@ -1,0 +1,870 @@
+{
+  "measurementKind": "read-attribution",
+  "status": "Passed on both private observer builds. Excluded from speed summaries.",
+  "productionBase": {
+    "revision": "7a9840211131f7471657105c0b75d08c4953bf65",
+    "assetsSha256": "820fcd57e5ecaf8d39c610f13cfbfabf4cd8dea4e64e555a57522fd3823c9a5d",
+    "changedByThisDiagnostic": false
+  },
+  "runtime": {
+    "status": "verified unchanged",
+    "arms": [
+      {
+        "arm": "baseline",
+        "assetsSha256": "b3f4b5c8d534bb9454a86a1977f052098c14793829741652e9863cb6a9056385",
+        "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+        "helpers": [
+          {
+            "path": "apps/backend/bin/agentctl",
+            "sha256": "4d08c6e2412f437a735dd6f5edf35a5fa78c70aa25c14824545d98d4e1da7bcc",
+            "mode": "700"
+          },
+          {
+            "path": "apps/backend/bin/mock-agent",
+            "sha256": "c9621492024a9c3881fd8fbf63242b9f3e5e7fe12ba484097c172d091edd1a4f",
+            "mode": "700"
+          }
+        ]
+      },
+      {
+        "arm": "candidate",
+        "assetsSha256": "b584aa5460442006474c70453ef18396db144f3fcab788f922dbf296aca281fa",
+        "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+        "helpers": [
+          {
+            "path": "apps/backend/bin/agentctl",
+            "sha256": "6e768aef1a1692630fe109c25e23ac31ab461b691800c2059e6dfdd5cf0b4d0a",
+            "mode": "700"
+          },
+          {
+            "path": "apps/backend/bin/mock-agent",
+            "sha256": "c69f05ee9f5622cc5bce83405c2e9240b537f3e79a21da65765d9867592288c1",
+            "mode": "700"
+          }
+        ]
+      }
+    ],
+    "recordedAt": "2026-10-25T21:39:55.084Z"
+  },
+  "builds": {
+    "baseline": {
+      "binary": "/tmp/kandev-read-cause-baseline-5936a872/apps/backend/bin/kandev",
+      "assets": "/tmp/kandev-read-cause-baseline-5936a872/apps/web/dist",
+      "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+      "assetsSha256": "b3f4b5c8d534bb9454a86a1977f052098c14793829741652e9863cb6a9056385"
+    },
+    "candidate": {
+      "binary": "/tmp/kandev-read-cause-candidate-5936a872/apps/backend/bin/kandev",
+      "assets": "/tmp/kandev-read-cause-candidate-5936a872/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "b584aa5460442006474c70453ef18396db144f3fcab788f922dbf296aca281fa"
+    }
+  },
+  "plugin": {
+    "id": "kandev-plugin-e2e",
+    "panelId": "plugin:kandev-plugin-e2e:prompt-history-plugin",
+    "bundleSha256": "9fd37c4eaa58a63603e071bf6a30d76e478d685c2b3e6d1ed58d7aa3f3d25894",
+    "scope": "Full in-repo E2E plugin, including navigation, toolbar, and review contributions"
+  },
+  "fixture": {
+    "taskCount": 1000,
+    "seededMessages": 36900,
+    "visibleHistoryMessages": 1000,
+    "hiddenHistoryMessages": 100,
+    "files": {
+      "taskId": "9a063ade-e5cb-413c-bf08-148fe4fb6f70",
+      "sessionId": "e181011b-30c2-4d89-96ef-745d64885e6e",
+      "environmentId": "74d82dfb-559a-410f-9ca8-73df590e1896",
+      "repoPath": "/tmp/kandev-e2e-0-1scOcf/.kandev/tasks/dense-task-0000_dyrzv1yu/E2E-Repo",
+      "profileFiles": 630,
+      "changedFiles": 73,
+      "stateSha256": "5ff4d53abea3ae02ad8612583653c713de322b2722e9383e0e4796703a7e5bd6",
+      "marker": "navigation-available/000-Dense-task-0000.txt"
+    }
+  },
+  "comparisonPlan": {
+    "pairs": 1,
+    "rates": [1],
+    "candidateFirst": false
+  },
+  "machine": {
+    "revision": "1cd11a93b92e3e78555e51d18646a734f38f4548",
+    "cpu": "11th Gen Intel(R) Core(TM) i7-11700T @ 1.40GHz",
+    "cores": 16,
+    "load": [2.4, 3.08, 3.58],
+    "totalMemory": 33303871488,
+    "freeMemory": 25606553600,
+    "platform": "linux 6.18.49"
+  },
+  "samples": [
+    {
+      "arm": "baseline",
+      "sample": "baseline-1x-0",
+      "physicalReads": 1289,
+      "byTransport": {
+        "websocket": 692,
+        "http": 597
+      },
+      "byReason": {
+        "core-cached-entry-refresh": 1,
+        "core-prompt-query": 3,
+        "core-periodic-backfill": 69,
+        "core-initial": 2,
+        "plugin-initial-or-query-change": 2,
+        "plugin-turns-initial-or-query-change": 2,
+        "core-gap-recovery": 619,
+        "plugin-rebind-recovery": 295,
+        "plugin-turns-rebind-recovery": 295,
+        "core-subscription-ready": 1
+      },
+      "byPhase": {
+        "setup": {
+          "core-cached-entry-refresh": 1,
+          "core-prompt-query": 3,
+          "core-periodic-backfill": 4,
+          "core-initial": 2,
+          "plugin-initial-or-query-change": 1,
+          "plugin-turns-initial-or-query-change": 1
+        },
+        "idle": {
+          "core-periodic-backfill": 25
+        },
+        "streaming": {
+          "core-gap-recovery": 617,
+          "plugin-rebind-recovery": 295,
+          "plugin-turns-rebind-recovery": 295,
+          "core-periodic-backfill": 16
+        },
+        "reduced-motion-idle": {
+          "core-gap-recovery": 2,
+          "core-periodic-backfill": 24
+        },
+        "hidden-tab-catchup": {
+          "core-subscription-ready": 1,
+          "plugin-initial-or-query-change": 1,
+          "plugin-turns-initial-or-query-change": 1
+        }
+      },
+      "allocationsWithoutWire": 0,
+      "missingAttribution": 0,
+      "unclassified": 0,
+      "collectorErrors": [],
+      "scheduledUpdates": 1800,
+      "verificationErrors": [],
+      "backendLog": {
+        "path": "/tmp/kandev-read-cause-candidate-5936a872/.kandev/diagnostics/dense-workbench-performance/matched-dockview-1792963855587.json.baseline-1x-0.backend.log",
+        "sha256": "2dcbfd40468e79da5ceea9fe2f35c6649f135582a6c449ed57f7a08ddf80fa7d",
+        "capturedAt": 1792964070682
+      },
+      "httpFailuresByWindow": [
+        {
+          "scenario": "idle",
+          "byStatus": {}
+        },
+        {
+          "scenario": "streaming",
+          "byStatus": {
+            "409": 74
+          }
+        },
+        {
+          "scenario": "reduced-motion-idle",
+          "byStatus": {}
+        }
+      ],
+      "hiddenCatchup": {
+        "sessionId": "cbc7465f-8e17-45ab-bb16-e6b8aea81c8f",
+        "progress": [
+          {
+            "sessionId": "cbc7465f-8e17-45ab-bb16-e6b8aea81c8f",
+            "mounted": true,
+            "at": 1792964069272,
+            "count": 300,
+            "uniqueCount": 300,
+            "lastTick": 299
+          }
+        ],
+        "draftPreserved": true,
+        "layout": {
+          "groups": 6,
+          "panels": [
+            {
+              "id": "session:e181011b-30c2-4d89-96ef-745d64885e6e",
+              "component": "chat",
+              "visible": false
+            },
+            {
+              "id": "session:cbc7465f-8e17-45ab-bb16-e6b8aea81c8f",
+              "component": "chat",
+              "visible": true
+            },
+            {
+              "id": "pr-detail",
+              "component": "pr-detail",
+              "visible": false
+            },
+            {
+              "id": "files",
+              "component": "files",
+              "visible": true
+            },
+            {
+              "id": "terminal-default",
+              "component": "terminal",
+              "visible": false
+            },
+            {
+              "id": "plan",
+              "component": "plan",
+              "visible": true
+            },
+            {
+              "id": "session:512251bd-a607-4ae4-abec-a908ce84fd8b",
+              "component": "chat",
+              "visible": true
+            },
+            {
+              "id": "changes",
+              "component": "changes",
+              "visible": true
+            },
+            {
+              "id": "plugin:kandev-plugin-e2e:prompt-history-plugin",
+              "component": "plugin-panel",
+              "visible": true
+            }
+          ],
+          "detailSessionIds": [
+            "512251bd-a607-4ae4-abec-a908ce84fd8b",
+            "cbc7465f-8e17-45ab-bb16-e6b8aea81c8f"
+          ],
+          "layout": {
+            "grid": {
+              "root": {
+                "type": "branch",
+                "data": [
+                  {
+                    "type": "leaf",
+                    "data": {
+                      "views": [
+                        "session:e181011b-30c2-4d89-96ef-745d64885e6e",
+                        "session:cbc7465f-8e17-45ab-bb16-e6b8aea81c8f",
+                        "pr-detail"
+                      ],
+                      "activeView": "session:cbc7465f-8e17-45ab-bb16-e6b8aea81c8f",
+                      "id": "group-center"
+                    },
+                    "size": 383
+                  },
+                  {
+                    "type": "leaf",
+                    "data": {
+                      "views": ["session:512251bd-a607-4ae4-abec-a908ce84fd8b"],
+                      "activeView": "session:512251bd-a607-4ae4-abec-a908ce84fd8b",
+                      "id": "1"
+                    },
+                    "size": 480
+                  },
+                  {
+                    "type": "branch",
+                    "data": [
+                      {
+                        "type": "leaf",
+                        "data": {
+                          "views": ["files"],
+                          "activeView": "files",
+                          "id": "group-right-top"
+                        },
+                        "size": 229
+                      },
+                      {
+                        "type": "leaf",
+                        "data": {
+                          "views": ["changes"],
+                          "activeView": "changes",
+                          "id": "2"
+                        },
+                        "size": 229
+                      },
+                      {
+                        "type": "leaf",
+                        "data": {
+                          "views": ["terminal-default", "plan"],
+                          "activeView": "plan",
+                          "id": "group-right-bottom"
+                        },
+                        "size": 229
+                      },
+                      {
+                        "type": "leaf",
+                        "data": {
+                          "views": [
+                            "plugin:kandev-plugin-e2e:prompt-history-plugin"
+                          ],
+                          "activeView": "plugin:kandev-plugin-e2e:prompt-history-plugin",
+                          "id": "3"
+                        },
+                        "size": 229
+                      }
+                    ],
+                    "size": 287
+                  }
+                ],
+                "size": 916
+              },
+              "width": 1150,
+              "height": 916,
+              "orientation": "HORIZONTAL"
+            },
+            "panels": {
+              "session:e181011b-30c2-4d89-96ef-745d64885e6e": {
+                "id": "session:e181011b-30c2-4d89-96ef-745d64885e6e",
+                "contentComponent": "chat",
+                "tabComponent": "sessionTab",
+                "params": {
+                  "sessionId": "e181011b-30c2-4d89-96ef-745d64885e6e"
+                },
+                "title": "Mock Fast"
+              },
+              "session:cbc7465f-8e17-45ab-bb16-e6b8aea81c8f": {
+                "id": "session:cbc7465f-8e17-45ab-bb16-e6b8aea81c8f",
+                "contentComponent": "chat",
+                "tabComponent": "sessionTab",
+                "params": {
+                  "sessionId": "cbc7465f-8e17-45ab-bb16-e6b8aea81c8f"
+                },
+                "title": "Mock Fast"
+              },
+              "pr-detail": {
+                "id": "pr-detail",
+                "contentComponent": "pr-detail",
+                "tabComponent": "props.defaultTabComponent",
+                "params": {
+                  "providerId": "fixture-source-control",
+                  "reviewKey": "pull-request-42",
+                  "connectionScope": "https://bitbucket.example.test",
+                  "repositoryId": "fixture-repository",
+                  "changeRequestNumber": 42
+                },
+                "title": "Bitbucket Pull Request #42"
+              },
+              "files": {
+                "id": "files",
+                "contentComponent": "files",
+                "title": "Files"
+              },
+              "terminal-default": {
+                "id": "terminal-default",
+                "contentComponent": "terminal",
+                "tabComponent": "terminalTab",
+                "params": {
+                  "terminalId": "shell-4625075d-b87e-4d96-8d19-dcd6c25c24ef",
+                  "environmentId": "74d82dfb-559a-410f-9ca8-73df590e1896",
+                  "taskID": "9a063ade-e5cb-413c-bf08-148fe4fb6f70"
+                },
+                "title": "Terminal"
+              },
+              "plan": {
+                "id": "plan",
+                "contentComponent": "plan",
+                "tabComponent": "planTab",
+                "title": "Plan"
+              },
+              "session:512251bd-a607-4ae4-abec-a908ce84fd8b": {
+                "id": "session:512251bd-a607-4ae4-abec-a908ce84fd8b",
+                "contentComponent": "chat",
+                "tabComponent": "sessionTab",
+                "params": {
+                  "sessionId": "512251bd-a607-4ae4-abec-a908ce84fd8b"
+                },
+                "title": "Mock Fast"
+              },
+              "changes": {
+                "id": "changes",
+                "contentComponent": "changes",
+                "tabComponent": "changesTab",
+                "title": "Changes (74)"
+              },
+              "plugin:kandev-plugin-e2e:prompt-history-plugin": {
+                "id": "plugin:kandev-plugin-e2e:prompt-history-plugin",
+                "contentComponent": "plugin-panel",
+                "tabComponent": "pluginPanelTab",
+                "params": {
+                  "pluginId": "kandev-plugin-e2e",
+                  "panelKey": "prompt-history-plugin"
+                },
+                "title": "Prompt history fixture"
+              }
+            },
+            "activeGroup": "group-center"
+          }
+        }
+      }
+    },
+    {
+      "arm": "candidate",
+      "sample": "candidate-1x-0",
+      "physicalReads": 88,
+      "byTransport": {
+        "websocket": 81,
+        "http": 7
+      },
+      "byReason": {
+        "core-cached-entry-refresh": 1,
+        "core-prompt-query": 3,
+        "core-periodic-backfill": 77,
+        "core-initial": 2,
+        "plugin-initial-or-query-change": 2,
+        "plugin-turns-initial-or-query-change": 2,
+        "core-subscription-ready": 1
+      },
+      "byPhase": {
+        "setup": {
+          "core-cached-entry-refresh": 1,
+          "core-prompt-query": 3,
+          "core-periodic-backfill": 3,
+          "core-initial": 2,
+          "plugin-initial-or-query-change": 1,
+          "plugin-turns-initial-or-query-change": 1
+        },
+        "idle": {
+          "core-periodic-backfill": 25
+        },
+        "streaming": {
+          "core-periodic-backfill": 24
+        },
+        "reduced-motion-idle": {
+          "core-periodic-backfill": 25
+        },
+        "hidden-tab-catchup": {
+          "core-subscription-ready": 1,
+          "plugin-initial-or-query-change": 1,
+          "plugin-turns-initial-or-query-change": 1
+        }
+      },
+      "allocationsWithoutWire": 0,
+      "missingAttribution": 0,
+      "unclassified": 0,
+      "collectorErrors": [],
+      "scheduledUpdates": 1800,
+      "verificationErrors": [],
+      "backendLog": {
+        "path": "/tmp/kandev-read-cause-candidate-5936a872/.kandev/diagnostics/dense-workbench-performance/matched-dockview-1792963855587.json.candidate-1x-0.backend.log",
+        "sha256": "8dde200b4b107238a81a07ced10b8172d231586f4876464fa937ab266722b12d",
+        "capturedAt": 1792964284421
+      },
+      "httpFailuresByWindow": [
+        {
+          "scenario": "idle",
+          "byStatus": {}
+        },
+        {
+          "scenario": "streaming",
+          "byStatus": {}
+        },
+        {
+          "scenario": "reduced-motion-idle",
+          "byStatus": {}
+        }
+      ],
+      "hiddenCatchup": {
+        "sessionId": "cbc7465f-8e17-45ab-bb16-e6b8aea81c8f",
+        "progress": [
+          {
+            "sessionId": "cbc7465f-8e17-45ab-bb16-e6b8aea81c8f",
+            "mounted": true,
+            "at": 1792964282999,
+            "count": 300,
+            "uniqueCount": 300,
+            "lastTick": 299
+          }
+        ],
+        "draftPreserved": true,
+        "layout": {
+          "groups": 6,
+          "panels": [
+            {
+              "id": "session:e181011b-30c2-4d89-96ef-745d64885e6e",
+              "component": "chat",
+              "visible": false
+            },
+            {
+              "id": "session:cbc7465f-8e17-45ab-bb16-e6b8aea81c8f",
+              "component": "chat",
+              "visible": true
+            },
+            {
+              "id": "pr-detail",
+              "component": "pr-detail",
+              "visible": false
+            },
+            {
+              "id": "files",
+              "component": "files",
+              "visible": true
+            },
+            {
+              "id": "terminal-default",
+              "component": "terminal",
+              "visible": false
+            },
+            {
+              "id": "plan",
+              "component": "plan",
+              "visible": true
+            },
+            {
+              "id": "session:512251bd-a607-4ae4-abec-a908ce84fd8b",
+              "component": "chat",
+              "visible": true
+            },
+            {
+              "id": "changes",
+              "component": "changes",
+              "visible": true
+            },
+            {
+              "id": "plugin:kandev-plugin-e2e:prompt-history-plugin",
+              "component": "plugin-panel",
+              "visible": true
+            }
+          ],
+          "detailSessionIds": [
+            "512251bd-a607-4ae4-abec-a908ce84fd8b",
+            "cbc7465f-8e17-45ab-bb16-e6b8aea81c8f"
+          ],
+          "layout": {
+            "grid": {
+              "root": {
+                "type": "branch",
+                "data": [
+                  {
+                    "type": "leaf",
+                    "data": {
+                      "views": [
+                        "session:e181011b-30c2-4d89-96ef-745d64885e6e",
+                        "session:cbc7465f-8e17-45ab-bb16-e6b8aea81c8f",
+                        "pr-detail"
+                      ],
+                      "activeView": "session:cbc7465f-8e17-45ab-bb16-e6b8aea81c8f",
+                      "id": "group-center"
+                    },
+                    "size": 383
+                  },
+                  {
+                    "type": "leaf",
+                    "data": {
+                      "views": ["session:512251bd-a607-4ae4-abec-a908ce84fd8b"],
+                      "activeView": "session:512251bd-a607-4ae4-abec-a908ce84fd8b",
+                      "id": "1"
+                    },
+                    "size": 480
+                  },
+                  {
+                    "type": "branch",
+                    "data": [
+                      {
+                        "type": "leaf",
+                        "data": {
+                          "views": ["files"],
+                          "activeView": "files",
+                          "id": "group-right-top"
+                        },
+                        "size": 229
+                      },
+                      {
+                        "type": "leaf",
+                        "data": {
+                          "views": ["changes"],
+                          "activeView": "changes",
+                          "id": "2"
+                        },
+                        "size": 229
+                      },
+                      {
+                        "type": "leaf",
+                        "data": {
+                          "views": ["terminal-default", "plan"],
+                          "activeView": "plan",
+                          "id": "group-right-bottom"
+                        },
+                        "size": 229
+                      },
+                      {
+                        "type": "leaf",
+                        "data": {
+                          "views": [
+                            "plugin:kandev-plugin-e2e:prompt-history-plugin"
+                          ],
+                          "activeView": "plugin:kandev-plugin-e2e:prompt-history-plugin",
+                          "id": "3"
+                        },
+                        "size": 229
+                      }
+                    ],
+                    "size": 287
+                  }
+                ],
+                "size": 916
+              },
+              "width": 1150,
+              "height": 916,
+              "orientation": "HORIZONTAL"
+            },
+            "panels": {
+              "session:e181011b-30c2-4d89-96ef-745d64885e6e": {
+                "id": "session:e181011b-30c2-4d89-96ef-745d64885e6e",
+                "contentComponent": "chat",
+                "tabComponent": "sessionTab",
+                "params": {
+                  "sessionId": "e181011b-30c2-4d89-96ef-745d64885e6e"
+                },
+                "title": "Mock Fast"
+              },
+              "session:cbc7465f-8e17-45ab-bb16-e6b8aea81c8f": {
+                "id": "session:cbc7465f-8e17-45ab-bb16-e6b8aea81c8f",
+                "contentComponent": "chat",
+                "tabComponent": "sessionTab",
+                "params": {
+                  "sessionId": "cbc7465f-8e17-45ab-bb16-e6b8aea81c8f"
+                },
+                "title": "Mock Fast"
+              },
+              "pr-detail": {
+                "id": "pr-detail",
+                "contentComponent": "pr-detail",
+                "tabComponent": "props.defaultTabComponent",
+                "params": {
+                  "providerId": "fixture-source-control",
+                  "reviewKey": "pull-request-42",
+                  "connectionScope": "https://bitbucket.example.test",
+                  "repositoryId": "fixture-repository",
+                  "changeRequestNumber": 42
+                },
+                "title": "Bitbucket Pull Request #42"
+              },
+              "files": {
+                "id": "files",
+                "contentComponent": "files",
+                "title": "Files"
+              },
+              "terminal-default": {
+                "id": "terminal-default",
+                "contentComponent": "terminal",
+                "tabComponent": "terminalTab",
+                "params": {
+                  "terminalId": "shell-5aba0ef1-7c7e-4662-b2fe-ebfaa7d273d5",
+                  "environmentId": "74d82dfb-559a-410f-9ca8-73df590e1896",
+                  "taskID": "9a063ade-e5cb-413c-bf08-148fe4fb6f70"
+                },
+                "title": "Terminal"
+              },
+              "plan": {
+                "id": "plan",
+                "contentComponent": "plan",
+                "tabComponent": "planTab",
+                "title": "Plan"
+              },
+              "session:512251bd-a607-4ae4-abec-a908ce84fd8b": {
+                "id": "session:512251bd-a607-4ae4-abec-a908ce84fd8b",
+                "contentComponent": "chat",
+                "tabComponent": "sessionTab",
+                "params": {
+                  "sessionId": "512251bd-a607-4ae4-abec-a908ce84fd8b"
+                },
+                "title": "Mock Fast"
+              },
+              "changes": {
+                "id": "changes",
+                "contentComponent": "changes",
+                "tabComponent": "changesTab",
+                "title": "Changes (74)"
+              },
+              "plugin:kandev-plugin-e2e:prompt-history-plugin": {
+                "id": "plugin:kandev-plugin-e2e:prompt-history-plugin",
+                "contentComponent": "plugin-panel",
+                "tabComponent": "pluginPanelTab",
+                "params": {
+                  "pluginId": "kandev-plugin-e2e",
+                  "panelKey": "prompt-history-plugin"
+                },
+                "title": "Prompt history fixture"
+              }
+            },
+            "activeGroup": "group-center"
+          }
+        }
+      }
+    }
+  ],
+  "orderedUpdatesVerified": 3600,
+  "validation": {
+    "runnerHandle": 86714,
+    "runnerExitCode": 0,
+    "underlyingCorrectness": "Both attempts passed all native surface, motion, retained draft, visible ordered-stream, hidden-tab catch-up and file fixture assertions.",
+    "explicitCauseJoins": "All physical HTTP/WS history reads join by transport and request ID; zero missing, unclassified or collector errors in either arm.",
+    "privateAppSource": "All 13 observation-only app files per arm match the frozen source manifest after the run.",
+    "runtimePostAudit": "Both binary/asset trees and their own agentctl/mock helpers match frozen hashes.",
+    "sourcePatchSha256": "3a4409f70f40c3366b568a3627ee184984dbe991faeccffcff544d64ad2dfe70",
+    "capturedPrivateSourceFiles": [
+      {
+        "path": "apps/web/e2e/fixtures/backend.ts",
+        "sha256": "b414486de485db9bf31629f035bf8f88ecebc9e7fc36496552041f5966435f66"
+      },
+      {
+        "path": "apps/web/e2e/fixtures/read-attribution-test-base.ts",
+        "sha256": "c15340ea174cfe658a669fb9dc60f5480fd0e77906ce3139973916b04ef38041"
+      },
+      {
+        "path": "apps/web/e2e/helpers/dense-backfill-eligibility.ts",
+        "sha256": "1c2c7017a858973933844ea0411a87548443ff938bd789564f1643d3a82bab62"
+      },
+      {
+        "path": "apps/web/e2e/helpers/dense-comparison-sample.ts",
+        "sha256": "ca26a7dd12688e11d98acc2673ab024e29eb031a9d3790ab6dd15bf8392ab6a2"
+      },
+      {
+        "path": "apps/web/e2e/helpers/dense-dockview-sample.ts",
+        "sha256": "f082ce0d9240ed7526c710f15888afd02f0f00323d719477d3ee256917df6eb5"
+      },
+      {
+        "path": "apps/web/e2e/helpers/dense-read-attribution-capture.ts",
+        "sha256": "7700254998ef3092e1ef166b9a39f6a92786abb3248d04e58b0501992cd989e8"
+      },
+      {
+        "path": "apps/web/e2e/scripts/dense-read-attribution-join.mjs",
+        "sha256": "293c68b1c40a8d98e5b89cbaabc2a48e0536f8b26d17edba9545aafc921b5f6b"
+      },
+      {
+        "path": "apps/web/e2e/scripts/summarize-dense-performance.mjs",
+        "sha256": "fe4a4106484e0feecb7db12f277611993652e0763f55e38cc6a07c637c358796"
+      },
+      {
+        "path": "apps/web/e2e/scripts/summarize-dense-performance.test.mjs",
+        "sha256": "948e6aa07e0ecaa0b00354bec68a061e19ae9e8780b6d4f9c57af7f322d76461"
+      },
+      {
+        "path": "apps/web/e2e/tests/chat/dense-read-cause-backfill.spec.ts",
+        "sha256": "e14d06d318c91e253bbe98725339c27da2ea527e9bec8de459353269f8cc8937"
+      },
+      {
+        "path": "apps/web/e2e/tests/chat/native-document-lifecycle.spec.ts",
+        "sha256": "54481d7e46e4371a9b55d173d7758bd80f884937c48160cc36c7c18be2e46d99"
+      },
+      {
+        "path": "apps/web/e2e/tests/performance/dense-dockview-comparison.spec.ts",
+        "sha256": "7e14b3fac1a0758e9e4e1489a8bbcf7579fb25eda95a7d0c81f9d80e29361325"
+      },
+      {
+        "path": "apps/web/e2e/tests/performance/dense-workbench-comparison.spec.ts",
+        "sha256": "b24eb266ba77041a4bc09ea41a25ae69e17fe026491550b50ab6c578a21698e3"
+      },
+      {
+        "path": "apps/web/e2e/tests/plugins/conversation-recovery.spec.ts",
+        "sha256": "567566123118885162731a77d27509381067b7ad10b96407df64e7e4ea29950c"
+      },
+      {
+        "path": "apps/web/hooks/domains/session/load-message-window.ts",
+        "sha256": "a5bc6ddb4d80b8f66a958be24dc9610ff609e6fb74fbd936ed6dd3dbad1be17b"
+      },
+      {
+        "path": "apps/web/hooks/domains/session/older-message-pagination.ts",
+        "sha256": "3a7f045b576d24699b84659132cc82cfe6d75d74f909454ef369bb6d12339d9c"
+      },
+      {
+        "path": "apps/web/hooks/domains/session/use-session-message-fetch.ts",
+        "sha256": "72adee5d1f127523ddb5b57b5f962526dc8abfdd1057de6e492a1b59de1ec148"
+      },
+      {
+        "path": "apps/web/hooks/domains/session/use-session-messages.ts",
+        "sha256": "24f0719e636c6124e0d32c98304eaaac55e29c14276404e7a52f6756f15091b2"
+      },
+      {
+        "path": "apps/web/hooks/domains/session/use-session-prompts.ts",
+        "sha256": "5b9121e4e9f576e136556198e0973e4ef43e6c08c02a57310363856a1d480d53"
+      },
+      {
+        "path": "apps/web/hooks/message-request.ts",
+        "sha256": "4d9771142ad14c04563c78340c6e4b53e57f7b0c7004528452d790af808f9701"
+      },
+      {
+        "path": "apps/web/hooks/use-late-clarification-message.ts",
+        "sha256": "735e221f78db0e08d59af0fc0b0f63ec9cd65c65831550683b8cde1fe30c744d"
+      },
+      {
+        "path": "apps/web/hooks/use-summarize-session.ts",
+        "sha256": "4a825eea44806c17e1128c65744db1f63cc425cde0b0548280db5e425aca4a76"
+      },
+      {
+        "path": "apps/web/lib/api/domains/session-api.ts",
+        "sha256": "87377a141dac3f3a2a9b66550d147b41c1b90fae49cfb2f500cd56be6bc2caf3"
+      },
+      {
+        "path": "apps/web/lib/debug/dense-read-attribution.ts",
+        "sha256": "8cceba8740fe8eee48355c586defccc00188aea7360288ce488e8ae2fc36bef3"
+      },
+      {
+        "path": "apps/web/lib/plugins/conversation-host.tsx",
+        "sha256": "d4b10942b314bc312692a3acf347d4acce12a38304190763e4f364ac1690420b"
+      },
+      {
+        "path": "apps/web/lib/ssr/session-page-state.ts",
+        "sha256": "5466fab00930df6e38ed90d80a9fc78c8aaafc916da36a620206e299e77a3391"
+      },
+      {
+        "path": "apps/web/lib/ws/client.ts",
+        "sha256": "ab5f84d07ad75bec81303d5d67f811cbcb6e5f58f90c91599f6f38160dc3f1bc"
+      }
+    ],
+    "speedSummaryGate": {
+      "exitCode": 1,
+      "expectedRejection": "excluded from timing comparisons",
+      "log": "/tmp/kandev-read-cause-work-5936a872/full-dockview-plugin-speed-summary-rejection.log",
+      "sha256": "2fff94856bdb754b42f4185eb20fc9a50622bf9ae4ca245a71f02d4137e3fce4",
+      "forbiddenSummaryExists": false
+    },
+    "cleanup": {
+      "fixtureRoot": "/tmp/kandev-e2e-0-1scOcf",
+      "removed": true,
+      "remainingOwnedProcesses": []
+    }
+  },
+  "reports": [
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/matched-dockview-1792963855587.json",
+      "sha256": "bb27c428e9255de14722062fd2d1a8f2273d98c19ec9fc7bab5af0158bc0b17e"
+    },
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/matched-dockview-1792963855587.json.backend.log",
+      "sha256": "8dde200b4b107238a81a07ced10b8172d231586f4876464fa937ab266722b12d"
+    },
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/matched-dockview-1792963855587.json.baseline-1x-0.backend.log",
+      "sha256": "2dcbfd40468e79da5ceea9fe2f35c6649f135582a6c449ed57f7a08ddf80fa7d"
+    },
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/matched-dockview-1792963855587.json.candidate-1x-0.backend.log",
+      "sha256": "8dde200b4b107238a81a07ced10b8172d231586f4876464fa937ab266722b12d"
+    }
+  ],
+  "readMethod": "Physical wire events, not logical hook calls. The phase is captured at actual request dispatch. Explicit cause comes from the allocating call site. All continuation, failure and periodic reads remain in the record.",
+  "runSettings": {
+    "KANDEV_DENSE_READ_ATTRIBUTION": "1",
+    "KANDEV_DENSE_DOCKVIEW_COMPARE": "1",
+    "KANDEV_DENSE_DOCKVIEW_PLUGIN": "1",
+    "KANDEV_DENSE_PAIRS": "1",
+    "KANDEV_DENSE_CPU_RATES": "1",
+    "densityOverrides": "none",
+    "windowDurationMs": 60000,
+    "browserProject": "chromium",
+    "guardedWorkers": 1
+  },
+  "limits": [
+    "One diagnostic pair on private observer app bundles. Excluded from speed summaries.",
+    "Request counts identify explicit call paths. They do not establish CPU, latency, battery or M2 Air gains.",
+    "Baseline streaming has 74 HTTP 409 responses; candidate streaming has zero. These recovered request failures remain in the raw report and per-window status counts.",
+    "Periodic streaming backfill count is 16 on baseline and 24 on candidate. This trace does not attribute the count difference or imply that scheduled backfill was removed.",
+    "This is full-density Dockview cause attribution. Final uninstrumented 820f six-pair timing, Threads cause coverage and 100-switch logical ownership proof remain open."
+  ],
+  "recordedAt": "2026-10-25T21:43:44.731434+00:00"
+}
