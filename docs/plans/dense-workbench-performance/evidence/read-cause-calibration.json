@@ -1,0 +1,715 @@
+{
+  "measurementKind": "read-attribution",
+  "recordedAt": "2026-10-25T21:12:11.866736+00:00",
+  "purpose": "Calibrate observation-only request-cause tags against actual physical HTTP/WS reads. Excluded from speed summaries.",
+  "joinContract": "Join actual wire events to explicit call-site cause allocations by transport and unique request ID. Keep queued or aborted allocations without a wire event separate. Unknown, missing, ambiguous and collector failures remain explicit. No inference from elapsed time.",
+  "builds": [
+    {
+      "arm": "baseline",
+      "revision": "595df36ed5c1cf02fd90cb972b623ad6edc53df8",
+      "assetsSha256": "b3f4b5c8d534bb9454a86a1977f052098c14793829741652e9863cb6a9056385",
+      "sourcePatchSha256": "1db40e70662917f67d8231ffa5c7a5c034efdab6317edd8db1dee5d52b3a04ea",
+      "productionFiles": [
+        {
+          "path": "apps/web/hooks/domains/session/load-message-window.ts",
+          "sha256": "a5bc6ddb4d80b8f66a958be24dc9610ff609e6fb74fbd936ed6dd3dbad1be17b"
+        },
+        {
+          "path": "apps/web/hooks/domains/session/older-message-pagination.ts",
+          "sha256": "3a7f045b576d24699b84659132cc82cfe6d75d74f909454ef369bb6d12339d9c"
+        },
+        {
+          "path": "apps/web/hooks/domains/session/use-session-message-fetch.ts",
+          "sha256": "72adee5d1f127523ddb5b57b5f962526dc8abfdd1057de6e492a1b59de1ec148"
+        },
+        {
+          "path": "apps/web/hooks/domains/session/use-session-messages.ts",
+          "sha256": "24f0719e636c6124e0d32c98304eaaac55e29c14276404e7a52f6756f15091b2"
+        },
+        {
+          "path": "apps/web/hooks/domains/session/use-session-prompts.ts",
+          "sha256": "5b9121e4e9f576e136556198e0973e4ef43e6c08c02a57310363856a1d480d53"
+        },
+        {
+          "path": "apps/web/hooks/message-request.ts",
+          "sha256": "4d9771142ad14c04563c78340c6e4b53e57f7b0c7004528452d790af808f9701"
+        },
+        {
+          "path": "apps/web/hooks/use-late-clarification-message.ts",
+          "sha256": "735e221f78db0e08d59af0fc0b0f63ec9cd65c65831550683b8cde1fe30c744d"
+        },
+        {
+          "path": "apps/web/hooks/use-summarize-session.ts",
+          "sha256": "4a825eea44806c17e1128c65744db1f63cc425cde0b0548280db5e425aca4a76"
+        },
+        {
+          "path": "apps/web/lib/api/domains/session-api.ts",
+          "sha256": "87377a141dac3f3a2a9b66550d147b41c1b90fae49cfb2f500cd56be6bc2caf3"
+        },
+        {
+          "path": "apps/web/lib/debug/dense-read-attribution.ts",
+          "sha256": "8cceba8740fe8eee48355c586defccc00188aea7360288ce488e8ae2fc36bef3"
+        },
+        {
+          "path": "apps/web/lib/plugins/conversation-host.tsx",
+          "sha256": "d4b10942b314bc312692a3acf347d4acce12a38304190763e4f364ac1690420b"
+        },
+        {
+          "path": "apps/web/lib/ssr/session-page-state.ts",
+          "sha256": "5466fab00930df6e38ed90d80a9fc78c8aaafc916da36a620206e299e77a3391"
+        },
+        {
+          "path": "apps/web/lib/ws/client.ts",
+          "sha256": "ab5f84d07ad75bec81303d5d67f811cbcb6e5f58f90c91599f6f38160dc3f1bc"
+        }
+      ],
+      "runtime": [
+        {
+          "path": "apps/backend/bin/agentctl",
+          "sha256": "4d08c6e2412f437a735dd6f5edf35a5fa78c70aa25c14824545d98d4e1da7bcc",
+          "mode": "700"
+        },
+        {
+          "path": "apps/backend/bin/kandev",
+          "sha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+          "mode": "700"
+        },
+        {
+          "path": "apps/backend/bin/mock-agent",
+          "sha256": "c9621492024a9c3881fd8fbf63242b9f3e5e7fe12ba484097c172d091edd1a4f",
+          "mode": "700"
+        }
+      ]
+    },
+    {
+      "arm": "candidate",
+      "revision": "1cd11a93b92e3e78555e51d18646a734f38f4548",
+      "assetsSha256": "b584aa5460442006474c70453ef18396db144f3fcab788f922dbf296aca281fa",
+      "sourcePatchSha256": "5bf46104bd74bc90cbd70de4b6d58c2ce47d45052c47b5f2347f44949d0185cf",
+      "productionFiles": [
+        {
+          "path": "apps/web/e2e/fixtures/backend.ts",
+          "sha256": "b414486de485db9bf31629f035bf8f88ecebc9e7fc36496552041f5966435f66"
+        },
+        {
+          "path": "apps/web/e2e/fixtures/read-attribution-test-base.ts",
+          "sha256": "c15340ea174cfe658a669fb9dc60f5480fd0e77906ce3139973916b04ef38041"
+        },
+        {
+          "path": "apps/web/e2e/helpers/dense-comparison-sample.ts",
+          "sha256": "ca26a7dd12688e11d98acc2673ab024e29eb031a9d3790ab6dd15bf8392ab6a2"
+        },
+        {
+          "path": "apps/web/e2e/helpers/dense-dockview-sample.ts",
+          "sha256": "f082ce0d9240ed7526c710f15888afd02f0f00323d719477d3ee256917df6eb5"
+        },
+        {
+          "path": "apps/web/e2e/helpers/dense-read-attribution-capture.ts",
+          "sha256": "7700254998ef3092e1ef166b9a39f6a92786abb3248d04e58b0501992cd989e8"
+        },
+        {
+          "path": "apps/web/e2e/scripts/dense-read-attribution-join.mjs",
+          "sha256": "293c68b1c40a8d98e5b89cbaabc2a48e0536f8b26d17edba9545aafc921b5f6b"
+        },
+        {
+          "path": "apps/web/e2e/scripts/summarize-dense-performance.mjs",
+          "sha256": "fe4a4106484e0feecb7db12f277611993652e0763f55e38cc6a07c637c358796"
+        },
+        {
+          "path": "apps/web/e2e/scripts/summarize-dense-performance.test.mjs",
+          "sha256": "948e6aa07e0ecaa0b00354bec68a061e19ae9e8780b6d4f9c57af7f322d76461"
+        },
+        {
+          "path": "apps/web/e2e/tests/chat/native-document-lifecycle.spec.ts",
+          "sha256": "104465b81735c97c52a7a917353dccb89bb73b24aa022f0e8827b9f296a52d79"
+        },
+        {
+          "path": "apps/web/e2e/tests/performance/dense-dockview-comparison.spec.ts",
+          "sha256": "7e14b3fac1a0758e9e4e1489a8bbcf7579fb25eda95a7d0c81f9d80e29361325"
+        },
+        {
+          "path": "apps/web/e2e/tests/performance/dense-workbench-comparison.spec.ts",
+          "sha256": "b24eb266ba77041a4bc09ea41a25ae69e17fe026491550b50ab6c578a21698e3"
+        },
+        {
+          "path": "apps/web/e2e/tests/plugins/conversation-recovery.spec.ts",
+          "sha256": "567566123118885162731a77d27509381067b7ad10b96407df64e7e4ea29950c"
+        },
+        {
+          "path": "apps/web/hooks/domains/session/load-message-window.ts",
+          "sha256": "a5bc6ddb4d80b8f66a958be24dc9610ff609e6fb74fbd936ed6dd3dbad1be17b"
+        },
+        {
+          "path": "apps/web/hooks/domains/session/older-message-pagination.ts",
+          "sha256": "3a7f045b576d24699b84659132cc82cfe6d75d74f909454ef369bb6d12339d9c"
+        },
+        {
+          "path": "apps/web/hooks/domains/session/use-session-message-fetch.ts",
+          "sha256": "72adee5d1f127523ddb5b57b5f962526dc8abfdd1057de6e492a1b59de1ec148"
+        },
+        {
+          "path": "apps/web/hooks/domains/session/use-session-messages.ts",
+          "sha256": "24f0719e636c6124e0d32c98304eaaac55e29c14276404e7a52f6756f15091b2"
+        },
+        {
+          "path": "apps/web/hooks/domains/session/use-session-prompts.ts",
+          "sha256": "5b9121e4e9f576e136556198e0973e4ef43e6c08c02a57310363856a1d480d53"
+        },
+        {
+          "path": "apps/web/hooks/message-request.ts",
+          "sha256": "4d9771142ad14c04563c78340c6e4b53e57f7b0c7004528452d790af808f9701"
+        },
+        {
+          "path": "apps/web/hooks/use-late-clarification-message.ts",
+          "sha256": "735e221f78db0e08d59af0fc0b0f63ec9cd65c65831550683b8cde1fe30c744d"
+        },
+        {
+          "path": "apps/web/hooks/use-summarize-session.ts",
+          "sha256": "4a825eea44806c17e1128c65744db1f63cc425cde0b0548280db5e425aca4a76"
+        },
+        {
+          "path": "apps/web/lib/api/domains/session-api.ts",
+          "sha256": "87377a141dac3f3a2a9b66550d147b41c1b90fae49cfb2f500cd56be6bc2caf3"
+        },
+        {
+          "path": "apps/web/lib/debug/dense-read-attribution.ts",
+          "sha256": "8cceba8740fe8eee48355c586defccc00188aea7360288ce488e8ae2fc36bef3"
+        },
+        {
+          "path": "apps/web/lib/plugins/conversation-host.tsx",
+          "sha256": "d4b10942b314bc312692a3acf347d4acce12a38304190763e4f364ac1690420b"
+        },
+        {
+          "path": "apps/web/lib/ssr/session-page-state.ts",
+          "sha256": "5466fab00930df6e38ed90d80a9fc78c8aaafc916da36a620206e299e77a3391"
+        },
+        {
+          "path": "apps/web/lib/ws/client.ts",
+          "sha256": "ab5f84d07ad75bec81303d5d67f811cbcb6e5f58f90c91599f6f38160dc3f1bc"
+        }
+      ],
+      "runtime": [
+        {
+          "path": "apps/backend/bin/agentctl",
+          "sha256": "6e768aef1a1692630fe109c25e23ac31ab461b691800c2059e6dfdd5cf0b4d0a",
+          "mode": "700"
+        },
+        {
+          "path": "apps/backend/bin/kandev",
+          "sha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "mode": "700"
+        },
+        {
+          "path": "apps/backend/bin/mock-agent",
+          "sha256": "c69f05ee9f5622cc5bce83405c2e9240b537f3e79a21da65765d9867592288c1",
+          "mode": "700"
+        }
+      ]
+    }
+  ],
+  "candidate": {
+    "measurementKind": "read-attribution",
+    "handle": 56395,
+    "exitCode": 0,
+    "casesPassed": 5,
+    "totalPhysicalReads": 32,
+    "cases": [
+      {
+        "path": ".kandev/diagnostics/dense-workbench-performance/read-cause-calibration-candidate-corrected-artifacts/plugins-conversation-recov-21268-vent-gap-on-the-live-socket-chromium/read-attribution.json",
+        "sha256": "3e3a720dd65020866a0142bf3bb604383d5ce02165a4fac97da30cbfdb3f784b",
+        "reads": 7,
+        "reasons": {
+          "core-prompt-query": 1,
+          "core-initial": 1,
+          "core-gap-recovery": 5
+        },
+        "missingAttribution": 0,
+        "unclassified": 0,
+        "collectorErrors": [],
+        "eligible": null,
+        "foregroundBeforeRestore": null,
+        "hiddenBaseline": null,
+        "orderedTicks": null,
+        "draftPreserved": null,
+        "scrollBefore": null,
+        "scrollAfter": null
+      },
+      {
+        "path": ".kandev/diagnostics/dense-workbench-performance/read-cause-calibration-candidate-corrected-artifacts/plugins-conversation-recov-279ea-eeps-paging-without-remount-chromium/read-attribution.json",
+        "sha256": "f3bdaef53d956d195f451d20de6c34c28d75c3e5fcfa7358f3a9f8779ec97eaf",
+        "reads": 9,
+        "reasons": {
+          "core-prompt-query": 1,
+          "core-cached-entry-refresh": 1,
+          "plugin-initial-or-query-change": 1,
+          "plugin-turns-initial-or-query-change": 1,
+          "plugin-rebind-recovery": 2,
+          "plugin-turns-rebind-recovery": 2,
+          "plugin-pagination": 1
+        },
+        "missingAttribution": 0,
+        "unclassified": 0,
+        "collectorErrors": [],
+        "eligible": null,
+        "foregroundBeforeRestore": null,
+        "hiddenBaseline": null,
+        "orderedTicks": null,
+        "draftPreserved": null,
+        "scrollBefore": null,
+        "scrollAfter": null
+      },
+      {
+        "path": ".kandev/diagnostics/dense-workbench-performance/read-cause-calibration-candidate-corrected-artifacts/chat-native-document-lifec-a87c7--after-real-document-hiding-chromium/native-document-lifecycle.json",
+        "sha256": "213a8b50e3e951073c569921db445c0c02d6c2ea92f1cbbc6e15f67396d87449",
+        "reads": 5,
+        "reasons": {
+          "core-cached-entry-refresh": 1,
+          "core-prompt-query": 1,
+          "core-foreground": 2,
+          "core-turn-settle": 1
+        },
+        "missingAttribution": 0,
+        "unclassified": 0,
+        "collectorErrors": [],
+        "eligible": null,
+        "foregroundBeforeRestore": 1,
+        "hiddenBaseline": null,
+        "orderedTicks": 12,
+        "draftPreserved": true,
+        "scrollBefore": {
+          "scrollTop": 4618,
+          "scrollHeight": 5845,
+          "clientHeight": 557,
+          "scrollOwnerCount": 1
+        },
+        "scrollAfter": {
+          "scrollTop": 4618,
+          "scrollHeight": 6175,
+          "clientHeight": 557,
+          "scrollOwnerCount": 1
+        }
+      },
+      {
+        "path": ".kandev/diagnostics/dense-workbench-performance/read-cause-calibration-candidate-corrected-artifacts/chat-native-document-lifec-d5550--after-real-document-hiding-chromium/native-document-lifecycle.json",
+        "sha256": "78e739c314a8f4cc4782cd6e6b30b8e1c3ac651394b9eac782d75589232560fa",
+        "reads": 7,
+        "reasons": {
+          "core-cached-entry-refresh": 1,
+          "core-prompt-query": 1,
+          "core-foreground": 2,
+          "plugin-initial-or-query-change": 1,
+          "plugin-turns-initial-or-query-change": 1,
+          "core-turn-settle": 1
+        },
+        "missingAttribution": 0,
+        "unclassified": 0,
+        "collectorErrors": [],
+        "eligible": null,
+        "foregroundBeforeRestore": 1,
+        "hiddenBaseline": null,
+        "orderedTicks": 12,
+        "draftPreserved": true,
+        "scrollBefore": {
+          "scrollTop": 8040,
+          "scrollHeight": 9267,
+          "clientHeight": 557,
+          "scrollOwnerCount": 1
+        },
+        "scrollAfter": {
+          "scrollTop": 8040,
+          "scrollHeight": 9619,
+          "clientHeight": 557,
+          "scrollOwnerCount": 1
+        }
+      },
+      {
+        "path": ".kandev/diagnostics/dense-workbench-performance/read-cause-calibration-candidate-corrected-artifacts/chat-dense-read-cause-back-ea54f--and-pauses-it-while-hidden-chromium/read-cause-backfill.json",
+        "sha256": "431999613b3e16306726aaf4fbf82bb0c56a774d261572902f4a512136c6da62",
+        "reads": 4,
+        "reasons": {
+          "core-cached-entry-refresh": 1,
+          "core-prompt-query": 1,
+          "core-periodic-backfill": 1,
+          "core-foreground": 1
+        },
+        "missingAttribution": 0,
+        "unclassified": 0,
+        "collectorErrors": [],
+        "eligible": {
+          "observedAt": 1792962263334,
+          "connectionStatus": "connected",
+          "taskSessionState": "RUNNING",
+          "activeTurnId": "65c82931-d941-4573-af5d-3458130093dc",
+          "visibilityState": "visible",
+          "detailActive": "true",
+          "mountedMessages": 1,
+          "owners": {
+            "instanceId": 1,
+            "counts": {
+              "status": "connected",
+              "taskReferences": [["1b3b1c08-c180-43a0-bb86-2f57e726f628", 3]],
+              "sessionReferences": [
+                ["ab7ed14e-1529-41cb-b929-304e5a3d16fa", 28]
+              ],
+              "focusReferences": [["ab7ed14e-1529-41cb-b929-304e5a3d16fa", 1]],
+              "sessionReadiness": 1,
+              "coreStreams": 1,
+              "coreRecoveryHandlers": [
+                ["ab7ed14e-1529-41cb-b929-304e5a3d16fa", 1]
+              ],
+              "conversationSessions": 1,
+              "userReferences": 5,
+              "runReferences": [],
+              "metricsReferences": 0,
+              "pendingRequests": 0
+            }
+          }
+        },
+        "foregroundBeforeRestore": 0,
+        "hiddenBaseline": 1,
+        "orderedTicks": null,
+        "draftPreserved": null,
+        "scrollBefore": null,
+        "scrollAfter": null
+      }
+    ],
+    "productionAssetsUnchanged": true,
+    "observerAssetsSha256": "b584aa5460442006474c70453ef18396db144f3fcab788f922dbf296aca281fa",
+    "limitations": [
+      "Private observation-only app. No speed conclusion.",
+      "Policy calibration uses backend-seeded unfinished turn and no live producer. Native lifecycle separately uses a real agent and native visibility.",
+      "No full-density attribution or100-switch logical-owner proof yet."
+    ],
+    "recordedAt": "2026-10-25T21:05:57.212650+00:00"
+  },
+  "baseline": {
+    "measurementKind": "read-attribution",
+    "handle": 52829,
+    "exitCode": 1,
+    "casesPassed": 3,
+    "casesFailed": 2,
+    "totalPhysicalReads": 85,
+    "cases": [
+      {
+        "path": ".kandev/diagnostics/dense-workbench-performance/read-cause-calibration-baseline-artifacts/plugins-conversation-recov-21268-vent-gap-on-the-live-socket-chromium/read-attribution.json",
+        "sha256": "df2c6d216311d8ce599207a0579bdeb04772dda7ce9ac7cd3abdf0880d4599bb",
+        "reads": 7,
+        "reasons": {
+          "core-prompt-query": 1,
+          "core-initial": 1,
+          "core-gap-recovery": 5
+        },
+        "missingAttribution": 0,
+        "unclassified": 0,
+        "collectorErrors": [],
+        "bodyFailure": null,
+        "eligibilityBefore": null
+      },
+      {
+        "path": ".kandev/diagnostics/dense-workbench-performance/read-cause-calibration-baseline-artifacts/plugins-conversation-recov-279ea-eeps-paging-without-remount-chromium/read-attribution.json",
+        "sha256": "0be952ac037403440887cc77860aeeabe0e404b41e95740b980158a171cdbfc3",
+        "reads": 10,
+        "reasons": {
+          "core-prompt-query": 1,
+          "core-cached-entry-refresh": 1,
+          "plugin-initial-or-query-change": 1,
+          "plugin-turns-initial-or-query-change": 1,
+          "plugin-rebind-recovery": 2,
+          "plugin-turns-rebind-recovery": 2,
+          "plugin-pagination": 2
+        },
+        "missingAttribution": 0,
+        "unclassified": 0,
+        "collectorErrors": [],
+        "bodyFailure": null,
+        "eligibilityBefore": null
+      },
+      {
+        "path": ".kandev/diagnostics/dense-workbench-performance/read-cause-calibration-baseline-artifacts/chat-native-document-lifec-a87c7--after-real-document-hiding-chromium/native-document-lifecycle.json",
+        "sha256": "c36b9229bd017c7b42da96a7f19383ba689be78b1ecca969186eb0f2c5269373",
+        "reads": 18,
+        "reasons": {
+          "core-cached-entry-refresh": 1,
+          "core-prompt-query": 1,
+          "core-foreground": 1,
+          "core-gap-recovery": 15
+        },
+        "missingAttribution": 0,
+        "unclassified": 0,
+        "collectorErrors": [],
+        "bodyFailure": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 16\nReceived: 17\n    at /tmp/kandev-read-cause-candidate-5936a872/apps/web/e2e/tests/chat/native-document-lifecycle.spec.ts:227:35\n    at withNativeBrowser (/tmp/kandev-read-cause-candidate-5936a872/apps/web/e2e/helpers/native-browser.ts:57:5)\n    at /tmp/kandev-read-cause-candidate-5936a872/apps/web/e2e/tests/chat/native-document-lifecycle.spec.ts:157:7",
+        "eligibilityBefore": {
+          "observedAt": 1792962459224,
+          "connectionStatus": "connected",
+          "taskSessionState": "RUNNING",
+          "activeTurnId": null,
+          "visibilityState": "visible",
+          "detailActive": "true",
+          "mountedMessages": 47,
+          "owners": {
+            "instanceId": 1,
+            "counts": {
+              "status": "connected",
+              "taskReferences": [["fff8c07c-ecc0-4ea5-8a13-2f9598519649", 3]],
+              "sessionReferences": [
+                ["55db49f0-210e-4560-86f0-80fbb380e86c", 28]
+              ],
+              "focusReferences": [["55db49f0-210e-4560-86f0-80fbb380e86c", 1]],
+              "sessionReadiness": 1,
+              "coreStreams": 1,
+              "coreRecoveryHandlers": [
+                ["55db49f0-210e-4560-86f0-80fbb380e86c", 1]
+              ],
+              "conversationSessions": 1,
+              "userReferences": 5,
+              "runReferences": [],
+              "metricsReferences": 0,
+              "pendingRequests": 0
+            }
+          }
+        }
+      },
+      {
+        "path": ".kandev/diagnostics/dense-workbench-performance/read-cause-calibration-baseline-artifacts/chat-native-document-lifec-d5550--after-real-document-hiding-chromium/native-document-lifecycle.json",
+        "sha256": "d6403e35a004f59db4dae469a1b8f91ceabf62ec691eea509dd514a0aa031b40",
+        "reads": 46,
+        "reasons": {
+          "core-cached-entry-refresh": 1,
+          "core-prompt-query": 1,
+          "core-foreground": 1,
+          "plugin-initial-or-query-change": 1,
+          "plugin-turns-initial-or-query-change": 1,
+          "core-gap-recovery": 15,
+          "plugin-rebind-recovery": 13,
+          "plugin-turns-rebind-recovery": 13
+        },
+        "missingAttribution": 0,
+        "unclassified": 0,
+        "collectorErrors": [],
+        "bodyFailure": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 16\nReceived: 17\n    at /tmp/kandev-read-cause-candidate-5936a872/apps/web/e2e/tests/chat/native-document-lifecycle.spec.ts:227:35\n    at withNativeBrowser (/tmp/kandev-read-cause-candidate-5936a872/apps/web/e2e/helpers/native-browser.ts:57:5)\n    at /tmp/kandev-read-cause-candidate-5936a872/apps/web/e2e/tests/chat/native-document-lifecycle.spec.ts:157:7",
+        "eligibilityBefore": {
+          "observedAt": 1792962498051,
+          "connectionStatus": "connected",
+          "taskSessionState": "RUNNING",
+          "activeTurnId": null,
+          "visibilityState": "visible",
+          "detailActive": "true",
+          "mountedMessages": 47,
+          "owners": {
+            "instanceId": 1,
+            "counts": {
+              "status": "connected",
+              "taskReferences": [["13c5363d-e985-4824-897e-0ae69b59855e", 3]],
+              "sessionReferences": [
+                ["df8b27f0-3127-4c17-8d8d-8350537ce4b4", 28]
+              ],
+              "focusReferences": [["df8b27f0-3127-4c17-8d8d-8350537ce4b4", 1]],
+              "sessionReadiness": 1,
+              "coreStreams": 1,
+              "coreRecoveryHandlers": [
+                ["df8b27f0-3127-4c17-8d8d-8350537ce4b4", 1]
+              ],
+              "conversationSessions": 1,
+              "userReferences": 5,
+              "runReferences": [],
+              "metricsReferences": 0,
+              "pendingRequests": 0
+            }
+          }
+        }
+      },
+      {
+        "path": ".kandev/diagnostics/dense-workbench-performance/read-cause-calibration-baseline-artifacts/chat-dense-read-cause-back-ea54f--and-pauses-it-while-hidden-chromium/read-cause-backfill.json",
+        "sha256": "3ab167160fcf3a874f3bce921e78b2f32f1caf392b76ac7eadb16a6fd3288b24",
+        "reads": 4,
+        "reasons": {
+          "core-cached-entry-refresh": 1,
+          "core-prompt-query": 1,
+          "core-periodic-backfill": 1,
+          "core-foreground": 1
+        },
+        "missingAttribution": 0,
+        "unclassified": 0,
+        "collectorErrors": [],
+        "bodyFailure": null,
+        "eligibilityBefore": {
+          "observedAt": 1792962435972,
+          "connectionStatus": "connected",
+          "taskSessionState": "RUNNING",
+          "activeTurnId": "b7fa5c25-f6c0-42d2-af7f-476bbe0b70b3",
+          "visibilityState": "visible",
+          "detailActive": "true",
+          "mountedMessages": 1,
+          "owners": {
+            "instanceId": 1,
+            "counts": {
+              "status": "connected",
+              "taskReferences": [["c0e18db6-ad10-40d8-8566-37a7bc55f7c7", 3]],
+              "sessionReferences": [
+                ["f2c177c7-d2f7-4d70-b2a2-20534c17bbaa", 28]
+              ],
+              "focusReferences": [["f2c177c7-d2f7-4d70-b2a2-20534c17bbaa", 1]],
+              "sessionReadiness": 1,
+              "coreStreams": 1,
+              "coreRecoveryHandlers": [
+                ["f2c177c7-d2f7-4d70-b2a2-20534c17bbaa", 1]
+              ],
+              "conversationSessions": 1,
+              "userReferences": 5,
+              "runReferences": [],
+              "metricsReferences": 0,
+              "pendingRequests": 0
+            }
+          }
+        }
+      }
+    ],
+    "observerAssetsSha256": "b3f4b5c8d534bb9454a86a1977f052098c14793829741652e9863cb6a9056385",
+    "interpretation": "All observed physical reads matched explicit causes. Three cases pass; both real native lifecycle cases fail the unchanged hidden-history-read bound on original595. Keep these policy failures separate from collector calibration. No speed claim.",
+    "recordedAt": "2026-10-25T21:09:05.657337+00:00"
+  },
+  "negativeControl": {
+    "measurementKind": "read-attribution",
+    "handle": 68894,
+    "exitCode": 1,
+    "artifacts": ".kandev/diagnostics/dense-workbench-performance/read-cause-backfill-policy-red-artifacts",
+    "artifactSha256": "192c143455629079a8e7fddbf874596b229f3bbea2fdbb1544cfeb6287ac16af",
+    "eligible": {
+      "observedAt": 1792962223307,
+      "connectionStatus": "connected",
+      "taskSessionState": "RUNNING",
+      "activeTurnId": "5f827dd5-b7b2-4382-8807-aa8015f9d202",
+      "visibilityState": "visible",
+      "detailActive": "true",
+      "mountedMessages": 1,
+      "owners": null
+    },
+    "reads": 5,
+    "missingAttribution": 5,
+    "unclassified": 0,
+    "collectorErrors": [],
+    "purpose": "Negative observer calibration on frozen uninstrumented820 assets. Backend-seeded eligible open turn verified. Missing cause expected; not a production regression or a speed run.",
+    "recordedAt": "2026-10-25T21:04:09.625643+00:00"
+  },
+  "earlierNegativeControl": {
+    "status": "genuine calibration RED;4tests fail on missing attribution from uninstrumented820f",
+    "handle": 86576,
+    "exitCode": 1,
+    "tests": 4,
+    "log": "/tmp/kandev-read-cause-candidate-5936a872/.kandev/diagnostics/dense-workbench-performance/read-cause-calibration-red-complete-fixture-logs/kandev-run.e2e.UsDclBiB.log",
+    "logSha256": "541837d99781fe600a61e086d63c82713faa18e4053ad414d8214d6962d0858d",
+    "artifacts": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/read-cause-calibration-red-artifacts",
+    "rows": [
+      {
+        "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/read-cause-calibration-red-artifacts/plugins-conversation-recov-21268-vent-gap-on-the-live-socket-chromium/read-attribution.json",
+        "sha256": "ecffc9f8f92b0323e15ad96334a191bc30f41ba6f9ac56a42d1adb27d8a311a7",
+        "reads": 7,
+        "missingAttribution": 7,
+        "unclassified": 0,
+        "collectorErrors": [],
+        "byReason": {
+          "missing-attribution": 7
+        }
+      },
+      {
+        "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/read-cause-calibration-red-artifacts/plugins-conversation-recov-279ea-eeps-paging-without-remount-chromium/read-attribution.json",
+        "sha256": "4be3e24e2e89db65d5233778ee03f96f16c521bd5ab00802a3669bfa9d6d7125",
+        "reads": 9,
+        "missingAttribution": 9,
+        "unclassified": 0,
+        "collectorErrors": [],
+        "byReason": {
+          "missing-attribution": 9
+        }
+      },
+      {
+        "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/read-cause-calibration-red-artifacts/chat-native-document-lifec-a87c7--after-real-document-hiding-chromium/native-document-lifecycle.json",
+        "sha256": "ae6e283d057810c8f6bdfdc88e968b92c128dc77cbcb03090395720b6ff5bdc7",
+        "reads": 3,
+        "missingAttribution": 3,
+        "unclassified": 0,
+        "collectorErrors": [],
+        "byReason": {
+          "missing-attribution": 3
+        }
+      },
+      {
+        "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/read-cause-calibration-red-artifacts/chat-native-document-lifec-d5550--after-real-document-hiding-chromium/native-document-lifecycle.json",
+        "sha256": "cdbed07dc48d68bd699597f89ede02fbefd22163249ef29001b3fcc468f9e434",
+        "reads": 5,
+        "missingAttribution": 5,
+        "unclassified": 0,
+        "collectorErrors": [],
+        "byReason": {
+          "missing-attribution": 5
+        }
+      }
+    ],
+    "recordedAt": "2026-10-25T20:46:04.382108+00:00"
+  },
+  "eligibilityCorrection": {
+    "evidence": "read-cause-calibration-native-eligibility.json",
+    "reason": "The real native fixture is RUNNING but activeTurnId is null. A periodic read is ineligible by the unchanged production policy. Keep that native lifecycle test; calibrate scheduled backfill separately on a backend-seeded unfinished turn.",
+    "nativeAssertionStrengthened": "Foreground cause count must increase after actual tab restore, not merely be positive.",
+    "policyFixture": "Backend-seeded RUNNING state, verified activeTurnId, connected socket, visible document and active detail. No frontend state mutation and no live producer."
+  },
+  "checks": {
+    "privateHelperNodeChecks": 26,
+    "bothObserverTypechecks": "passed",
+    "bothObserverBuilds": "passed",
+    "strictHarnessLint": "passed",
+    "candidateBrowserCasesPassed": 5,
+    "candidatePhysicalReads": 32,
+    "baselineBrowserCasesPassed": 3,
+    "baselineBrowserCasesFailed": 2,
+    "baselinePhysicalReads": 85,
+    "positiveMissingOrUnclassified": 0,
+    "positiveCollectorErrors": 0
+  },
+  "receipts": [
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/read-cause-calibration-native-eligibility.json",
+      "sha256": "0e5c723a7c1586ad9d406d74dc2f9af24e4830f7a6f3aecf469f6f360a540881"
+    },
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/read-cause-backfill-policy-red.json",
+      "sha256": "1fa37581511a30fb322cbda7770abedc50f128ea28ccdba7c3a7ab586ac1e658"
+    },
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/read-cause-calibration-candidate-corrected.json",
+      "sha256": "b4a6f786ef19ad577271198881e00fb9f7a62586034a45f69a4c784e5997f2a0"
+    },
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/read-cause-calibration-baseline.json",
+      "sha256": "81ed7a71d19c70aa49db2d6fce9fbdc530869abee2266dabaffe4f8740588c45"
+    },
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/read-cause-calibration-red.json",
+      "sha256": "9534e9f81bdf44227d094ef9e403d591a3f041b334725c147bf6bb8c4074b1a2"
+    }
+  ],
+  "calibrationHarness": {
+    "recordedAt": "2026-10-25T21:03:36.847767+00:00",
+    "purpose": "E2E-only calibration correction: real native fixture activeTurnId null; separately seed unfinished backend turn; require new foreground read after restore. Production and observer app assets unchanged.",
+    "files": [
+      {
+        "path": "apps/web/e2e/helpers/dense-backfill-eligibility.ts",
+        "sha256": "1c2c7017a858973933844ea0411a87548443ff938bd789564f1643d3a82bab62"
+      },
+      {
+        "path": "apps/web/e2e/tests/chat/dense-read-cause-backfill.spec.ts",
+        "sha256": "e14d06d318c91e253bbe98725339c27da2ea527e9bec8de459353269f8cc8937"
+      },
+      {
+        "path": "apps/web/e2e/tests/chat/native-document-lifecycle.spec.ts",
+        "sha256": "54481d7e46e4371a9b55d173d7758bd80f884937c48160cc36c7c18be2e46d99"
+      }
+    ]
+  },
+  "limits": [
+    "Private instrumentation is not shipped and does not establish latency, CPU, memory, battery or M2 Air gains.",
+    "The baseline real native cases stop at the unchanged hidden-read assertion; their total85reads cannot be compared as a matched speed metric with candidate32reads.",
+    "Full-density read-cause attribution and100-switch private-reference proof remain open.",
+    "Initial setup failures and inapplicable periodic expectations remain retained; they are not successful or genuine negative calibrations."
+  ]
+}

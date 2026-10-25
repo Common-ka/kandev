@@ -1,0 +1,138 @@
+{
+  "handle": 3445,
+  "exitCode": 0,
+  "passed": 4,
+  "red": {
+    "handle": 54364,
+    "exitCode": 1,
+    "failed": 3
+  },
+  "tests": [
+    "Missing chat on first visit",
+    "Missing chat only on return after three completed visits",
+    "Original error survives checkpoint write failure",
+    "Healthy native traversal retains0,1,3,0 and loaded history"
+  ],
+  "records": [
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/column-traversal-diagnostics-final-green-artifacts/performance-dense-column-d-93698-column-visit-on-first-entry-chromium/column-traversal-failure.json",
+      "sha256": "db592b146c3ff64afb01e23c982c6574cc653bca7a8c45a3470e16da74f43dd3",
+      "failedVisit": {
+        "index": 0,
+        "position": 0,
+        "taskId": "column-task-0",
+        "sessionId": "column-session-0",
+        "stage": "session-id"
+      },
+      "completedVisits": [],
+      "observationTiming": "after the failed assertion; not its predicate sample",
+      "failedAt": 1792962615193,
+      "requestedAt": 1792962615193,
+      "observedAt": 1792962615196,
+      "receivedAt": 1792962615198,
+      "target": {
+        "columnPresent": true,
+        "rect": {
+          "x": 8,
+          "y": 8,
+          "width": 300,
+          "height": 240
+        },
+        "loadedMessages": 1,
+        "sessionState": null,
+        "activeTurnId": null,
+        "chats": []
+      },
+      "image": {
+        "path": "/tmp/kandev-perf-delivery-5936a872/apps/web/e2e/test-results/performance-dense-column-d-93698-column-visit-on-first-entry-chromium/column-failure.columns.png",
+        "sha256": "05b2dfb019df5c6dcecc3d977e09255fe281ecd6f8cdf4cdec7d8fd92826cd30",
+        "capturedAt": 1792962615222
+      }
+    },
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/column-traversal-diagnostics-final-green-artifacts/performance-dense-column-d-f236c-t-after-traversing-the-deck-chromium/column-traversal-failure.json",
+      "sha256": "58de4c2af7ba7c90144a342e2413f2632e2537f99a5e03a2813960668336c47d",
+      "failedVisit": {
+        "index": 3,
+        "position": 0,
+        "taskId": "column-task-0",
+        "sessionId": "column-session-0",
+        "stage": "session-id"
+      },
+      "completedVisits": [
+        {
+          "position": 0,
+          "taskId": "column-task-0",
+          "sessionId": "column-session-0",
+          "loadedMessages": 1
+        },
+        {
+          "position": 1,
+          "taskId": "column-task-1",
+          "sessionId": "column-session-1",
+          "loadedMessages": 1
+        },
+        {
+          "position": 3,
+          "taskId": "column-task-3",
+          "sessionId": "column-session-3",
+          "loadedMessages": 1
+        }
+      ],
+      "observationTiming": "after the failed assertion; not its predicate sample",
+      "failedAt": 1792962620372,
+      "requestedAt": 1792962620372,
+      "observedAt": 1792962620374,
+      "receivedAt": 1792962620376,
+      "target": {
+        "columnPresent": true,
+        "rect": {
+          "x": 8,
+          "y": 8,
+          "width": 300,
+          "height": 240
+        },
+        "loadedMessages": 1,
+        "sessionState": null,
+        "activeTurnId": null,
+        "chats": []
+      },
+      "image": {
+        "path": "/tmp/kandev-perf-delivery-5936a872/apps/web/e2e/test-results/performance-dense-column-d-f236c-t-after-traversing-the-deck-chromium/column-failure.columns.png",
+        "sha256": "05b2dfb019df5c6dcecc3d977e09255fe281ecd6f8cdf4cdec7d8fd92826cd30",
+        "capturedAt": 1792962620392
+      }
+    }
+  ],
+  "lintHandle": 61271,
+  "lintExitCode": 0,
+  "nodeChecks": 15,
+  "bounds": "Original scrollIntoView calls, visit positions, default5s session/detail checks,30s content check, and loaded-history predicate remain unchanged. All DOM/image observation occurs after original failure.",
+  "productionChanged": false,
+  "recordedAt": "2026-10-25T21:11:00.232064+00:00",
+  "measurementKind": "harness-validation",
+  "initialTestAuthoringFailure": {
+    "handle": 66647,
+    "exitCode": 1,
+    "reason": "Initial error regex omitted the actual Playwright toHaveAttribute wording. Corrected before genuine RED54364. All artifacts retained."
+  },
+  "sourceFiles": [
+    {
+      "path": "apps/web/e2e/helpers/dense-column-diagnostics.ts",
+      "sha256": "924fad245e66ec0c752a81243e75990527d6d2ab6b64faad4a19637e33f69f21"
+    },
+    {
+      "path": "apps/web/e2e/helpers/dense-column-traversal.ts",
+      "sha256": "ec3ebf07218c23fe790d0e4125c017066f5ffd1dd60156420cc25a8f210eebb7"
+    },
+    {
+      "path": "apps/web/e2e/helpers/dense-comparison-sample.ts",
+      "sha256": "5de30e9b43e5e51303aa8e14050d8c338c786f7690b68cce1c09aacf5c07c86b"
+    },
+    {
+      "path": "apps/web/e2e/tests/performance/dense-column-diagnostics.spec.ts",
+      "sha256": "4893b12877ffa7b5a36216c31dfb38b095d8c646ae34b570b1b3e0ff28cd6af9"
+    }
+  ],
+  "remaining": "The earlier dense candidate failure is not reproduced or attributed by synthetic fault tests. They only prove that future failures retain the visit and later DOM/image evidence."
+}

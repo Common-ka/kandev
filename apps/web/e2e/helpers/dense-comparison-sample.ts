@@ -226,6 +226,7 @@ export async function runDenseSample(options: {
       page,
       options.allThreads,
       DENSE_WORKLOAD.layout,
+      { checkpoint: options.checkpoint, failureArtifactPrefix: options.failureArtifactPrefix },
     );
     const history = await loadedDenseHistory(page, threads);
     const animationDiagnostics = await inspectDenseAnimations(page);

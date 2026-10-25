@@ -585,3 +585,16 @@ owned motion, resumed foreground backfill, and retained plugin expansion. The
 paired speed caller does not use this helper. See
 [complete evidence](evidence/native-document-visibility.json), including the
 initial fixture/cleanup timeouts and collapsed-row assertion failure.
+
+
+### Column traversal failure evidence
+
+The fixed first/middle/last/first traversal runs after the measured windows.
+The verifier records the current visit and stage in local variables. It adds
+no browser observation before the existing scroll calls or assertions. On a
+failure, it retains prior successful visits and captures bounded current DOM
+and viewport image evidence before closing the page. The DOM and image are
+later observations, not the failed predicate sample. Diagnostic failure must
+preserve the original traversal error. Validation covers a missing first chat,
+a chat removed only before the return visit, checkpoint write failure and a
+healthy native traversal. The original deadlines and workload remain required.

@@ -170,3 +170,31 @@ protocol documents continued failed attempts, and
 [the Mac reproduction guide](mac-reproduction.md) keeps native commands separate
 from this Linux runner. This assessment does not close the remaining measurement
 or regression-attribution gates.
+
+## Request-cause calibration and column failure evidence
+
+Private observer builds now join each physical history read to an explicit
+call-site cause by transport and request ID. Five candidate browser cases pass:
+all 32 reads have a cause, with no collector errors. The original-version
+observer also classifies all 85 captured reads. Its two real native lifecycle
+cases fail the unchanged hidden-read bound; three other cases pass. Different
+completion paths make these totals unsuitable for a speed comparison.
+
+The real native fixture has no active turn ID. Scheduled backfill is therefore
+calibrated separately with a backend-seeded unfinished turn whose eligibility
+is verified in the browser. Actual tab hiding pauses its reads. Restoring the
+tab must produce a new foreground read. The real native cases still verify
+ordered updates, draft and scroll retention. Both builds, negative controls,
+source identities, and earlier failures are retained in
+[the calibration evidence](evidence/read-cause-calibration.json).
+
+The column verifier now retains the exact failed visit, completed visits,
+assertion stage, bounded DOM observation and image before cleanup. Observation
+occurs after the original failure and is labelled accordingly. Three genuine
+RED regressions become GREEN; four final browser checks, 15 Node checks and
+strict scoped lint pass. Native scroll calls, visit order and assertion bounds
+are unchanged. The original assertion remains the reported failure if diagnostic
+writing fails. See [the failure-evidence checks](evidence/column-traversal-diagnostics.json).
+These synthetic faults do not attribute the earlier dense activation failure.
+Production assets are unchanged; full-density attribution, the remaining
+matrix and the completion gates stay open.
