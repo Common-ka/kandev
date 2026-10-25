@@ -263,3 +263,15 @@ matrix stay open. See [results.md](results.md) for ranges, errors, and limits.
 
 The [completion audit](completion-audit.md) tracks the remaining scenario,
 artifact, correctness, and delivery proof against the full approved scope.
+
+
+## Editor subscription lifecycle follow-up
+
+Full-reference private ownership observation finds user-reference growth of
+200 per 100 task switches on both the original and retained candidate. The
+existing `004.3` cleanup contract covers this finding. A minimal `useEditors`
+effect cleanup passes 14 unit checks, both build/type pipelines, the fixed
+100-switch and Settings release proof, and all 50 targeted desktop/phone checks.
+The new uninstrumented candidate is `39be7b61`. Its full comparison matrix
+remains pending; previous `820f` failures and measurements retain their build
+scope. See [the repair evidence](evidence/editor-user-subscription-ownership.json).

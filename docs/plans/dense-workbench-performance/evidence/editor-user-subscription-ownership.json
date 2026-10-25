@@ -1,0 +1,563 @@
+{
+  "status": "Ownership repair verified. 14 unit checks, both typechecks and builds, and 50 browser checks pass.",
+  "scope": "Lifecycle correctness under AC-UI-SESSION-REFRESH-EFFICIENCY-004.3. No speed or memory-saving claim.",
+  "finding": "Both original and retained candidate user-reference counts grow from 97 to 297 after 100 task switches. Visible API/editor counts and acknowledged scope roles remain stable.",
+  "rootCause": "useEditors subscribes to user updates on mount and never releases its acquired reference on unmount. Two mounted consumers per task explain 200 extra references per 100 switches.",
+  "repair": "Return effect cleanup that calls unsubscribeUser on the same captured client. Keep the root user subscription, editor discovery and current UI behavior.",
+  "productionFiles": [
+    {
+      "path": "apps/web/hooks/domains/settings/use-editors.ts",
+      "sha256": "0ad86cdd6a571cb424e9ae8e37c936c7ce1d5d0f1031366d7ab2facc925cf7fe"
+    },
+    {
+      "path": "apps/web/hooks/domains/settings/use-editors.test.ts",
+      "sha256": "99c437d9cf463a5519322de91f1073264ab36e8c9d81a712a70d34ab9d65d076"
+    }
+  ],
+  "unit": {
+    "handle": 32948,
+    "exitCode": 1,
+    "failed": 3,
+    "passed": 6,
+    "status": "Three new regressions fail and six existing cases pass before the fix.",
+    "log": "/tmp/kandev-editors-user-ownership-red-5936a872.log"
+  },
+  "unitGreen": {
+    "handle": 30965,
+    "exitCode": 0,
+    "passed": 14,
+    "log": "/tmp/kandev-editors-user-ownership-green-5936a872.log"
+  },
+  "builds": {
+    "createdAt": "2026-10-25T22:01:28.105Z",
+    "purpose": "Builds for captured-client editor user-subscription cleanup. No new timing result.",
+    "flags": {
+      "mode": "e2e",
+      "KANDEV_VERSION": "e2e",
+      "KANDEV_I18N_BUNDLE_PSEUDO": "1",
+      "nodeHeapMiB": 8192
+    },
+    "checks": {
+      "unitRed": {
+        "handle": 32948,
+        "exitCode": 1,
+        "failed": 3,
+        "passed": 6
+      },
+      "unitGreen": {
+        "handle": 30965,
+        "exitCode": 0,
+        "passed": 14
+      },
+      "production": {
+        "handle": 65751,
+        "exitCode": 0,
+        "lint": "passed",
+        "typecheck": "passed",
+        "build": "passed"
+      },
+      "observer": {
+        "handle": 19929,
+        "exitCode": 0,
+        "typecheck": "passed",
+        "build": "passed"
+      }
+    },
+    "arms": [
+      {
+        "arm": "production",
+        "root": "/tmp/kandev-perf-delivery-5936a872",
+        "baseRevision": "9b495448d4622b5b517029df1ca32f58f4bedd47",
+        "assetsSha256": "39be7b61627a3539d8305b522079e0da671a9cb3d643286194cbfe164ea12261",
+        "sourcePatchSha256": "3631c73089c9ad8a56f9908ec162d9ac8815e207600c02151ee23e43825fd331",
+        "sourceFiles": [
+          {
+            "path": "apps/web/hooks/domains/settings/use-editors.ts",
+            "sha256": "0ad86cdd6a571cb424e9ae8e37c936c7ce1d5d0f1031366d7ab2facc925cf7fe"
+          },
+          {
+            "path": "apps/web/hooks/domains/settings/use-editors.test.ts",
+            "sha256": "99c437d9cf463a5519322de91f1073264ab36e8c9d81a712a70d34ab9d65d076"
+          }
+        ],
+        "generated": [
+          {
+            "path": "apps/web/generated/changelog.json",
+            "sha256": "8552e9fd1aa79fe07d0eaaa8d05179548ae1c5555b3206a2842c09cec4bfdd43"
+          },
+          {
+            "path": "apps/web/generated/release-notes.json",
+            "sha256": "3391126f01051873eebb779dece251225037923b7e96794855a11af2135c0a37"
+          }
+        ],
+        "lockSha256": "9d5a03a9086f28c93752fce491f896047fbcdbc64abfafe3b3aa53261199c554"
+      },
+      {
+        "arm": "observer",
+        "root": "/tmp/kandev-editor-owner-observer-fix-5936a872",
+        "baseRevision": "9b495448d4622b5b517029df1ca32f58f4bedd47",
+        "assetsSha256": "5cf526000374b44c4b1d08426db459b4a3228fe5bf8cdc73efcc90c1cf57d6b0",
+        "sourcePatchSha256": "ec635e460e6eddecbf9b210114552f04fc48dee6dd72a7a8a17b2f6f04996473",
+        "sourceFiles": [
+          {
+            "path": "apps/web/hooks/domains/session/load-message-window.ts",
+            "sha256": "a5bc6ddb4d80b8f66a958be24dc9610ff609e6fb74fbd936ed6dd3dbad1be17b"
+          },
+          {
+            "path": "apps/web/hooks/domains/session/older-message-pagination.ts",
+            "sha256": "3a7f045b576d24699b84659132cc82cfe6d75d74f909454ef369bb6d12339d9c"
+          },
+          {
+            "path": "apps/web/hooks/domains/session/use-session-message-fetch.ts",
+            "sha256": "72adee5d1f127523ddb5b57b5f962526dc8abfdd1057de6e492a1b59de1ec148"
+          },
+          {
+            "path": "apps/web/hooks/domains/session/use-session-messages.ts",
+            "sha256": "24f0719e636c6124e0d32c98304eaaac55e29c14276404e7a52f6756f15091b2"
+          },
+          {
+            "path": "apps/web/hooks/domains/session/use-session-prompts.ts",
+            "sha256": "5b9121e4e9f576e136556198e0973e4ef43e6c08c02a57310363856a1d480d53"
+          },
+          {
+            "path": "apps/web/hooks/message-request.ts",
+            "sha256": "4d9771142ad14c04563c78340c6e4b53e57f7b0c7004528452d790af808f9701"
+          },
+          {
+            "path": "apps/web/hooks/use-late-clarification-message.ts",
+            "sha256": "735e221f78db0e08d59af0fc0b0f63ec9cd65c65831550683b8cde1fe30c744d"
+          },
+          {
+            "path": "apps/web/hooks/use-summarize-session.ts",
+            "sha256": "4a825eea44806c17e1128c65744db1f63cc425cde0b0548280db5e425aca4a76"
+          },
+          {
+            "path": "apps/web/lib/api/domains/session-api.ts",
+            "sha256": "87377a141dac3f3a2a9b66550d147b41c1b90fae49cfb2f500cd56be6bc2caf3"
+          },
+          {
+            "path": "apps/web/lib/debug/dense-read-attribution.ts",
+            "sha256": "8cceba8740fe8eee48355c586defccc00188aea7360288ce488e8ae2fc36bef3"
+          },
+          {
+            "path": "apps/web/lib/plugins/conversation-host.tsx",
+            "sha256": "d4b10942b314bc312692a3acf347d4acce12a38304190763e4f364ac1690420b"
+          },
+          {
+            "path": "apps/web/lib/ssr/session-page-state.ts",
+            "sha256": "5466fab00930df6e38ed90d80a9fc78c8aaafc916da36a620206e299e77a3391"
+          },
+          {
+            "path": "apps/web/lib/ws/client.ts",
+            "sha256": "ab5f84d07ad75bec81303d5d67f811cbcb6e5f58f90c91599f6f38160dc3f1bc"
+          },
+          {
+            "path": "apps/web/hooks/domains/settings/use-editors.ts",
+            "sha256": "0ad86cdd6a571cb424e9ae8e37c936c7ce1d5d0f1031366d7ab2facc925cf7fe"
+          },
+          {
+            "path": "apps/web/hooks/domains/settings/use-editors.test.ts",
+            "sha256": "99c437d9cf463a5519322de91f1073264ab36e8c9d81a712a70d34ab9d65d076"
+          }
+        ],
+        "generated": [
+          {
+            "path": "apps/web/generated/changelog.json",
+            "sha256": "8552e9fd1aa79fe07d0eaaa8d05179548ae1c5555b3206a2842c09cec4bfdd43"
+          },
+          {
+            "path": "apps/web/generated/release-notes.json",
+            "sha256": "3391126f01051873eebb779dece251225037923b7e96794855a11af2135c0a37"
+          }
+        ],
+        "lockSha256": "9d5a03a9086f28c93752fce491f896047fbcdbc64abfafe3b3aa53261199c554"
+      }
+    ],
+    "browserProof": "pending"
+  },
+  "counterFailure": {
+    "report": ".kandev/diagnostics/dense-workbench-performance/matched-navigation-1792964662547.json",
+    "sha256": "8140d01a26c26f6ba2275e9102359b71648e6c2980d88af5f8c1a893fc1f40eb",
+    "runnerExitCode": 1,
+    "baselineGrowth": 200,
+    "retainedCandidateGrowth": 200,
+    "releaseObserved": false,
+    "scope": "Both attempts fail the private stability assertion before native Settings; no release proof follows from that run."
+  },
+  "fixedCandidate": {
+    "measurementKind": "owner-retention",
+    "runnerHandle": 52453,
+    "runnerExitCode": 1,
+    "candidateStatus": "passed",
+    "negativeControlStatus": "failed as expected:97to297user references; original error retained",
+    "report": ".kandev/diagnostics/dense-workbench-performance/matched-navigation-1792965920822.json",
+    "reportSha256": "ea4fb3e20160bed5bef5105bc753c171d3d89b7de619bb6b15002352a4a35c3c",
+    "attempts": [
+      {
+        "arm": "baseline",
+        "pair": 0,
+        "cpuRate": 1,
+        "sample": "baseline-1x-0",
+        "status": "failed",
+        "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 1\u001b[39m\n\n\u001b[33m@@ -40,11 +40,11 @@\u001b[39m\n\u001b[2m          Array [\u001b[22m\n\u001b[2m            \"fc7b6779-b744-450f-a8da-ece25e11c5a5\",\u001b[22m\n\u001b[2m            3,\u001b[22m\n\u001b[2m          ],\u001b[22m\n\u001b[2m        ],\u001b[22m\n\u001b[32m-       \"userReferences\": 97,\u001b[39m\n\u001b[31m+       \"userReferences\": 297,\u001b[39m\n\u001b[2m      },\u001b[22m\n\u001b[2m      \"instanceId\": 1,\u001b[22m\n\u001b[2m    },\u001b[22m\n\u001b[2m    \"panels\": Array [\u001b[22m\n\u001b[2m      Object {\u001b[22m"
+      },
+      {
+        "arm": "candidate",
+        "pair": 0,
+        "cpuRate": 1,
+        "sample": "candidate-1x-0",
+        "status": "passed"
+      }
+    ],
+    "candidateProof": {
+      "status": "passed for fixed candidate; retained negative control failed",
+      "proof": {
+        "switches": 100,
+        "clientInstanceId": 1,
+        "documentTimeOrigin": 1792966094467.2,
+        "gatewayEpoch": 3,
+        "logicalSessionReferences": 28,
+        "acknowledgedCoreSessions": 1,
+        "releasedRootReferences": {
+          "user": 1,
+          "runs": 0,
+          "metrics": 0
+        }
+      },
+      "states": [
+        {
+          "stage": "before",
+          "logical": {
+            "instanceId": 1,
+            "counts": {
+              "status": "connected",
+              "taskReferences": [["fc7b6779-b744-450f-a8da-ece25e11c5a5", 3]],
+              "sessionReferences": [
+                ["76f6450d-bdc7-4c5b-a43e-612e4a2414d7", 28]
+              ],
+              "focusReferences": [["76f6450d-bdc7-4c5b-a43e-612e4a2414d7", 1]],
+              "sessionReadiness": 1,
+              "coreStreams": 1,
+              "coreRecoveryHandlers": [
+                ["76f6450d-bdc7-4c5b-a43e-612e4a2414d7", 1]
+              ],
+              "conversationSessions": 1,
+              "userReferences": 5,
+              "runReferences": [],
+              "metricsReferences": 0,
+              "pendingRequests": 0
+            }
+          },
+          "apiPanels": 4,
+          "documentEditors": 1,
+          "acknowledgedScopes": 3,
+          "documentTimeOrigin": 1792966094467.2,
+          "gatewayEpoch": 3
+        },
+        {
+          "stage": "after",
+          "logical": {
+            "instanceId": 1,
+            "counts": {
+              "status": "connected",
+              "taskReferences": [["fc7b6779-b744-450f-a8da-ece25e11c5a5", 3]],
+              "sessionReferences": [
+                ["76f6450d-bdc7-4c5b-a43e-612e4a2414d7", 28]
+              ],
+              "focusReferences": [["76f6450d-bdc7-4c5b-a43e-612e4a2414d7", 1]],
+              "sessionReadiness": 1,
+              "coreStreams": 1,
+              "coreRecoveryHandlers": [
+                ["76f6450d-bdc7-4c5b-a43e-612e4a2414d7", 1]
+              ],
+              "conversationSessions": 1,
+              "userReferences": 5,
+              "runReferences": [],
+              "metricsReferences": 0,
+              "pendingRequests": 0
+            }
+          },
+          "apiPanels": 4,
+          "documentEditors": 1,
+          "acknowledgedScopes": 3,
+          "documentTimeOrigin": 1792966094467.2,
+          "gatewayEpoch": 3
+        },
+        {
+          "stage": "released",
+          "logical": {
+            "instanceId": 1,
+            "counts": {
+              "status": "connected",
+              "taskReferences": [],
+              "sessionReferences": [],
+              "focusReferences": [],
+              "sessionReadiness": 0,
+              "coreStreams": 0,
+              "coreRecoveryHandlers": [],
+              "conversationSessions": 0,
+              "userReferences": 1,
+              "runReferences": [],
+              "metricsReferences": 0,
+              "pendingRequests": 0
+            }
+          },
+          "apiPanels": 0,
+          "documentEditors": 0,
+          "acknowledgedScopes": 0,
+          "documentTimeOrigin": 1792966094467.2,
+          "gatewayEpoch": 3
+        }
+      ],
+      "recordedAt": "2026-10-25T22:13:34.346Z"
+    },
+    "builds": {
+      "baseline": {
+        "binary": "/tmp/kandev-read-cause-baseline-5936a872/apps/backend/bin/kandev",
+        "assets": "/tmp/kandev-read-cause-baseline-5936a872/apps/web/dist",
+        "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+        "assetsSha256": "b3f4b5c8d534bb9454a86a1977f052098c14793829741652e9863cb6a9056385"
+      },
+      "candidate": {
+        "binary": "/tmp/kandev-read-cause-candidate-5936a872/apps/backend/bin/kandev",
+        "assets": "/tmp/kandev-editor-owner-observer-fix-5936a872/apps/web/dist",
+        "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+        "assetsSha256": "5cf526000374b44c4b1d08426db459b4a3228fe5bf8cdc73efcc90c1cf57d6b0"
+      }
+    },
+    "buildManifest": ".kandev/diagnostics/dense-workbench-performance/editor-user-subscription-fix-builds/manifest.json",
+    "databaseWitness": {
+      "source": "/tmp/kandev-e2e-0-phJ5Y8/navigation-base.db",
+      "retained": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/editor-owner-fix-full-reference-base.db",
+      "sha256": "93a4444361536727adda9cfdc7db1985d72f4d1be2681303df1c90eb52583831",
+      "reportDatabaseSha256": "93a4444361536727adda9cfdc7db1985d72f4d1be2681303df1c90eb52583831",
+      "tasks": 1000,
+      "sessions": 2,
+      "messages": 2000,
+      "recordedAt": "2026-10-25T22:07:42.068477+00:00"
+    },
+    "rawFiles": [
+      {
+        "path": ".kandev/diagnostics/dense-workbench-performance/matched-navigation-1792965920822.json",
+        "sha256": "ea4fb3e20160bed5bef5105bc753c171d3d89b7de619bb6b15002352a4a35c3c"
+      },
+      {
+        "path": ".kandev/diagnostics/dense-workbench-performance/matched-navigation-1792965920822.json.backend.log",
+        "sha256": "6b0dfa7ddd7c97a3386a897bf2551bce96d2ae02ac7e1c8ba538da5e0b0868e7"
+      },
+      {
+        "path": ".kandev/diagnostics/dense-workbench-performance/matched-navigation-1792965920822.json.baseline-1x-0.backend.log",
+        "sha256": "96c17073bc2e7af25f3b0fb2f327eb4fc4e19b426d382716b430f33824b5140e"
+      },
+      {
+        "path": ".kandev/diagnostics/dense-workbench-performance/matched-navigation-1792965920822.json.candidate-1x-0.backend.log",
+        "sha256": "6b0dfa7ddd7c97a3386a897bf2551bce96d2ae02ac7e1c8ba538da5e0b0868e7"
+      }
+    ],
+    "limitations": [
+      "Expected negative control failure means the whole paired test returns1. This is not a successful paired speed comparison.",
+      "The fixed candidate completed the full100-switch and native Settings release flow; original control stops before Settings on growing private user references.",
+      "No CPU, memory saving, leak absence, battery or M2 Air claim."
+    ],
+    "recordedAt": "2026-10-25T22:13:34.546225+00:00"
+  },
+  "assetAudit": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/editor-owner-fix-production-byte-audit.json",
+    "sha256": "230b44c452e6abc16807eb76d86e217c31675281a195d66ae28da3fa1b932d98",
+    "sidecars": 552,
+    "identityBytes": 62082907,
+    "gzipBytes": 15811830,
+    "privateObserversAbsent": true,
+    "scope": "Whole-tree compressed byte integrity only; no page-transfer or CPU estimate."
+  },
+  "qa": {
+    "status": "All 50 browser checks passed. The interrupted parent receipt was recovered.",
+    "totalChecks": 50,
+    "assetsSha256": "39be7b61627a3539d8305b522079e0da671a9cb3d643286194cbfe164ea12261",
+    "suites": [
+      {
+        "name": "editor-owner-final-desktop",
+        "exitCode": 0,
+        "status": "passed",
+        "expectedChecks": 33,
+        "actualPassed": 33,
+        "project": "chromium",
+        "command": [
+          "pnpm",
+          "--dir",
+          "apps/web",
+          "e2e:run",
+          "--host",
+          "--no-build",
+          "--project",
+          "chromium",
+          "e2e/tests/performance/dense-workbench-correctness.spec.ts",
+          "e2e/tests/performance/dense-navigation-correctness.spec.ts",
+          "e2e/tests/performance/dense-dockview-stream.spec.ts",
+          "e2e/tests/performance/lazy-monaco.spec.ts",
+          "e2e/tests/plugins/conversation-recovery.spec.ts",
+          "e2e/tests/plugins/plugin-action-motion.spec.ts",
+          "e2e/tests/task/task-switch-efficiency.spec.ts",
+          "e2e/tests/task/threads-composer-disclosure.spec.ts",
+          "e2e/tests/task/threads-status-motion.spec.ts",
+          "e2e/tests/chat/chat-motion.spec.ts",
+          "e2e/tests/chat/persistent-animation-motion.spec.ts",
+          "e2e/tests/chat/native-document-lifecycle.spec.ts",
+          "e2e/tests/layout/changes-panel-hidden-lifecycle.spec.ts",
+          "e2e/tests/layout/saved-layout-arrangement.spec.ts",
+          "e2e/tests/layout/dockview-owner-release.spec.ts"
+        ],
+        "env": {
+          "E2E_PORT_OFFSET": "27",
+          "KANDEV_DENSE_WINDOW_MS": "2000",
+          "KANDEV_RUN_QUIET_DIR": ".kandev/diagnostics/dense-workbench-performance/editor-owner-final-desktop-logs"
+        },
+        "assetsSha256": "39be7b61627a3539d8305b522079e0da671a9cb3d643286194cbfe164ea12261",
+        "durationSeconds": 360.14462900161743,
+        "log": {
+          "path": "/tmp/kandev-perf-delivery-5936a872/.kandev/diagnostics/dense-workbench-performance/editor-owner-final-desktop-logs/kandev-run.e2e.nVgHLKqz.log",
+          "sha256": "acf294dfbc02ddb996c110e6b6f6970b25b4f98061ec19231c9c6ebafc95cd2d"
+        },
+        "runnerLog": {
+          "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/editor-owner-final-desktop-runner.log",
+          "sha256": "b2aaab7ffd19d53d8ba402c97143d2a7e8fec170bbd47745878605cd11feea3b"
+        },
+        "artifacts": ".kandev/diagnostics/dense-workbench-performance/editor-owner-final-desktop-artifacts",
+        "recordedAt": "2026-10-25T22:19:34.813463+00:00"
+      },
+      {
+        "name": "editor-owner-final-phone",
+        "exitCode": 0,
+        "status": "passed",
+        "expectedChecks": 17,
+        "actualPassed": 17,
+        "project": "mobile-chrome",
+        "command": [
+          "pnpm",
+          "--dir",
+          "apps/web",
+          "e2e:run",
+          "--host",
+          "--no-build",
+          "--project",
+          "mobile-chrome",
+          "e2e/tests/performance/mobile-dense-workbench-correctness.spec.ts",
+          "e2e/tests/performance/mobile-dense-navigation-correctness.spec.ts",
+          "e2e/tests/performance/mobile-lazy-monaco.spec.ts",
+          "e2e/tests/plugins/mobile-plugin-action-motion.spec.ts",
+          "e2e/tests/task/mobile-task-switch-efficiency.spec.ts",
+          "e2e/tests/task/mobile-threads-composer-disclosure.spec.ts",
+          "e2e/tests/task/mobile-threads-status-motion.spec.ts",
+          "e2e/tests/chat/mobile-chat-motion.spec.ts",
+          "e2e/tests/chat/mobile-persistent-animation-motion.spec.ts"
+        ],
+        "env": {
+          "E2E_PORT_OFFSET": "27",
+          "KANDEV_RUN_QUIET_DIR": ".kandev/diagnostics/dense-workbench-performance/editor-owner-final-phone-logs"
+        },
+        "assetsSha256": "39be7b61627a3539d8305b522079e0da671a9cb3d643286194cbfe164ea12261",
+        "durationSeconds": null,
+        "durationNote": "Playwright reports3.3minutes. Exact parent timing unavailable after interruption.",
+        "log": {
+          "path": "/tmp/kandev-perf-delivery-5936a872/.kandev/diagnostics/dense-workbench-performance/editor-owner-final-phone-logs/kandev-run.e2e.rXrEbwCR.log",
+          "sha256": "349c2409c159e4b66ab420579fd1e9336d0f5faf911c5a944f94b9de2cb674c7"
+        },
+        "runnerLog": {
+          "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/editor-owner-final-phone-runner.log",
+          "sha256": "d21f73350e1b62bd53381792087cd52e6f0c1dea40ea5f8be06fbf7bc3fa64b2"
+        },
+        "artifacts": ".kandev/diagnostics/dense-workbench-performance/editor-owner-final-phone-artifacts",
+        "orchestration": {
+          "launcherHandle": 91944,
+          "launcherExitCode": 143,
+          "cause": "Unattributed SIGTERM; parent did not write its phone receipt.",
+          "recovery": "Actual run-quiet wrapper records underlying E2E exit0; raw log has all17ordered passed cases and no failed summary; Playwright last-run says passed with no failed IDs. No duplicate run.",
+          "lastRunSha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903",
+          "childExitEvidence": "scripts/run-quiet captures RC=$? from the command, prints exit=$RC and exits with that result."
+        },
+        "recordedAt": "2026-10-25T22:30:38.772882+00:00"
+      }
+    ],
+    "inspectedCaptures": [
+      {
+        "path": ".kandev/diagnostics/dense-workbench-performance/editor-owner-final-desktop-artifacts/plugins-plugin-action-moti-33b12--actions-visible-and-usable-chromium/plugin-busy-actions-reduced-motion.png",
+        "sha256": "d60b20d8d1ffb71c0534c75df116c44dc7d5bdd26c727f24a53388eb07f7af62",
+        "inspection": "Busy actions remain visible and static with reduced motion. The fixture toolbar remains crowded."
+      },
+      {
+        "path": ".kandev/diagnostics/dense-workbench-performance/editor-owner-final-desktop-artifacts/task-threads-composer-disc-bd1f0-h-hover-and-keyboard-reveal-chromium/grid-revealed-draft.png",
+        "sha256": "c8f0c84ea851ffd545b6211c7e0789c5b57405c889bc2afcfd57a44428cccec3",
+        "inspection": "Revealed Grid composer retains the exact draft and existing tile arrangement."
+      },
+      {
+        "path": ".kandev/diagnostics/dense-workbench-performance/editor-owner-final-phone-artifacts/plugins-mobile-plugin-acti-e9306--actions-visible-and-usable-mobile-chrome/plugin-busy-actions-reduced-motion.png",
+        "sha256": "f72c7844850ea90c6d8f12ceaa761aea41bbb417128e15a52e429f339e0e352b",
+        "inspection": "Phone busy controls remain visible with reduced motion. Existing fixture toolbar crowding remains."
+      },
+      {
+        "path": ".kandev/diagnostics/dense-workbench-performance/editor-owner-final-phone-artifacts/task-mobile-threads-compos-3bf33-ough-single-chat-navigation-mobile-chrome/phone-visible-composer-short-height.png",
+        "sha256": "e5c52653e196833218f5c8b59977ee9001509f87e9ac490932b6a059cc94bcaa",
+        "inspection": "Short phone viewport keeps the composer, model, attachment and cancellation controls visible."
+      }
+    ],
+    "postRuntime": {
+      "status": "Both new source/asset sets remain identical to frozen build manifests after browser checks",
+      "arms": [
+        {
+          "arm": "production",
+          "assetsSha256": "39be7b61627a3539d8305b522079e0da671a9cb3d643286194cbfe164ea12261"
+        },
+        {
+          "arm": "observer",
+          "assetsSha256": "5cf526000374b44c4b1d08426db459b4a3228fe5bf8cdc73efcc90c1cf57d6b0"
+        }
+      ],
+      "recordedAt": "2026-10-25T22:32:39.837Z"
+    },
+    "cleanup": {
+      "ownedRoots": [
+        "/tmp/kandev-e2e-0-zGKe5t",
+        "/tmp/kandev-e2e-0-s7Jer8",
+        "/tmp/kandev-e2e-0-phJ5Y8"
+      ],
+      "allRootsRemoved": true,
+      "remainingOwnedProcesses": []
+    },
+    "orchestration": {
+      "launcherHandle": 91944,
+      "launcherExitCode": 143,
+      "cause": "Unattributed SIGTERM; parent did not write its phone receipt.",
+      "recovery": "Actual run-quiet wrapper records underlying E2E exit0; raw log has all17ordered passed cases and no failed summary; Playwright last-run says passed with no failed IDs. No duplicate run.",
+      "lastRunSha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903",
+      "childExitEvidence": "scripts/run-quiet captures RC=$? from the command, prints exit=$RC and exits with that result.",
+      "recordedAt": "2026-10-25T22:30:38.772882+00:00"
+    },
+    "scope": "Targeted correctness on uninstrumented production assets. No timing, M2 Air, battery or leak claim.",
+    "recordedAt": "2026-10-25T22:32:39.967798+00:00"
+  },
+  "remaining": [
+    "Normal-hook commit/push and exact-byte original sync",
+    "New final-build reference/stress/all-history/ownership matrix and unresolved Threads attribution"
+  ],
+  "recordedAt": "2026-10-25T22:32:39.967798+00:00",
+  "dependencySetupFailure": {
+    "cause": "Delivery clone linked root/web dependencies but had no workspace UI dependencies. Full typecheck failed resolving React/Radix/UI imports. This is setup failure, not a product regression.",
+    "failedHandle": 43782,
+    "exitCode": 2,
+    "retainedLog": "/tmp/kandev-editor-owner-fix-types-5936a872.log",
+    "removedSymlinksOnly": [
+      {
+        "path": "/tmp/kandev-perf-delivery-5936a872/apps/node_modules",
+        "previousTarget": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/node_modules"
+      },
+      {
+        "path": "/tmp/kandev-perf-delivery-5936a872/apps/web/node_modules",
+        "previousTarget": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/node_modules"
+      }
+    ],
+    "next": "Install the frozen workspace into the delivery clone itself. Original dependency trees remain untouched.",
+    "recordedAt": "2026-10-25T21:58:21.820354+00:00",
+    "logSha256": "3654bd142887bfe0bbd9576962737e4e31f23bb897b7ca2c6af20ce2d0d89615",
+    "repairResult": "Pinned pnpm 9 frozen install passed in the delivery clone. Original dependency trees remained unchanged. Both subsequent typecheck/build pipelines passed."
+  }
+}

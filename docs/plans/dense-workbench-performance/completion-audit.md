@@ -99,7 +99,7 @@ open. Earlier failures are retained.
 | Expanded/collapsed composers and visibility | Existing motion correctness and targeted attribution | Audit scenario records for normal/reduced motion, offscreen columns, hidden Dockview tabs, and actual document hide/restore; The earlier native probe stayed visible because Playwright enables focus emulation. An owned external Chromium default context with `noDefaults: true` now passes actual core/plugin hide-and-restore checks, including updates, draft/scroll retention, paused motion, foreground refresh, and plugin-local expansion ([evidence](evidence/native-document-visibility.json)). This is native browser behavior without property overrides. The final combined desktop suite also passes both core/plugin cases ([evidence](evidence/final-targeted-correctness.json)) |
 | Long-history stress | Earlier all-history attempt failed within the unchanged 360-second load bound | Final-build attempts with verified loaded counts; report overload if a full sample cannot complete |
 | 4x CPU stress | Earlier cold and warm attempts contain failures and incomplete samples | Same final desktop scenarios, with cold and throttle-after-load modes kept separate; retain every failed attempt |
-| Retention after 100 switches | Existing and preliminary candidate runs retain one editor and three Dockview group content containers | Final compatible-task checks retain one editor and three Dockview group content containers on both arms after 100 switches. Incompatible-layout checks also retain one editor and three group containers, with about 18 MB used-heap growth per arm. Session-tab checks retain two editors and three group containers, with about 2 MB used-heap growth per arm. A separate small paired 100-switch check now verifies actual API panels, editors, acknowledged wire scopes, and same-document release. It exposed and verifies the departed-API cleanup ([evidence](evidence/dockview-api-release.json)). Full-reference ownership and private reference-count coverage remain distinct; no leak inference from one heap sample |
+| Retention after 100 switches | Existing and preliminary candidate runs retain one editor and three Dockview group content containers | Final compatible-task checks retain one editor and three Dockview group content containers on both arms after 100 switches. Incompatible-layout checks also retain one editor and three group containers, with about 18 MB used-heap growth per arm. Session-tab checks retain two editors and three group containers, with about 2 MB used-heap growth per arm. A separate small paired 100-switch check now verifies actual API panels, editors, acknowledged wire scopes, and same-document release. It exposed and verifies the departed-API cleanup ([evidence](evidence/dockview-api-release.json)). The fixed private full-reference candidate now verifies stable reference counts through 100 switches and same-document Settings release ([evidence](evidence/editor-user-subscription-ownership.json)). The original counter-growth failure remains. The new uninstrumented final matrix stays pending; no leak inference from one heap sample |
 | Phone parity and final correctness | Native phone composition, history, and deep-tree rerun pass for current candidate | Final combined verification passes 33 desktop and 17 phone cases, including recovery, drafts/navigation, scroll, motion, and native phone input. Selected captures are inspected ([evidence](evidence/final-targeted-correctness.json)). The unexplained initial deep-tree failure remains preserved; dense timing/stress are separate |
 | Delivery and reporting | Production fixes pushed through `f5c8fb8f6ab`; compatible-task evidence pushed in `e9a849ab745` and incompatible-layout evidence in `63c1b8da509` | Final normal-hook commits/pushes, accurate work-order statuses, companion records, public-doc impact check, reproducible commands, and Kandev rich results |
 
@@ -220,3 +220,31 @@ verified, and the disposable instance stops cleanly. See
 [the cause evidence](evidence/full-density-dockview-read-causes.json).
 The final uninstrumented timing matrix, Threads attribution and private
 100-switch ownership proof remain open.
+
+## Editor user-subscription cleanup
+
+The private full-reference ownership check finds a missed cleanup in
+`useEditors`. Its mount effect acquires a user-subscription reference without
+releasing it on unmount. Both the original and retained candidate grow from
+97 to 297 user references after 100 task switches. Session references, actual
+API panels, editors and acknowledged scope roles remain stable. The increasing
+counter is separate from those wire and panel counts.
+
+The effect now releases the same client that it acquired. Three new unit
+regressions fail before this repair, and all 14 related checks pass afterward.
+Both production and private observer typechecks and builds pass. The fixed
+observer completes the full 1,000-task, 2,000-message navigation check: user
+references stay at five after 100 switches. Native Settings navigation clears
+all session references, editors, API panels and acknowledged task/session
+scopes on the same document, client and connection epoch. The single root user
+subscription remains. The original negative control and its failure are retained.
+
+The uninstrumented candidate is `39be7b61`; its private proof bundle is
+`5cf52600`. All 33 desktop and 17 phone checks pass, and four selected
+captures are inspected. The phone runner exits zero; its interrupted parent
+receipt is recovered from the exact wrapper, raw log and Playwright state.
+The parent termination remains separately recorded. These are ownership
+correctness results, not a speed or memory-saving estimate. Existing `820f`
+measurements keep their old build scope. The new final performance matrix and
+remaining Threads attribution stay open. See
+[the repair evidence](evidence/editor-user-subscription-ownership.json).

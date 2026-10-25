@@ -746,3 +746,31 @@ verified, and the disposable instance stops cleanly. See
 [the cause evidence](evidence/full-density-dockview-read-causes.json).
 The final uninstrumented timing matrix, Threads attribution and private
 100-switch ownership proof remain open.
+
+## Editor user-subscription cleanup
+
+The private full-reference ownership check finds a missed cleanup in
+`useEditors`. Its mount effect acquires a user-subscription reference without
+releasing it on unmount. Both the original and retained candidate grow from
+97 to 297 user references after 100 task switches. Session references, actual
+API panels, editors and acknowledged scope roles remain stable. The increasing
+counter is separate from those wire and panel counts.
+
+The effect now releases the same client that it acquired. Three new unit
+regressions fail before this repair, and all 14 related checks pass afterward.
+Both production and private observer typechecks and builds pass. The fixed
+observer completes the full 1,000-task, 2,000-message navigation check: user
+references stay at five after 100 switches. Native Settings navigation clears
+all session references, editors, API panels and acknowledged task/session
+scopes on the same document, client and connection epoch. The single root user
+subscription remains. The original negative control and its failure are retained.
+
+The uninstrumented candidate is `39be7b61`; its private proof bundle is
+`5cf52600`. All 33 desktop and 17 phone checks pass, and four selected
+captures are inspected. The phone runner exits zero; its interrupted parent
+receipt is recovered from the exact wrapper, raw log and Playwright state.
+The parent termination remains separately recorded. These are ownership
+correctness results, not a speed or memory-saving estimate. Existing `820f`
+measurements keep their old build scope. The new final performance matrix and
+remaining Threads attribution stay open. See
+[the repair evidence](evidence/editor-user-subscription-ownership.json).
