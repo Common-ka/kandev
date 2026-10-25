@@ -86,10 +86,29 @@ keep normal throttled cold loading separate from `KANDEV_DENSE_THROTTLE_AFTER_LO
 set `KANDEV_DENSE_HISTORY=all`. Preserve its fixed load deadline and report
 incomplete loading as overload rather than increasing the deadline.
 
+## Check dense owner retention separately
+
+Use one unthrottled pair without a switch-count override or CPU profiler:
+
+```bash
+KANDEV_DENSE_NAVIGATION=1 KANDEV_DENSE_NAV_READINESS=1 \
+KANDEV_DENSE_NAV_RETENTION=1 KANDEV_DENSE_PAIRS=1 KANDEV_DENSE_CPU_RATES=1 \
+pnpm --dir apps/web e2e:run --host --no-build --project chromium \
+  e2e/tests/performance/dense-navigation-comparison.spec.ts
+```
+
+This mode records actual API panels, document editors, and acknowledged gateway
+scopes after 100 extra switches and native Settings navigation. It verifies
+release in the same document and connection epoch. It does not inspect private
+frontend reference counts or establish leak freedom. Speed summaries reject it.
+
 ## Inspect and retain results
 
 Reports are saved under `.kandev/diagnostics/dense-workbench-performance/`.
-Summarize complete paired reports without an error:
+A sample failure is saved immediately, then the runner continues the remaining
+planned independent samples. Wait for the actual runner to finish even if the
+raw report already contains an error. The final test fails if any sample failed.
+Summarize complete paired reports only when every planned attempt passed:
 
 ```bash
 node apps/web/e2e/scripts/summarize-dense-performance.mjs INPUT.json OUTPUT.json
@@ -100,8 +119,17 @@ candidate commit. Compare medians of paired changes as well as individual
 pairs. Retain neutral and regressing results. Fewer requests alone do not prove
 faster interaction. CPU attribution profiles are separate from speed samples.
 
-Run document hide/restore as a separate correctness pass. Playwright enables
-focus emulation by default, which can keep the document visible after tab changes.
+Run document hide/restore as a separate correctness pass:
+
+```bash
+pnpm --dir apps/web e2e:run --host --no-build --project chromium \
+  e2e/tests/chat/native-document-lifecycle.spec.ts
+```
+
+The core and plugin cases launch an owned Chromium context and check real
+visibility transitions, hidden updates, drafts, motion, and return behavior.
+Playwright enables focus emulation by default, which can keep the document
+visible after tab changes.
 An external Chromium default context connected with `noDefaults: true` emits
 real hidden/visible events in both headed and headless capability probes. Do not
 replace visibility properties and call that native behavior. For a separate

@@ -1,0 +1,453 @@
+{
+  "status": "Interrupted after confirmed fixture gap; final reference comparison incomplete",
+  "reason": "Confirmed common reference fixture gap: six prepared Threads repositories each have one tracked file and zero profile files. Stop after first complete pair; correct seed before final reference runs. Not a timeout or inference from raw.error.",
+  "sourceRevision": "7a9840211131f7471657105c0b75d08c4953bf65",
+  "builds": {
+    "baseline": {
+      "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+      "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+      "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+      "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+    },
+    "candidate": {
+      "binary": "/tmp/kandev-perf-delivery-5936a872/apps/backend/bin/kandev",
+      "assets": "/tmp/kandev-perf-delivery-5936a872/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "820fcd57e5ecaf8d39c610f13cfbfabf4cd8dea4e64e555a57522fd3823c9a5d"
+    }
+  },
+  "fixtureWorkload": {
+    "layout": "grid",
+    "extraBusyHeaders": 0,
+    "tasks": 1000,
+    "columns": 30,
+    "messages": 1000,
+    "durationMs": 60000
+  },
+  "fileWitness": {
+    "checkedAt": "2026-10-25T11:43:10.282569+00:00",
+    "method": "Read-only SQLite lookup maps six canonical Threads tasks to their actual task-environment repositories; read-only git ls-files counts tracked profile entries. No browser probes or writes.",
+    "report": "/tmp/kandev-perf-delivery-5936a872/.kandev/diagnostics/dense-workbench-performance/matched-dense-1792928222623.json",
+    "referenceProfileFiles": 630,
+    "repositories": [
+      {
+        "taskId": "8d004e61-2a49-4906-8656-6d0ecb1e2c32",
+        "environmentId": "37159ae5-6816-4c22-8119-de4a8a5e696d",
+        "path": "/tmp/kandev-e2e-0-JHR443/.kandev/tasks/dense-task-0000_z04htpc5/E2E-Repo",
+        "status": "active",
+        "trackedFiles": 1,
+        "profileFiles": 0
+      },
+      {
+        "taskId": "efa9d22c-1323-434a-ba07-3086c643f92d",
+        "environmentId": "c0fdab4a-cea1-45cb-9c0a-3327654c1689",
+        "path": "/tmp/kandev-e2e-0-JHR443/.kandev/tasks/dense-task-0001_5gnv0vvo/E2E-Repo",
+        "status": "active",
+        "trackedFiles": 1,
+        "profileFiles": 0
+      },
+      {
+        "taskId": "8db4f855-65fd-4297-a996-88484f53f199",
+        "environmentId": "5254e687-c24c-484d-aac7-42559abb7d63",
+        "path": "/tmp/kandev-e2e-0-JHR443/.kandev/tasks/dense-task-0002_76i22s36/E2E-Repo",
+        "status": "active",
+        "trackedFiles": 1,
+        "profileFiles": 0
+      },
+      {
+        "taskId": "99974117-bffa-4449-b83d-c7506171ea2b",
+        "environmentId": "f23891a8-6d32-44f7-bf94-4b1c90e48050",
+        "path": "/tmp/kandev-e2e-0-JHR443/.kandev/tasks/dense-task-0003_8egafo2d/E2E-Repo",
+        "status": "active",
+        "trackedFiles": 1,
+        "profileFiles": 0
+      },
+      {
+        "taskId": "a6b1c824-762f-49eb-a701-51491d620a22",
+        "environmentId": "a6e05855-5c47-413b-a45c-50bf83e11652",
+        "path": "/tmp/kandev-e2e-0-JHR443/.kandev/tasks/dense-task-0004_c7ck1s7i/E2E-Repo",
+        "status": "active",
+        "trackedFiles": 1,
+        "profileFiles": 0
+      },
+      {
+        "taskId": "f8c9236b-5c4e-4010-9722-07f7c17c7664",
+        "environmentId": "12229f80-bc86-4680-b5d6-c854acd13d34",
+        "path": "/tmp/kandev-e2e-0-JHR443/.kandev/tasks/dense-task-0005_g03pwfpk/E2E-Repo",
+        "status": "active",
+        "trackedFiles": 1,
+        "profileFiles": 0
+      }
+    ],
+    "mappedTaskCount": 6,
+    "allPreparedReposMeetProfileCount": false
+  },
+  "report": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792928222623.json",
+    "sha256": "8afc58fcaa78f2514144b838df998ca3bd5789aca4499e81c483d9ee0c61e961"
+  },
+  "stopRecord": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/wheel-growth-grid-fixture-stop.json",
+    "sha256": "558460ab7ef6613de24949dd17ef88e3a476e8f195d85199bdfe535e6b8a83b5"
+  },
+  "runnerExitCode": 130,
+  "runnerLog": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/wheel-growth-final-grid-six-pair-source-matched-logs/kandev-run.e2e.NpLanoRx.log",
+    "sha256": "dac22dba56c845f0c9af79fb630259ba714fa7985aab04150b8f2922373bf0cc"
+  },
+  "hostLoad": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/wheel-growth-final-grid-source-matched-host-load.jsonl",
+    "sha256": "451442aa9f89bd259ec69eca06036c15586a89f22fdbdc559f469723ef50286a"
+  },
+  "attempts": [
+    {
+      "arm": "baseline",
+      "pair": 0,
+      "cpuRate": 1,
+      "sample": "baseline-1x-0",
+      "status": "passed"
+    },
+    {
+      "arm": "candidate",
+      "pair": 0,
+      "cpuRate": 1,
+      "sample": "candidate-1x-0",
+      "status": "passed"
+    },
+    {
+      "arm": "candidate",
+      "pair": 1,
+      "cpuRate": 1,
+      "sample": "candidate-1x-1",
+      "status": "pending"
+    },
+    {
+      "arm": "baseline",
+      "pair": 1,
+      "cpuRate": 1,
+      "sample": "baseline-1x-1",
+      "status": "pending"
+    },
+    {
+      "arm": "baseline",
+      "pair": 2,
+      "cpuRate": 1,
+      "sample": "baseline-1x-2",
+      "status": "pending"
+    },
+    {
+      "arm": "candidate",
+      "pair": 2,
+      "cpuRate": 1,
+      "sample": "candidate-1x-2",
+      "status": "pending"
+    },
+    {
+      "arm": "candidate",
+      "pair": 3,
+      "cpuRate": 1,
+      "sample": "candidate-1x-3",
+      "status": "pending"
+    },
+    {
+      "arm": "baseline",
+      "pair": 3,
+      "cpuRate": 1,
+      "sample": "baseline-1x-3",
+      "status": "pending"
+    },
+    {
+      "arm": "baseline",
+      "pair": 4,
+      "cpuRate": 1,
+      "sample": "baseline-1x-4",
+      "status": "pending"
+    },
+    {
+      "arm": "candidate",
+      "pair": 4,
+      "cpuRate": 1,
+      "sample": "candidate-1x-4",
+      "status": "pending"
+    },
+    {
+      "arm": "candidate",
+      "pair": 5,
+      "cpuRate": 1,
+      "sample": "candidate-1x-5",
+      "status": "pending"
+    },
+    {
+      "arm": "baseline",
+      "pair": 5,
+      "cpuRate": 1,
+      "sample": "baseline-1x-5",
+      "status": "pending"
+    }
+  ],
+  "completeSamples": [
+    {
+      "arm": "baseline",
+      "pair": 0,
+      "sample": "baseline-1x-0",
+      "cpuRate": 1,
+      "scheduledUpdates": 1800,
+      "verificationErrors": [],
+      "initialLoadedHistory": [
+        {
+          "sessionId": "01755c25-69e7-41fb-8ae3-abd45bb2b71b",
+          "messages": 100
+        },
+        {
+          "sessionId": "fbdd7297-ea07-4861-a08b-504774f32d2c",
+          "messages": 100
+        },
+        {
+          "sessionId": "2c16802e-4497-440c-be53-58725c568ea3",
+          "messages": 100
+        },
+        {
+          "sessionId": "31282e90-7df4-41d9-9ae5-f49fe41ab1ee",
+          "messages": 100
+        },
+        {
+          "sessionId": "a279db8f-5873-4737-9f44-8dcbe9cf5b2c",
+          "messages": 100
+        },
+        {
+          "sessionId": "6f67fbf8-87ba-4ef4-9c74-c75edb09a875",
+          "messages": 100
+        }
+      ],
+      "interactionMode": "scripted-scroll-v1",
+      "scriptedActions": [
+        {
+          "action": "scroll-up",
+          "taskId": "8d004e61-2a49-4906-8656-6d0ecb1e2c32",
+          "scheduledMs": 12000,
+          "startedMs": 11999.558495000005,
+          "finishedMs": 15152.315479999874,
+          "before": {
+            "scrollTop": 51541,
+            "scrollHeight": 51893,
+            "clientHeight": 352,
+            "composer": "closed",
+            "sessionId": "01755c25-69e7-41fb-8ae3-abd45bb2b71b"
+          },
+          "after": {
+            "scrollTop": 51842,
+            "scrollHeight": 52294,
+            "clientHeight": 164,
+            "composer": "open",
+            "sessionId": "01755c25-69e7-41fb-8ae3-abd45bb2b71b"
+          }
+        },
+        {
+          "action": "return-bottom",
+          "taskId": "8d004e61-2a49-4906-8656-6d0ecb1e2c32",
+          "scheduledMs": 24000,
+          "startedMs": 23999.692371999845,
+          "finishedMs": 27555.13936099992,
+          "before": {
+            "scrollTop": 51842,
+            "scrollHeight": 53224,
+            "clientHeight": 164,
+            "composer": "open",
+            "sessionId": "01755c25-69e7-41fb-8ae3-abd45bb2b71b"
+          },
+          "after": {
+            "scrollTop": 53355,
+            "scrollHeight": 53519,
+            "clientHeight": 164,
+            "composer": "open",
+            "sessionId": "01755c25-69e7-41fb-8ae3-abd45bb2b71b"
+          }
+        },
+        {
+          "action": "leave-tile",
+          "taskId": "8d004e61-2a49-4906-8656-6d0ecb1e2c32",
+          "scheduledMs": 36000,
+          "startedMs": 35999.37133999984,
+          "finishedMs": 37391.24306200002,
+          "before": {
+            "scrollTop": 54285,
+            "scrollHeight": 54449,
+            "clientHeight": 164,
+            "composer": "open",
+            "sessionId": "01755c25-69e7-41fb-8ae3-abd45bb2b71b"
+          },
+          "after": {
+            "scrollTop": 54202,
+            "scrollHeight": 54554,
+            "clientHeight": 352,
+            "composer": "closed",
+            "sessionId": "01755c25-69e7-41fb-8ae3-abd45bb2b71b"
+          }
+        },
+        {
+          "action": "hover-tile",
+          "taskId": "8d004e61-2a49-4906-8656-6d0ecb1e2c32",
+          "scheduledMs": 48000,
+          "startedMs": 47999.160524999956,
+          "finishedMs": 51044.54894499993,
+          "before": {
+            "scrollTop": 55343,
+            "scrollHeight": 55780,
+            "clientHeight": 352,
+            "composer": "closed",
+            "sessionId": "01755c25-69e7-41fb-8ae3-abd45bb2b71b"
+          },
+          "after": {
+            "scrollTop": 55869,
+            "scrollHeight": 56033,
+            "clientHeight": 164,
+            "composer": "open",
+            "sessionId": "01755c25-69e7-41fb-8ae3-abd45bb2b71b"
+          }
+        }
+      ]
+    },
+    {
+      "arm": "candidate",
+      "pair": 0,
+      "sample": "candidate-1x-0",
+      "cpuRate": 1,
+      "scheduledUpdates": 1800,
+      "verificationErrors": [],
+      "initialLoadedHistory": [
+        {
+          "sessionId": "01755c25-69e7-41fb-8ae3-abd45bb2b71b",
+          "messages": 100
+        },
+        {
+          "sessionId": "fbdd7297-ea07-4861-a08b-504774f32d2c",
+          "messages": 100
+        },
+        {
+          "sessionId": "2c16802e-4497-440c-be53-58725c568ea3",
+          "messages": 100
+        },
+        {
+          "sessionId": "31282e90-7df4-41d9-9ae5-f49fe41ab1ee",
+          "messages": 100
+        },
+        {
+          "sessionId": "a279db8f-5873-4737-9f44-8dcbe9cf5b2c",
+          "messages": 100
+        },
+        {
+          "sessionId": "6f67fbf8-87ba-4ef4-9c74-c75edb09a875",
+          "messages": 100
+        }
+      ],
+      "interactionMode": "scripted-scroll-v1",
+      "scriptedActions": [
+        {
+          "action": "scroll-up",
+          "taskId": "8d004e61-2a49-4906-8656-6d0ecb1e2c32",
+          "scheduledMs": 12000,
+          "startedMs": 11999.512757000048,
+          "finishedMs": 28311.796105999965,
+          "before": {
+            "scrollTop": 51815,
+            "scrollHeight": 52167,
+            "clientHeight": 352,
+            "composer": "closed",
+            "sessionId": "01755c25-69e7-41fb-8ae3-abd45bb2b71b"
+          },
+          "after": {
+            "scrollTop": 52014,
+            "scrollHeight": 53414,
+            "clientHeight": 164,
+            "composer": "open",
+            "sessionId": "01755c25-69e7-41fb-8ae3-abd45bb2b71b"
+          }
+        },
+        {
+          "action": "return-bottom",
+          "taskId": "8d004e61-2a49-4906-8656-6d0ecb1e2c32",
+          "scheduledMs": 24000,
+          "startedMs": 30516.98482599994,
+          "finishedMs": 43331.73080400005,
+          "before": {
+            "scrollTop": 52014,
+            "scrollHeight": 53604,
+            "clientHeight": 164,
+            "composer": "open",
+            "sessionId": "01755c25-69e7-41fb-8ae3-abd45bb2b71b"
+          },
+          "after": {
+            "scrollTop": 54369,
+            "scrollHeight": 54576,
+            "clientHeight": 164,
+            "composer": "open",
+            "sessionId": "01755c25-69e7-41fb-8ae3-abd45bb2b71b"
+          }
+        },
+        {
+          "action": "leave-tile",
+          "taskId": "8d004e61-2a49-4906-8656-6d0ecb1e2c32",
+          "scheduledMs": 36000,
+          "startedMs": 45697.82885499997,
+          "finishedMs": 48228.385211999994,
+          "before": {
+            "scrollTop": 54411,
+            "scrollHeight": 54576,
+            "clientHeight": 164,
+            "composer": "open",
+            "sessionId": "01755c25-69e7-41fb-8ae3-abd45bb2b71b"
+          },
+          "after": {
+            "scrollTop": 54224,
+            "scrollHeight": 54576,
+            "clientHeight": 352,
+            "composer": "closed",
+            "sessionId": "01755c25-69e7-41fb-8ae3-abd45bb2b71b"
+          }
+        },
+        {
+          "action": "hover-tile",
+          "taskId": "8d004e61-2a49-4906-8656-6d0ecb1e2c32",
+          "scheduledMs": 48000,
+          "startedMs": 56331.23421100015,
+          "finishedMs": 63858.174777999986,
+          "before": {
+            "scrollTop": 55764,
+            "scrollHeight": 56118,
+            "clientHeight": 352,
+            "composer": "closed",
+            "sessionId": "01755c25-69e7-41fb-8ae3-abd45bb2b71b"
+          },
+          "after": {
+            "scrollTop": 56397,
+            "scrollHeight": 56582,
+            "clientHeight": 164,
+            "composer": "open",
+            "sessionId": "01755c25-69e7-41fb-8ae3-abd45bb2b71b"
+          }
+        }
+      ]
+    }
+  ],
+  "artifacts": ".kandev/diagnostics/dense-workbench-performance/wheel-growth-grid-fixture-gap-interrupted-artifacts",
+  "processAudit": {
+    "remaining": []
+  },
+  "summaryValidation": {
+    "exitCode": 1,
+    "reason": "Incomplete dense attempts",
+    "log": {
+      "path": "/tmp/kandev-threads-file-gap-summary-rejection-5936a872.log",
+      "sha256": "a839957d0f2b1458f7f834cde635f9009df1139b4ccbb6b126cd51030ce8f630"
+    },
+    "topLevelRawErrorAbsent": true,
+    "rawReportModified": false
+  },
+  "limits": [
+    "Only one complete pair; not the planned six-pair series.",
+    "The seed misses the common reference file state in Threads; it validates the recorded chat/history fixture only.",
+    "No speed, M2 Air, INP, battery, or leak claim follows from this interrupted series.",
+    "Existing frozen production assets, original wheel actions, history count, update rate, and deadlines remain unchanged."
+  ],
+  "next": "TDD regression for missing file state, reuse existing profile-file helpers, verify fixture identity before timing, then rerun the final Threads matrix."
+}

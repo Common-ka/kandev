@@ -372,6 +372,31 @@ This fixture validates targeting only. It does not replace the required dense
 Dockview idle/streaming, structural-panel, plugin, visibility, or stress cases.
 See [the harness evidence](evidence/dockview-stream-targets.json).
 
+## Threads reference file state
+
+`seedDenseThreadsFixture` records the actual workspace task count and prepares
+file state in each of the six canonical producer environments, or every
+prepared environment in a smaller rehearsal. It reuses the existing navigation
+profile helpers: 630 profile files in 21 folders, 72 modified files, and one
+untracked task marker. Other original repository files remain in the hash.
+File preparation occurs before the shared database snapshot.
+
+Each arm verifies the expected counts and a SHA-256 manifest of repository file
+bytes before cold entry and after all measured work. These checks are outside
+timing. Reports identify this contract as `fixtureProtocol: threads-files-v1`
+and retain `fixture.taskCount`, `fixture.files`, and per-sample `fileState`.
+The summary rejects missing, changed, or mismatched new-format witnesses.
+Historical reports remain readable without claiming this protocol.
+
+A real fixture regression first fails with zero profile files. The repaired
+seed, summary regressions, and both frozen-build callers pass
+([validation evidence](evidence/threads-reference-file-fixture.json)). The
+preceding six-pair attempt stops after one complete pair when the omission is
+confirmed; its pending attempts and data remain preserved
+([gap evidence](evidence/threads-reference-file-gap.json)). It cannot establish
+the full file-state reference workload. Keep earlier Threads results scoped
+to their recorded data and rerun the final matrix with this verified seed.
+
 ## Dense Dockview fixture
 
 `seedDenseDockviewFixture` preserves the 1,000-task, 30-eligible-task workload

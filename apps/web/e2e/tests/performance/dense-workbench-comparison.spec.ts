@@ -1,3 +1,4 @@
+import { DENSE_THREADS_FILE_PROTOCOL } from "../../scripts/dense-file-summary.mjs";
 import { DENSE_INTERACTION_MODE } from "../../helpers/dense-interactions";
 import {
   DENSE_ATTEMPT_PROTOCOL,
@@ -10,27 +11,17 @@ import { DENSE_VISIBILITY_PROBE } from "../../helpers/dense-visible";
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
-import { test, expect, type SeedData } from "../../fixtures/test-base";
-import type { ApiClient } from "../../helpers/api-client";
-import { DENSE_WORKLOAD, seedDenseWorkbench } from "../../helpers/dense-workbench-fixture";
+import { test, expect } from "../../fixtures/test-base";
+import { DENSE_WORKLOAD } from "../../helpers/dense-workbench-fixture";
+import {
+  seedDenseThreadsFixture,
+  verifyDenseThreadsFiles,
+} from "../../helpers/dense-threads-fixture";
 import { runDenseSample } from "../../helpers/dense-comparison-sample";
 import { hashAssetTree, sha256File, snapshotDatabase } from "../../helpers/dense-snapshot";
-import { seedThreadPresentation } from "../task/threads-presentation-helpers";
 import { profileMachine } from "../task/task-navigation-profile-helpers";
 
 test.skip(process.env.KANDEV_DENSE_COMPARE !== "1", "opt-in matched dense benchmark");
-
-async function seedComparison(api: ApiClient, seed: SeedData) {
-  if (DENSE_WORKLOAD.layout === "columns" && process.env.KANDEV_DENSE_HISTORY === "all")
-    throw new Error("Columns timing requires viewport-bounded history");
-  const fixture = await seedDenseWorkbench(api, seed, true);
-  await seedThreadPresentation(api, {
-    layout: DENSE_WORKLOAD.layout,
-    maxChats: DENSE_WORKLOAD.layout === "columns" ? null : 6,
-    autoHideComposer: true,
-  });
-  return fixture;
-}
 
 test("compares frozen builds on identical dense conversation snapshots", async ({
   browser,
@@ -83,7 +74,7 @@ test("compares frozen builds on identical dense conversation snapshots", async (
     }));
   const lockfileSha256 = sha256File(path.join(candidateRoot, "apps/pnpm-lock.yaml"));
   expect(lockfileSha256).toBe(sha256File(path.join(baselineRoot, "apps/pnpm-lock.yaml")));
-  const fixture = await seedComparison(api, seed);
+  const fixture = await seedDenseThreadsFixture(api, seed, backend);
   await testPage.close();
   const snapshot = path.join(backend.tmpDir, "dense-base.db");
   snapshotDatabase(path.join(backend.tmpDir, "kandev.db"), snapshot);
@@ -103,6 +94,7 @@ test("compares frozen builds on identical dense conversation snapshots", async (
     sourceFiles,
     lockfileSha256,
     measurementKind,
+    fixtureProtocol: DENSE_THREADS_FILE_PROTOCOL,
     attemptProtocol: DENSE_ATTEMPT_PROTOCOL,
     comparisonPlan,
     attempts,
@@ -147,6 +139,9 @@ test("compares frozen builds on identical dense conversation snapshots", async (
           },
           arms[arm].binary,
         );
+        const fileState = await verifyDenseThreadsFiles(api, backend, fixture);
+        report.checkpoints[sample] = { ...report.checkpoints[sample], fileState };
+        save();
         const busyHeaders = fixture.threads.slice(6, 6 + DENSE_WORKLOAD.extraBusyHeaders);
         expect(busyHeaders).toHaveLength(DENSE_WORKLOAD.extraBusyHeaders);
         await seedDenseBusyHeaders(api, busyHeaders);
@@ -166,7 +161,8 @@ test("compares frozen builds on identical dense conversation snapshots", async (
             save();
           },
         });
-        return { arm, pair, ...result };
+        await verifyDenseThreadsFiles(api, backend, fixture);
+        return { arm, pair, ...result, fileState };
       },
       (outcome) => {
         recordDenseAttempt(report, outcome);

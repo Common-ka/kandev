@@ -171,3 +171,25 @@ the full plan independently of the top-level error. Meaningful RED/GREEN checks,
 47 Node tests, strict lint, controlled failure behavior, and the three caller
 rehearsals are preserved in [evidence](evidence/dense-attempt-continuation.json).
 No input, timeout, workload, or speed claim changes.
+
+
+### Verified Threads reference file state
+
+A read-only audit exposes a fixture omission: six prepared Threads repositories
+each contain only the default tracked file. The six-pair attempt is deliberately
+interrupted after its first completed pair; raw data and ten pending attempts
+remain retained, and summary validation rejects it
+([gap evidence](evidence/threads-reference-file-gap.json)).
+
+The shared file helper now seeds 630 profile files and 73 changes in each
+prepared Threads producer environment. The fixture records actual task count
+and verifies file content hashes before and after each sample, outside timing.
+The new `threads-files-v1` summary contract rejects missing or changed witnesses
+while preserving historical report reads. The real RED/GREEN regression,
+53 Node checks, strict lint, and final default-grid, scripted eight-column,
+and full-plugin Dockview callers pass
+([fixture evidence](evidence/threads-reference-file-fixture.json)).
+
+Production assets, original wheel actions, history density, update schedule,
+and correctness bounds remain unchanged. These checks verify the harness. The
+full final reference, stress, all-history, and ownership matrix remains open.

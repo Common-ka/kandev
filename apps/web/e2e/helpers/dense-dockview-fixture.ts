@@ -1,37 +1,9 @@
-import path from "node:path";
 import { expect } from "@playwright/test";
 import type { ApiClient } from "./api-client";
 import type { SeedData } from "../fixtures/test-base";
 import type { BackendContext } from "../fixtures/backend";
-import { GitHelper, makeGitEnv } from "./git-helper";
 import { DENSE_WORKLOAD, seedDenseWorkbench, type DenseThread } from "./dense-workbench-fixture";
-import {
-  PROFILE_FOLDERS,
-  seedProfileFiles,
-  modifyProfileFiles,
-} from "../tests/task/task-navigation-profile-helpers";
-
-async function seedDockviewFiles(api: ApiClient, backend: BackendContext, thread: DenseThread) {
-  const environment = await api.getTaskEnvironment(thread.taskId);
-  const repoPath =
-    environment?.repos?.[0]?.worktree_path ??
-    environment?.worktree_path ??
-    environment?.workspace_path;
-  if (!repoPath?.startsWith(`${backend.tmpDir}${path.sep}`))
-    throw new Error("Dense Dockview fixture requires its disposable worktree");
-  const git = new GitHelper(repoPath, makeGitEnv(backend.tmpDir));
-  seedProfileFiles(git);
-  const marker = modifyProfileFiles(git, thread.title);
-  const profileFiles = git
-    .exec("git ls-files")
-    .trim()
-    .split("\n")
-    .filter((name) => PROFILE_FOLDERS.some((folder) => name.startsWith(`${folder}/entry-`))).length;
-  const changedFiles = git.exec("git status --porcelain").trim().split("\n").length;
-  expect(profileFiles).toBe(630);
-  expect(changedFiles).toBe(73);
-  return { marker, profileFiles, changedFiles };
-}
+import { seedDenseEnvironmentFiles } from "./dense-environment-files";
 
 async function siblingStream(api: ApiClient, first: DenseThread, sessionId: string, index: number) {
   const { messages } = await api.listSessionMessages(sessionId);
@@ -78,7 +50,7 @@ export async function seedDenseDockviewFixture(
   const producers = [first, ...siblings, ...fixture.threads.slice(1, 4)];
   expect(producers).toHaveLength(6);
   expect(new Set(producers.map((thread) => thread.sessionId)).size).toBe(6);
-  const files = await seedDockviewFiles(api, backend, first);
+  const files = await seedDenseEnvironmentFiles(api, backend, first);
   await api.wsRequest("task.plan.create", {
     task_id: first.taskId,
     title: "Dense workbench fixture plan",

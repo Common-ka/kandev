@@ -1,0 +1,681 @@
+{
+  "status": "Targeted fixture and callers passed; final reference matrix remains open",
+  "scope": "Test harness only. Six prepared Threads environments now include the reference file state. Frozen application and original scripted inputs are unchanged.",
+  "sourceFiles": [
+    {
+      "path": "apps/web/e2e/helpers/dense-environment-files.ts",
+      "sha256": "104bef63e05fee3e2a92cd99b55f27d4cf61a69c5fa991dd74f80e24b47a46c8"
+    },
+    {
+      "path": "apps/web/e2e/helpers/dense-threads-fixture.ts",
+      "sha256": "69c3440e0a12309870137533c04cfe85ab09a49ac3298508bb57ebbed29ec4a6"
+    },
+    {
+      "path": "apps/web/e2e/helpers/dense-dockview-fixture.ts",
+      "sha256": "c301161433926bd12393b8cb5cad692a2cbb4a7dc0cc52f993fd2458f5ab4fdb"
+    },
+    {
+      "path": "apps/web/e2e/scripts/dense-file-summary.mjs",
+      "sha256": "8a257d58c0e597932aac90162f24721224dcd562093be4fed22405f9e6ba3fff"
+    },
+    {
+      "path": "apps/web/e2e/scripts/summarize-dense-files.test.mjs",
+      "sha256": "df0fe7844a60db8912b51c03de4eb1dc7a6a1e4ba184eb663269d70869738174"
+    },
+    {
+      "path": "apps/web/e2e/scripts/summarize-dense-performance.mjs",
+      "sha256": "292a5f267a528440d5f5ddeb5f5d72cd654ca76f87939f942f0c2b4d91791374"
+    },
+    {
+      "path": "apps/web/e2e/tests/performance/dense-workbench-comparison.spec.ts",
+      "sha256": "ee91b1bf55d9cb2e5109e5d210ceea9299cdf94efe567866bdb25adfb83359f5"
+    },
+    {
+      "path": "apps/web/e2e/tests/performance/dense-threads-file-fixture.spec.ts",
+      "sha256": "cfaaf83484519da32ff6ca8f088e77fe53893236b1e8718cc599c7cb47deafb4"
+    }
+  ],
+  "sourcePatch": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/threads-reference-files-source.patch",
+    "sha256": "43ca283272ac702bafb44297182ff7e43f230eefde80bf0b0dcbdbd68059967a"
+  },
+  "gapEvidence": "threads-reference-file-gap.json",
+  "red": {
+    "browser": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/threads-reference-files-red-logs/kandev-run.e2e.bGH82keA.log",
+      "sha256": "a37d22795f83a6e9ee40a535fb7cb695c2f759db1bca5797db9ea874727ec397"
+    },
+    "expectedFailure": "Expected630profilefiles; received0",
+    "summary": {
+      "path": "/tmp/kandev-threads-file-summary-red-5936a872.log",
+      "sha256": "64931a053a5423e3deb2563adb7fd88738e88cf1211b41b988f7c5b56de64d34"
+    },
+    "summaryIdentity": {
+      "path": "/tmp/kandev-threads-file-identity-red-5936a872.log",
+      "sha256": "b971e34b11dc68a584c5587a7af290c5b472d82da860afe4227e1ff45c8fd788"
+    },
+    "taskCount": {
+      "path": "/tmp/kandev-threads-task-count-red-5936a872.log",
+      "sha256": "5575356b85811f7cb62963dfc42e59d55ae7d3edabd4068ec266c5f7c522284f"
+    }
+  },
+  "green": {
+    "nodeChecks": 53,
+    "nodeLog": {
+      "path": "/tmp/kandev-threads-files-final-node-5936a872.log",
+      "sha256": "fabdd4c89ca408b03f37674c93e7c981b0ae988e4dc1c6b56533f8c881700c15"
+    },
+    "lintLog": {
+      "path": "/tmp/kandev-threads-files-final-lint-5936a872.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "finalFixtureAndColumnsBrowserChecks": 2,
+    "gridCallerBrowserChecks": 1,
+    "pluginCallerBrowserChecks": 1
+  },
+  "callers": {
+    "final-grid": {
+      "report": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792929817006.json",
+        "sha256": "9402d48ab92b2d861bd46da67e12ce760af36c643b7f5dc73220282892789062"
+      },
+      "sourceRevision": "7a9840211131f7471657105c0b75d08c4953bf65",
+      "sourcePatchSha256": "f22fe98045eafc7cebd314371fa254fc696b90d7e9dd8b5a3b55b9d328d53437",
+      "builds": {
+        "baseline": {
+          "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+          "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+          "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+          "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+        },
+        "candidate": {
+          "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+          "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "820fcd57e5ecaf8d39c610f13cfbfabf4cd8dea4e64e555a57522fd3823c9a5d"
+        }
+      },
+      "attemptProtocol": "continue-and-fail-v1",
+      "comparisonPlan": {
+        "pairs": 1,
+        "rates": [
+          1
+        ],
+        "candidateFirst": false
+      },
+      "attempts": [
+        {
+          "arm": "baseline",
+          "pair": 0,
+          "cpuRate": 1,
+          "sample": "baseline-1x-0",
+          "status": "passed"
+        },
+        {
+          "arm": "candidate",
+          "pair": 0,
+          "cpuRate": 1,
+          "sample": "candidate-1x-0",
+          "status": "passed"
+        }
+      ],
+      "orderedUpdates": 10,
+      "verificationErrors": [
+        [],
+        []
+      ],
+      "summary": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/threads-reference-files-final-grid-summary.json",
+        "sha256": "483a4fe29dc628f8be0e50a89d541bcfe0519ad44cf3c700d86836eda69a9104"
+      },
+      "log": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/threads-reference-files-final-grid-logs/kandev-run.e2e.QuoMFqYM.log",
+        "sha256": "d45706fa9469fd66f8d5dfdfcb6aae520fdd54904a5f30d45d5aed46ef0e8805"
+      },
+      "artifacts": ".kandev/diagnostics/dense-workbench-performance/threads-reference-files-final-grid-artifacts",
+      "fixtureProtocol": "threads-files-v1",
+      "taskCount": 10,
+      "workload": {
+        "layout": "grid",
+        "extraBusyHeaders": 0,
+        "tasks": 10,
+        "columns": 1,
+        "messages": 10,
+        "durationMs": 1000
+      },
+      "files": [
+        {
+          "taskId": "2053b126-e965-4e35-8b9e-4bf674d68911",
+          "sessionId": "700808e0-72a9-4c65-8abc-27946c61b10e",
+          "environmentId": "81500334-6c16-456a-b87f-bc1f123ab107",
+          "repoPath": "/tmp/kandev-e2e-0-O4cICf/.kandev/tasks/dense-task-0000_jqwcmy30/E2E-Repo",
+          "profileFiles": 630,
+          "changedFiles": 73,
+          "stateSha256": "5ff4d53abea3ae02ad8612583653c713de322b2722e9383e0e4796703a7e5bd6"
+        }
+      ],
+      "perArmFileState": [
+        [
+          {
+            "taskId": "2053b126-e965-4e35-8b9e-4bf674d68911",
+            "sessionId": "700808e0-72a9-4c65-8abc-27946c61b10e",
+            "environmentId": "81500334-6c16-456a-b87f-bc1f123ab107",
+            "repoPath": "/tmp/kandev-e2e-0-O4cICf/.kandev/tasks/dense-task-0000_jqwcmy30/E2E-Repo",
+            "profileFiles": 630,
+            "changedFiles": 73,
+            "stateSha256": "5ff4d53abea3ae02ad8612583653c713de322b2722e9383e0e4796703a7e5bd6"
+          }
+        ],
+        [
+          {
+            "taskId": "2053b126-e965-4e35-8b9e-4bf674d68911",
+            "sessionId": "700808e0-72a9-4c65-8abc-27946c61b10e",
+            "environmentId": "81500334-6c16-456a-b87f-bc1f123ab107",
+            "repoPath": "/tmp/kandev-e2e-0-O4cICf/.kandev/tasks/dense-task-0000_jqwcmy30/E2E-Repo",
+            "profileFiles": 630,
+            "changedFiles": 73,
+            "stateSha256": "5ff4d53abea3ae02ad8612583653c713de322b2722e9383e0e4796703a7e5bd6"
+          }
+        ]
+      ]
+    },
+    "final-columns": {
+      "report": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792929711132.json",
+        "sha256": "6fc4c6d730b2aa96380b85ab6d513ebcc43390f4614a61df01b7b68732537b5b"
+      },
+      "sourceRevision": "7a9840211131f7471657105c0b75d08c4953bf65",
+      "sourcePatchSha256": "f22fe98045eafc7cebd314371fa254fc696b90d7e9dd8b5a3b55b9d328d53437",
+      "builds": {
+        "baseline": {
+          "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+          "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+          "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+          "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+        },
+        "candidate": {
+          "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+          "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "820fcd57e5ecaf8d39c610f13cfbfabf4cd8dea4e64e555a57522fd3823c9a5d"
+        }
+      },
+      "attemptProtocol": "continue-and-fail-v1",
+      "comparisonPlan": {
+        "pairs": 1,
+        "rates": [
+          1
+        ],
+        "candidateFirst": false
+      },
+      "attempts": [
+        {
+          "arm": "baseline",
+          "pair": 0,
+          "cpuRate": 1,
+          "sample": "baseline-1x-0",
+          "status": "passed"
+        },
+        {
+          "arm": "candidate",
+          "pair": 0,
+          "cpuRate": 1,
+          "sample": "candidate-1x-0",
+          "status": "passed"
+        }
+      ],
+      "orderedUpdates": 60,
+      "verificationErrors": [
+        [],
+        []
+      ],
+      "summary": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/threads-reference-files-final-columns-summary.json",
+        "sha256": "fdff0d5483276955654baa7d322fb596527d8bc79fea1abd7327ff2653a4e97a"
+      },
+      "log": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/threads-reference-files-final-columns-logs/kandev-run.e2e.mW5b58Rx.log",
+        "sha256": "7940bfd98fddf8b7d3ddf2aa1c1d745eddf9359d5091ea7319ccee26379e0b29"
+      },
+      "artifacts": ".kandev/diagnostics/dense-workbench-performance/threads-reference-files-final-columns-artifacts",
+      "fixtureProtocol": "threads-files-v1",
+      "taskCount": 10,
+      "workload": {
+        "layout": "columns",
+        "extraBusyHeaders": 0,
+        "tasks": 10,
+        "columns": 8,
+        "messages": 10,
+        "durationMs": 1000
+      },
+      "files": [
+        {
+          "taskId": "f85f89fd-860f-4db0-8a91-ff08d8ebe965",
+          "sessionId": "ca015a4e-cc71-403f-bd05-140f59a74a95",
+          "environmentId": "231aad07-b146-4a3a-966a-68d3ed521176",
+          "repoPath": "/tmp/kandev-e2e-0-mPHkwH/.kandev/tasks/dense-task-0000_elayacpr/E2E-Repo",
+          "profileFiles": 630,
+          "changedFiles": 73,
+          "stateSha256": "5ff4d53abea3ae02ad8612583653c713de322b2722e9383e0e4796703a7e5bd6"
+        },
+        {
+          "taskId": "d0b1bdc0-6d27-4b38-96a1-3efa545c7efd",
+          "sessionId": "28289ddd-6856-423a-a51c-7df61d4ebcda",
+          "environmentId": "f1c30612-638a-4d80-862f-1a82917cc48f",
+          "repoPath": "/tmp/kandev-e2e-0-mPHkwH/.kandev/tasks/dense-task-0001_em2yagya/E2E-Repo",
+          "profileFiles": 630,
+          "changedFiles": 73,
+          "stateSha256": "b65a1f677b5651b41a136719f9ed760849a25d129fa808e91a25564ea54af9ff"
+        },
+        {
+          "taskId": "7cc29d80-e772-4af1-b847-f0498e9fa11d",
+          "sessionId": "577e72af-1102-4f1e-aad4-6b7a3a2ce8ee",
+          "environmentId": "a761b0aa-129c-4011-931e-dc9a24b26d34",
+          "repoPath": "/tmp/kandev-e2e-0-mPHkwH/.kandev/tasks/dense-task-0002_fjhb7kk5/E2E-Repo",
+          "profileFiles": 630,
+          "changedFiles": 73,
+          "stateSha256": "b920ca84e5b816a4852a8738a14c5eb6c98d5a01b252ab295d5a21580875cd78"
+        },
+        {
+          "taskId": "a242611d-0feb-4cbd-a2d5-13063f2ef7be",
+          "sessionId": "782616de-b1d0-47ee-a998-1308bf232ac7",
+          "environmentId": "a42c0725-bd50-48db-8038-f442126f2d84",
+          "repoPath": "/tmp/kandev-e2e-0-mPHkwH/.kandev/tasks/dense-task-0003_ve9wqk8a/E2E-Repo",
+          "profileFiles": 630,
+          "changedFiles": 73,
+          "stateSha256": "18f5b44265f9d8d906ad4f8f2013e83dba16592cb67828f9f57c8c63c637e2f1"
+        },
+        {
+          "taskId": "70859a39-24e4-4133-8f05-d5b79fff38ee",
+          "sessionId": "bba109b3-9162-4aab-9a2a-4e0e4f4b1baa",
+          "environmentId": "f4cd6a6b-9e8a-4633-a380-683a8eeb9160",
+          "repoPath": "/tmp/kandev-e2e-0-mPHkwH/.kandev/tasks/dense-task-0004_giqldzge/E2E-Repo",
+          "profileFiles": 630,
+          "changedFiles": 73,
+          "stateSha256": "2e9471d8c3c10ad771d81c540ca918c2ae0a383f789d7d50a45af7b1993d9091"
+        },
+        {
+          "taskId": "8c6d61ea-da41-443c-aa06-535fa4171b6b",
+          "sessionId": "cd97a753-1018-45d2-97ce-2cc80268ebb8",
+          "environmentId": "940ac09b-cd65-4921-8fe4-25ad2d1d477f",
+          "repoPath": "/tmp/kandev-e2e-0-mPHkwH/.kandev/tasks/dense-task-0005_jr09dmu7/E2E-Repo",
+          "profileFiles": 630,
+          "changedFiles": 73,
+          "stateSha256": "7a94157b68f3000169c1b21d5dc05341979a38f5a026036e38200ea6daa53585"
+        }
+      ],
+      "perArmFileState": [
+        [
+          {
+            "taskId": "f85f89fd-860f-4db0-8a91-ff08d8ebe965",
+            "sessionId": "ca015a4e-cc71-403f-bd05-140f59a74a95",
+            "environmentId": "231aad07-b146-4a3a-966a-68d3ed521176",
+            "repoPath": "/tmp/kandev-e2e-0-mPHkwH/.kandev/tasks/dense-task-0000_elayacpr/E2E-Repo",
+            "profileFiles": 630,
+            "changedFiles": 73,
+            "stateSha256": "5ff4d53abea3ae02ad8612583653c713de322b2722e9383e0e4796703a7e5bd6"
+          },
+          {
+            "taskId": "d0b1bdc0-6d27-4b38-96a1-3efa545c7efd",
+            "sessionId": "28289ddd-6856-423a-a51c-7df61d4ebcda",
+            "environmentId": "f1c30612-638a-4d80-862f-1a82917cc48f",
+            "repoPath": "/tmp/kandev-e2e-0-mPHkwH/.kandev/tasks/dense-task-0001_em2yagya/E2E-Repo",
+            "profileFiles": 630,
+            "changedFiles": 73,
+            "stateSha256": "b65a1f677b5651b41a136719f9ed760849a25d129fa808e91a25564ea54af9ff"
+          },
+          {
+            "taskId": "7cc29d80-e772-4af1-b847-f0498e9fa11d",
+            "sessionId": "577e72af-1102-4f1e-aad4-6b7a3a2ce8ee",
+            "environmentId": "a761b0aa-129c-4011-931e-dc9a24b26d34",
+            "repoPath": "/tmp/kandev-e2e-0-mPHkwH/.kandev/tasks/dense-task-0002_fjhb7kk5/E2E-Repo",
+            "profileFiles": 630,
+            "changedFiles": 73,
+            "stateSha256": "b920ca84e5b816a4852a8738a14c5eb6c98d5a01b252ab295d5a21580875cd78"
+          },
+          {
+            "taskId": "a242611d-0feb-4cbd-a2d5-13063f2ef7be",
+            "sessionId": "782616de-b1d0-47ee-a998-1308bf232ac7",
+            "environmentId": "a42c0725-bd50-48db-8038-f442126f2d84",
+            "repoPath": "/tmp/kandev-e2e-0-mPHkwH/.kandev/tasks/dense-task-0003_ve9wqk8a/E2E-Repo",
+            "profileFiles": 630,
+            "changedFiles": 73,
+            "stateSha256": "18f5b44265f9d8d906ad4f8f2013e83dba16592cb67828f9f57c8c63c637e2f1"
+          },
+          {
+            "taskId": "70859a39-24e4-4133-8f05-d5b79fff38ee",
+            "sessionId": "bba109b3-9162-4aab-9a2a-4e0e4f4b1baa",
+            "environmentId": "f4cd6a6b-9e8a-4633-a380-683a8eeb9160",
+            "repoPath": "/tmp/kandev-e2e-0-mPHkwH/.kandev/tasks/dense-task-0004_giqldzge/E2E-Repo",
+            "profileFiles": 630,
+            "changedFiles": 73,
+            "stateSha256": "2e9471d8c3c10ad771d81c540ca918c2ae0a383f789d7d50a45af7b1993d9091"
+          },
+          {
+            "taskId": "8c6d61ea-da41-443c-aa06-535fa4171b6b",
+            "sessionId": "cd97a753-1018-45d2-97ce-2cc80268ebb8",
+            "environmentId": "940ac09b-cd65-4921-8fe4-25ad2d1d477f",
+            "repoPath": "/tmp/kandev-e2e-0-mPHkwH/.kandev/tasks/dense-task-0005_jr09dmu7/E2E-Repo",
+            "profileFiles": 630,
+            "changedFiles": 73,
+            "stateSha256": "7a94157b68f3000169c1b21d5dc05341979a38f5a026036e38200ea6daa53585"
+          }
+        ],
+        [
+          {
+            "taskId": "f85f89fd-860f-4db0-8a91-ff08d8ebe965",
+            "sessionId": "ca015a4e-cc71-403f-bd05-140f59a74a95",
+            "environmentId": "231aad07-b146-4a3a-966a-68d3ed521176",
+            "repoPath": "/tmp/kandev-e2e-0-mPHkwH/.kandev/tasks/dense-task-0000_elayacpr/E2E-Repo",
+            "profileFiles": 630,
+            "changedFiles": 73,
+            "stateSha256": "5ff4d53abea3ae02ad8612583653c713de322b2722e9383e0e4796703a7e5bd6"
+          },
+          {
+            "taskId": "d0b1bdc0-6d27-4b38-96a1-3efa545c7efd",
+            "sessionId": "28289ddd-6856-423a-a51c-7df61d4ebcda",
+            "environmentId": "f1c30612-638a-4d80-862f-1a82917cc48f",
+            "repoPath": "/tmp/kandev-e2e-0-mPHkwH/.kandev/tasks/dense-task-0001_em2yagya/E2E-Repo",
+            "profileFiles": 630,
+            "changedFiles": 73,
+            "stateSha256": "b65a1f677b5651b41a136719f9ed760849a25d129fa808e91a25564ea54af9ff"
+          },
+          {
+            "taskId": "7cc29d80-e772-4af1-b847-f0498e9fa11d",
+            "sessionId": "577e72af-1102-4f1e-aad4-6b7a3a2ce8ee",
+            "environmentId": "a761b0aa-129c-4011-931e-dc9a24b26d34",
+            "repoPath": "/tmp/kandev-e2e-0-mPHkwH/.kandev/tasks/dense-task-0002_fjhb7kk5/E2E-Repo",
+            "profileFiles": 630,
+            "changedFiles": 73,
+            "stateSha256": "b920ca84e5b816a4852a8738a14c5eb6c98d5a01b252ab295d5a21580875cd78"
+          },
+          {
+            "taskId": "a242611d-0feb-4cbd-a2d5-13063f2ef7be",
+            "sessionId": "782616de-b1d0-47ee-a998-1308bf232ac7",
+            "environmentId": "a42c0725-bd50-48db-8038-f442126f2d84",
+            "repoPath": "/tmp/kandev-e2e-0-mPHkwH/.kandev/tasks/dense-task-0003_ve9wqk8a/E2E-Repo",
+            "profileFiles": 630,
+            "changedFiles": 73,
+            "stateSha256": "18f5b44265f9d8d906ad4f8f2013e83dba16592cb67828f9f57c8c63c637e2f1"
+          },
+          {
+            "taskId": "70859a39-24e4-4133-8f05-d5b79fff38ee",
+            "sessionId": "bba109b3-9162-4aab-9a2a-4e0e4f4b1baa",
+            "environmentId": "f4cd6a6b-9e8a-4633-a380-683a8eeb9160",
+            "repoPath": "/tmp/kandev-e2e-0-mPHkwH/.kandev/tasks/dense-task-0004_giqldzge/E2E-Repo",
+            "profileFiles": 630,
+            "changedFiles": 73,
+            "stateSha256": "2e9471d8c3c10ad771d81c540ca918c2ae0a383f789d7d50a45af7b1993d9091"
+          },
+          {
+            "taskId": "8c6d61ea-da41-443c-aa06-535fa4171b6b",
+            "sessionId": "cd97a753-1018-45d2-97ce-2cc80268ebb8",
+            "environmentId": "940ac09b-cd65-4921-8fe4-25ad2d1d477f",
+            "repoPath": "/tmp/kandev-e2e-0-mPHkwH/.kandev/tasks/dense-task-0005_jr09dmu7/E2E-Repo",
+            "profileFiles": 630,
+            "changedFiles": 73,
+            "stateSha256": "7a94157b68f3000169c1b21d5dc05341979a38f5a026036e38200ea6daa53585"
+          }
+        ]
+      ],
+      "columnTraversal": [
+        {
+          "columnCount": 8,
+          "order": [
+            "f85f89fd-860f-4db0-8a91-ff08d8ebe965",
+            "d0b1bdc0-6d27-4b38-96a1-3efa545c7efd",
+            "7cc29d80-e772-4af1-b847-f0498e9fa11d",
+            "a242611d-0feb-4cbd-a2d5-13063f2ef7be",
+            "70859a39-24e4-4133-8f05-d5b79fff38ee",
+            "8c6d61ea-da41-443c-aa06-535fa4171b6b",
+            "0739b8b5-5d8c-4c8a-bcf0-146e99c0acc9",
+            "5c451000-9274-43d3-a6a9-694476685c26"
+          ],
+          "visits": [
+            {
+              "position": 0,
+              "taskId": "f85f89fd-860f-4db0-8a91-ff08d8ebe965",
+              "sessionId": "ca015a4e-cc71-403f-bd05-140f59a74a95",
+              "loadedMessages": 14
+            },
+            {
+              "position": 3,
+              "taskId": "a242611d-0feb-4cbd-a2d5-13063f2ef7be",
+              "sessionId": "782616de-b1d0-47ee-a998-1308bf232ac7",
+              "loadedMessages": 14
+            },
+            {
+              "position": 7,
+              "taskId": "5c451000-9274-43d3-a6a9-694476685c26",
+              "sessionId": "9f5d7ea6-dbba-4487-b6da-584177b9f389",
+              "loadedMessages": 10
+            },
+            {
+              "position": 0,
+              "taskId": "f85f89fd-860f-4db0-8a91-ff08d8ebe965",
+              "sessionId": "ca015a4e-cc71-403f-bd05-140f59a74a95",
+              "loadedMessages": 14
+            }
+          ]
+        },
+        {
+          "columnCount": 8,
+          "order": [
+            "f85f89fd-860f-4db0-8a91-ff08d8ebe965",
+            "d0b1bdc0-6d27-4b38-96a1-3efa545c7efd",
+            "7cc29d80-e772-4af1-b847-f0498e9fa11d",
+            "a242611d-0feb-4cbd-a2d5-13063f2ef7be",
+            "70859a39-24e4-4133-8f05-d5b79fff38ee",
+            "8c6d61ea-da41-443c-aa06-535fa4171b6b",
+            "0739b8b5-5d8c-4c8a-bcf0-146e99c0acc9",
+            "5c451000-9274-43d3-a6a9-694476685c26"
+          ],
+          "visits": [
+            {
+              "position": 0,
+              "taskId": "f85f89fd-860f-4db0-8a91-ff08d8ebe965",
+              "sessionId": "ca015a4e-cc71-403f-bd05-140f59a74a95",
+              "loadedMessages": 14
+            },
+            {
+              "position": 3,
+              "taskId": "a242611d-0feb-4cbd-a2d5-13063f2ef7be",
+              "sessionId": "782616de-b1d0-47ee-a998-1308bf232ac7",
+              "loadedMessages": 14
+            },
+            {
+              "position": 7,
+              "taskId": "5c451000-9274-43d3-a6a9-694476685c26",
+              "sessionId": "9f5d7ea6-dbba-4487-b6da-584177b9f389",
+              "loadedMessages": 10
+            },
+            {
+              "position": 0,
+              "taskId": "f85f89fd-860f-4db0-8a91-ff08d8ebe965",
+              "sessionId": "ca015a4e-cc71-403f-bd05-140f59a74a95",
+              "loadedMessages": 14
+            }
+          ]
+        }
+      ],
+      "offscreenCatchup": [
+        [
+          {
+            "taskId": "70859a39-24e4-4133-8f05-d5b79fff38ee",
+            "ticks": 5,
+            "at": 1792929739833
+          },
+          {
+            "taskId": "8c6d61ea-da41-443c-aa06-535fa4171b6b",
+            "ticks": 5,
+            "at": 1792929740403
+          }
+        ],
+        [
+          {
+            "taskId": "70859a39-24e4-4133-8f05-d5b79fff38ee",
+            "ticks": 5,
+            "at": 1792929773620
+          },
+          {
+            "taskId": "8c6d61ea-da41-443c-aa06-535fa4171b6b",
+            "ticks": 5,
+            "at": 1792929774320
+          }
+        ]
+      ]
+    },
+    "dockview-plugin": {
+      "report": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/matched-dockview-1792929941890.json",
+        "sha256": "900b8d4d3176f784e7c9b6680535597dd363afad8ad63e840ee1f2455171cd4e"
+      },
+      "sourceRevision": "7a9840211131f7471657105c0b75d08c4953bf65",
+      "sourcePatchSha256": "f22fe98045eafc7cebd314371fa254fc696b90d7e9dd8b5a3b55b9d328d53437",
+      "builds": {
+        "baseline": {
+          "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+          "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+          "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+          "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+        },
+        "candidate": {
+          "binary": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/backend/bin/kandev",
+          "assets": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/apps/web/dist",
+          "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+          "assetsSha256": "820fcd57e5ecaf8d39c610f13cfbfabf4cd8dea4e64e555a57522fd3823c9a5d"
+        }
+      },
+      "attemptProtocol": "continue-and-fail-v1",
+      "comparisonPlan": {
+        "pairs": 1,
+        "rates": [
+          1
+        ],
+        "candidateFirst": false
+      },
+      "attempts": [
+        {
+          "arm": "baseline",
+          "pair": 0,
+          "cpuRate": 1,
+          "sample": "baseline-1x-0",
+          "status": "passed"
+        },
+        {
+          "arm": "candidate",
+          "pair": 0,
+          "cpuRate": 1,
+          "sample": "candidate-1x-0",
+          "status": "passed"
+        }
+      ],
+      "orderedUpdates": 60,
+      "verificationErrors": [
+        [],
+        []
+      ],
+      "summary": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/threads-reference-files-dockview-plugin-summary.json",
+        "sha256": "3de9defcab6a806db0ea7aa6b8f4ef752d41ae9a4eaa36c0c7130650e1554d9a"
+      },
+      "log": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/threads-reference-files-dockview-plugin-logs/kandev-run.e2e.ewMVDkgo.log",
+        "sha256": "007261037391847a35759a423b1216c5fab64ebed311fec4ee60db8fd30cd6c5"
+      },
+      "artifacts": ".kandev/diagnostics/dense-workbench-performance/threads-reference-files-dockview-plugin-artifacts",
+      "plugin": {
+        "id": "kandev-plugin-e2e",
+        "panelId": "plugin:kandev-plugin-e2e:prompt-history-plugin",
+        "bundleSha256": "9fd37c4eaa58a63603e071bf6a30d76e478d685c2b3e6d1ed58d7aa3f3d25894",
+        "scope": "Full in-repo E2E plugin, including navigation, toolbar, and review contributions"
+      },
+      "files": {
+        "taskId": "f779c25c-c88d-427f-9e77-9a254b00e9c1",
+        "sessionId": "4887003b-9084-451f-968a-d443b7ab6eba",
+        "environmentId": "e53ba405-47c4-4b10-a64c-21d9c2270c2d",
+        "repoPath": "/tmp/kandev-e2e-0-9Yw0XF/.kandev/tasks/dense-task-0000_kyo5k2k7/E2E-Repo",
+        "profileFiles": 630,
+        "changedFiles": 73,
+        "stateSha256": "5ff4d53abea3ae02ad8612583653c713de322b2722e9383e0e4796703a7e5bd6",
+        "marker": "navigation-available/000-Dense-task-0000.txt"
+      }
+    }
+  },
+  "hashFormat": "Sorted repository-relative paths, then each path + NUL + SHA-256 of file bytes + LF. Hash covers tracked and nonignored untracked files.",
+  "perSampleContract": "Verify counts and content hash after restoring each arm, before cold entry; repeat verification after all measured work. Only complete verified samples are recorded.",
+  "summaryContract": "threads-files-v1 requires actual workspace task count, mapped task/session/environment identities,630profilefiles,73changes,valid hashes,and matching per-arm file state. Legacy reports remain readable without the new protocol claim.",
+  "limits": [
+    "Short callers validate harness behavior and metadata, not performance gains.",
+    "The interrupted prior series and its ten pending attempts remain retained.",
+    "Initial draft grid/columns rehearsals preceded the final task-count metadata; delivery proof uses the final callers linked above.",
+    "Do not promote earlier Threads data as proof of the previously missing file-state dimension.",
+    "Full six-pair, stress, all-history, ownership, regression attribution, and final reporting gates remain open."
+  ],
+  "productionBuild": {
+    "root": "/tmp/kandev-dense-wheel-follow-5936a872",
+    "parentDeliveredRevision": "82320fd31bb96abb69beb73b7555092a00d1f5ff",
+    "parentProductionRevision": "7808415cf2e373f85486101c271dc63a121fe1f1",
+    "sourcePatchSha256": "a3579fefa3da56710aad6b87781fba77fed2f6b607ca026d8cd3761cc8857998",
+    "productionFiles": [
+      {
+        "path": "apps/web/components/task/chat/message-list-native-scroll.ts",
+        "sha256": "16899fa4014403694d7b79ba7549a140bfd66644525d118fbdcac2572e227cc5"
+      }
+    ],
+    "testFiles": [
+      {
+        "path": "apps/web/components/task/chat/message-list-native.test.tsx",
+        "sha256": "3de985a398efccc6a356c6030251724ca76c687e79d36ff6f109dbeb6e66bd42"
+      }
+    ],
+    "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+    "assetsSha256": "820fcd57e5ecaf8d39c610f13cfbfabf4cd8dea4e64e555a57522fd3823c9a5d",
+    "agentctlSha256": "6e768aef1a1692630fe109c25e23ac31ab461b691800c2059e6dfdd5cf0b4d0a",
+    "mockAgentSha256": "c69f05ee9f5622cc5bce83405c2e9240b537f3e79a21da65765d9867592288c1",
+    "lockSha256": "9d5a03a9086f28c93752fce491f896047fbcdbc64abfafe3b3aa53261199c554"
+  },
+  "runtimeIdentities": {
+    "status": "Runtime byte identities verified after targeted callers and before final reference timing; delivered-workload equivalence is checked separately in each report.",
+    "checkedAt": "2026-10-25T12:08:33.714Z",
+    "helperNote": "The original baseline retains its own recorded helper binaries; their hashes differ from the candidate helpers. Candidate runtime copies match its frozen manifest. No control binary was replaced. An initial ad hoc check incorrectly assumed cross-revision helper hashes must match; the corrected check verifies each frozen identity separately.",
+    "deliveryHead": "7a9840211131f7471657105c0b75d08c4953bf65",
+    "builds": {
+      "baseline": {
+        "root": "/tmp/kandev-dense-baseline-595df36",
+        "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+        "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987",
+        "agentctlSha256": "4d08c6e2412f437a735dd6f5edf35a5fa78c70aa25c14824545d98d4e1da7bcc",
+        "mockAgentSha256": "c9621492024a9c3881fd8fbf63242b9f3e5e7fe12ba484097c172d091edd1a4f",
+        "lockSha256": "9d5a03a9086f28c93752fce491f896047fbcdbc64abfafe3b3aa53261199c554"
+      },
+      "candidate": {
+        "root": "/tmp/kandev-perf-delivery-5936a872",
+        "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+        "assetsSha256": "820fcd57e5ecaf8d39c610f13cfbfabf4cd8dea4e64e555a57522fd3823c9a5d",
+        "agentctlSha256": "6e768aef1a1692630fe109c25e23ac31ab461b691800c2059e6dfdd5cf0b4d0a",
+        "mockAgentSha256": "c69f05ee9f5622cc5bce83405c2e9240b537f3e79a21da65765d9867592288c1",
+        "lockSha256": "9d5a03a9086f28c93752fce491f896047fbcdbc64abfafe3b3aa53261199c554"
+      },
+      "frozenCandidate": {
+        "root": "/tmp/kandev-dense-wheel-follow-5936a872",
+        "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+        "assetsSha256": "820fcd57e5ecaf8d39c610f13cfbfabf4cd8dea4e64e555a57522fd3823c9a5d",
+        "agentctlSha256": "6e768aef1a1692630fe109c25e23ac31ab461b691800c2059e6dfdd5cf0b4d0a",
+        "mockAgentSha256": "c69f05ee9f5622cc5bce83405c2e9240b537f3e79a21da65765d9867592288c1",
+        "lockSha256": "9d5a03a9086f28c93752fce491f896047fbcdbc64abfafe3b3aa53261199c554"
+      }
+    },
+    "sourceFiles": [
+      {
+        "path": "apps/web/components/task/chat/message-list-native-scroll.ts",
+        "sha256": "16899fa4014403694d7b79ba7549a140bfd66644525d118fbdcac2572e227cc5"
+      },
+      {
+        "path": "apps/web/components/task/chat/message-list-native.test.tsx",
+        "sha256": "3de985a398efccc6a356c6030251724ca76c687e79d36ff6f109dbeb6e66bd42"
+      }
+    ],
+    "pluginSha256": "9fd37c4eaa58a63603e071bf6a30d76e478d685c2b3e6d1ed58d7aa3f3d25894"
+  }
+}

@@ -28,6 +28,29 @@ legacy_specs: []
 
 ## Latest measured checkpoint
 
+Production `7a984021113` adds the native wheel follow repair and passes 228
+related unit checks plus 33 desktop and 17 phone browser checks. The original
+scripted candidate rehearsal returns to the bottom after streamed height growth;
+its frozen baseline fails at 21 pixels. See
+[the repair evidence](evidence/native-wheel-bottom-follow.json).
+
+The next six-pair grid attempt stopped after one complete pair because a
+read-only audit found only the default file in its six prepared repositories.
+Its data and pending attempts remain preserved, and the summary rejects the
+incomplete plan ([gap evidence](evidence/threads-reference-file-gap.json)).
+The Threads seed now includes 630 profile files and 73 changes in each prepared
+environment. It records actual task count and verifies file hashes before and
+after each sample. The real regression, 53 Node checks, strict lint, default
+grid, scripted eight-column, and full-plugin Dockview callers pass
+([fixture evidence](evidence/threads-reference-file-fixture.json)). These are
+harness correctness checks. The final dense reference matrix remains open.
+
+The benchmark preserves failed attempts and continues the complete planned
+matrix while retaining final failure
+([harness evidence](evidence/dense-attempt-continuation.json)). Older measurements
+below retain their own build and fixture identities. Earlier Threads data do
+not prove the previously missing file-state dimension.
+
 The retained production build at `72085e06b49` passes final six-pair comparisons
 at 1x for compatible tasks, incompatible layouts, and same-environment session
 tabs. Gains are modest and some pairs regress; the 20% warm-p95 target remains

@@ -5,11 +5,51 @@ Status: incomplete. This audit preserves the approved scope in
 not complete the package. Existing results remain evidence for their recorded
 builds, fixtures, and probes; they do not automatically verify the final build.
 
+## Latest build checkpoint
+
+Production commit `7a984021113` repairs native wheel following when streamed
+content grows between input and the resulting scroll. Its immutable asset hash
+is `820fcd57e5ecaf8d39c610f13cfbfabf4cd8dea4e64e555a57522fd3823c9a5d`.
+The build passes 228 related unit checks and the combined 33 desktop and 17
+phone browser checks. A short original-wheel candidate rehearsal returns to
+zero pixels from the bottom while the frozen baseline fails at 21 pixels.
+The eight-column rehearsal passes both arms. See
+[the build and correctness evidence](evidence/native-wheel-bottom-follow.json).
+These checks establish correctness within their scope, not a speed gain.
+
+Commit `4fda423daf7` records the complete attempt plan and continues independent
+samples after a failure while preserving final failure. Its controlled fault
+check verifies that both candidate attempts execute after control failures;
+summary validation rejects incomplete or failed plans. See
+[the harness evidence](evidence/dense-attempt-continuation.json).
+The original native wheel sequence and deadlines remain unchanged. An easier
+explicit-follow scenario does not replace this matrix.
+
+The next six-pair grid attempt stopped after one complete pair when a read-only
+audit found one tracked file and zero profile files in all six canonical
+repositories. Its data, ten pending attempts, logs, and interruption reason
+are retained. The summary rejects the incomplete plan despite its absent
+top-level error ([gap evidence](evidence/threads-reference-file-gap.json)).
+
+The repaired Threads seed now supplies 630 profile files and 73 changes in
+each prepared producer environment. It records the actual task count and
+verifies content hashes before and after each sample, outside timing. The
+regression, 53 Node checks, strict lint, default grid, scripted columns, and
+full-plugin Dockview callers pass ([fixture evidence](evidence/threads-reference-file-fixture.json)).
+The final full-reference matrix still requires new measurements. Earlier
+Threads series retain their recorded chat/history density and file-state limit.
+
+Previous grid, Dockview, navigation, and motion results below also remain
+limited to their recorded build identities. Final-build coverage, stress,
+full-history loading, ownership retention, and regression attribution remain
+open. Earlier failures are retained.
+
 ## Current evidence and remaining proof
 
 | Requirement | Current evidence | Remaining proof |
 | --- | --- | --- |
 | Freeze both builds and use disposable equivalent data | Existing manifests, database backup hashes, canonical fixture assertions, and paired reports | Final retained source/patch, binary, assets, lockfile, harness, and plugin bundle identities |
+| Reference file-state coverage | The missing Threads file state is reproduced and repaired. Targeted default-grid and scripted eight-column callers now verify 630 profile files, 73 changes, mapped identities, actual task count, and matching file hashes on both builds. The shared Dockview helper passes its full-plugin caller ([evidence](evidence/threads-reference-file-fixture.json)) | Collect the final reference matrix with the repaired seed. Older Threads series do not prove this dimension |
 | Incremental conversation delivery and real gap recovery | WO02 tests and retained binary; native/plugin recovery browser cases | Inspect linked receipts and final targeted browser gates; retain scheduled backfill separately |
 | Persistent motion lifecycle | WO03 desktop/phone checks and six-pair busy-header comparison | Include final visibility variants and distinguish the busy-header fixture from the default workload |
 | Asset compression and lazy editor loading | WO04 handler/build/import tests and earlier cold-byte comparison | Final cold-load comparison with corrected visibility probe |
@@ -78,3 +118,17 @@ It does not count API panel objects or subscription owners. Keep the raw field
 for historical comparisons; actual API panel and acknowledged wire-scope retention now have a separate
 small paired check. Private reference counts and dense retention remain distinct
 open checks. No timing calculation changes.
+
+## Public documentation impact
+
+The retained fixes preserve the existing commands, configuration, API, labels,
+layout, and interaction model. They repair delivery, presentation eligibility,
+asset transfer, layout restoration, and scroll following within those contracts.
+The public [Threads composer and chat motion guide](../../public/sessions-and-review.md)
+still describes the resulting behavior: independent transcript scrolling,
+reduced-motion disclosure, retained drafts, and the existing auto-scroll setting.
+No new public setup step or setting is introduced. The internal benchmark
+protocol documents continued failed attempts, and
+[the Mac reproduction guide](mac-reproduction.md) keeps native commands separate
+from this Linux runner. This assessment does not close the remaining measurement
+or regression-attribution gates.

@@ -1,11 +1,33 @@
 # Dense workbench performance results
 
-Status: final six-pair comparisons for compatible tasks, incompatible layouts,
-same-environment session tabs, and Dockview core are complete at 1x. Final grid,
-columns, visibility, stress, and dense owner retention remain open. The full
-plugin Dockview series is also complete; core/plugin regressions still need attribution. The branch is
-`feature/evaluate-live-thread-bc0`; the frozen baseline is
+Status: earlier-build 1x comparisons for compatible tasks, incompatible layouts,
+same-environment session tabs, Dockview core, and full-plugin Dockview are
+recorded below. The latest production build is `7a984021113`. Its final grid,
+columns, stress, owner retention, and regression-attribution gates remain open.
+The branch is `feature/evaluate-live-thread-bc0`; the frozen baseline is
 `595df36ed5c1cf02fd90cb972b623ad6edc53df8`.
+
+## Threads reference file-state correction
+
+The latest grid attempt completes one pair and 3,600 ordered updates before a
+read-only audit confirms that each prepared repository has only its default
+tracked file. The run is deliberately interrupted to repair that missing
+reference dimension. All data and pending attempts remain retained, and the
+summary rejects the incomplete plan. See
+[the gap evidence](evidence/threads-reference-file-gap.json).
+
+The seed now prepares 630 profile files and 73 changes in each canonical
+producer environment. It records actual task count and verifies content hashes
+outside timing on both arms. The real regression, 53 Node checks, strict lint,
+and paired default-grid, original scripted-column, and full-plugin Dockview
+callers pass. See [fixture evidence](evidence/threads-reference-file-fixture.json).
+No speed gain follows from these short checks. Earlier Threads measurements
+retain their exact chat/history workload and do not prove the missing file-state
+dimension. New final-reference comparisons remain required.
+
+The same production build passes 228 related scroll unit checks and 50 targeted
+browser checks ([evidence](evidence/native-wheel-bottom-follow.json)). Older
+measurements and their limits remain below.
 
 ## Final targeted correctness
 
