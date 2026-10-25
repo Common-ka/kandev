@@ -553,3 +553,10 @@ The base advanced once more to `f33e6ef287d53c93b19f95c7054feb7080ec77b0`
 (question-image preview cleanup). It merged without conflicts. The two affected
 frontend unit files passed all 21 tests in the merged tree. SDK race tests,
 vet, and the real npm workspace integration also passed after integration.
+
+The first delivery's CI passed SDK tests but reported `goconst` for repeated
+package-manager kind strings. The resolver now shares constants for both kinds;
+this changes no resolution policy. SDK race tests, vet, and full SDK lint
+passed with CI's `GOFLAGS=-trimpath`. The documentation preview's remote
+demo download failed with a closed TLS socket and recovered on its failed-job
+rerun. Fresh CI remains required for the lint correction.

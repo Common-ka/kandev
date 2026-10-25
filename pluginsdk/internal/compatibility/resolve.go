@@ -14,6 +14,11 @@ import (
 const ModulePath = "github.com/kdlbs/kandev/pluginsdk"
 const PackageName = "@kandev/plugin-sdk"
 
+const (
+	npmLockKind  = "npm"
+	pnpmLockKind = "pnpm"
+)
+
 func ResolveGo(directory string) (Record, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -110,7 +115,7 @@ func ResolveFrontend(directory, packagePath string) (Record, error) {
 	if err = verifyInstalledPath(packagePath, lockRoot, installed.Version, kind); err != nil {
 		return Record{}, err
 	}
-	if kind == "npm" {
+	if kind == npmLockKind {
 		err = checkNPMLock(lockRoot, directory, packagePath, spec, installed.Version)
 	} else {
 		err = checkPNPMLock(lockRoot, directory, spec, installed.Version)
@@ -138,7 +143,7 @@ func installedFrontend(directory, root, kind, requested string) (string, error) 
 		if !os.IsNotExist(err) {
 			return "", err
 		}
-		if current == root || kind != "npm" {
+		if current == root || kind != npmLockKind {
 			return "", fmt.Errorf("installed frontend SDK not found within lockfile root %s", root)
 		}
 	}
@@ -147,7 +152,7 @@ func installedFrontend(directory, root, kind, requested string) (string, error) 
 func findLock(directory string) (string, string, error) {
 	for current := directory; ; current = filepath.Dir(current) {
 		found := ""
-		for _, entry := range []struct{ name, kind string }{{"package-lock.json", "npm"}, {"pnpm-lock.yaml", "pnpm"}} {
+		for _, entry := range []struct{ name, kind string }{{"package-lock.json", npmLockKind}, {"pnpm-lock.yaml", pnpmLockKind}} {
 			_, err := os.Stat(filepath.Join(current, entry.name))
 			if err == nil {
 				if found != "" {
@@ -186,7 +191,7 @@ func verifyInstalledPath(path, root, version, kind string) error {
 		return err
 	}
 	store := filepath.Join(root, "node_modules", ".pnpm", "@kandev+plugin-sdk@"+version, "node_modules", "@kandev", "plugin-sdk")
-	if kind == "pnpm" && actual == store {
+	if kind == pnpmLockKind && actual == store {
 		return nil
 	}
 	return fmt.Errorf("frontend SDK is a local substitution outside the installed package or pnpm store")
