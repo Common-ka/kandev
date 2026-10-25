@@ -20,6 +20,7 @@ import type { UtilityGenerationResult } from "@/hooks/use-utility-agent-generato
 import type { AgentProfileOption, WorkspaceState } from "@/lib/state/slices";
 import type { AgentProfileRecentUseContext } from "@/lib/types/http-agent-profile-recent-use";
 import type { TaskEditDialogDependenciesState } from "@/hooks/domains/task/use-task-edit-dialog-dependencies";
+import type { useTaskEditSandbox } from "@/hooks/domains/task/use-task-edit-sandbox";
 import type {
   KanbanMultiState,
   WorkflowSnapshotData,
@@ -608,6 +609,8 @@ export type SubmitHandlersDeps = {
   noRepository: boolean;
   /** Predecessor task IDs to link at creation time. */
   blockedBy?: string[];
+  /** Operator policy draft. Save must finish before launch. */
+  editSandbox?: Pick<TaskEditDialogDependenciesState, "isDirty" | "ready" | "save">;
   /** Edit-mode dependency draft and persistence state. */
   editDependencies?: Pick<TaskEditDialogDependenciesState, "isDirty" | "ready" | "save">;
   /** Optional host folder for repo-less tasks; empty means kandev creates a scratch workspace. */
@@ -663,6 +666,7 @@ export type DialogFormBodyProps = {
   launchPreview: TaskCreateLaunchPreview | null;
   fs: DialogFormState;
   editDependencies: TaskEditDialogDependenciesState;
+  editSandbox: ReturnType<typeof useTaskEditSandbox>;
   handleKeyDown: ReturnType<typeof useKeyboardShortcutHandler>;
   onTaskNameChange: (v: string) => void;
   onRowRepositoryChange: (key: string, value: string) => void;

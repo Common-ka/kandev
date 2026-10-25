@@ -31,6 +31,7 @@ import {
 } from "@/components/task-create-dialog-selectors";
 import { RepoChipsRow } from "@/components/task-create-dialog-repo-chips";
 import { TaskCreateAdvancedSettings } from "@/components/task-create-dialog-advanced-settings";
+import { SandboxSelectionForm } from "@/components/settings/sandbox-selection-settings";
 import { TaskEditDialogDependencies } from "@/components/task-edit-dialog-dependencies";
 import type {
   DialogFormBodyProps,
@@ -231,6 +232,14 @@ function DialogFormBody(props: DialogFormBodyProps) {
         onResetWorkflowAgentOverrides={props.onResetWorkflowAgentOverrides}
         onRetryWorkflowAgentOverrides={props.onRetryWorkflowAgentOverrides}
       />
+      {props.isEditMode && props.editSandbox.visible && (
+        <SandboxSelectionForm
+          scope="task"
+          model={props.editSandbox.model}
+          inlineChoices
+          disabled={props.isCreatingSession || props.isCreatingTask}
+        />
+      )}
       {props.isEditMode && (
         <TaskEditDialogDependencies
           state={props.editDependencies}

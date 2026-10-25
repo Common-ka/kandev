@@ -472,6 +472,9 @@ func appendSessionStateMessageWithCancellation(
 		"name":                     session.Name,
 		"cancellation_pending":     false,
 		"cancellation_revision":    uint64(0),
+		"execution_snapshot":       session.ExecutionSnapshot,
+		"execution_observation":    session.ExecutionObservation,
+		"queue_incarnation_id":     session.QueueIncarnationID,
 	}
 	if cancellationProvider != nil {
 		pending, revision := cancellationPendingSnapshot(cancellationProvider, sessionID)
@@ -1819,6 +1822,9 @@ func registerSecondaryRoutes(
 
 	agentsettingshandlers.RegisterRoutes(p.router, p.agentSettingsController, p.gateway.Hub, p.log, p.interimSettingsInterlockToken)
 	p.log.Debug("Registered Agent Settings handlers (HTTP)")
+	if p.services.Sandbox != nil {
+		p.services.Sandbox.RegisterRoutes(p.router)
+	}
 
 	// Login PTY: spawns agent login commands under a PTY on the kandev host
 	// (claude auth login, auggie login, ...). The manager is shared with Quick

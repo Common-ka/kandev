@@ -1850,6 +1850,11 @@ func (m *Manager) Launch(ctx context.Context, req *LaunchRequest) (*AgentExecuti
 			return nil, err
 		}
 	}
+	if m.sandboxAdmission != nil {
+		if err := m.sandboxAdmission(ctx, req); err != nil {
+			return nil, err
+		}
+	}
 	if err := m.validateManagedToolPolicyAdmission(ctx, req); err != nil {
 		return nil, err
 	}
@@ -1991,6 +1996,7 @@ func (m *Manager) promoteWorkspaceExecution(ctx context.Context, execution *Agen
 		execution.AgentArgs = cmds.args
 		execution.ContinueArgs = cmds.continueArgs
 		execution.LaunchWrapper = cmds.wrapper
+		execution.SandboxSelection = req.SandboxSelection
 		if req.ACPSessionID != "" && execution.ACPSessionID == "" {
 			execution.ACPSessionID = req.ACPSessionID
 		}
@@ -2462,6 +2468,7 @@ func (m *Manager) buildExecutionFromInstance(
 	execution.AgentArgs = cmds.args
 	execution.ContinueArgs = cmds.continueArgs
 	execution.LaunchWrapper = cmds.wrapper
+	execution.SandboxSelection = req.SandboxSelection
 	return execution, nil
 }
 
@@ -3072,13 +3079,7 @@ func (m *Manager) configureAndStartAgent(ctx context.Context, execution *AgentEx
 		return "", fmt.Errorf("execution %q has no agentctl client", execution.ID)
 	}
 
-	// Starting with stale agent configuration could expose an old credential
-	// set, so the subprocess must not start when configuration delivery fails.
-	if err := client.ConfigureAgent(ctx, execution.AgentCommand, execution.AgentArgs, configureEnv, execution.ContinueCommand, execution.ContinueArgs, execution.LaunchWrapper); err != nil {
-		return "", fmt.Errorf("failed to configure agent: %w", err)
-	}
-
-	fullCommand, err := client.Start(ctx)
+	fullCommand, err := m.configureAndStartProcess(ctx, execution, client, configureEnv)
 	if err != nil {
 		m.updateExecutionError(execution.ID, "failed to start agent: "+err.Error())
 		return "", fmt.Errorf("failed to start agent: %w", err)

@@ -358,8 +358,8 @@ func redactPassthroughArgs(args []string) []string {
 }
 
 func passthroughCommandForLog(execution *AgentExecution, args []string) []string {
-	if isSSHPassthrough(execution) {
-		return []string{"remote CLI", "<arguments omitted>"}
+	if isSSHPassthrough(execution) || (execution != nil && execution.SandboxSelection != nil) {
+		return []string{"agent CLI", "<arguments omitted>"}
 	}
 	return redactPassthroughArgs(args)
 }
@@ -464,6 +464,9 @@ func (m *Manager) applyPassthroughMCPWithPreparation(
 	if err != nil {
 		return nil, fmt.Errorf("build passthrough MCP config: %w", err)
 	}
+	if err := validateSandboxMCPArtifacts(execution, len(servers), artifacts); err != nil {
+		return nil, err
+	}
 	if err := m.writePassthroughMCPFiles(ctx, execution, artifacts.Files); err != nil {
 		return nil, err
 	}
@@ -485,11 +488,15 @@ func (m *Manager) passthroughMCPServers(
 	if port <= 0 {
 		return nil, fmt.Errorf("standalone port unavailable for passthrough MCP config")
 	}
-	servers := []agentctltypes.McpServer{{
-		Name: kandevMCPServerName,
-		Type: string(mcpconfig.ServerTypeHTTP),
-		URL:  m.agentMCPURL(execution, port, "/mcp"),
-	}}
+	endpoint, err := m.sandboxMCPRoute(ctx, execution, m.agentMCPURL(execution, port, "/mcp"))
+	if err != nil {
+		return nil, err
+	}
+	servers := []agentctltypes.McpServer{}
+	if endpoint != "" {
+		servers = append(servers, agentctltypes.McpServer{Name: kandevMCPServerName, Type: string(mcpconfig.ServerTypeHTTP), URL: endpoint})
+	}
+
 	profileServers, err := m.resolveMcpServersWithParams(ctx, execution.AgentProfileID, execution.MetadataSnapshot(), agentConfig)
 	if err != nil {
 		return nil, err
@@ -507,6 +514,9 @@ func (m *Manager) passthroughMCPServers(
 // kandev-owned temp config path (for file+flag / file+env strategies) and the
 // workspace dir (for project-local file strategies like Cursor).
 func (m *Manager) passthroughMCPPaths(execution *AgentExecution) mcpconfig.PassthroughPaths {
+	if execution.SandboxSelection != nil {
+		return sandboxMCPPaths(execution)
+	}
 	root := m.dataDir
 	if root == "" {
 		root = filepath.Join(os.TempDir(), "kandev")
@@ -577,6 +587,9 @@ func (m *Manager) materializePassthroughFile(ctx context.Context, execution *Age
 }
 
 func (m *Manager) materializePassthroughFileLocked(execution *AgentExecution, f mcpconfig.PassthroughConfigFile) (bool, error) {
+	if execution.SandboxSelection != nil {
+		return m.materializeSandboxMCPFileLocked(execution, f)
+	}
 	if escapes, err := workspacePathEscapes(execution.WorkspacePath, f.Path); err != nil {
 		return false, fmt.Errorf("validate passthrough MCP config path: %w", err)
 	} else if escapes {
@@ -912,7 +925,7 @@ func (m *Manager) startInteractiveProcess(ctx context.Context, execution *AgentE
 	startReq := buildInteractiveStartRequest(execution.SessionID, execution, pt, env, cmd, stripEnv, true)
 	startReq.InitialPromptChunks = passthroughInitialPromptChunks(execution, pt)
 
-	processInfo, err := interactiveRunner.Start(ctx, startReq)
+	processInfo, err := m.startSandboxInteractive(ctx, execution, interactiveRunner, startReq)
 	if err != nil {
 		m.updateExecutionError(execution.ID, "failed to start passthrough session: "+err.Error())
 		return nil, fmt.Errorf("failed to start passthrough session: %w", err)
@@ -1278,7 +1291,7 @@ func (m *Manager) resumePassthroughSession(ctx context.Context, sessionID, expec
 	if err := m.ensureLaunchSessionStillActive(ctx, sessionID, executionAdmissionAgent); err != nil {
 		return err
 	}
-	processInfo, err := interactiveRunner.Start(ctx, startReq)
+	processInfo, err := m.startSandboxInteractive(ctx, execution, interactiveRunner, startReq)
 	if err != nil {
 		return fmt.Errorf("failed to start passthrough session: %w", err)
 	}
@@ -1542,7 +1555,7 @@ func (m *Manager) attemptResumeFallbackForProcess(execution *AgentExecution, run
 	startReq := buildInteractiveStartRequest(sessionID, execution, pt, env, cmd, rt.StripEnv, true)
 	startReq.InitialPromptChunks = passthroughInitialPromptChunks(execution, pt)
 
-	processInfo, err := runner.Start(ctx, startReq)
+	processInfo, err := m.startSandboxInteractive(ctx, execution, runner, startReq)
 	if err != nil {
 		m.notifyFallbackInfrastructureFailure(runner, sessionID, "start fresh process", err)
 		return
