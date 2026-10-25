@@ -136,3 +136,34 @@ It reported no assertion failure or data race before that timeout. This is
 incomplete validation, not a passing full suite. The archive-context package
 passed with the race detector. Focused handler race validation and fresh CI are
 recorded separately in the plan.
+
+## Browser fixture validation after container fixes
+
+At `33242d13906ddc6c8cb146470ac1d0e129dcf14c`, backend and frontend CI and
+all six container shards passed. E2E run `40190052557` remained failed because
+one browser test passed only on retry. The storage cleanup navigation assertion
+passed five focused local runs and the single permitted failed-job rerun. No
+production or test change was justified for that assertion.
+
+The rerun exposed a different mobile MCP test failure: the saved-report case
+expected `deferred_restart` but received the real backend state, `applied`. The
+failed-attempt trace showed that the intended fixture response was not served
+after the route was removed and installed again. It did not show a selection
+write or establish a production state-transition defect. The exact interception
+race remains unproven. An unchanged local replay reproduced the same assertion
+at 320px with retries disabled: one failure and eight passes across three
+viewport widths.
+
+The shared helper now retains one route for all saved-report cases, captures the
+selected state before fetching the backend response, and marks that response
+with a test-only header. The response wait matches that header before checking
+the UI. This avoids reading a response body that reload can discard. All state, copy, keyboard, scrolling,
+and touch-target assertions remain. This correction changes only test setup and
+synchronization. It does not change plugin support or production MCP behavior.
+
+The failing helper existed only in the current base branch. A conflict-free
+merge of `main` at `cc687bdce96bc22fb8a9ca87abe571b8309d3125` made that source
+available in this PR. The corrected helper passed nine mobile tests and two
+desktop/tablet tests with retries disabled. Formatting, lint, sleep-ratchet,
+workflow contracts, and documentation checks passed. The secondary reviewer
+found no blocking issue. Fresh CI for the resulting head remains required.

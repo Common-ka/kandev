@@ -419,3 +419,37 @@ Scoped Go lint passed with zero issues. The secondary reviewer found no blocking
 issue in the archive or SSH correction. A finite response-deadline assertion
 addresses their additional coverage suggestion. Container execution remains a
 CI requirement because this workspace has no Docker daemon.
+
+### Browser fixture validation after container fixes
+
+The published archive/SSH correction passed backend and frontend CI and all six
+container shards. The browser aggregate still failed on a retry-pass storage
+assertion. Five unchanged local runs passed. The single failed-job rerun passed
+that assertion but exposed an MCP saved-report fixture failure at 320px.
+
+PR cleanup work order: integrate the current base containing the failing helper,
+retain its mock route across report cases, and await the intended response before
+UI assertions. Preserve all desktop and mobile assertions. The unchanged local
+baseline reproduced the same `deferred_restart` versus `applied` failure with
+retries disabled. Validate the correction at 320px, 393px, 767px, desktop, and
+tablet widths, plus helper lint, formatting, and the sleep ratchet. Check the
+auto-merged workflow contracts and documentation. Commit through normal hooks,
+push to the same draft PR, and require fresh CI and review evidence.
+
+The corrected helper passed nine mobile runs (320px, 393px, and 767px, three
+runs each) with retries disabled. The command was
+`pnpm e2e:raw --project=mobile-chrome e2e/tests/chat/mobile-mcp-status.spec.ts --grep 'contains multiline MCP connection rows' --repeat-each=3 --retries=0 --trace=on`.
+The isolated checkout used the current base's MCP implementation and the exact
+edited helper. It did not include the later archive-response binary correction;
+fresh current-head CI remains required for the full integrated result.
+
+Helper ESLint, Prettier, and sleep-ratchet checks passed. Workflow contracts
+passed: 10 SDK selection tests, 27 E2E workflow tests, and 68 release tests
+(with GPG available). Catalog validation passed for 404 decisions and 1734
+specifications; all specification files passed. The secondary reviewer found no
+blocking issue in the final persistent-route and response-header correction.
+
+Desktop and tablet checks also passed with retries disabled (two tests):
+`pnpm e2e:raw --project=chromium e2e/tests/chat/mcp-status.spec.ts --grep 'explains mixed connections|tablet MCP connections' --retries=0 --trace=on`.
+The final helper therefore passed 11 focused browser tests. Fresh CI and review
+on the delivered merge commit remain pending.
