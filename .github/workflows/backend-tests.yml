@@ -224,7 +224,8 @@ jobs:
     # Checkout receives the short-lived job token. Keep this credential-bearing
     # path on GitHub-hosted capacity during the external-runner pilot.
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Include cold builds, SDK consumers, the 15-minute lint budget, and cache cleanup.
+    timeout-minutes: 30
     # Pre-baked image bundles Go, golangci-lint, go-licenses, Docker CLI, Node,
     # pnpm, and the Playwright base — see .github/docker/ci-base/Dockerfile.
     # Skips the per-run setup-go / golangci-lint download steps below.

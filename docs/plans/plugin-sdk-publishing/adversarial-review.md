@@ -167,3 +167,19 @@ available in this PR. The corrected helper passed nine mobile tests and two
 desktop/tablet tests with retries disabled. Formatting, lint, sleep-ratchet,
 workflow contracts, and documentation checks passed. The secondary reviewer
 found no blocking issue. Fresh CI for the resulting head remains required.
+
+## Static-check job completion budget
+
+At `858ac559a1e74e6c63fe89ab73e09cae5ab458ea`, E2E run `40196132124`
+passed all 4239 executed tests on their first attempts, with 40 skips and no
+retry-pass failures. Backend run `40196131960` completed every static check,
+including SDK artifacts/consumers, SDK tests, and lint with zero issues. Job
+`121177329927` then reached its newly integrated 20-minute job limit while
+compressing the Go cache. Its checks finished after about 18 minutes; cache
+cleanup was cancelled after another two minutes. This was a job-budget failure,
+not a failing test or lint finding.
+
+The static-check job now has a finite 30-minute total budget to include cold
+builds, SDK consumers, the existing 15-minute lint allowance, and post-job cache
+cleanup. Individual validation commands and their assertions are unchanged.
+Fresh CI on the delivered correction remains required.

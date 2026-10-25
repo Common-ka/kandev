@@ -453,3 +453,24 @@ Desktop and tablet checks also passed with retries disabled (two tests):
 `pnpm e2e:raw --project=chromium e2e/tests/chat/mcp-status.spec.ts --grep 'explains mixed connections|tablet MCP connections' --retries=0 --trace=on`.
 The final helper therefore passed 11 focused browser tests. Fresh CI and review
 on the delivered merge commit remain pending.
+
+### Static-check job completion budget
+
+The MCP correction passed full E2E CI: 4239 first-attempt passes, zero retries
+or failures, and 40 skips. Backend static validation also passed every command,
+but its newly integrated 20-minute job budget cancelled post-job cache
+compression. The checks consumed about 18 minutes before cleanup began.
+
+PR cleanup work order: set a finite 30-minute total static-check budget while
+keeping the 15-minute lint limit and every validation command. Run backend/SDK
+workflow contracts and workflow lint, preserve the failed job evidence, and
+push through normal hooks. Require fresh backend and aggregate CI on that head.
+This changes CI scheduling capacity only; public behavior and SDK contracts do
+not change.
+
+Validation passed: `node --test scripts/backend-lint-workflow.test.mjs` (two
+tests), `python3 .github/scripts/backend-tests-workflow-contract_test.py`
+(25 tests), `python3 .github/scripts/plugin-sdk-ci-contract_test.py` (10 tests),
+and `actionlint -shellcheck= .github/workflows/backend-tests.yml`. Catalog and
+specification checks also passed. The secondary reviewer found no blocking
+issue. The correction adds no test bypass and changes no test assertion.
