@@ -42,6 +42,8 @@ type httpWorkspaceSourcesRequest struct {
 
 const taskDeleteConfirmationHeader = "X-Kandev-Task-Delete-Confirmation"
 
+const archiveResponseWriteGrace = 5 * time.Second
+
 type workspaceSourceJSON struct {
 	Kind           string `json:"kind"`
 	RepositoryID   string `json:"repository_id"`
@@ -2237,6 +2239,11 @@ func (h *TaskHandlers) httpArchiveTask(c *gin.Context) {
 	// context.Background() also drops the request identity used by auth checks.
 	archiveCtx, cancel := archivecascade.ContinuationContext(c.Request.Context())
 	defer cancel()
+	// Keep the final response writable without extending the archive work budget.
+	deadline, _ := archiveCtx.Deadline()
+	if err := http.NewResponseController(c.Writer).SetWriteDeadline(deadline.Add(archiveResponseWriteGrace)); err != nil && !errors.Is(err, http.ErrNotSupported) {
+		h.logger.Warn("failed to set archive response write deadline", zap.Error(err))
+	}
 	// Office task-handoffs phase 6: when a HandoffService is wired,
 	// archive the whole subtree under a single cascade ID so
 	// descendants get tagged for scoped unarchive AND workspace-group

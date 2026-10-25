@@ -96,3 +96,43 @@ The secondary reviewer confirmed both readiness findings from source and
 retained evidence. These corrections change test setup and synchronization;
 they do not change plugin or runtime behavior. Current-head CI must pass before
 validation is complete.
+
+## Container validation follow-up
+
+At `0e029887a1737118597d59a833bf6c62efd583b6`, backend and frontend CI passed.
+E2E run `40133977745` failed because two container tests passed only on retry.
+The complete report audit found 4237 first-attempt passes, two retry-pass
+failures, 40 skips, and no parse errors.
+
+- SSH host-key rotation probed immediately after TCP readiness, before sshd
+  necessarily finished reloading its keys. The test now waits for a successful
+  probe with a nonempty, changed fingerprint. It rotates once and preserves
+  stale-key refusal and explicit re-trust checks. A local simulation of the
+  actual helper covered temporary probe failure, the old key, an empty key,
+  eventual success, and refusal to accept an unchanged key.
+- The Kubernetes foreign-UID test passed task creation and the different-UID
+  assertion, then failed during `archiveTask` after 30,036 ms. The retained trace
+  covers the successful retry; the first-attempt timing comes from the blob
+  report. The exact blocking cleanup step is unknown. Source independently
+  shows a two-minute archive work budget behind a 30-second server write timeout.
+  The archive handler now allows response writes until its captured work
+  deadline plus five seconds, without extending work or changing cleanup,
+  identity, ownership, cancellation, or mutation retry rules.
+
+A real HTTP-server regression reproduced EOF before the correction and returned
+successful JSON afterward. It covers both the default work budget and an earlier
+caller deadline. Existing archive authorization, cancellation, and outcome tests
+also passed. This repairs archive response delivery, not plugin compatibility.
+The secondary reviewer found no blocking issue in either correction.
+
+Local Docker is unavailable, so the container tests still require current-head
+CI. These corrections do not change public commands, API shapes, or documented
+plugin migration steps. Durable archive deadline requirements and design remain
+aligned with the implementation.
+
+The broad local handler race run reached Go's ten-minute suite timeout while
+starting `TestTaskDTOBuilderStampsQueuedPromptCount` in SQLite schema setup.
+It reported no assertion failure or data race before that timeout. This is
+incomplete validation, not a passing full suite. The archive-context package
+passed with the race detector. Focused handler race validation and fresh CI are
+recorded separately in the plan.

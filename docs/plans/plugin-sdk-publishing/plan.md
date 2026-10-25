@@ -385,3 +385,37 @@ preceding branch change as well as the cleanup-message readiness correction.
 The secondary reviewer inspected all three test corrections and found no
 remaining issue. Fresh CI on the pushed follow-up remains required before
 reporting validation complete.
+
+### Container validation follow-up
+
+CI on `0e029887a1737118597d59a833bf6c62efd583b6` passed backend and frontend
+checks but failed two container cases on their first attempts. The SSH host-key
+rotation test must wait for a successful probe with the new fingerprint after
+sshd reload. The Kubernetes foreign-UID case passed task creation and UID checks,
+then its archive response failed after 30 seconds. The archive work budget is
+two minutes, but the server write timeout is 30 seconds.
+
+PR cleanup work order: first reproduce the archive response loss with the real
+HTTP handler and a short server write timeout. Then align only this route's
+write deadline with its existing work deadline plus five seconds. Preserve
+earlier caller deadlines, identity, cancellation handling, and foreign-resource
+checks. Run the handler and archive-context tests with the race detector,
+changed-file lint, and specification checks. Commit the archive correction with
+the SSH readiness correction, then require fresh container CI. Local Docker is
+unavailable. The exact shutdown step that occupied the failed CI request remains
+unknown; the response deadline mismatch is independently testable.
+
+The real-server regression failed with EOF in both cases before the correction.
+Afterward, focused archive tests passed. Race validation passed for archive
+response delivery, the finite five-second write allowance, earlier caller
+boundaries, request cancellation, authorization, and success/pending outcomes.
+The archive-context package also passed with the race detector. The broad handler
+suite hit its ten-minute total limit without an assertion failure or race report;
+the SQLite fixture active at timeout passed separately in 5.31 seconds. This
+broad local result remains incomplete, pending CI. SSH ESLint, formatting, and
+sleep-ratchet checks passed, as did catalog and specification validation.
+
+Scoped Go lint passed with zero issues. The secondary reviewer found no blocking
+issue in the archive or SSH correction. A finite response-deadline assertion
+addresses their additional coverage suggestion. Container execution remains a
+CI requirement because this workspace has no Docker daemon.
