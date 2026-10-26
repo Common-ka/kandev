@@ -963,3 +963,32 @@ unchanged repetitions. The review flow passes three phone and three desktop
 repetitions after removing deliberate contamination. Full typecheck, changed
 file lint, documentation checks, guide checksum, and independent read-only
 review pass. Fresh exact-head CI remains required.
+
+
+### Review input cancellation follow-up
+
+Full CI on c6815d866f7 reports 94 passing checks, 11 skipped checks, one failed
+browser shard plus its aggregate, and no pending checks. The complete audit
+covers 118 reports and 4,305 attempts: two failed attempts, two retries, 40
+skipped tests, and no parse errors. Both failures are the same phone review
+first-scroll assertion. Fixture membership is exactly two files; this differs
+from the corrected contamination failure. First-attempt trace retention works.
+Three unchanged local repetitions pass; exact browser causality remains open.
+
+A real-hook regression independently exposes suppression ordering: cancelling
+a queued anchor restoration can restore its saved true suppression after
+manual input has set false. All three wheel/touch, scroll-key, and root-pointer
+cases fail before the correction. Cancel restoration first, then apply explicit
+manual marking permission. Preserve descendant-pointer and unrelated-key gates.
+The owning review requirement, design, plan, and work order are reconciled
+before production correction. All 52 focused input, anchor, auto-mark, and
+persistence unit cases pass, including both negative input gates. This verifies
+a source defect, not the exact cause of the recorded browser failure.
+
+
+Follow-up validation: all 52 focused unit cases, full typecheck, changed-file
+lint, documentation validators, and three desktop plus three phone browser
+repetitions pass after rebuilding web assets. Independent read-only review
+confirms the real-hook regression and narrow ordering correction. The original
+CI trace does not expose saved restoration state, so its precise cause remains
+unconfirmed. Fresh exact-head CI is required after publication.

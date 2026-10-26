@@ -56,8 +56,14 @@ one CSS pixel of rounding; layout changes cannot borrow earlier input.
 Intersection observations refresh the current geometry baseline without marking.
 This avoids comparing an older observer snapshot against a later touch-scroll
 position. Remove the listener and disconnect the observer together on cleanup.
-Preserve `useReviewDiffScrollInteraction` and `useReviewScrollAnchor` input and
-navigation suppression. No interaction-hook change is needed.
+Preserve `useReviewDiffScrollInteraction` and `useReviewScrollAnchor` navigation
+suppression. Input cancellation first restores the previous suppression value
+and cancels the queued anchor frame. Then wheel/touch movement, scroll keys,
+and a pointer press on the scroll root explicitly allow automatic marking.
+That explicit input must win over the cancelled restoration's saved value.
+Descendant pointer presses cancel stale restoration without allowing marking;
+unrelated keys do neither. This ordering changes no crossing geometry or
+pending/stale eligibility gate.
 
 ## Shared state, identity, and persistence
 
