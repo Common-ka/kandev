@@ -64,7 +64,11 @@ Replace `X.Y.Z` with a real release. `latest` moves on release. `universal` move
 
 The repository root `Dockerfile` packages prebuilt release artifacts. A plain `docker build .` from a checkout fails because `bundle/` is intentionally absent.
 
-Use a full Linux release archive for the target architecture: `kandev-linux-x64-full.tar.gz` for amd64 or `kandev-linux-arm64-full.tar.gz` for arm64. Standard archives omit remote helpers required by the Dockerfile. The [release workflow](https://github.com/kdlbs/kandev/blob/main/.github/workflows/release.yml) prepares each build context with these steps:
+Use a full Linux release archive for the target architecture: `kandev-linux-x64-full.tar.gz` for amd64 or `kandev-linux-arm64-full.tar.gz` for arm64. Current standard archives omit remote helpers required by the Dockerfile.
+
+Releases before the standard/full split use `kandev-linux-x64.tar.gz` or `kandev-linux-arm64.tar.gz` for the full bundle. Those older archives already include the remote helpers.
+
+The [release workflow](../../.github/workflows/release.yml) prepares each build context with these steps:
 
 1. Create `ctx/bundle/`. Extract the matching full archive there with `tar -xzf <archive> --strip-components=1 -C ctx/bundle` to remove its top-level directory.
 2. Copy `docker-entrypoint.sh` from the matching source release into `ctx/`.
