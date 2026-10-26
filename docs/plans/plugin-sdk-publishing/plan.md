@@ -805,3 +805,43 @@ cases, and four phone navigation/override cases pass. Full typecheck and
 changed-file lint pass with zero warnings. Independent review finds no
 remaining issue in the fix or its coverage. Full CI on the next published head
 remains the delivery gate. NOTIFICATION_GUIDE.md is uncommitted.
+
+
+### Goal activation and file-transfer view correction
+
+CI on ee67f21f366 contains two failed browser attempts across 118 reports and
+4,302 total attempts; the audit has no parse errors. Prior model, restart,
+prepared-session, and scroll cases pass in this run. Preserve the distinction
+between that result and proof of an earlier untraced failure's exact cause.
+
+The Quick Chat goal-popover failure exposes a controlled desktop interaction
+bug. Hover or focus opens the goal details, then the primitive's default click
+toggles them closed. Both component regressions fail before correction. The
+controlled desktop trigger now explicitly opens and consumes that toggle,
+matching the existing goal-disclosure contract. Keep Escape, outside dismissal,
+focus restoration, and the native phone drawer. Fifteen focused unit cases,
+all three desktop goal scenarios, and full typecheck pass. The goal design and
+owning work order are reconciled before production correction.
+
+The collision-upload failure is a test-view mismatch. Its failed screenshot
+and context show Changes with the expected `taken-1.txt`, while the assertion
+requires a visible Files-tree node. A controlled local run waits for the
+Changes row and reproduces that original assertion failure. Follow the
+existing neighboring upload cases: await the Changes row, select Files, and
+retain both filename assertions. Three repetitions pass with retries disabled.
+No upload or keep-both naming behavior changes. Retain first-failure traces in
+both affected browser files. Fresh exact-head CI remains required.
+
+
+Final local verification adds both phone goal scenarios, unchanged touch
+controls, zero-warning changed-file lint, and independent read-only review.
+The complete prior CI outcome is 93 passing checks, 11 skipped checks, the two
+failed browser shards and their aggregate, and zero pending checks. Review
+threads are refreshed separately before delivery. Full CI must pass on the
+next published commit; no retry-pass is treated as a clean required run.
+
+
+Main advances to b6263ea4c31 while validation runs. It already contains the
+same two-line file-transfer focus correction. Integrate that main commit and
+retain a single copy of the correction. Its integration-plugin sidebar changes
+require merged-code navigation/plugin grouping validation before publication.
