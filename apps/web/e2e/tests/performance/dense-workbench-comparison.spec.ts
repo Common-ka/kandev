@@ -1,6 +1,7 @@
 import { copyDenseBackendLog } from "../../helpers/dense-evidence";
 import { DENSE_THREADS_FILE_PROTOCOL } from "../../scripts/dense-file-summary.mjs";
 import { DENSE_INTERACTION_MODE } from "../../helpers/dense-interactions";
+import { DENSE_NATIVE_INPUT_ATTRIBUTION } from "../../helpers/dense-native-input";
 import {
   DENSE_ATTEMPT_PROTOCOL,
   createDenseAttempts,
@@ -86,6 +87,7 @@ test("compares frozen builds on identical dense conversation snapshots", async (
   if (process.env.KANDEV_DENSE_PROFILE === "1") measurementKind = "cpu-attribution";
   if (process.env.KANDEV_DENSE_ANIMATION_DIAGNOSTICS === "1")
     measurementKind = "animation-attribution";
+  if (DENSE_NATIVE_INPUT_ATTRIBUTION) measurementKind = "native-input-attribution";
   const report = {
     machine: profileMachine(),
     sourceRevision: execFileSync("git", ["rev-parse", "HEAD"], {

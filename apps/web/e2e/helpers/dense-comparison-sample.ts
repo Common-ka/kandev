@@ -20,6 +20,11 @@ import { dwell } from "./causal-waits";
 import { inspectDenseAnimations } from "./dense-animation-diagnostics";
 import { loadDenseCold } from "./dense-cold-load";
 import { verifyDenseOffscreenCatchup } from "./dense-viewport";
+import {
+  DENSE_NATIVE_INPUT_ATTRIBUTION,
+  installDenseNativeInputObserver,
+  captureDenseNativeInputObserver,
+} from "./dense-native-input";
 
 async function startDenseProfile(cdp: CDPSession, profilePath?: string) {
   if (!profilePath) return;
@@ -106,6 +111,7 @@ export async function runDenseSample(options: {
   const traffic = captureDenseTraffic(page);
   const cdp = await context.newCDPSession(page);
   const { throttleAfterLoad, coldCpuRate } = denseThrottlingMode(cpuRate);
+  let nativeInputInstalled = false;
   await cdp.send("Performance.enable", { timeDomain: "timeTicks" });
   await cdp.send("Emulation.setCPUThrottlingRate", { rate: coldCpuRate });
   try {
@@ -141,6 +147,11 @@ export async function runDenseSample(options: {
         ).toBeVisible();
     }
     const initialLoadedHistory = await loadedDenseHistory(page, threads);
+    nativeInputInstalled = await installDenseNativeInputObserver(
+      page,
+      cold.visibleTaskIds[0],
+      DENSE_NATIVE_INPUT_ATTRIBUTION,
+    );
     const editor = await prepareFocusedComposer(page, threads[0].taskId);
     const focusComposer = Boolean(editor);
     if (throttleAfterLoad) await cdp.send("Emulation.setCPUThrottlingRate", { rate: cpuRate });
@@ -255,6 +266,7 @@ export async function runDenseSample(options: {
       loadedHistory: history,
     };
   } finally {
+    await captureDenseNativeInputObserver(page, nativeInputInstalled, options.checkpoint);
     await context.close();
     await stream.finish();
   }

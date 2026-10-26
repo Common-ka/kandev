@@ -1428,3 +1428,20 @@ comparison is published from its five complete pairs. All raw attempts,
 identities remain exact, and the temporary instance stops cleanly. The other
 19 new-build matrix cases remain pending. Earlier `820f` failures retain
 their original scope. See [the Grid evidence](evidence/reference39be-grid-failed.json).
+
+## Native wheel attribution preparation
+
+A browser-only observer now records actual wheel targets, path membership,
+prevention state, geometry and subsequent scroll events. All 14 focused
+browser cases, eight summary checks, strict lint and the isolated observer
+typecheck pass. Saved ledgers verify missed targets, prevented input, synthetic
+events, bounded retention, cleanup, disabled mode, error preservation, replaced
+nodes and a 2x display context. A small real-page pair passes on both frozen
+builds. This is capture validation, not a speed estimate.
+
+The original input helper stays byte-identical. The new diagnostic kind is
+excluded from gain summaries, including the passing rehearsal report. All
+calibration failures, export corrections and the stale-source guard check are
+retained. Full-density native-event attribution is next; the actual `39be`
+scroll-up failure and the other 19 final matrix cases remain open. See
+[the calibration evidence](evidence/native-input-calibration.json).

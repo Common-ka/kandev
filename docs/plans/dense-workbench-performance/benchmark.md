@@ -598,3 +598,35 @@ later observations, not the failed predicate sample. Diagnostic failure must
 preserve the original traversal error. Validation covers a missing first chat,
 a chat removed only before the return visit, checkpoint write failure and a
 healthy native traversal. The original deadlines and workload remain required.
+
+## Native input attribution
+
+Use `KANDEV_DENSE_NATIVE_INPUT_ATTRIBUTION=1` for a separate diagnostic run.
+It sets `measurementKind` to `native-input-attribution`; the summary guard
+rejects that kind even when all attempts pass. Use the unchanged driver
+commands, original deadlines and declared workload. Keep the original
+production asset hashes separate from the observer harness revision.
+
+The observer installs after cold/history setup, before observation windows.
+Capture persists in each attempt checkpoint before the page closes, including
+failed attempts. Disabled setup evaluates no browser code. An observation
+error is explicit; checkpoint I/O cannot replace the original sample error.
+
+Each of at most four gestures retains up to 16 preceding observations,
+64 initial events and 16 final events within 6,000 milliseconds of wheel
+dispatch. Dropped gestures and omitted middle events have explicit counts.
+Native scroll and resize events can reflect programmatic movement, so a
+following scroll does not by itself prove the wheel caused it. Final
+prevention state is observed in a separately timestamped animation-frame
+callback after dispatch.
+
+Geometry belongs to the original transcript node. Connected/live-node flags
+and expected/current session IDs distinguish a replacement. Capture actual
+wheel deltas and `devicePixelRatio`; do not replace event values with driver
+arguments. The 2x calibration compares them with an independent native
+listener. No delta conversion or input substitution is applied.
+
+Run `dense-native-input.spec.ts` with the existing interaction diagnostic
+spec. It saves explicit JSON ledger files. The summary guard and its actual
+passing-diagnostic rejection are covered separately. See
+[the calibration evidence](evidence/native-input-calibration.json).

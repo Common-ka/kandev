@@ -1,0 +1,148 @@
+{
+  "status": "Native-input observer calibrated; full-density attribution pending",
+  "recordedAt": "2026-10-26T00:16:22.605258+00:00",
+  "harnessBaseRevision": "e50a1a12549a7517312c5d81875ca3e95f879992",
+  "appBuildRevision": "30e72e160e5ac8566d8d2b595e462330ca88f0e8",
+  "productionAssetsSha256": "39be7b61627a3539d8305b522079e0da671a9cb3d643286194cbfe164ea12261",
+  "files": [
+    {
+      "path": "apps/web/e2e/helpers/dense-native-input.ts",
+      "sha256": "67a6f75df5e63e062ac2d3629c18ed6b58680d0925e172c980493c2312200ed1"
+    },
+    {
+      "path": "apps/web/e2e/tests/performance/dense-native-input.spec.ts",
+      "sha256": "a04335fdbbd65c3d1d344f19627a08ee802a4f4ff218652554d11d1e77161bb8"
+    },
+    {
+      "path": "apps/web/e2e/helpers/dense-comparison-sample.ts",
+      "sha256": "efd1b109989685901794e8fdea9c28d17ab26416c7c681ecf6665bd7363372e3"
+    },
+    {
+      "path": "apps/web/e2e/scripts/summarize-dense-performance.mjs",
+      "sha256": "fb6278837fa2c0e6f454d00b8d2e4dfad23644cc090d6b46fbb4c8e4c8a75cb7"
+    },
+    {
+      "path": "apps/web/e2e/scripts/summarize-dense-performance.test.mjs",
+      "sha256": "d51b8bc257da1fe9e82f0c9de3ea791af22131b0676d27c0682e76cd757e7757"
+    },
+    {
+      "path": "apps/web/e2e/tests/performance/dense-workbench-comparison.spec.ts",
+      "sha256": "adda7a9627b65480b5a6a5082dbbdf8b2628e01f74b0d5831d679cde8993aff6"
+    }
+  ],
+  "sourceArchive": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/native-input-delivery-source/manifest.json",
+    "sha256": "a6df1f7c1a3261f0e82f460a2db42412276a4d444d3caddbe1916c9456f28308"
+  },
+  "calibration": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/native-input-final-calibration.json",
+    "sha256": "5f9f7dc9d0e20e8395747e50e9f7a198ea1f5f6a9cba8aa57a41d60a3451df28",
+    "browser": {
+      "handle": 26637,
+      "exitCode": 0,
+      "passed": 14,
+      "nativeInputCases": 12,
+      "existingInteractionCases": 2
+    },
+    "typesAndLint": {
+      "handle": 10390,
+      "exitCode": 0
+    },
+    "savedProtocolLedgers": 10,
+    "explicitMissingCollectorLedgers": 2
+  },
+  "negativeControls": [
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/native-input-calibration-red.json",
+      "sha256": "4247f64dc8c32b9814925b897b92d14ffed17d00d1fa81ce1c3294fed8ba67d1"
+    },
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/native-input-calibration-first-implementation.json",
+      "sha256": "c1ad124c16417c564e27fdaf14072e0f103cb8941fa2010b0cc8a5df285fb7bd"
+    },
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/native-input-disabled-red.json",
+      "sha256": "1426af1e46eaaef6162f0da9116d8bdae09ce5e8616170be4e16e0d825ea2ebf"
+    },
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/native-input-live-node-first-red.json",
+      "sha256": "d0bc8d78b20dfc43d5f531dc402c3bdac62b5528e24a87b4f33ed8b494773e58"
+    },
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/native-input-live-node-corrected-red.json",
+      "sha256": "9e22532824c7611e4f6e083802753033f14847c411043523418366c914084822"
+    },
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/native-input-calibration-export-failure.json",
+      "sha256": "b93722a00fa2c56046ea8a053902094dffe85400477c8eda89883e1364a8b3a0"
+    },
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/native-input-rehearsal-guard-source-correction.json",
+      "sha256": "a593ad0fa4f6aac1b48fbf56c947121310adabeb23c8d59b620481e931902b74"
+    }
+  ],
+  "summaryGuard": {
+    "genuineRed": {
+      "failed": 1,
+      "passed": 7,
+      "exitCode": 1,
+      "log": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/native-input-summary-red.log",
+        "sha256": "978c8be854329b647565fe3e4b8314c8b1b56365e73f9287668a432c94a20215"
+      }
+    },
+    "green": {
+      "passed": 8,
+      "failed": 0,
+      "exitCode": 0,
+      "log": {
+        "path": ".kandev/diagnostics/dense-workbench-performance/native-input-summary-green.log",
+        "sha256": "8f84bcba3adce39e45cad65a1750058d991aa2edf3ab22fd93ca7f0ffaa5a2b9"
+      }
+    },
+    "actualPassingDiagnosticRejected": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/native-input-rehearsal-summary-rejection.log",
+      "sha256": "dabeb4d76693f5a9adb44e8013743cba546942c0019bbdf777a9080a7f81d271",
+      "exitCode": 1,
+      "summaryCreated": false
+    }
+  },
+  "realPageRehearsal": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/native-input-rehearsal-result.json",
+    "sha256": "830dbad7da29273a3ca4d10637dfbd1c0c9dad2db5b6e272675237252ba9712d",
+    "handle": 32076,
+    "exitCode": 0,
+    "pairedAttemptsPassed": 2,
+    "verifiedOrderedUpdates": 120,
+    "workload": {
+      "tasks": 8,
+      "columns": 8,
+      "messages": 20,
+      "durationMs": 2000
+    }
+  },
+  "originalInputHelper": {
+    "path": "apps/web/e2e/helpers/dense-interactions.ts",
+    "sha256": "cef907a213b16e33f30493bf139158f13687e97ff23dace4e85eb813edf47e33",
+    "unchanged": true
+  },
+  "captureLimits": {
+    "gestureCount": 4,
+    "firstEventsPerGesture": 64,
+    "tailEventsPerGesture": 16,
+    "precedingObservations": 16,
+    "windowAfterWheelMs": 6000,
+    "omissions": "Explicit omitted-event and dropped-gesture counts"
+  },
+  "scope": [
+    "Browser-only passive wheel/scroll/scrollend listeners and ResizeObserver. Read scalar geometry and bounded path metadata; do not mutate product state or cancel input.",
+    "Record actual isTrusted, event delta/mode, point, path membership, expected/live node/session identity, devicePixelRatio and observation timestamps.",
+    "Read final prevention state in a separately timestamped animation-frame callback after dispatch. Keep callback ownership when gestures overlap; cancel pending callbacks on dispose.",
+    "Disabled setup performs no browser evaluation. Capture happens after observation windows; checkpoint failure preserves the sample outcome.",
+    "Geometry belongs to the original target. A replaced target is marked disconnected and distinguished from current live nodes and sessions.",
+    "Native scroll events after a wheel can also include programmatic movement. Temporal correlation alone does not establish which code caused a scroll.",
+    "The observed2x browser delivers delta-80 for a driver-160 command; an independent native listener agrees. This does not establish a universal conversion.",
+    "No production files or built assets change. No speed, M2 latency, field INP, battery or memory-leak gain is claimed.",
+    "The actual full-density39be Grid failure remains unresolved. The other19 final matrix cases remain pending."
+  ]
+}
