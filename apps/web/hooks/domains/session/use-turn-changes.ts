@@ -85,7 +85,10 @@ function useTurnChangeSubscription(
   }, [sessionId, connectionStatus, store, setError]);
 }
 
-export function useSessionTurnChanges(sessionId: string | null) {
+export function useSessionTurnChanges(
+  sessionId: string | null,
+  { detailActive = true }: { detailActive?: boolean } = {},
+) {
   const store = useAppStoreApi();
   const summaries = useAppStore((state) => selectTurnChangeSummaries(state.turnChanges, sessionId));
   const loaded = useAppStore((state) =>
@@ -117,7 +120,7 @@ export function useSessionTurnChanges(sessionId: string | null) {
     if (sessionId && !loaded) void load(0);
   }, [sessionId, loaded, load]);
 
-  useTurnChangeSubscription(sessionId, store, setError);
+  useTurnChangeSubscription(detailActive ? sessionId : null, store, setError);
 
   const loadMore = useCallback(() => {
     if (nextOffset !== null) void load(nextOffset);

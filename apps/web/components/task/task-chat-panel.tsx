@@ -1577,6 +1577,7 @@ export const TaskChatPanel = memo(function TaskChatPanel({
                   childrenByParentToolCallId={childrenByParentToolCallId}
                   taskId={taskId ?? undefined}
                   sessionId={resolvedSessionId}
+                  detailActive={detailActive}
                   messagesLoading={messagesLoading}
                   historyRefreshPending={historyRefreshPending}
                   historyStatus={historyStatus}

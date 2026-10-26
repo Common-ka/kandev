@@ -679,3 +679,35 @@ The complete previous CI artifact audit contains 118 reports and 4,294 attempts;
 all five failed attempts belong to the two affected mobile changed-files cases.
 A new committed head still requires full CI. Public docs need no new command or
 UI composition changes for this freshness correction.
+
+### Delayed session hydration CI correction
+
+The next exact-head CI run exposed a stale session-state projection in the MCP
+subtask case. Its failed retry trace shows the parent idle, followed by an
+optional active-session timeout and a regression to STARTING, without a newer
+backend start. The fallback session list was older than the live settled row.
+Keep the idle assertion and correct hydration freshness through the existing
+UI session-refresh contract and its progressive-navigation work order.
+Canonical rows, per-task copies, and settled-turn boundaries must agree.
+
+The same terminal CI run caught a regression in the newly added changed-files
+readiness lease: hidden mounted transcripts retained rich streams. The original
+changed-files cases passed; the visible-demand test failed four attempts.
+Scope the lease with existing `detailActive` and group visibility, including
+persistent historical diff viewers. Preserve eager HTTP history loading and
+all existing browser assertions. The owning Journey data-loading design and
+visible-demand work order record the correction.
+
+Validation for both corrections: 259 focused unit cases across 15 files passed;
+after lint cleanup, the 127 affected ownership/native-transcript cases and six
+typed hydration fixtures passed again. Full typecheck and changed-file ESLint
+with zero warnings pass. The independent reviewer found no remaining actionable
+issue. The unchanged full subtask file plus desktop progressive navigation
+passed 19 cases against a fresh build. Desktop historical-diff/visible-demand
+validation passed five cases, then the final eight-tab ownership case passed
+after rebuilding the final source. Seven phone cases passed: visible demand,
+historical diffs, and progressive navigation. All browser runs disable retries.
+The prior CI artifact audit contains 118 reports and 4,295 attempts: four
+visible-demand failures and two subtask failures, with no other error results.
+Main advanced to e5c38184cf9 without file conflicts. New-head CI and focused
+synthetic-merge validation remain delivery gates; keep the guide uncommitted.

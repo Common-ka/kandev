@@ -203,6 +203,36 @@ describe("turn change subscription handoff", () => {
 });
 
 describe("turn change subscription ownership", () => {
+  it("loads initial history without a rich lease when detail demand is inactive", async () => {
+    mockHistory.state.connection.status = "connected";
+    mockHistory.state.turnChanges.loadedBySession["session-1"] = false;
+    mockHistory.listPage.mockResolvedValue(page(0, []));
+    renderHook(() => useSessionTurnChanges("session-1", { detailActive: false }));
+    await waitFor(() => expect(mockHistory.listPage).toHaveBeenCalledTimes(1));
+    expect(mockHistory.subscribe).not.toHaveBeenCalled();
+  });
+
+  it("leases the rich stream only while detail demand is active", async () => {
+    mockHistory.state.connection.status = "connected";
+    const unsubscribe = vi.fn();
+    mockHistory.subscribe.mockReturnValue({ ready: Promise.resolve(), unsubscribe });
+    mockHistory.listPage.mockResolvedValue(page(0, []));
+    const { rerender } = renderHook(
+      ({ detailActive }) => useSessionTurnChanges("session-1", { detailActive }),
+      {
+        initialProps: { detailActive: false },
+      },
+    );
+    expect(mockHistory.subscribe).not.toHaveBeenCalled();
+    rerender({ detailActive: true });
+    await waitFor(() => expect(mockHistory.listPage).toHaveBeenCalledTimes(1));
+    expect(mockHistory.subscribe).toHaveBeenCalledTimes(1);
+    rerender({ detailActive: false });
+    expect(unsubscribe).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("turn change subscription lifetime", () => {
   it("refreshes a cached session after reconnecting", async () => {
     mockHistory.subscribe.mockReturnValue({ ready: Promise.resolve(), unsubscribe: vi.fn() });
     mockHistory.listPage.mockResolvedValue(page(0, [summary("reconnected", 1)]));

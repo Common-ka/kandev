@@ -170,6 +170,11 @@ Do not globally cache `fetchJson` or share server-side state across users.
 Capture hydration epochs before requests. Publish optional resources through
 current slice merge actions only while the navigation/auth generation is valid.
 Reuse current loaded workspace/settings resources and their invalidation rules.
+For session rows, reuse the strict RFC3339 freshness predicate from session
+state events. Reject strictly older route rows before merging canonical state.
+Per-task copies and settled-turn boundaries use the accepted canonical rows.
+Equal or unparseable timestamps retain the existing event policy; newer
+restarts remain admissible. Preserve the separate read-cursor epoch guard.
 Do not reset agent-profile versions or overwrite newer WebSocket state during
 late hydration. Full session/model loading must not briefly enable send with a
 fallback model. Transcript, terminals, and other surfaces retain their existing

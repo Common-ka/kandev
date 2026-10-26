@@ -6,8 +6,10 @@ wave: 4
 depends_on: []
 plan: "plan.md"
 requirements:
+  - REQ-UI-SESSION-REFRESH-EFFICIENCY-001
   - REQ-UI-SESSION-REFRESH-EFFICIENCY-003
 acceptance_criteria:
+  - AC-UI-SESSION-REFRESH-EFFICIENCY-001.2
   - AC-UI-SESSION-REFRESH-EFFICIENCY-003.1
   - AC-UI-SESSION-REFRESH-EFFICIENCY-003.2
   - AC-UI-SESSION-REFRESH-EFFICIENCY-003.3
@@ -138,3 +140,29 @@ turns. Navigation reads carry an immutable store-scope token and the route check
 that exact owner before publishing shell or enrichment state. A deferred real
 store test changes workspace scope, replaces the read owner, and confirms that
 the old response publishes neither its task nor its session list.
+
+## Delayed session enrichment correction
+
+Failed CI traces show a settled parent session becoming STARTING again after
+optional active-session hydration times out. The fallback list predates the
+live WAITING_FOR_INPUT update. This is a UI projection regression; backend
+snapshots remain settled and the child task was created successfully.
+
+Reuse the strict session-state timestamp predicate across WebSocket events,
+reconciliation, and route hydration. Reject strictly older session rows before
+the canonical merge. Keep per-task copies and settled-turn boundary seeding
+consistent with accepted rows. Preserve equal/unknown timestamp behavior,
+read-cursor epochs, and newer legitimate restarts. Retain the MCP subtask test's
+idle-state and child-relationship assertions.
+
+Verify controlled old STARTING-after-WAITING and old settled-after-RUNNING
+regressions, including per-task copies and turn boundaries. Run the existing
+session, hydration, and reconciliation suites, full typecheck, the unchanged
+subtask file in order, and desktop/mobile progressive task-switch cases.
+
+Validation results: the controlled stale-hydration cases failed before the fix.
+All 121 focused hydration/session cases passed, including separate per-task
+copies, sub-millisecond timestamps, and accepted restarts. The final typed
+fixture cases and full typecheck passed. Existing subtask and progressive
+navigation desktop cases passed (19 total); phone progressive-navigation
+cases passed with the final build. Assertions and timeouts remain intact.
