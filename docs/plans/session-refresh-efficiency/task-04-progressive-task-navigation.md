@@ -166,3 +166,34 @@ copies, sub-millisecond timestamps, and accepted restarts. The final typed
 fixture cases and full typecheck passed. Existing subtask and progressive
 navigation desktop cases passed (19 total); phone progressive-navigation
 cases passed with the final build. Assertions and timeouts remain intact.
+
+
+### Empty-identity enrichment correction (2026-10-26)
+
+CI run 40261251455 loses task-session activation in a prepared, non-auto-start
+scenario. The failed attempt has no trace; its precise producer is unproven.
+Source review identifies a separate reproducible boundary: optional enrichment
+reuses an earlier empty list after session preparation has updated live state.
+
+Before production correction, add controlled tests that hold optional metadata,
+create a prepared session through real store actions, and apply the enrichment
+through the real hydrator. Cover selected and unselected additions, both before
+resolution and between resolution and application. The real task-session hook
+must retain its normal fallback. Keep existing activation and Start-agent E2E
+assertions. Correct the optional result boundary; do not globally ignore empty
+authoritative lists or resnapshot live state only when the promise resolves.
+
+Validation: run the owning SSR and route/hydration tests, full typecheck, lint,
+and affected desktop/phone navigation plus the non-auto-start browser case.
+Record the controlled RED/GREEN evidence separately from CI cause attribution.
+
+
+The four controlled membership cases fail against the original producer:
+selected sessions become null and unselected additions disappear from the list.
+They pass when successful-empty-identity optional results omit the already
+applied selection and session-list slices. Tests use real store hydration and
+the real task-session fallback, including additions after promise resolution.
+A fifth regression confirms unavailable-list recovery still applies a fresh
+empty list and its loaded state. The tests live in
+`lib/ssr/session-page-enrichment-membership.test.ts`; the original SSR test file
+is unchanged. No global hydrator policy, boot contract, or model rule changes.

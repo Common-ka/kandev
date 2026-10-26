@@ -181,6 +181,16 @@ fallback model. Transcript, terminals, and other surfaces retain their existing
 local loading and error states. Missing/forbidden task handling remains authoritative.
 No previous task's content becomes interactive under the destination identity.
 
+A successful empty identity read already supplies initial empty membership and
+selection. Its later optional enrichment contributes convenience resources;
+it does not publish those earlier selection or session-list slices again.
+This preserves sessions created, selected, or merely observed before the
+result is applied, including after the enrichment promise resolves. The task
+surface retains its normal same-task session fallback. An unavailable identity
+list that is subsequently recovered remains an authoritative list read. Boot
+hydration and explicit session admission retain their existing contracts.
+
+
 ### Editor and render lifecycle
 
 Implements `REQ-UI-SESSION-REFRESH-EFFICIENCY-004`.

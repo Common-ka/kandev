@@ -15,6 +15,8 @@ import {
   waitForWorkflowStep,
 } from "./task-workflow-agent-overrides-helpers";
 
+test.use({ trace: "retain-on-failure" });
+
 useRegularMode();
 
 async function longPress(page: Page, target: Locator): Promise<void> {

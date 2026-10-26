@@ -765,3 +765,43 @@ MCP cases. Browser checks use zero retries. Documentation validation and
 specification lint pass. Independent review finds no merge concern. Require
 fresh-head CI after publishing the merge. The root notification guide remains
 uncommitted.
+
+
+### Optional membership and causal scroll correction
+
+Full CI on dd5ada91cdc completes with 91 passing and 11 skipped checks. Four
+browser shards and their aggregate fail. All 118 reports are inspected:
+4,305 attempts include five failures and five retries, with no parse errors.
+
+The mobile bottom-freeze test fails twice because its 1.5-second delay expires
+before it captures the marker count. The retained failed retry trace and
+snapshot show the prompt and assistant already present when the baseline is
+two. Reuse the existing mock-turn file gate, establish settled geometry while
+the final response is held, require one marker, release once, and require two.
+Keep the two-pixel freeze assertion and release the turn during cleanup.
+Three focused repetitions and all seven mobile scroll cases pass without retries.
+
+Source review of the non-auto-start failure exposes a separately controlled
+production defect. Optional enrichment replays an earlier empty session list
+and clears a session prepared after identity load. Four real-store/hydrator
+regressions reproduce selection or membership loss, including the interval
+between resolution and application. Omit those already applied identity slices
+from the successful-empty-identity optional result. A fifth regression proves
+unavailable identity recovery remains an authoritative empty read. The owning
+UI requirement, design, and progressive-navigation work order are reconciled.
+The failed CI attempt has no trace, so this controlled defect is not claimed
+as its proven original cause.
+
+The model-preview and restart-activity failures also lack failed-attempt traces;
+each passes five unchanged local repetitions. The non-auto-start case passes
+five diagnostic repetitions too. Preserve all model, activation, and restart
+assertions and retain first-failure traces in their files. Temporary diagnostic
+instrumentation is removed. No speculative product change is made for either
+unreproduced failure.
+
+Validation on the rebuilt app: 136 focused SSR/route/hydration/task-session
+unit cases, the existing mock-turn helper test, four desktop restart/navigation
+cases, and four phone navigation/override cases pass. Full typecheck and
+changed-file lint pass with zero warnings. Independent review finds no
+remaining issue in the fix or its coverage. Full CI on the next published head
+remains the delivery gate. NOTIFICATION_GUIDE.md is uncommitted.

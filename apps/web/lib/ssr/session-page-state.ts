@@ -440,7 +440,16 @@ export async function fetchTaskNavigationEnrichment(
   const loadAgentList = options.store
     ? () => getAgentListResourceScope(options.store!).ensure()
     : () => listAgents({ cache: "no-store" });
-  if (!sessionId) return fetchTaskDataOnly(task, allSessionsResponse, loadAgentList, options.store);
+  if (!sessionId) {
+    const result = await fetchTaskDataOnly(task, allSessionsResponse, loadAgentList, options.store);
+    if (!identity.sessionListUnavailable) {
+      // The shell already applied this identity; optional data does not own live selection.
+      delete result.initialState.tasks;
+      delete result.initialState.taskSessions;
+      delete result.initialState.taskSessionsByTask;
+    }
+    return result;
+  }
 
   const optionalHydration = beginOptionalHydration();
   const { fetchTaskSession } = await import("@/lib/api");
