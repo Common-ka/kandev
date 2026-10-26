@@ -845,3 +845,12 @@ Main advances to b6263ea4c31 while validation runs. It already contains the
 same two-line file-transfer focus correction. Integrate that main commit and
 retain a single copy of the correction. Its integration-plugin sidebar changes
 require merged-code navigation/plugin grouping validation before publication.
+
+
+The actual merge with b6263ea4c31 is conflict-free and contains one copy of the
+file-transfer correction. All 86 focused sidebar/layout/goal unit cases and
+full typecheck pass. Five desktop/tablet MCP/plugin-grouping scenarios and
+three phone goal/plugin-grouping scenarios pass with retries disabled. They
+cover saved plugin visibility and native phone disclosure. Documentation and
+specification validators pass. Publish both local commits together, then
+require fresh full CI. The notification guide remains uncommitted.
