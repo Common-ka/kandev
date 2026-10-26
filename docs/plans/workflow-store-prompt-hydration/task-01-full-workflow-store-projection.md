@@ -27,11 +27,14 @@ or description as a cleared server value.
 - `src/kanban-route.tsx`, `src/spa-routes.tsx`: drop local copies, use it.
 - `lib/ssr/session-page-state.ts`,
   `components/task/mobile/session-task-switcher-sheet-hooks.ts`: use it.
+- `apps/backend/internal/backendapp/boot_state_routes.go`: add `prompt` to
+  `mapWorkflowItemState`.
+- `settings-search.tsx`: test id on each search result.
 - Unit and E2E regressions listed in [the plan](plan.md#tests).
 
 ## Out of scope
 
-Backend, API, save coordinator, settings merge logic, `useWorkflows`.
+API, save coordinator, settings merge logic, `useWorkflows`.
 
 ## Acceptance
 
@@ -48,6 +51,7 @@ Backend, API, save coordinator, settings merge logic, `useWorkflows`.
 (cd apps/web && pnpm exec eslint --max-warnings 0 <changed files>)
 (cd apps/web && pnpm run typecheck)
 (cd apps/web && pnpm e2e:run --project chromium tests/workflow/workflow-settings.spec.ts -- --grep 'keeps the workflow prompt when a step is saved')
+(cd apps/backend && go test -tags fts5 ./internal/backendapp -run 'TestMapWorkflowItemState|TestMapKanban')
 python3 scripts/lint-spec-files.py --all
 ```
 
@@ -69,10 +73,16 @@ Local run on Windows with Node 24.21.0, upstream `b6263ea4c`:
   v0.96.0 backend. After board → settings navigation the prompt was visible;
   renaming a step and saving logged `workflow updated` + `updated workflow step`
   and the API still returned the unchanged prompt.
+- Review follow-up (Go boot payload): `TestMapWorkflowItemStateIncludesPrompt`
+  failed without the `prompt` key (`<nil>`) and passes with it, alongside the
+  existing `TestMapKanban*`/`TestMapUserSettings*` mappers (CGO via `zig cc` on
+  Windows). `gofmt` clean.
 
 ## Files touched
 
 - `apps/web/lib/routing/route-bootstrap.ts` and `.test.ts`
+- `apps/backend/internal/backendapp/boot_state_routes.go` and `_test.go`
+- `apps/web/components/app-sidebar/sections/settings/settings-search.tsx`
 - `apps/web/src/kanban-route.tsx`, `apps/web/src/spa-routes.tsx`
 - `apps/web/lib/ssr/session-page-state.ts`
 - `apps/web/components/task/mobile/session-task-switcher-sheet-hooks.ts`

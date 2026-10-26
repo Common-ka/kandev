@@ -84,15 +84,19 @@ export function mapWorkspaceItem(ws: WorkspaceItem): WorkspaceState["items"][num
   };
 }
 
+/**
+ * Maps a listed workflow to its store entry. Every route that hydrates the
+ * workflow store uses this, as does the Go boot payload's
+ * `mapWorkflowItemState`: the workflow settings page treats store entries as the
+ * server's current values and its Save sends every editable field, so a dropped
+ * description or prompt reads as a cleared value and the next save of any step
+ * persists it. The API omits an empty prompt, so an absent prompt maps to "".
+ */
 export function mapWorkflowItem(workflow: Workflow): WorkflowsState["items"][number] {
   return {
     id: workflow.id,
     workspaceId: workflow.workspace_id,
     name: workflow.name,
-    // The workflow settings page treats store entries as the server's current
-    // values, and its Save sends every editable field. Dropping description or
-    // prompt here reads as a cleared value there, and the next save of any step
-    // persists that empty value. The API omits an empty prompt, so absent is "".
     description: workflow.description ?? null,
     prompt: workflow.prompt ?? "",
     sortOrder: workflow.sort_order ?? 0,

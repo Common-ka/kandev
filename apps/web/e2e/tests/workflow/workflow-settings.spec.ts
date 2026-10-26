@@ -643,8 +643,7 @@ test.describe("Workflow settings", () => {
     const settingsMode = testPage.getByTestId("app-sidebar-settings-mode");
     await settingsMode.getByRole("searchbox", { name: "Search settings" }).fill("Workflows");
     await settingsMode
-      .locator(`a[href="/settings/workspaces/${seedData.workspaceId}/workflows"]`)
-      .first()
+      .getByTestId(`settings-search-result-workspace:${seedData.workspaceId}:workflows`)
       .click();
     await expect(testPage).toHaveURL(
       new RegExp(`/settings/workspaces/${seedData.workspaceId}/workflows$`),

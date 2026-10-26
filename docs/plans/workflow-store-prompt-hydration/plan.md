@@ -22,7 +22,9 @@ editable workflow projection and adds unit and browser regressions.
 - `src/kanban-route.tsx` and `src/spa-routes.tsx` hydrate `workflows.items`
   through local `mapWorkflowItem` copies that omit `prompt`;
   `lib/ssr/session-page-state.ts` and the mobile task switcher also omit
-  `description`.
+  `description`. The Go boot payload (`mapWorkflowItemState`) omits `prompt`
+  too, and an already hydrated board skips the client route bootstrap, so a
+  failed sidebar refresh keeps those entries (found in review).
 - `useWorkflowSettings` merges store entries into clean drafts and baselines.
   A missing prompt is merged as `undefined`, so the field renders empty and is
   not dirty.
@@ -43,13 +45,16 @@ editable workflow projection and adds unit and browser regressions.
 
 - One shared `mapWorkflowItem` next to `mapWorkspaceItem`, used by the kanban,
   SPA, session-page and mobile task-switcher hydration paths.
+- `prompt` in the Go boot payload's `mapWorkflowItemState`.
+- A test id on settings search results so the E2E can select the Workflows
+  result without depending on its `href`.
 - Unit regressions for the mapper and the settings hook, and one chromium E2E
   for board navigation followed by a step save.
 - AC-UI-SETTINGS-MANUAL-SAVE-001.9 and the owning design section.
 
 ### Out of scope
 
-- Backend, API payloads, the save coordinator, the settings merge logic and
+- API payloads, the save coordinator, the settings merge logic and
   `useWorkflows` (it already maps the full projection).
 
 ## Technical approach
@@ -65,6 +70,7 @@ The two thinner paths gain `description`, `prompt` and `sortOrder`.
 | --- | --- |
 | `route-bootstrap.test.ts` › mapWorkflowItem keeps editable fields / maps omitted prompt | .9 |
 | `use-workflow-settings.test.ts` › keeps the saved prompt and description when a route hydrated the store | .9 |
+| `boot_state_routes_test.go` › TestMapWorkflowItemStateIncludesPrompt | .9 |
 | `workflow-settings.spec.ts` › keeps the workflow prompt when a step is saved after opening settings from the board | .9 |
 
 ## Work orders

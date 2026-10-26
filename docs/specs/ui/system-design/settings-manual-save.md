@@ -89,7 +89,9 @@ The workflow settings contributor reconciles its clean drafts and baselines with
 the shared workflow store, and its Save sends name, description, prompt and
 default profile together. Every route that hydrates that store from a workflow
 list therefore writes the full editable projection through the shared
-`mapWorkflowItem` in `lib/routing/route-bootstrap.ts`. A route-local projection
+`mapWorkflowItem` in `lib/routing/route-bootstrap.ts`, and the Go boot payload's
+`mapWorkflowItemState` (`backendapp/boot_state_routes.go`) emits the same
+fields for the first render. A projection
 that omits a field would read as a cleared server value after in-app navigation,
 and the next unrelated step Save would persist it (AC-UI-SETTINGS-MANUAL-SAVE-001.9).
 The list API omits an empty prompt, so the projection maps an absent prompt to "".
