@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useAppStore, useAppStoreApi } from "@/components/state-provider";
+import { getWebSocketClient } from "@/lib/ws/connection";
 import {
   getTurnChangeHistoryItem,
   listTurnChangeHistory,
@@ -54,6 +55,36 @@ export function clearTurnChangeRequestsForTest(): void {
   inFlightPages.clear();
 }
 
+function useTurnChangeSubscription(
+  sessionId: string | null,
+  store: ReturnType<typeof useAppStoreApi>,
+  setError: (error: unknown) => void,
+) {
+  const connectionStatus = useAppStore((state) => state.connection.status);
+  useEffect(() => {
+    if (!sessionId || connectionStatus !== "connected") return;
+    const client = getWebSocketClient();
+    if (!client) return;
+    const subscription = client.subscribeSessionWithReady(sessionId);
+    let active = true;
+    void subscription.ready
+      .then(async () => {
+        // The new snapshot must not join a read started before the subscription was ready.
+        await inFlightPages.get(`${sessionId}:0`)?.catch(() => undefined);
+        if (!active) return;
+        await loadPage(sessionId, 0, store);
+        if (active) setError(null);
+      })
+      .catch((error) => {
+        if (active) setError(error);
+      });
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, [sessionId, connectionStatus, store, setError]);
+}
+
 export function useSessionTurnChanges(sessionId: string | null) {
   const store = useAppStoreApi();
   const summaries = useAppStore((state) => selectTurnChangeSummaries(state.turnChanges, sessionId));
@@ -85,6 +116,8 @@ export function useSessionTurnChanges(sessionId: string | null) {
   useEffect(() => {
     if (sessionId && !loaded) void load(0);
   }, [sessionId, loaded, load]);
+
+  useTurnChangeSubscription(sessionId, store, setError);
 
   const loadMore = useCallback(() => {
     if (nextOffset !== null) void load(nextOffset);

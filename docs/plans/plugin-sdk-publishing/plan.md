@@ -651,3 +651,31 @@ workspace paths, and completed owned cleanup. The secondary reviewer found no
 remaining actionable issue in the fixture or release integration. Documentation
 validators and the guide checksum pass. Commit/push through normal hooks and
 require current-head CI; the root notification guide remains uncommitted.
+
+
+### Historical changed-files CI follow-up
+
+New-head CI failed mobile historical-diff scenarios. Actual failed traces show
+an initial pending history read before session subscription, then conversation
+backfill containing the completed turn with no later history read. The exact
+server notification emission is not retained, so its timing is not claimed.
+A controlled hook regression reproduces the stale pending snapshot when the
+terminal event falls outside the subscription. A second case keeps the initial
+HTTP response pending across acknowledgment to prevent a deduplication bypass.
+Use the existing subscription-ready lease, refresh after acknowledgment and
+reconnect, preserve the independent initial HTTP read, and cancel obsolete
+refreshes. Reconcile the owning Tasks requirement/design and transcript work
+order. Verify unit ownership/error boundaries, fresh desktop/mobile E2E, normal
+hooks, and new CI. Keep the root notification guide uncommitted.
+
+Validation: the pending-snapshot and overlapping-read regressions failed before
+the handoff fix. Review exposed a late error from an obsolete subscribed refresh;
+its controlled session-switch regression also failed before correction.
+The final focused unit run passes 12 tests. Typecheck, changed-file ESLint,
+Prettier, catalog/specification validation, and diff checks pass. Fresh desktop
+and mobile builds pass all seven historical-diff cases with retries disabled.
+The secondary reviewer found no remaining actionable issue in the final diff.
+The complete previous CI artifact audit contains 118 reports and 4,294 attempts;
+all five failed attempts belong to the two affected mobile changed-files cases.
+A new committed head still requires full CI. Public docs need no new command or
+UI composition changes for this freshness correction.
