@@ -927,3 +927,39 @@ and speculative waits. Preserve the original behavior, assertions, and
 timeouts, and retain first-failure traces in both affected browser files.
 Fresh full CI and its complete artifact audit remain required. The notification
 guide stays uncommitted.
+
+
+### Optimistic save and review fixture isolation
+
+Full CI on 5c4c2caa52d exposes three different browser failures. The previous
+mobile cancellation and topbar cases pass. The Office title test reads the
+database immediately after the optimistic render. A controlled held PATCH
+reproduces its old-title failure; awaiting the exact task's successful save
+response after the original immediate UI assertions makes the probe pass.
+All five title/description scenarios pass, including failed-save rollback and
+independent-client projection. No production mutation behavior changes.
+
+The mobile review context contains a prior passthrough upload plus the two
+owned files. The extra attachment is correctly reviewed, while the manually
+cleared target remains unchecked. An injected earlier-sorting attachment
+reproduces the aggregate-zero failure. Reuse resetSeedRepositoryCheckout before
+task creation and require exact two-file status membership. The contaminated
+probe then passes with all original aggregate and manual-scroll assertions.
+
+The coordinator executor option detaches during selection; the failed attempt
+has no trace. A controlled held agent-popover exit with normal pointer input
+keeps the executor open: nonmodal outside-interaction suppresses old close
+focus. This does not reproduce the CI cause. Preserve chooseIdentity actions,
+assertions, and timeouts; retain first-failure traces. Remove temporary probes
+before commit. The notification guide remains uncommitted.
+
+
+The final browser audit covers 118 reports and 4,306 attempts: two failed
+attempts, one timed-out attempt, three retries, 40 skipped tests, and no parse
+errors. CI reports 92 passing checks, 11 skipped checks, three failed shards
+plus their aggregate, and no pending checks. Review evidence is complete with
+no unresolved threads or API errors. All four coordinator cases pass three
+unchanged repetitions. The review flow passes three phone and three desktop
+repetitions after removing deliberate contamination. Full typecheck, changed
+file lint, documentation checks, guide checksum, and independent read-only
+review pass. Fresh exact-head CI remains required.

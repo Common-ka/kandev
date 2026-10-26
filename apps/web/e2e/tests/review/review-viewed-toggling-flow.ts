@@ -1,6 +1,6 @@
 import path from "node:path";
 import { type Locator, type Page } from "@playwright/test";
-import { test, expect } from "../../fixtures/test-base";
+import { test, expect, resetSeedRepositoryCheckout } from "../../fixtures/test-base";
 import { GitHelper, makeGitEnv } from "../../helpers/git-helper";
 import { SessionPage } from "../../pages/session-page";
 import type { GitStatusData } from "../../../lib/types/git-events";
@@ -59,6 +59,7 @@ async function scrollReview(page: Page, root: Locator, mobile: boolean, directio
 
 export function reviewViewedTogglingScenario(mobile: boolean) {
   test.setTimeout(120_000);
+  test.use({ trace: "retain-on-failure" });
   // @covers AC-UI-REVIEW-VIEWED-001.1, AC-UI-REVIEW-VIEWED-001.2, AC-UI-REVIEW-VIEWED-001.5
   test("keeps a file unchecked until scrolling back and passing it again", async ({
     testPage,
@@ -67,6 +68,7 @@ export function reviewViewedTogglingScenario(mobile: boolean) {
     backend,
     prCapture,
   }) => {
+    resetSeedRepositoryCheckout(seedData, backend.tmpDir);
     const task = await apiClient.createTaskWithAgent(
       seedData.workspaceId,
       "Review viewed checkbox",
@@ -104,7 +106,11 @@ export function reviewViewedTogglingScenario(mobile: boolean) {
     git.createFile(TRAILING, "export const trailing = true;\n".repeat(80));
     git.stageFile(TARGET);
     git.stageFile(TRAILING);
-    await filesPublished;
+    const published = await filesPublished;
+    expect(Object.keys((published.payload.status as GitStatusData).files ?? {}).sort()).toEqual([
+      TARGET,
+      TRAILING,
+    ]);
     if (mobile) {
       await testPage
         .getByRole("navigation")
