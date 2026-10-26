@@ -1,0 +1,555 @@
+{
+  "status": "Full native attribution complete; failed diagnostic, excluded from gain summaries",
+  "recordedAt": "2026-10-26T01:44:35.329077+00:00",
+  "harnessRevision": "685fc7296da4fe2a22d92acfc439871323a54b0a",
+  "productionRevision": "30e72e160e5ac8566d8d2b595e462330ca88f0e8",
+  "sourcePatchBytes": 0,
+  "untrackedSourceFiles": 0,
+  "raw": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/matched-dense-1792975829767.json",
+    "sha256": "1d65ecd0faa998811aea7868a3a9834ab2dc8354eb6abca98d4654eeb8a65a80"
+  },
+  "runner": {
+    "handle": 2942,
+    "exitCode": 1,
+    "terminal": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/native-input-full-tool-terminal.json",
+      "sha256": "77c72d15a6f1089ddc4e41e40b7b65b7b534af603a5ca56df06b64f4bd763992"
+    },
+    "log": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/native-input-full-logs/kandev-run.e2e.GLzBxzH5.log",
+      "sha256": "9df0cfe70390bcafe88c34218ecb5c6e2e3707736feca59ee358e2c7a17156ac"
+    }
+  },
+  "sampler": {
+    "handle": 69254,
+    "exitCode": 0,
+    "hostLoad": {
+      "path": ".kandev/diagnostics/dense-workbench-performance/native-input-full-host-load.jsonl",
+      "sha256": "fa9212d69e9afcf0220c1bb6d7871168c7aea7d53ad2fe3a353915e110ca40fd"
+    }
+  },
+  "measurementKind": "native-input-attribution",
+  "harness": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/native-input-full-harness-manifest.json",
+    "sha256": "f421d3305020d585efcb13547edec00279942790206d4223e10affdb29535788"
+  },
+  "workload": {
+    "layout": "grid",
+    "extraBusyHeaders": 0,
+    "tasks": 1000,
+    "columns": 30,
+    "messages": 1000,
+    "durationMs": 60000
+  },
+  "storedMessages": 36000,
+  "databaseSha256": "b49447d09ab802b0545095de0d761be89e1f78a0effd93c41e96c65e971f7b29",
+  "builds": {
+    "baseline": {
+      "binary": "/tmp/kandev-dense-baseline-595df36/apps/backend/bin/kandev",
+      "assets": "/tmp/kandev-dense-baseline-595df36/apps/web/dist",
+      "binarySha256": "79862387cc00751d9462fd4f2f5b844ad7126f3e45d5e990a7c14577d31499de",
+      "assetsSha256": "312770e3ef7b09b53e7791dbea8ad87eea19f687bd85a218ce6ced2493ce3987"
+    },
+    "candidate": {
+      "binary": "/tmp/kandev-perf-delivery-5936a872/apps/backend/bin/kandev",
+      "assets": "/tmp/kandev-perf-delivery-5936a872/apps/web/dist",
+      "binarySha256": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "assetsSha256": "39be7b61627a3539d8305b522079e0da671a9cb3d643286194cbfe164ea12261"
+    }
+  },
+  "attempts": [
+    {
+      "arm": "baseline",
+      "pair": 0,
+      "cpuRate": 1,
+      "sample": "baseline-1x-0",
+      "status": "passed"
+    },
+    {
+      "arm": "candidate",
+      "pair": 0,
+      "cpuRate": 1,
+      "sample": "candidate-1x-0",
+      "status": "passed"
+    },
+    {
+      "arm": "candidate",
+      "pair": 1,
+      "cpuRate": 1,
+      "sample": "candidate-1x-1",
+      "status": "failed",
+      "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: <= \u001b[32m3\u001b[39m\nReceived:    \u001b[31m21\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate"
+    },
+    {
+      "arm": "baseline",
+      "pair": 1,
+      "cpuRate": 1,
+      "sample": "baseline-1x-1",
+      "status": "passed"
+    },
+    {
+      "arm": "baseline",
+      "pair": 2,
+      "cpuRate": 1,
+      "sample": "baseline-1x-2",
+      "status": "passed"
+    },
+    {
+      "arm": "candidate",
+      "pair": 2,
+      "cpuRate": 1,
+      "sample": "candidate-1x-2",
+      "status": "failed",
+      "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m52171\u001b[39m\nReceived:   \u001b[31m52616\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate"
+    },
+    {
+      "arm": "candidate",
+      "pair": 3,
+      "cpuRate": 1,
+      "sample": "candidate-1x-3",
+      "status": "passed"
+    },
+    {
+      "arm": "baseline",
+      "pair": 3,
+      "cpuRate": 1,
+      "sample": "baseline-1x-3",
+      "status": "failed",
+      "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m52024\u001b[39m\nReceived:   \u001b[31m52054\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate"
+    },
+    {
+      "arm": "baseline",
+      "pair": 4,
+      "cpuRate": 1,
+      "sample": "baseline-1x-4",
+      "status": "passed"
+    },
+    {
+      "arm": "candidate",
+      "pair": 4,
+      "cpuRate": 1,
+      "sample": "candidate-1x-4",
+      "status": "passed"
+    },
+    {
+      "arm": "candidate",
+      "pair": 5,
+      "cpuRate": 1,
+      "sample": "candidate-1x-5",
+      "status": "passed"
+    },
+    {
+      "arm": "baseline",
+      "pair": 5,
+      "cpuRate": 1,
+      "sample": "baseline-1x-5",
+      "status": "passed"
+    }
+  ],
+  "completePairs": 3,
+  "completedSamples": 9,
+  "verifiedOrderedUpdates": 16200,
+  "actualNativeWheelRecords": 22,
+  "negativeMotionObservations": [
+    {
+      "sample": "baseline-1x-0",
+      "status": "passed",
+      "wheelTop": 52066,
+      "firstUpTop": 51906,
+      "advanceAfterFirstUpPx": 0,
+      "firstUpMs": 159.79999999701977,
+      "omittedEvents": 0
+    },
+    {
+      "sample": "candidate-1x-0",
+      "status": "passed",
+      "wheelTop": 52045,
+      "firstUpTop": 51885,
+      "advanceAfterFirstUpPx": 0,
+      "firstUpMs": 124.20000000298023,
+      "omittedEvents": 0
+    },
+    {
+      "sample": "candidate-1x-1",
+      "status": "failed",
+      "wheelTop": 52827,
+      "firstUpTop": 52667,
+      "advanceAfterFirstUpPx": 0,
+      "firstUpMs": 163.79999999701977,
+      "omittedEvents": 0
+    },
+    {
+      "sample": "baseline-1x-1",
+      "status": "passed",
+      "wheelTop": 51982,
+      "firstUpTop": 51822,
+      "advanceAfterFirstUpPx": 0,
+      "firstUpMs": 94.0,
+      "omittedEvents": 0
+    },
+    {
+      "sample": "baseline-1x-2",
+      "status": "passed",
+      "wheelTop": 52024,
+      "firstUpTop": 51864,
+      "advanceAfterFirstUpPx": 0,
+      "firstUpMs": 83.69999998807907,
+      "omittedEvents": 0
+    },
+    {
+      "sample": "candidate-1x-2",
+      "status": "failed",
+      "wheelTop": 52215,
+      "firstUpTop": 52055,
+      "advanceAfterFirstUpPx": 772,
+      "firstUpMs": 141.90000000596046,
+      "omittedEvents": 17
+    },
+    {
+      "sample": "candidate-1x-3",
+      "status": "passed",
+      "wheelTop": 52595,
+      "firstUpTop": 52435,
+      "advanceAfterFirstUpPx": 0,
+      "firstUpMs": 164.0,
+      "omittedEvents": 0
+    },
+    {
+      "sample": "baseline-1x-3",
+      "status": "failed",
+      "wheelTop": 52214,
+      "firstUpTop": 52054,
+      "advanceAfterFirstUpPx": 0,
+      "firstUpMs": 166.0,
+      "omittedEvents": 0
+    },
+    {
+      "sample": "baseline-1x-4",
+      "status": "passed",
+      "wheelTop": 52046,
+      "firstUpTop": 51886,
+      "advanceAfterFirstUpPx": 0,
+      "firstUpMs": 97.1000000089407,
+      "omittedEvents": 0
+    },
+    {
+      "sample": "candidate-1x-4",
+      "status": "passed",
+      "wheelTop": 53038,
+      "firstUpTop": 52878,
+      "advanceAfterFirstUpPx": 0,
+      "firstUpMs": 134.90000000596046,
+      "omittedEvents": 0
+    },
+    {
+      "sample": "candidate-1x-5",
+      "status": "passed",
+      "wheelTop": 52679,
+      "firstUpTop": 52519,
+      "advanceAfterFirstUpPx": 0,
+      "firstUpMs": 157.3999999910593,
+      "omittedEvents": 0
+    },
+    {
+      "sample": "baseline-1x-5",
+      "status": "passed",
+      "wheelTop": 51978,
+      "firstUpTop": 51818,
+      "advanceAfterFirstUpPx": 0,
+      "firstUpMs": 88.5,
+      "omittedEvents": 0
+    }
+  ],
+  "cases": {
+    "candidateReturnBottom": {
+      "sample": "candidate-1x-1",
+      "originalPredicateFailed": true,
+      "waitMs": 5000,
+      "targetSameAndTrusted": true,
+      "prevented": false,
+      "nodeCallBounds": [
+        {
+          "name": "read-before",
+          "startedMs": 11999.989562999923,
+          "finishedMs": 14996.936169999652,
+          "browserObservedEpochMs": 1792976433947
+        },
+        {
+          "name": "read-scroll-position",
+          "startedMs": 24034.920523999725,
+          "finishedMs": 27611.89448599983,
+          "browserObservedEpochMs": 1792976446556
+        },
+        {
+          "name": "read-after",
+          "startedMs": 31159.99817600008,
+          "finishedMs": 33602.93378999969,
+          "browserObservedEpochMs": 1792976452549
+        },
+        {
+          "name": "read-before",
+          "startedMs": 33604.25715699978,
+          "finishedMs": 35099.60167300003,
+          "browserObservedEpochMs": 1792976454047
+        }
+      ],
+      "nodeWindowEpochOffsetRangeMs": [
+        1792976418950.0637,
+        1792976420442.743
+      ],
+      "clockAssumption": "Browser and Node Date.now use the same host wall clock with a constant offset to the Node monotonic window over these RPCs. Each browser observation occurs within its recorded Node call interval.",
+      "latestPossibleWaitStartEpochMs": 1792976462517.4868,
+      "earliestPossibleWaitEndEpochMs": 1792976466024.8076,
+      "nativeZeroGapPointsInsideEveryCompatibleWait": [
+        {
+          "at": 127521.5,
+          "observedAt": 1792976463256,
+          "kind": "scroll",
+          "gapPx": 0
+        },
+        {
+          "at": 127522,
+          "observedAt": 1792976463257,
+          "kind": "scrollend",
+          "gapPx": 0
+        },
+        {
+          "at": 128387.59999999404,
+          "observedAt": 1792976464122,
+          "kind": "scroll",
+          "gapPx": 0
+        },
+        {
+          "at": 128388,
+          "observedAt": 1792976464123,
+          "kind": "scrollend",
+          "gapPx": 0
+        }
+      ],
+      "inference": "The predicate timeout does not mean the transcript never reached the end: native observations include zero-gap states inside every possible original5second wait interval consistent with RPC timing. Check controller polling before attributing this sample to a product follow failure.",
+      "screenshot": {
+        "error": "TimeoutError: page.screenshot: Timeout 2000ms exceeded.\nCall log:\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n"
+      }
+    },
+    "candidateReadingPosition": {
+      "sample": "candidate-1x-2",
+      "controllerBeforeTop": 52171,
+      "actualWheelTop": 52215,
+      "targetSameAndTrusted": true,
+      "prevented": false,
+      "onlyRecordedWheel": true,
+      "omittedScrollEvents": 17,
+      "initialEvents": [
+        {
+          "kind": "scroll",
+          "dtMs": 4.0,
+          "observedAt": 1792977052147,
+          "top": 52215,
+          "height": 52379,
+          "gapPx": 0,
+          "deltaFromWheelTop": 0,
+          "deltaFromControllerBefore": 44,
+          "connected": true,
+          "sameNode": true
+        },
+        {
+          "kind": "scrollend",
+          "dtMs": 5.1,
+          "observedAt": 1792977052148,
+          "top": 52215,
+          "height": 52379,
+          "gapPx": 0,
+          "deltaFromWheelTop": 0,
+          "deltaFromControllerBefore": 44,
+          "connected": true,
+          "sameNode": true
+        },
+        {
+          "kind": "after-dispatch",
+          "dtMs": 7.7,
+          "observedAt": 1792977052151,
+          "top": 52215,
+          "height": 52379,
+          "gapPx": 0,
+          "deltaFromWheelTop": 0,
+          "deltaFromControllerBefore": 44,
+          "connected": true,
+          "sameNode": true,
+          "defaultPrevented": false
+        },
+        {
+          "kind": "scroll",
+          "dtMs": 141.9,
+          "observedAt": 1792977052285,
+          "top": 52055,
+          "height": 52400,
+          "gapPx": 181,
+          "deltaFromWheelTop": -160,
+          "deltaFromControllerBefore": -116,
+          "connected": true,
+          "sameNode": true
+        },
+        {
+          "kind": "scrollend",
+          "dtMs": 142.3,
+          "observedAt": 1792977052285,
+          "top": 52055,
+          "height": 52400,
+          "gapPx": 181,
+          "deltaFromWheelTop": -160,
+          "deltaFromControllerBefore": -116,
+          "connected": true,
+          "sameNode": true
+        },
+        {
+          "kind": "scroll",
+          "dtMs": 389.8,
+          "observedAt": 1792977052533,
+          "top": 52256,
+          "height": 52421,
+          "gapPx": 1,
+          "deltaFromWheelTop": 41,
+          "deltaFromControllerBefore": 85,
+          "connected": true,
+          "sameNode": true
+        },
+        {
+          "kind": "scrollend",
+          "dtMs": 390.2,
+          "observedAt": 1792977052533,
+          "top": 52256,
+          "height": 52421,
+          "gapPx": 1,
+          "deltaFromWheelTop": 41,
+          "deltaFromControllerBefore": 85,
+          "connected": true,
+          "sameNode": true
+        },
+        {
+          "kind": "scroll",
+          "dtMs": 582.0,
+          "observedAt": 1792977052725,
+          "top": 52275,
+          "height": 52442,
+          "gapPx": 3,
+          "deltaFromWheelTop": 60,
+          "deltaFromControllerBefore": 104,
+          "connected": true,
+          "sameNode": true
+        },
+        {
+          "kind": "scrollend",
+          "dtMs": 582.3,
+          "observedAt": 1792977052725,
+          "top": 52275,
+          "height": 52442,
+          "gapPx": 3,
+          "deltaFromWheelTop": 60,
+          "deltaFromControllerBefore": 104,
+          "connected": true,
+          "sameNode": true
+        }
+      ],
+      "failureState": {
+        "observedAt": 1792977057483,
+        "scrollTop": 52785,
+        "scrollHeight": 52949,
+        "clientHeight": 164,
+        "composer": "open",
+        "sessionId": "567b6ed9-f042-4894-a528-d4204e3e8820"
+      },
+      "inference": "The same transcript moves up160pixels, then advances toward the end without a later scripted gesture. A queued old-edge scroll after fresh upward intent can re-arm follow; reproduce that event ordering before production changes."
+    },
+    "baselineStaleOffset": {
+      "sample": "baseline-1x-3",
+      "controllerBefore": {
+        "name": "read-scroll-position",
+        "startedMs": 15668.17177699972,
+        "value": {
+          "observedAt": 1792977452211,
+          "scrollTop": 52024,
+          "scrollHeight": 52188,
+          "clientHeight": 164,
+          "composer": "open",
+          "sessionId": "567b6ed9-f042-4894-a528-d4204e3e8820"
+        },
+        "finishedMs": 16315.681942999829
+      },
+      "wheel": {
+        "at": 100106.5,
+        "observedAt": 1792977452636,
+        "scrollTop": 52214,
+        "scrollHeight": 52379,
+        "clientHeight": 164,
+        "isTrusted": true,
+        "deltaY": -80,
+        "ctrlKey": false,
+        "targetWithinTranscript": true,
+        "connected": true,
+        "liveTranscriptSameNode": true,
+        "sessionId": "567b6ed9-f042-4894-a528-d4204e3e8820"
+      },
+      "scrolls": [
+        {
+          "dtMs": 166.0,
+          "top": 52054,
+          "deltaFromWheel": -160,
+          "deltaFromControllerBefore": 30,
+          "gapPx": 161
+        }
+      ],
+      "failureState": {
+        "observedAt": 1792977458242,
+        "scrollTop": 52054,
+        "scrollHeight": 52949,
+        "clientHeight": 164,
+        "composer": "open",
+        "sessionId": "567b6ed9-f042-4894-a528-d4204e3e8820"
+      },
+      "omittedEvents": 0,
+      "inference": "The baseline moves up160pixels and holds that position. The test compares with an earlier offset that became stale as streaming continued."
+    }
+  },
+  "summaryRejection": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/native-input-full-summary-rejection.log",
+    "sha256": "dabeb4d76693f5a9adb44e8013743cba546942c0019bbdf777a9080a7f81d271",
+    "exitCode": 1,
+    "summaryCreated": false
+  },
+  "runtimeAfter": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/native-input-full-post-runtime.json",
+    "sha256": "49e2103c7196907cd502d7f91be47aa65c91d4ea8acd8c351c11298b1b701474"
+  },
+  "sourceLogsAndCleanup": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/native-input-full-source-logs-cleanup.json",
+    "sha256": "736c1abc771c5872edaedf12b12bf486541d216a1a1b9e12942a7222d883408c"
+  },
+  "copyManifest": {
+    "path": ".kandev/diagnostics/dense-workbench-performance/native-input-full-copy-manifest.json",
+    "sha256": "029c9c9b85d634640bf8557b357f3d238d6511d65f5ecca849aab4621e5b623a"
+  },
+  "reconciledCaseSnapshots": [
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/native-input-full-candidate1-checkpoint.json",
+      "sha256": "a1768385901f4a235421298b8e32af7803254ffd0f7bf091b59031a454d4c721"
+    },
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/native-input-full-candidate2-checkpoint.json",
+      "sha256": "5bafdd74cc6fc41c82849860bce8031e4a9378a6a2255c798ad15add4b697728"
+    },
+    {
+      "path": ".kandev/diagnostics/dense-workbench-performance/native-input-full-baseline3-checkpoint.json",
+      "sha256": "19dcf099b6ce99624d523b8d64e205af08250f3c35c3e89baf6c3c6c8705fa62"
+    }
+  ],
+  "limits": [
+    "All12planned attempts and22trusted wheel records are retained. Failed attempts are not relabelled as passed.",
+    "Only9complete samples count toward16200verified ordered updates. Native event retention is bounded, and omitted events are explicit.",
+    "A faster predicate that sees transient upward movement would hide the new-build reading-position problem. Regress and fix held reading before changing the measurement protocol.",
+    "The candidate bottom timeout and original stale-offset timeout are separate measurement defects. Preserve original wheel commands,5second deadline and3pixel edge bound; keep protocol versions distinct.",
+    "eventAgeMs includes capture work and is not a pure queue-delay or field-INP metric.",
+    "One bounded failure screenshot attempt times out; the error remains. Later file presence is not substituted for an acknowledged capture.",
+    "No speed, M2 Air, battery or memory-leak gain is established by this observer run. The final primary matrix remains open."
+  ]
+}

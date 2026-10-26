@@ -289,3 +289,28 @@ calibration failures, export corrections and the stale-source guard check are
 retained. Full-density native-event attribution is next; the actual `39be`
 scroll-up failure and the other 19 final matrix cases remain open. See
 [the calibration evidence](evidence/native-input-calibration.json).
+
+## Full-density native input findings
+
+The calibrated observer completes all 12 planned attempts on the frozen
+`312770e3` and `39be7b61` builds. Nine attempts pass and three fail; nine
+complete samples verify 16,200 ordered updates. All 22 native wheel records,
+12 backend logs and bounded capture results are retained. Sources, assets,
+owned helpers and cleanup are verified. The diagnostic is rejected by the
+speed-summary guard.
+
+The traces distinguish three cases. The candidate scrolls upward by 160 pixels
+then resumes following without a later scripted gesture. A queued old-edge
+scroll can consume the new upward intent; reproduce that order and preserve
+held reading before changing the test. Separately, the candidate reaches zero
+bottom gap within the five-second check window while controller polling misses
+those states. The original version also scrolls up and holds correctly, but
+its check compares with an offset that became stale before the gesture.
+
+Next: add a failing native-scroll regression for the queued-scroll race,
+implement the smallest session-owned intent repair, and verify explicit resume
+and other input modes. Correct measurement separately under a distinct
+protocol with the same commands, deadlines and thresholds. Catching only a
+transient upward move would hide the product issue. The current primary
+`39be` failure and the other 19 matrix cases remain open. See
+[the full input evidence](evidence/full-density-native-input-causes.json).
