@@ -899,3 +899,31 @@ The same shared handoff also passes a real phone two-chat setup probe with
 normal agent selection. All temporary probe files are removed. The complete
 fallback scenario passes once more with metadata capture enabled. Normal
 commit hooks and fresh exact-head CI are the remaining delivery gates.
+
+
+### Mobile cancellation observation and topbar evidence
+
+Full CI on 47818c553a6 finishes with 93 passing and 11 skipped checks, two
+failed browser shards plus their aggregate, and no pending checks. The audit
+covers 118 reports and 4,304 attempts: two failed attempts, one retry, and no
+parse errors. Prior corrected cases pass.
+
+The mobile Quick Chat palette case expects a disabled Cancel control after
+the actual cancellation has already settled. Its failed context shows the
+cancellation notice, idle input, and no Cancel control. Reuse the existing
+real-gateway cancellation observation helper in both mobile cancellation
+cases: install before navigation, arm for the exact session immediately before
+the single action, observe actual pending state and the original disabled
+assertion, then release in finally. Keep settlement, touch geometry, follow-up
+response, and overflow assertions. Both cases pass three repetitions each
+with retries disabled. Independent read-only review finds no issue.
+
+The mobile topbar failure leaves View options open after a Search action.
+Its failed attempt has no trace. Five unchanged runs, one controlled long
+transition run, and five runs with sixfold CPU throttling all pass. Captured
+search clicks in the probes occur after finite animations have finished; this
+does not establish an animation cause. Remove all temporary instrumentation
+and speculative waits. Preserve the original behavior, assertions, and
+timeouts, and retain first-failure traces in both affected browser files.
+Fresh full CI and its complete artifact audit remain required. The notification
+guide stays uncommitted.
