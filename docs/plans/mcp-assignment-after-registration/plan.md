@@ -34,9 +34,9 @@ management design branch for the authorized draft checkpoint below.
 - Own branch: `feature/clarify-mcp-assignme-mhh`.
 - Historical fetched parent: `feature/plan-workspace-mcp-c-dcc` at
   `193de56ba2597b335a97b1e5ab01d09340f22647`, verified 2026-10-22.
-- Current PR base: `feature/improve-mcp-manageme-mpe` at
-  `7aca966a6ec262eb1ce839fa883f66e23441d477`, verified against the remote on
-  2026-10-25. Its parent is main `cc687bdce96bc22fb8a9ca87abe571b8309d3125`.
+- Current PR base: `main` at
+  `e5c38184cf9c191075dc88c1ffad28c636858bf5`, verified against the remote on
+  2026-10-26. This is the actual squash merge of management PR #4759.
   Draft publication is authorized. No review handling, CI waiting, or merge.
   Do not mutate the parent or sibling workspace.
 
@@ -410,3 +410,29 @@ MCPSelectionContent and workspace-keyed search, attach assignment's existing
 focus-only props directly, and remove the obsolete picker opener/reveal prop.
 No backend, selection-write, authorization or provider timing contract changes.
 Affected validation and fresh profile evidence are recorded in WO03.
+
+
+## Management squash reconciliation, 2026-10-26
+
+Management PR #4759 merged as `e5c38184cf9c191075dc88c1ffad28c636858bf5`.
+GitHub retargeted draft assignment PR #4760 to main. Verified the live merge
+receipt and fetched main, preserved old assignment
+`f3be6a5186f43dcce4487371c7a493be6c9ec280` in
+`backup/clarify-mcp-assignment-before-management-squash-20261026`, and replayed
+only the nine task commits after actual integrated management base
+`7aca966a6ec262eb1ce839fa883f66e23441d477`. No management or parent commits
+were replayed. Exclusions must keep that old assignment tip as its next cut point.
+
+Range-diff shows eight identical assignment patches. WO01 differs only by
+moving the newly merged usage-pagination transport regression into the existing
+mocked `mcp-usage-api.test.ts` suite, preserving the real-fetch conditional-write
+suite independently. Current WO01 is
+`84f880ae45c143b3bda7349d47a9b46907937443`. The merged shared draft hook retains
+its layout-effect context/draft refs. Management's error/retry guards, deferred
+legacy editor and exact-session admission corrections are preserved alongside
+assignment's accepted-selection focus readiness and conditional writes.
+
+The new base includes unrelated main changes; these are inherited and absent
+from the assignment PR diff. Affected validation is recorded in WO03. Existing
+backups and user work are preserved. Keep PR #4760 draft, with no review handling,
+CI waiting, auto-merge or merge.

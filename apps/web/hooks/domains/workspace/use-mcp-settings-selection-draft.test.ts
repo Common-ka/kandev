@@ -121,5 +121,7 @@ it("submits only the committed draft while a newer edit is suspended", async () 
   expect(suspended).toBe(true);
   expect(view.container.textContent).toBe("committed");
   await act(() => current.save());
-  expect(replaceMCPSelections).toHaveBeenCalledWith("profile", "profile", "a", ["committed"]);
+  expect(replaceMCPSelections).toHaveBeenCalledWith("profile", "profile", "a", ["committed"], {
+    expected_definition_ids: ["saved"],
+  });
 });

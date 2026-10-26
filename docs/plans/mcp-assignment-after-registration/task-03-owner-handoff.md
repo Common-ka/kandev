@@ -349,3 +349,48 @@ The remaining assignment behavior and prior screenshots are unchanged. Full web
 typecheck and strict lint passed after the readiness correction; no temporary
 instrumentation or hook bypass is present. Current rebased WO01 is
 `778c9ebabeb039c60530c5935704e2dddf6892ab`.
+
+
+### Management squash integration, 2026-10-26
+
+Verified management PR #4759 merged at `e5c38184cf9c191075dc88c1ffad28c636858bf5`
+and fetched that current main. Replayed only nine assignment commits after
+integrated management `7aca966a6`; backup
+`backup/clarify-mcp-assignment-before-management-squash-20261026` preserves old
+assignment `f3be6a5186f43dcce4487371c7a493be6c9ec280` for exclusions. PR #4760
+now targets main and remains draft. Current WO01 is
+`84f880ae45c143b3bda7349d47a9b46907937443`.
+
+Preserved the merged layout-effect update of draft/context refs, profile retry
+admission, deferred global legacy editor, usage retry handling and exact-session
+route guards. The only rebase conflict moved management's new transport test
+into `mcp-usage-api.test.ts`, alongside its existing mocked-fetch tests, while
+retaining assignment's real-fetch conditional serialization tests separately.
+Range-diff shows the other eight assignment patches unchanged.
+
+The first focused test run passed 82 of 83 cases. Its one failure was the newly
+merged suspended-render test expecting the old four-argument write call. The
+assertion now also requires `expected_definition_ids: ["saved"]`; this preserves
+the test's committed-versus-suspended-draft contract and proves the conditional
+baseline is retained. All four draft-suite tests then passed. Combined focused
+coverage is 83 tests across 11 files, including owner hints, metadata, usage,
+conditional writes, registration recovery and actual task-route admission.
+Logs: `/tmp/assignment-squash-unit.log`, `/tmp/assignment-squash-draft-final.log`.
+
+Full web typecheck and strict affected ESLint pass. Race-enabled
+`MCP|Selection|Effective|Usage|ImportStatus` checks pass in MCP config, settings
+handlers and backend composition (`/tmp/assignment-squash-go.log`); backendapp
+completed in 137.142s. Storage/conditional-operation source is byte-identical to
+the prior verified tip, so existing SQLite/PostgreSQL evidence remains applicable.
+Spec catalog validation and spec lint pass. Fresh-build desktop E2E passes all
+13 assignment/management journeys with zero retries
+(`/tmp/kandev-run.e2e.IJfS4gTV.log`), including the new exact-session admission case.
+
+
+The unchanged build also passed all 13 phone assignment/management journeys with
+zero retries (`/tmp/kandev-run.e2e.vr4VlPJ4.log`). Fresh desktop and phone captures
+replace the prior PR evidence. Public docs validation passed (54 pages), catalog
+validation passed (403 decisions / 1742 specifications), and diff whitespace is
+clean. Only the test assertion and integration records changed after the rebase;
+no additional production changes were needed. Normal commit hooks and exact-OID
+publication are required before reporting this head to exclusions.
