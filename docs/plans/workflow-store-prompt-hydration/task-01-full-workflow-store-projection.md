@@ -65,6 +65,10 @@ Local run on Windows with Node 24.21.0, upstream `b6263ea4c`:
 - Web typecheck: no errors in changed files; the only errors come from tests
   that import backend fixtures outside this sparse checkout.
 - The E2E harness needs Linux helpers and was not run locally; CI runs it.
+- Manual check: the same change applied to v0.96.0 web, served by an isolated
+  v0.96.0 backend. After board → settings navigation the prompt was visible;
+  renaming a step and saving logged `workflow updated` + `updated workflow step`
+  and the API still returned the unchanged prompt.
 
 ## Files touched
 
