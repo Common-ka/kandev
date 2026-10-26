@@ -754,5 +754,14 @@ zero warnings. SSH persistence passes three cases; its first fingerprint case
 was skipped by the Docker availability fixture; a separate attempt was also
 skipped. The affected save case is verified by its passing trace. Container CI
 remains authoritative for fingerprint coverage.
-Main advanced to 94ec7bfc99d; delivery requires fresh-head CI and updated
-synthetic-merge validation. The root notification guide remains uncommitted.
+Main advanced to 94ec7bfc99d and introduced one mobile runtime test conflict.
+Merge both sides: retain the explicit 44px CSS invariant and rounded touch
+geometry, and use the incoming settled-box helper before measuring. The MCP
+helper merge preserves the persistent report route and new neutral evidence
+assertions. The actual merged worktree passes checkout-identity and lifecycle
+Go tests, 102 route/hydration/MCP unit cases, full typecheck, changed-file lint,
+all six mobile runtime cases, three desktop/tablet MCP cases, and four phone
+MCP cases. Browser checks use zero retries. Documentation validation and
+specification lint pass. Independent review finds no merge concern. Require
+fresh-head CI after publishing the merge. The root notification guide remains
+uncommitted.

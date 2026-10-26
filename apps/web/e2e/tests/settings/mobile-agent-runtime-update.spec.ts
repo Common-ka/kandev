@@ -256,7 +256,7 @@ test.describe("managed agent runtime updates on mobile", () => {
     await expect(drawer).toBeVisible();
     const migrationChoice = drawer.getByTestId(`agent-update-migrate-family-${runtime.agentName}`);
     await expect(migrationChoice).toHaveCSS("min-height", "44px");
-    const choiceBox = await migrationChoice.boundingBox();
+    const choiceBox = await settledBoundingBox(migrationChoice);
     expect(choiceBox).not.toBeNull();
     expect(Math.round(choiceBox!.height)).toBeGreaterThanOrEqual(44);
     expect(Math.round(choiceBox!.width)).toBeGreaterThanOrEqual(44);
