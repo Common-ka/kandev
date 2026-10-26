@@ -854,3 +854,48 @@ three phone goal/plugin-grouping scenarios pass with retries disabled. They
 cover saved plugin visibility and native phone disclosure. Documentation and
 specification validators pass. Publish both local commits together, then
 require fresh full CI. The notification guide remains uncommitted.
+
+
+### Quick Chat menu handoff and fallback diagnostics
+
+Full CI on 1c2335447f7 finishes with 93 passing and 11 skipped checks, two
+failed browser shards plus their aggregate, and no pending checks. The audit
+covers 118 reports and 4,305 attempts: one failed fallback UI assertion, one
+timed-out cross-device setup, two retries, and no parse errors. Prior corrected
+cases pass. No review thread is left unresolved in the refreshed snapshot.
+
+The cross-device setup reaches an agent option, then loses it while the Add
+menu trigger regains focus. The failed attempt has no trace. Source review
+finds the owned menu exit animation and deferred focus return can outlast the
+new setup's visibility. Three unchanged local repetitions pass, so exact CI
+event ordering remains unproven. A controlled keyboard probe holds that menu
+exit, opens the picker, then finishes the exit: Add regains focus and the
+picker closes. An earlier pointer probe is inconclusive because the retained
+modal overlay blocks the click; it is not used as failure proof.
+
+The shared New-agent setup helper now owns that transition: one Add click,
+one scoped New-agent click, menu DOM removal, the same trigger's focus return,
+and setup visibility. Use it in both cross-device cases and the existing stale
+setup opener. Keep the picker selection, timeouts, tab/rename/delete outcomes,
+and production focus behavior. The controlled corrected probe then selects an
+agent with a normal mouse click. Both cross-device cases pass three times
+(six tests) with retries disabled. Temporary probes are removed before commit.
+
+The fallback failed-attempt trace shows the correct visible session with stale
+Starting UI after the API has persisted completion. It has no WebSocket frame
+payloads, so dropped delivery, rejected state, and overwritten state cannot be
+distinguished. Three full diagnostic repetitions pass unchanged; no product
+fix or assertion relaxation is justified. Reuse the existing metadata-only
+gateway capture and attach it only on failure, before cleanup, then rethrow.
+The full fallback scenario passes with capture enabled. This narrows future
+transport evidence; it does not provide complete store/route-generation proof.
+
+Five existing helper unit cases, full typecheck, zero-warning changed-file
+lint, and independent read-only review pass. Fresh full CI remains required.
+The notification guide stays uncommitted and unchanged.
+
+
+The same shared handoff also passes a real phone two-chat setup probe with
+normal agent selection. All temporary probe files are removed. The complete
+fallback scenario passes once more with metadata capture enabled. Normal
+commit hooks and fresh exact-head CI are the remaining delivery gates.

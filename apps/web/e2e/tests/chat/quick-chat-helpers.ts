@@ -93,11 +93,21 @@ export async function openQuickChatSetup(page: Page, navigateHome = true): Promi
   // If a stale session tab is showing, click "+" to start a fresh setup form.
   const setup = dialog.getByTestId("quick-chat-setup");
   if (!(await setup.isVisible({ timeout: 1_000 }).catch(() => false))) {
-    await dialog.getByTestId("quick-chat-add-menu-trigger").click();
-    await page.getByTestId("quick-chat-new-agent").click();
+    await openNewQuickChatSetup(dialog, page);
   }
   await expect(setup).toBeVisible({ timeout: 5_000 });
   return dialog;
+}
+
+/** Finish the owned menu's exit and focus return before opening a setup picker. */
+export async function openNewQuickChatSetup(dialog: Locator, page: Page): Promise<void> {
+  const trigger = dialog.getByTestId("quick-chat-add-menu-trigger");
+  await trigger.click();
+  const menu = page.getByTestId("quick-chat-add-menu-content");
+  await menu.getByTestId("quick-chat-new-agent").click();
+  await expect(menu).toHaveCount(0, { timeout: 5_000 });
+  await expect(trigger).toBeFocused({ timeout: 5_000 });
+  await expect(dialog.getByTestId("quick-chat-setup")).toBeVisible({ timeout: 5_000 });
 }
 
 export async function selectAgentIfNeeded(dialog: Locator, page: Page) {
