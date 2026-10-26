@@ -1,0 +1,260 @@
+{
+  "status": "Verified product repair; final dense performance matrix remains open",
+  "recordedAt": "2026-10-26T10:04:23.460074+00:00",
+  "taskId": "bacce745-f09d-4752-a4d4-6ddc7d5a1225",
+  "sessionId": "5936a872-e574-45fb-b153-4e8d34a6e7bf",
+  "requirement": "AC-UI-TRANSCRIPT-AUTO-SCROLL-001.20",
+  "sourceParent": "824055ceba9302a3a9175a005479a8b3ed43dc73",
+  "beforeAssets": "39be7b61627a3539d8305b522079e0da671a9cb3d643286194cbfe164ea12261",
+  "afterAssets": "44cf53e748355040d55feadf95c87546dcc2bb72d3b061b914226e2c8cb5fdaf",
+  "trigger": "A queued old-edge scroll follows fresh upward input before native movement, then output grows. The old event re-arms following; animated delivery can move the reader back down.",
+  "change": "Retain the session and scroll origin for unconsumed upward intent. Do not let an unchanged or greater old-edge offset clear reading. Discard the pending origin after actual upward movement, a different session, or explicit End. Keep existing explicit bottom-wheel and follow-button behavior.",
+  "appearance": "No markup, CSS, spacing, or visible copy changes. No new timer or recurring RAF loop.",
+  "browserReplay": {
+    "scope": "Controlled captured order in actual Chromium. Wheel and intermediate movement are replayed; real trusted desktop wheel and phone touch are checked by the shared motion scenarios. Not a dense performance measurement.",
+    "before": {
+      "path": "upward-intent-browser-red-results/chat-native-upward-intent--d10b1-sition-through-later-growth-chromium/queued-upward-reading.json",
+      "before": {
+        "top": 2096,
+        "height": 2580
+      },
+      "heldTop": 1936,
+      "heldHeight": 2636,
+      "final": {
+        "top": 2206,
+        "height": 2691
+      },
+      "maximumAdvance": 270,
+      "samples": 24
+    },
+    "after": {
+      "before": {
+        "top": 2096,
+        "height": 2580
+      },
+      "heldTop": 1936,
+      "heldHeight": 2636,
+      "final": {
+        "top": 1936,
+        "height": 2691
+      },
+      "frames": 24,
+      "maximumAbsoluteMovementPx": 0,
+      "evidenceSha256": "56473a3eebf501b282ba071ec9c8ea00497d87e12191fc07923711bf25371960"
+    }
+  },
+  "unit": {
+    "initialRed": {
+      "handle": 56257,
+      "exitCode": 1,
+      "motionEnabled": true,
+      "expectedTop": 440,
+      "actualTop": 642
+    },
+    "boundaryRed": {
+      "passed": 1,
+      "failed": 1,
+      "expectedEndBottom": 2147483647,
+      "actualEndTop": 621,
+      "terminalCode": "Unavailable after prior tool-output truncation; complete runner log retained"
+    },
+    "focusedGreen": {
+      "handle": 1002,
+      "exitCode": 0,
+      "passed": 4
+    },
+    "final": {
+      "handle": 97369,
+      "exitCode": 0,
+      "passed": 136,
+      "files": 4
+    }
+  },
+  "static": {
+    "recordedAt": "2026-10-26T09:54:19.825405+00:00",
+    "initialIsolatedCheck": {
+      "handle": 35147,
+      "exitCode": 2,
+      "reason": "Incomplete temporary config omitted Node types and browser declarations; new test cast also needed correction"
+    },
+    "correctedIsolatedCheck": {
+      "handle": 25032,
+      "exitCode": 2,
+      "remainingDiagnostics": 6,
+      "diagnosticFilesUnchanged": [
+        {
+          "path": "apps/web/e2e/fixtures/test-base.ts",
+          "sha256": "953bc274b515a7cc244b4306dd7ed688abf12ee758239bf0836a5172b518d32e",
+          "matchesHead": true
+        },
+        {
+          "path": "apps/web/e2e/helpers/api-client.ts",
+          "sha256": "186a55c3324ea6512449fb5b78ed2cf9efd724960f484fe9645b5a72020e6e77",
+          "matchesHead": true
+        },
+        {
+          "path": "apps/web/e2e/helpers/session.ts",
+          "sha256": "cb99442b7f3a4194c45b86e4abbb90c03982080dd67fb5615c4a86fa1566699d",
+          "matchesHead": true
+        },
+        {
+          "path": "apps/web/e2e/pages/session-page.ts",
+          "sha256": "0055b8744e9f5c8d34fad8557855f88e31827d553bd3c757cd71fe16b948f5f2",
+          "matchesHead": true
+        }
+      ],
+      "newTestDiagnostics": 0
+    },
+    "normalWebTypecheck": {
+      "handle": 43307,
+      "exitCode": 0
+    },
+    "strictLint": {
+      "handle": 35147,
+      "stage": "lint",
+      "exitCode": 0
+    },
+    "scope": "Isolated E2E type audit is not green. Existing duplicate fixture/page methods and Window typing errors remain outside this change; their logs are preserved."
+  },
+  "build": {
+    "recordedAt": "2026-10-26T09:53:22.698Z",
+    "productionParent": "824055ceba9302a3a9175a005479a8b3ed43dc73",
+    "productionSource": "uncommitted queued upward-scroll repair",
+    "root": "/tmp/kandev-perf-delivery-5936a872",
+    "assetsSha256": "44cf53e748355040d55feadf95c87546dcc2bb72d3b061b914226e2c8cb5fdaf",
+    "assetFiles": 1253,
+    "gzipSiblingsVerified": 552,
+    "buildHandle": 79088,
+    "buildExitCode": 0,
+    "unitHandle": 97369,
+    "unitExitCode": 0,
+    "unitPassed": 136,
+    "webTypecheckHandle": 43307,
+    "webTypecheckExitCode": 0,
+    "source": [
+      {
+        "path": "apps/web/components/task/chat/message-list-native-scroll.ts",
+        "sha256": "d5ea357e96e7e04134e4101e0c3e9ec78f3555bb853621d68b608e25154e0225"
+      },
+      {
+        "path": "apps/web/components/task/chat/message-list-native.test.tsx",
+        "sha256": "39b1a4ae1512d298071884b76fc95b36ad70d420ae4a420f1135712fcf90d1bd"
+      }
+    ],
+    "helpers": {
+      "kandev": "b6a65c8046a00cd45f3d9dcb9beb11ee1783c85633cc13f1f18b9594bae4aed9",
+      "agentctl": "6e768aef1a1692630fe109c25e23ac31ab461b691800c2059e6dfdd5cf0b4d0a",
+      "mock-agent": "c69f05ee9f5622cc5bce83405c2e9240b537f3e79a21da65765d9867592288c1"
+    }
+  },
+  "deliveryLint": {
+    "handle": 81808,
+    "exitCode": 0
+  },
+  "beforeControlVerification": ".kandev/diagnostics/dense-workbench-performance/upward-intent-before-control-verified.json",
+  "limits": [
+    "No dense final speed claim from this focused repair.",
+    "Final reference matrix needs this new build and a separately versioned input protocol.",
+    "No direct M2 Air, INP, battery, or leak conclusion.",
+    "Optional isolated E2E type audit still reports six errors in unchanged fixtures/helpers; normal full web typecheck passes."
+  ],
+  "qa": [
+    {
+      "recordedAt": "2026-10-26T10:00:47.771410+00:00",
+      "name": "upward-intent-desktop",
+      "project": "chromium",
+      "handle": 18138,
+      "exitCode": 0,
+      "expectedChecks": 34,
+      "passed": 34,
+      "lastRun": {
+        "status": "passed",
+        "failedTests": []
+      },
+      "log": {
+        "path": "upward-intent-desktop-logs/kandev-run.e2e.vbne9UG3.log",
+        "sha256": "d48ca3bd80cba2bb3dbb5c9cd80c9864b8ddaec42dc78a2307ce964e331ec217"
+      },
+      "artifacts": "upward-intent-desktop-results",
+      "ledgers": [
+        {
+          "path": "upward-intent-desktop-results/chat-native-upward-intent--d10b1-sition-through-later-growth-chromium/queued-upward-reading.json",
+          "before": {
+            "top": 2096,
+            "height": 2580
+          },
+          "heldTop": 1936,
+          "heldHeight": 2636,
+          "final": {
+            "top": 1936,
+            "height": 2691
+          },
+          "maximumAbsoluteMovementPx": 0,
+          "sampleCount": 24
+        }
+      ],
+      "fixtureRoots": ["/tmp/kandev-e2e-0-FAIxQ8"],
+      "fixtureRootsRemoved": true,
+      "assetsSha256": "44cf53e748355040d55feadf95c87546dcc2bb72d3b061b914226e2c8cb5fdaf"
+    },
+    {
+      "recordedAt": "2026-10-26T10:04:23.342947+00:00",
+      "name": "upward-intent-phone",
+      "project": "mobile-chrome",
+      "handle": 84382,
+      "exitCode": 0,
+      "expectedChecks": 17,
+      "passed": 17,
+      "lastRun": {
+        "status": "passed",
+        "failedTests": []
+      },
+      "log": {
+        "path": "upward-intent-phone-logs/kandev-run.e2e.4Wz9FZAI.log",
+        "sha256": "f46917f59b2755c29c9fd9d9d5ea34fac9b28c74d2f091894cca63c01b263389"
+      },
+      "artifacts": "upward-intent-phone-results",
+      "ledgers": [],
+      "fixtureRoots": ["/tmp/kandev-e2e-0-1WxvZ2"],
+      "fixtureRootsRemoved": true,
+      "assetsSha256": "44cf53e748355040d55feadf95c87546dcc2bb72d3b061b914226e2c8cb5fdaf"
+    }
+  ],
+  "visual": {
+    "recordedAt": "2026-10-26T10:03:09.393447+00:00",
+    "captures": [
+      {
+        "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/upward-intent-desktop-results/chat-chat-motion-chat-moti-4d9d0-and-persists-on-this-device-chromium/chat-motion-settings-desktop.png",
+        "sha256": "f140762e8568b172922a88d5dea25ab3d3e714f0be1ef17ff5b8de44a3a2d06d"
+      },
+      {
+        "path": "/home/zeval/.kandev/tasks/do-some-live-evaluat_ije4iccr/kdlbs-kandev/.kandev/diagnostics/dense-workbench-performance/upward-intent-desktop-results/chat-chat-motion-live-pros-fdceb--reduced-motion-stay-static-chromium/chat-motion-desktop.png",
+        "sha256": "aecd4a5dc281c6f42c19c69f31d84090d7c68d4e592353f0e569bb6e80bf1d86"
+      },
+      {
+        "path": "/tmp/kandev-perf-delivery-5936a872/apps/web/e2e/test-results/chat-mobile-chat-motion-li-c9d0c--reduced-motion-stay-static-mobile-chrome/chat-motion-phone.png",
+        "sha256": "ed5be77e741972c22f1046e42423524e1d8c225d0db467f0ef183a6e017ef44b"
+      },
+      {
+        "path": "/tmp/kandev-perf-delivery-5936a872/apps/web/e2e/test-results/chat-mobile-chat-motion-ch-a87bc-and-persists-on-this-device-mobile-chrome/chat-motion-settings-phone.png",
+        "sha256": "b22d9fb248470313aaa1c9f83b1cf966aae9be45b3f61539a9da657431d166fd"
+      }
+    ],
+    "inspection": "All four captures viewed. No new layout or clipping issue observed. This source change adds no markup, CSS, visible copy, or control placement. Static images do not establish motion, which has separate browser assertions."
+  },
+  "sourceFiles": [
+    {
+      "path": "apps/web/components/task/chat/message-list-native-scroll.ts",
+      "sha256": "d5ea357e96e7e04134e4101e0c3e9ec78f3555bb853621d68b608e25154e0225"
+    },
+    {
+      "path": "apps/web/components/task/chat/message-list-native.test.tsx",
+      "sha256": "39b1a4ae1512d298071884b76fc95b36ad70d420ae4a420f1135712fcf90d1bd"
+    },
+    {
+      "path": "apps/web/e2e/tests/chat/native-upward-intent.spec.ts",
+      "sha256": "b8ff7d8bffea034df58bb78823d82979338b1e3c7b7d908d00af69086993ca21"
+    }
+  ],
+  "publicDocumentation": "Existing upward-reading contract restored. No public command, configuration, terminology, or interaction redesign."
+}

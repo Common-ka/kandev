@@ -623,6 +623,18 @@ function useRecheckPaginationOnVisible(isVisible: boolean, recheck: () => void) 
  * off indefinitely. */
 const PROGRAMMATIC_SCROLL_GUARD_MS = 1000;
 
+type PendingUpwardScroll = { sessionId: string | null; scrollTop: number };
+
+function useUpwardScrollIntent({ scrollRef, sessionId, onUserScrollIntent }: AutoScrollParams) {
+  const pendingUpwardScrollRef = useRef<PendingUpwardScroll | null>(null);
+  const markUpwardScrollIntent = () => {
+    const element = scrollRef.current;
+    pendingUpwardScrollRef.current = element ? { sessionId, scrollTop: element.scrollTop } : null;
+    onUserScrollIntent?.();
+  };
+  return { pendingUpwardScrollRef, markUpwardScrollIntent };
+}
+
 /**
  * Auto-scrolls to bottom when new messages arrive (if user is near bottom)
  * or when the agent starts working (isWorking transitions to true) — unless
@@ -643,6 +655,8 @@ function useFollowIntent({
   isVisibleRef,
   isAnimating,
   userReading,
+  pendingUpwardScrollRef,
+  sessionIdRef,
   isNearBottomRef,
   wheelBottomRef,
   cancelMotion,
@@ -651,6 +665,8 @@ function useFollowIntent({
   isVisibleRef: React.RefObject<boolean>;
   isAnimating: () => boolean;
   userReading: React.RefObject<boolean>;
+  pendingUpwardScrollRef: React.RefObject<PendingUpwardScroll | null>;
+  sessionIdRef: React.RefObject<string | null>;
   isNearBottomRef: React.RefObject<boolean>;
   wheelBottomRef: React.RefObject<number | null>;
   cancelMotion: () => void;
@@ -658,10 +674,30 @@ function useFollowIntent({
   const resyncIsNearBottom = useCallback(() => {
     const el = scrollRef.current;
     if (!el || !isVisibleRef.current || isAnimating()) return;
+    const pending = pendingUpwardScrollRef.current;
+    // An old follow scroll must not consume upward intent before native movement.
+    if (
+      pending &&
+      userReading.current &&
+      pending.sessionId === sessionIdRef.current &&
+      el.scrollTop >= pending.scrollTop
+    ) {
+      isNearBottomRef.current = false;
+      return;
+    }
+    pendingUpwardScrollRef.current = null;
     isNearBottomRef.current =
       el.scrollHeight - el.scrollTop - el.clientHeight < (userReading.current ? 3 : 100);
     if (isNearBottomRef.current) userReading.current = false;
-  }, [scrollRef, isAnimating, userReading]);
+  }, [
+    scrollRef,
+    isAnimating,
+    userReading,
+    pendingUpwardScrollRef,
+    sessionIdRef,
+    isVisibleRef,
+    isNearBottomRef,
+  ]);
   const markNotNearBottom = useCallback(() => {
     wheelBottomRef.current = null;
     cancelMotion();
@@ -698,10 +734,10 @@ export function useAutoScroll(params: AutoScrollParams) {
     isProgrammaticScrollLocked,
     isVisible = true,
     initialPlacementPending = false,
-    onUserScrollIntent,
   } = params;
   const storeApi = useAppStoreApi();
   const isNearBottomRef = useRef(true);
+  const { pendingUpwardScrollRef, markUpwardScrollIntent } = useUpwardScrollIntent(params);
   const wheelBottomRef = useRef<number | null>(null);
   const prevIsWorkingRef = useRef(isWorking);
   const isVisibleRef = useRef(isVisible);
@@ -728,7 +764,7 @@ export function useAutoScroll(params: AutoScrollParams) {
     sessionId,
     isNearBottomRef,
     instant: scrollNativeToBottom,
-    onUserScrollIntent,
+    onUserScrollIntent: markUpwardScrollIntent,
     isBlocked: () =>
       motionBlocked ||
       initialPlacementPending ||
@@ -741,6 +777,8 @@ export function useAutoScroll(params: AutoScrollParams) {
     isVisibleRef,
     isAnimating,
     userReading,
+    pendingUpwardScrollRef,
+    sessionIdRef,
     isNearBottomRef,
     wheelBottomRef,
     cancelMotion,
@@ -749,17 +787,14 @@ export function useAutoScroll(params: AutoScrollParams) {
   useTranscriptViewportResize({ ...params, isVisible, initialPlacementPending });
 
   const syncOwnedScrollTop = usePersistedTranscriptScroll({
-    scrollRef,
-    sessionId,
+    ...params,
     storeApi,
     resyncIsNearBottom,
     followBottom,
     wheelBottomRef,
-    enabled,
-    isWorking,
+    pendingUpwardScrollRef,
     isVisible,
     isVisibleRef,
-    messages,
     initialPlacementPending,
   });
 
@@ -800,6 +835,7 @@ function usePersistedTranscriptScroll({
   resyncIsNearBottom,
   followBottom,
   wheelBottomRef,
+  pendingUpwardScrollRef,
   enabled,
   isWorking,
   isVisible,
@@ -813,6 +849,7 @@ function usePersistedTranscriptScroll({
   resyncIsNearBottom: () => void;
   followBottom: () => void;
   wheelBottomRef: React.RefObject<number | null>;
+  pendingUpwardScrollRef: React.RefObject<PendingUpwardScroll | null>;
   enabled: boolean;
   isWorking: boolean;
   isVisible: boolean;
@@ -868,6 +905,7 @@ function usePersistedTranscriptScroll({
       wheelBottomRef.current = null;
     };
     const markScrollKeyIntent = (event: KeyboardEvent) => {
+      if (event.key === "End") pendingUpwardScrollRef.current = null;
       if (SCROLL_KEYS.has(event.key)) markUserScrollIntent();
     };
     /** Persists the container's current scrollTop for the session (used when
@@ -951,6 +989,7 @@ function usePersistedTranscriptScroll({
     resyncIsNearBottom,
     followBottom,
     wheelBottomRef,
+    pendingUpwardScrollRef,
     isVisible,
     enabled,
     rememberSessionScrollTop,

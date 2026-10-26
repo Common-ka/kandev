@@ -840,3 +840,29 @@ protocol with the same commands, deadlines and thresholds. Catching only a
 transient upward move would hide the product issue. The current primary
 `39be` failure and the other 19 matrix cases remain open. See
 [the full input evidence](evidence/full-density-native-input-causes.json).
+
+## Queued upward-reading repair
+
+The queued-scroll repair preserves the reading position when an old follow
+scroll arrives between fresh upward input and actual native movement. The
+controlled Chromium replay advances the before-fix reader by 270 pixels and
+moves the corrected reader by zero pixels across the same 24 frames, while
+content grows. Four focused cases, all 136 related unit tests, strict scoped
+lint, the full web typecheck, and the production build pass. The corrected
+asset hash is `44cf53e7`; the full hash and before/after identities are retained
+in [the repair evidence](evidence/native-upward-intent.json).
+
+The existing upward-reading contract remains in force. The guard is scoped to
+the session and pending native movement; explicit End and a bottom-reaching
+wheel still resume following. Markup, styles, and visible copy stay unchanged.
+Desktop correctness passes all 34 checks. Phone correctness passes all 17 checks.
+The optional isolated E2E type audit reports six existing errors in unchanged
+fixtures and page helpers; the regular full web typecheck passes. Its complete
+failed logs remain retained.
+
+This is correctness evidence. The final dense speed matrix needs the new build
+and a separate input protocol for actual gesture-time origin and retained
+bottom-hit observations. The original commands, five-second bounds, workload,
+and failed v1 reports remain unchanged. The new protocol must reject a transient
+upward move followed by an unrequested return. No final speed or M2 Air claim
+follows from the focused repair.

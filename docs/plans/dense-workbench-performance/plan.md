@@ -28,8 +28,24 @@ legacy_specs: []
 
 ## Latest measured checkpoint
 
-The corrected full-reference grid run finishes all 12 planned attempts: five
-pass and seven fail. Only pair zero completes both arms. The five complete
+The current uninstrumented correctness candidate (`44cf53e7`) preserves
+upward reading when a queued old-edge scroll precedes native movement. The
+controlled Chromium replay changes a 270-pixel jump to zero movement across
+24 frames. All 136 related unit tests, 34 desktop checks, 17 phone checks,
+strict scoped lint, the full web typecheck, and the production build pass.
+The optional isolated E2E type audit still reports six errors in unchanged
+fixtures/helpers; its complete failed logs are retained. See
+[the repair evidence](evidence/native-upward-intent.json).
+
+The final dense matrix is still open for this build. Next, calibrate a distinct
+input protocol for the two confirmed measurement defects: stale pre-gesture
+position and missed bottom-hit observations. Keep the original commands,
+five-second bounds, workload and failed v1 reports, and require held reading.
+The focused repair is correctness evidence, with no final speed or M2 Air claim.
+Earlier entries below retain their own build and fixture identities.
+
+The earlier `820f` full-reference grid run finishes all 12 planned attempts:
+five pass and seven fail. Only pair zero completes both arms. The five complete
 samples verify 9,000 ordered updates, but the failed series cannot support a
 six-pair speed summary. Cold readiness, scroll-up, return-bottom, and composer
 closure failures remain on the original inputs and deadlines. The current wheel

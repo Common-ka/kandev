@@ -7,7 +7,23 @@ builds, fixtures, and probes; they do not automatically verify the final build.
 
 ## Latest build checkpoint
 
-Production commit `7a984021113` repairs native wheel following when streamed
+The current uninstrumented correctness candidate (`44cf53e7`) preserves
+upward reading when a queued old-edge scroll precedes native movement. The
+controlled Chromium replay changes a 270-pixel jump to zero movement across
+24 frames. All 136 related unit tests, 34 desktop checks, 17 phone checks,
+strict scoped lint, the full web typecheck, and the production build pass.
+The optional isolated E2E type audit still reports six errors in unchanged
+fixtures/helpers; its complete failed logs are retained. See
+[the repair evidence](evidence/native-upward-intent.json).
+
+The final dense matrix is still open for this build. Next, calibrate a distinct
+input protocol for the two confirmed measurement defects: stale pre-gesture
+position and missed bottom-hit observations. Keep the original commands,
+five-second bounds, workload and failed v1 reports, and require held reading.
+The focused repair is correctness evidence, with no final speed or M2 Air claim.
+Earlier entries below retain their own build and fixture identities.
+
+Earlier production commit `7a984021113` repairs native wheel following when streamed
 content grows between input and the resulting scroll. Its immutable asset hash
 is `820fcd57e5ecaf8d39c610f13cfbfabf4cd8dea4e64e555a57522fd3823c9a5d`.
 The build passes 228 related unit checks and the combined 33 desktop and 17
