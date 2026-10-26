@@ -711,3 +711,48 @@ The prior CI artifact audit contains 118 reports and 4,295 attempts: four
 visible-demand failures and two subtask failures, with no other error results.
 Main advanced to e5c38184cf9 without file conflicts. New-head CI and focused
 synthetic-merge validation remain delivery gates; keep the guide uncommitted.
+
+### Final test fixture and completion-boundary cleanup
+
+The next full CI run has 118 reports and 4,304 attempts. Its four failed
+attempts belong to menu preselection, policy-label geometry, SSH save
+persistence, and phone Threads swiping. Previous session hydration and
+visible-stream corrections no longer fail. These follow-ups change tests only.
+
+The preselection case incorrectly equated the first command row with the
+persisted branch choice. Policies intentionally precede branches. An owned
+policy reproduces the original failure locally; the corrected case checks
+`main` by its exact value and retains selected-surface and keyboard assertions.
+The settings fixture now removes only the policies it creates, preserving
+baseline IDs even when an assertion fails.
+
+The geometry helper sampled nullable boxes immediately after a text-only check.
+A controlled hidden-to-visible browser probe fails before the correction. Poll
+only read-only geometry with the existing assertion budget; null boxes cannot
+pass, the three-pixel alignment bound remains, and misaligned labels still
+fail. The temporary probe was removed after red/green validation. The original
+failed CI attempt has no trace, so exact original render timing is not claimed.
+
+The SSH case waited for the accessible Save button name to disappear, which
+also happens when its label becomes Saving. Wait for the existing explicit
+saved status before the single persisted API read and reload assertion. Source
+ordering and the later renamed/Saved failure screenshot establish the invalid
+completion gate; no failed HTTP trace is available.
+
+The phone Threads case assumed a native flick always stops on its immediate
+neighbor. Its failed snapshot shows one chat on page 3 instead of the expected
+page 2. Await native scroll completion, require motion in the intended
+direction, and bind the sole chat/indicator to the geometrically settled
+column. Preserve snap alignment, layout, touch controls, and tablet-to-phone
+chat ownership. Do not change production snapping or add gesture retries.
+
+Validation: 32 selector/pill unit cases pass. Seven desktop cases pass,
+including five real fixture flows and the two temporary geometry probes.
+The Threads case passes three stress repetitions, and all nine final phone
+Threads/branch-policy cases pass with retries disabled. Changed-file lint has
+zero warnings. SSH persistence passes three cases; its first fingerprint case
+was skipped by the Docker availability fixture; a separate attempt was also
+skipped. The affected save case is verified by its passing trace. Container CI
+remains authoritative for fingerprint coverage.
+Main advanced to 94ec7bfc99d; delivery requires fresh-head CI and updated
+synthetic-merge validation. The root notification guide remains uncommitted.
