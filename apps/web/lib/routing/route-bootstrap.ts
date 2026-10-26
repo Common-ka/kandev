@@ -1,6 +1,7 @@
 import { getBackendConfig } from "@/lib/config";
+import type { WorkflowsState } from "@/lib/state/slices/kanban/types";
 import type { WorkspaceState } from "@/lib/state/slices/workspace/types";
-import type { ListWorkspacesResponse } from "@/lib/types/http";
+import type { ListWorkspacesResponse, Workflow } from "@/lib/types/http";
 
 export const ACTIVE_WORKSPACE_COOKIE = "kandev-active-workspace";
 export const LEGACY_OFFICE_ACTIVE_WORKSPACE_COOKIE = "office-active-workspace";
@@ -80,6 +81,24 @@ export function mapWorkspaceItem(ws: WorkspaceItem): WorkspaceState["items"][num
     office_workflow_id: ws.office_workflow_id ?? null,
     created_at: ws.created_at,
     updated_at: ws.updated_at,
+  };
+}
+
+export function mapWorkflowItem(workflow: Workflow): WorkflowsState["items"][number] {
+  return {
+    id: workflow.id,
+    workspaceId: workflow.workspace_id,
+    name: workflow.name,
+    // The workflow settings page treats store entries as the server's current
+    // values, and its Save sends every editable field. Dropping description or
+    // prompt here reads as a cleared value there, and the next save of any step
+    // persists that empty value. The API omits an empty prompt, so absent is "".
+    description: workflow.description ?? null,
+    prompt: workflow.prompt ?? "",
+    sortOrder: workflow.sort_order ?? 0,
+    ...(workflow.agent_profile_id ? { agent_profile_id: workflow.agent_profile_id } : {}),
+    ...(workflow.hidden !== undefined ? { hidden: workflow.hidden } : {}),
+    ...(workflow.style !== undefined ? { style: workflow.style } : {}),
   };
 }
 
