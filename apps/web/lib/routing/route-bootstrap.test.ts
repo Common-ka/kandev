@@ -120,6 +120,21 @@ describe("mapWorkflowItem", () => {
       sortOrder: 0,
     });
   });
+
+  it("preserves provenance for synced workflows", () => {
+    expect(
+      mapWorkflowItem(
+        listedWorkflow({
+          source: "github",
+          source_path: ".kandev/workflows/development.yaml",
+        }),
+      ),
+    ).toMatchObject({
+      id: "wf-1",
+      source: "github",
+      source_path: ".kandev/workflows/development.yaml",
+    });
+  });
 });
 
 describe("readCookie", () => {
